@@ -1,0 +1,665 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="Shortcut Icon" href="image/site.jpg" />
+	<script>
+        window.location.href = "onemap.html";
+		window.console = window.console || (function(){  
+					var c = {};
+
+					c.log = c.warn = c.debug = c.info = c.error = c.time = c.dir = c.profile  
+						   = c.clear = c.exception = c.trace = c.assert = function(){};  
+					 return c;  
+		})();  
+	</script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/linq.min.js"></script>
+  <!--  <script src="js/ktop/ktop.js"></script>-->
+    <script src="js/data.util.js"></script>
+    <script src="js/ktw.ui.js"></script>
+   <!-- <script src="js/ktw.gis.js"></script>-->
+    <script src="js/jquery.cookie.js"></script>
+    <script src="js/echarts.js"></script>
+    <title>国土资源综合管理平台</title>
+    <script>
+        $(window).ready(function () {
+            ktw.cookie.init();
+            ktw.cookie.validateUser();
+            initChart();
+            $(".link").on("click", function (e) {
+                $(this).removeClass("linkbg2");
+                $(".linkbg1").addClass("linkbg2");
+                $(".linkbg1").removeClass("linkbg1")
+                $(this).addClass("linkbg1");
+                $("#now")[0].innerText = $(this).context.innerText;
+            })
+        })
+        function initChart() {
+            var leftgauge = echarts.init(document.getElementById('leftgauge'));
+            var rightgauge = echarts.init(document.getElementById('rightgauge'));
+            var axisLine = {
+                lineStyle: {
+                    color: '#fff'
+                }
+            };
+            var splitLine = {
+                lineStyle: {
+                    color: '#264864'
+                }
+            };
+            var textStyle = {
+                rich: {
+                    a: {
+                        color: '#fff',
+                        fontSize: 12
+                    },
+                    b: {
+                        color: '#69E5DA',
+                        fontSize: 18
+                    },
+                }
+                //color:'#fff'
+            }
+            var gaugeoption = {
+                //title:{
+                //    text: '11111111111',
+                //    offsetCenter:[0,'-100%']
+                //},
+                tooltip: {
+                    formatter: "{a} <br/>{b} : {c}%"
+                },
+
+                series: [
+                    {
+                        radius: '80%',
+                        type: 'gauge',
+                        axisLine: { lineStyle: { width: 10 } },
+                        splitLine: { length: 15 },
+                        pointer: { width: 4 },
+                        detail: { formatter: '{value}%', fontSize: 18, offsetCenter: [0, '60%'], },
+                        data: [{ value: 50, name: '新增建设用地' }],
+                        title: {
+                            color: '#fff',
+                            offsetCenter: [0, '100%'],
+                            borderWidth: 1,
+                            padding: 5,
+                            borderColor: '#69E5DA',
+                            textStyle: { fontSize: 12 }
+                        }
+                    }
+                ]
+            };
+            var rgaugeoption = $.extend(true, {}, gaugeoption);;
+            rgaugeoption.series[0].data[0].name = '可用耕地指标';
+            setInterval(function () {
+                gaugeoption.series[0].data[0].value = (Math.random() * 100).toFixed(2) - 0;
+                rgaugeoption.series[0].data[0].value = (Math.random() * 100).toFixed(2) - 0;
+                leftgauge.setOption(gaugeoption, true);
+                rightgauge.setOption(rgaugeoption, true);
+            }, 2000);
+            //左中柱状图
+            var lcbar = echarts.init(document.getElementById('lcbar'));
+            lcbaroption = {
+                title: {
+                    text: '{a|截止目前供应}' + '{b|533.45}' + '{a|公顷}',
+                    x: 'center',
+                    textStyle: textStyle
+                },
+                color: ['#69E5DA'],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    },
+                },
+                grid: {
+                    top: 40,
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: ['第一季度', '第二季度', '第三季度', '第四季度'],
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLine: axisLine
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        axisLine: axisLine,
+                        splitLine: splitLine
+                    }
+                ],
+                series: [
+                    {
+                        name: '直接访问',
+                        type: 'bar',
+                        barWidth: '60%',
+                        data: [10, 52, 200, 334],
+                        itemStyle: {
+                            normal: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#69E5DA'
+                                }, {
+                                    offset: 1,
+                                    color: '#03B1F8'
+                                }]),
+                            }
+                        }
+                    }
+                ]
+            };
+            lcbar.setOption(lcbaroption);
+            //左下柱状图
+            var lbbar = echarts.init(document.getElementById('lbbar'));
+            lbbaroption = {
+                color: ['#69E5DA', '#08AFF6'],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    },
+                },
+                grid: {
+                    top: 20,
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisLabel: {
+                            interval: 0,
+                            rotate: 30
+                        },
+                        data: ['2017年1月', '2017年2月', '2017年3月', '2017年4月', '2017年5月', '2017年6月'],
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLine: axisLine
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        axisLine: axisLine,
+                        splitLine: splitLine
+                    }
+                ],
+                series: [
+                    {
+                        name: '储地',
+                        type: 'bar',
+                        barWidth: '60%',
+                        data: [10, 52, 200, 334, 100, 180],
+                        itemStyle: {
+                            normal: {
+                                color: function (params) {
+                                    // build a color map as your need.
+                                    var colorList = [
+                                     '#69E5DA', '#00B7EE', '#69E5DA', '#00B7EE', '#69E5DA', '#00B7EE'
+                                    ];
+                                    return colorList[params.dataIndex]
+                                }
+                            }
+                        }
+                    }, {
+                        name: '储地',
+                        type: 'line',
+                        data: [10, 52, 200, 334, 100, 180]
+                    }
+                ]
+            };
+            lbbar.setOption(lbbaroption);
+            //右中饼图
+            var rcpie = echarts.init(document.getElementById('rcpie'));
+            rcpieoption = {
+                title: {
+                    text: '{a|本年度项目共}' + '{b|160}' + '{a|个，开工}' + '{b|20}' + '{a|个，竣工项目}' + '{b|10}' + '{a|个}',
+                    x: 'center',
+                    textStyle: textStyle
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    top: 'center',
+                    data: ['开工项目', '竣工项目', '其他项目'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                series: [
+                    {
+                        name: '访问来源',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['60%', '60%'],
+                        data: [
+                            { value: 20, name: '开工项目' },
+                            { value: 10, name: '竣工项目' },
+                            { value: 130, name: '其他项目' },
+                        ],
+                        itemStyle: {
+                            emphasis: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+            rcpie.setOption(rcpieoption);
+            //右下折线图
+            var rbline = echarts.init(document.getElementById('rbline'));
+            rblineoption = {
+                color: ['#69E5DA'],
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['住宅用地', '商服用地', '工矿用地', '公共用地', '交通用地'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['一月', '二月', '三月', '四月', '五月', '六月', '七月'],
+                    axisLine: axisLine
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: axisLine,
+                    splitLine: splitLine
+                },
+                series: [
+                    {
+                        name: '住宅用地',
+                        type: 'line',
+                        stack: '总量',
+                        data: [120, 132, 101, 134, 90, 230, 210]
+                    },
+                    {
+                        name: '商服用地',
+                        type: 'line',
+                        stack: '总量',
+                        data: [220, 182, 191, 234, 290, 330, 310]
+                    },
+                    {
+                        name: '工矿用地',
+                        type: 'line',
+                        stack: '总量',
+                        data: [150, 232, 201, 154, 190, 330, 410]
+                    },
+                    {
+                        name: '公共用地',
+                        type: 'line',
+                        stack: '总量',
+                        data: [320, 332, 301, 334, 390, 330, 320]
+                    },
+                    {
+                        name: '交通用地',
+                        type: 'line',
+                        stack: '总量',
+                        data: [820, 932, 901, 934, 1290, 1330, 1320]
+                    }
+                ]
+            };
+            rbline.setOption(rblineoption);
+            //
+            var ctmap = echarts.init(document.getElementById('ctmap'));
+            ctmap.showLoading();
+            $.get('config/mapdata/geometryCouties/' + ktw.cookie.config.SystemTheme.AreaCode.substring(0, 6) + '.json', function (geoJson) {
+
+                ctmap.hideLoading();
+
+                echarts.registerMap('湘潭', geoJson);
+                //echarts.registerMap('兰州', geoJson);
+
+                ctmap.setOption(option = {
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{b}<br/>{c}'
+                    },
+                    visualMap: {
+                        min: 1,
+                        max: 1000,
+                        text: ['High', 'Low'],
+                        realtime: false,
+                        calculable: true,
+                        textStyle: {
+                            color: "#00eaff"
+                        },
+                        inRange: {
+                            color: ['lightskyblue', '#0059CD']
+                        }
+                    },
+                    //toolbox: {
+                    //    show: true,
+                    //    orient: 'vertical',
+                    //    left: 'right',
+                    //    top: 'center',
+                    //    feature: {
+                    //        dataView: { readOnly: false },
+                    //        restore: {},
+                    //        saveAsImage: {}
+                    //    }
+                    //},
+
+                    series: [
+                        {
+                            name: '湘潭',
+                            type: 'map',
+                            mapType: '湘潭',
+                            roam: true,
+                            itemStyle: {
+                                normal: { label: { show: true } },
+                                emphasis: { label: { show: true } }
+                            },
+                            data: [{ "name": "湘乡市", "value": 1000 }, { "name": "韶山市", "value": 200 }, { "name": "雨湖区", "value": 150 }, { "name": "岳塘区", "value": 50 }, { "name": "湘潭县", "value": 30 }]
+                        }
+                        /*{
+                            name: '兰州',
+                            type: 'map',
+                            mapType: '兰州',
+                            itemStyle: {
+                                normal: { label: { show: true } },
+                                emphasis: { label: { show: true } }
+                            },
+                            data: [{ "name": "永登县", "value": 1000 }, { "name": "皋兰县", "value": 30 }, { "name": "红古区", "value": 500 }, { "name": "西固区", "value": 400 }, { "name": "七里河区", "value": 300 }, { "name": "榆中县", "value": 200 }, { "name": "城关区", "value": 100 }, { "name": "安宁区", "value": 800 }]
+                        }*/
+                    ]
+                })
+            });
+            /*页面自适应*/
+            $(window).resize(function () {
+                ctmap.resize();
+                rbline.resize();
+                rcpie.resize();
+                lbbar.resize();
+                lcbar.resize();
+                leftgauge.resize();
+                rightgauge.resize();
+            });
+        }
+
+    </script>
+    <style>
+		
+        html,body{
+            height:100%;
+            width:100%;
+            padding: 0;
+            margin: 0;
+            box-sizing:border-box;
+			overflow:hidden;
+        }
+        div {
+            color: white;
+            text-align: center;
+        }
+
+        .box {                                                                      
+            border: 1px solid #69E5DA;
+            box-sizing:border-box;
+            /*background-image:url(image/wireframe-top-left.png),url(image/wireframe-top-right.png),url(image/wireframe-foot-left.png),url(image/wireframe-foot-right.png);
+       background-position:left top,right top,left bottom,right,bottom;
+       background-repeat: no-repeat,no-repeat,no-repeat,no-repeat*/
+        }
+
+        .title {
+            width: 100%;
+            /*height:40px;*/
+            color: #69E5DA;
+            line-height: 30px;
+            text-align: center;
+            background-image: url(image/wireframe-top-banner.png);
+            background-position: center top;
+            background-repeat: no-repeat;
+        }
+
+        #centertag {
+            background-image: url(image/map-title-bg.png),url(image/map-title-name.png);
+            background-position: center center,center center;
+        }
+
+        .header {
+            width: 100%;
+            height: 15%;
+            position:relative;            
+            /*background-image: url(image/top-logo.png),url(image/top-bg.png);*/
+            /*background-image: url(image/top-bg.png);
+            background-position: center center,center 28px;
+            background-repeat: no-repeat,no-repeat;*/
+        }
+
+            .header div {
+                width: 473px;
+                height: 48px;
+                margin: 0 auto;
+                position: relative;
+                top: 13px;
+                font-size: 30px;
+                line-height: 48px;
+                letter-spacing: 1.5px;
+                font-family: '幼圆&';
+                color: #4FE3F3;
+                font-weight: bold;
+            }
+
+        .link {
+            text-align: center;
+            float: left;
+            position: relative;           
+            width: 12%;
+            background-position: center center;
+            background-repeat: no-repeat;
+            height: 100%;
+            
+        }
+
+        .linkbg2 {
+            background-image: url(image/icontwo.png);
+        }
+
+        .linkbg1 {
+            background-image: url(image/iconone.png);
+        }
+
+        #rtlink {
+            float: left;
+            position: relative;
+            width: 50px;
+            height: 100%;
+            line-height: 80px;
+            margin-left: 10px;            
+        }
+
+        #rttext {
+            width: 100%;            
+            text-align: left;
+        }
+
+        .textbox {
+            border: 1px solid #69E5DA;
+            overflow:hidden;			
+            /*background-image:url(image/文本框-top-left.png),url(image/文本框-top-right.png),url(image/文本框-foot-left.png),url(image/文本框-foot-right.png),url(image/文本框-top-center.png),url(image/文本框-foot-center.png);
+        background-position:top left,top right,bottom left,bottom right,top center,bottom center;
+        background-repeat:no-repeat,no-repeat,no-repeat,no-repeat;*/
+        }
+
+        .Allchart {
+           box-sizing:border-box;           
+        }
+
+        .chart {
+            display: inline-block;
+            width: 94%;
+            height: calc(100% - 30px);
+        }
+
+        .text {
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .number {
+            color: #69E5DA;
+            font-size: 18px;
+        }
+
+        .more {
+            float: right;
+            margin-right: 10px;
+            font-size: 10px;
+        }
+
+        .rightchart .intext {          
+            position: relative;
+			line-height: 87px;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; height: 100%;position:relative; /*background-image: url(image/zhjgbg.png); background-repeat: no-repeat;background-size: 100% 100%;*/">
+        <div style="width:100%; height:100%;position:absolute;z-index:-999;" ><img style="width:100%; height:100%; "src="image/zhjgbg.png"  /></div>        
+        <div class="header"style="width: 100%;">
+            <div style="width:100%; height:100%;position:absolute;z-index:-99;" ><img style="width:80%; height:80%; "src="image/top-bg.png"  /></div>
+            <div>湘潭市国土资源综合管理平台</div>
+        </div>
+        <div class="Allchart" style="width: 100%;height:85%;">
+        	<div style="float: left; width: 30%;padding:10px;box-sizing:border-box;height:100%;padding-bottom:5px;">
+	            <div class="leftchart" style="height: 100%;width: 100%;">
+	                <div class="box" id="lefttop"style="height: 32%;box-sizing:border-box;margin-bottom:2%;">
+	                  <div style="height: 100%;">
+			              <div class="title">用地指标</div>
+			              <div class="chart" id="leftgauge" style="width: 50%; float: left"></div>
+			              <div class="chart" id="rightgauge" style="width: 50%; float: left"></div>
+				          <div style="clear:both;"></div>
+				      </div>
+	                </div>
+	                <div class="box" id="leftcenter"style="height: 32%;box-sizing:border-box;margin-bottom:2%;">
+	                	<div style="height: 100%;">
+		                    <div class="title">土地供应</div>
+		                    <div class="chart" id="lcbar"></div>
+		                </div>
+	                </div>
+	                <div class="box" id="leftbottom"style="height: 32%;box-sizing:border-box;">
+	                	<div style="height: 100%;">
+		                    <div class="title">土地储备增量统计</div>
+		                    <div class="chart" id="lbbar"></div>
+		                </div>
+	                </div>
+	            </div>
+	        </div>
+	        <div style="float: left; width: 40%;padding:10px;box-sizing:border-box;height: 100%;">
+	            <div class="centerchart" style=" height: 100%;width: 100%;">
+	                <div class="box" id="centertop" style=" margin-bottom: 0px; border-bottom: 0px;height: 80%;">
+	                    <div class="title" id="centertag" style="height: 10%; background-image: url(image/map-title-bg.png)/*,url(image/map-title-name.png)*/; background-position: center center,center center;">
+	                        <div style="color: #22EEF0; position: relative; top: 3px; font-size: 14px;">
+	                            湘潭市国土资源规划区域图
+	                        </div>
+                                <div style="clear:both;"></div>
+	                    </div>
+	                    <div id="ctmap" style="width: 100%; height: 90%;"></div>
+                            
+	                </div>
+	                <div class="box" id="centerbottom" style="height: 20%; margin-top: 0px; color: #69E5DA; overflow: hidden">
+	                    &nbsp&nbsp<p style="text-align: left; text-indent: 2em; margin-left: 20px; margin-top: -10px; margin-right: 20px">湘乡市2016年土地供应总量为137宗，面积12681.154公顷；湘乡市2015年土地供应总量为219宗，面积728.36公顷；同比减少13.61%；韶山市2016年土地供应总量为137宗，面积12681.154公顷；韶山市2015年土地供应总量为219宗，面积728.36公顷；同比减少13.61%</p>
+	                </div>
+	                <!--<div class="box" id="centerbottom" style="height: 20%; margin-top: 0px; color: #69E5DA; overflow: hidden">
+	                    &nbsp&nbsp<p style="text-align: left; text-indent: 2em; margin-left: 20px; margin-top: -10px; margin-right: 20px">城关区2015年土地供应总量为219宗，面积728.36公顷；永登县2016年土地供应总量为137宗，面积12681.154公顷；皋兰县2015年土地供应总量为219宗，面积728.36公顷；安宁区2015年土地供应总量为219宗，面积728.36公顷；西固区2015年土地供应总量为219宗，面积728.36公顷；七里河区2015年土地供应总量为219宗，面积728.36公顷；</p>
+	                </div>-->
+	            </div>
+	        </div>
+	        <div style="float: right; width:30% ;padding:10px;box-sizing:border-box;height:100%;padding-bottom:5px;">
+	            <div class="rightchart" style="height: 100%;width: 100%; ">
+	                <div class="box" id="righttop"style="height: 32%;overflow:hidden;box-sizing:border-box;margin-bottom:2%;">
+					    <div style="height: 100%;">
+							<div class="title">
+								一张图
+								  <div class="more"><a style="color: #69E5DA" href="onemap.html" target="_blank">更多</a></div>
+							</div>
+							<div style="height: 90%;width:100%;">
+								<div style="width: 100%; height: 50%;">
+									<div class="textbox" style="width: 90%; height: 100%; margin-left: 5%;">
+										<div id="rtlink"style="margin-top:20px;width:40px;height:40px;background-image: url(image/iconbg.png);background-position: center center;background-repeat: no-repeat;">
+											<div id="now" style="position: absolute; top: -50%; left: 30%;font-weight:bolder; ">批</div>
+										</div>
+										<div id="rttext" style="margin-left:60px;margin-top:30px;"><span class="text">本年度累计批准</span><span class="number">13</span><span class="text">批次,总面积</span><span class="number">313.41</span><span class="text">公顷</span></div>
+									</div>
+								</div>	                 
+								<div style="width: 100%; height: 50%;">
+									<div style="width: 90%; height: 100%; margin-left: 5%;">
+										<div class="link linkbg1"style="margin-left:2%;">
+											<div class="intext">批</div>
+										</div>
+										<div class="link linkbg2"style="margin-left:2%;">
+											<div class="intext">征</div>
+										</div>
+										<div class="link linkbg2"style="margin-left:2%;">
+											<div class="intext">储</div>
+										</div>
+										<div class="link linkbg2"style="margin-left:2%;">
+											<div class="intext">供</div>
+										</div>
+										<div class="link linkbg2"style="margin-left:2%;">
+											<div class="intext">用</div>
+										</div>
+										<div class="link linkbg2"style="margin-left:2%;">
+											<div class="intext">补</div>
+										</div>
+										<div class="link linkbg2"style="margin-left:2%;">
+											<div class="intext">查</div>
+										</div>
+									</div>
+								</div>
+							</div>
+             		    </div>				
+					</div>	                
+	                <div class="box" id="rightcenter"style="height: 32%;box-sizing:border-box;margin-bottom:2%;">
+					    <div style="height: 100%;">
+							<div class="title">
+								综合监管
+								  <div class="more"><a style="color: #69E5DA">更多</a></div>
+							</div>
+							<div class="chart" id="rcpie"></div>
+					    </div>
+	                </div>
+	                <div class="box" id="rightbottom"style="height: 32%;box-sizing:border-box;">
+					    <div style="height: 100%;">
+							<div class="title">
+								决策支持
+								  <div class="more"><a style="color: #69E5DA">更多</a></div>
+							</div>
+							<div class="chart" id="rbline"></div>
+						</div>
+	                </div>
+	            </div>
+		    </div>			
+	    </div>
+    </div>
+</body>
+</html>

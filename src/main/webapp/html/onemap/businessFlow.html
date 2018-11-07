@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>业务详细信息</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .nav {
+            position: absolute;
+            top: 20px;
+            left: 10px;
+            bottom: 5px;
+            width: 200px;
+        }
+
+        .page {
+            position: absolute;
+            top: 20px;
+            left: 220px;
+            bottom: 5px;
+            right: 10px;
+        }
+
+        .icon-unit {
+            background: url('../../image/authorization/qy_ico.gif') no-repeat center center;
+        }
+
+        .icon-department {
+            background: url('../../image/authorization/bm_ico.gif') no-repeat center center;
+        }
+    </style>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var feature;
+        var selectID;
+        var node;//记录当前选中的节点的数据信息
+        var _parent;
+        function WidgetCommunication(s) {//部件通讯
+            _parent = s.parent;
+            feature = s.param.feature;
+            selectID = s.param.selectID;
+            ktw.InitControl();
+            initPage();
+            //注册页面关闭事件
+            _parent.one("onClosing", function () {
+
+            });
+        }
+
+        //初始化页面
+        function initPage() {
+            var nodes;
+            try { nodes = Ktw.App.Config.Extend.BusinessFlow.Node; } catch (ex) { alert("未获取到业务流页面的配置信息!"); return; }
+            var data = [];
+            (function _tmp(srcdata, data, _parent) {
+                if (!srcdata.length) srcdata = [srcdata];
+                for (var i = 0; i < srcdata.length; i++) {
+                    var node = {
+                        ID: srcdata[i].ID,
+                        Text: srcdata[i].Text,
+                        Value: srcdata[i].Value,
+                        State: "close",
+                        iconCls: srcdata[i].IconCls,
+                        Url: srcdata[i].Url,
+                        Parent: _parent
+                    };
+                    data.push(node);
+                    if (srcdata[i].Children && srcdata[i].Children.Node) {
+                        node.Children = [];
+                        _tmp(srcdata[i].Children.Node, node.Children, node);
+                    }
+                }
+            })(nodes, data, undefined);
+            //根据selectID展开节点
+            filterState(data);
+            var tree_control = new ktw.Tree({
+                CheckBox: false,
+                ValueField: "Value",
+                TextField: "Text",
+                ChildrenField: "Children",
+                CheckedField: "Checked",
+                Data: data,
+                StateField: "State",
+                TagField: "Tag"
+            });
+            filterState(data);
+            tree_control.Target.bind("onClick", function (evt, node) {
+                var url = $(node).prop("$this").Url;
+                if (!url) return;
+                $("#content").attr("src", Ktw.App.Root + url);
+
+                $("#content").bind('load', function () {
+                    try {
+                        if (this.contentWindow.WidgetCommunication) {
+                            this.contentWindow.WidgetCommunication({ parent: _parent, param: { feature: feature, selectID: selectID } });
+                        }
+                    } catch (ex) {
+                        alert("页面加载出错");
+                        console.log(ex.stack);
+                    }
+                });
+            });
+            tree_control.Target.appendTo($(".nav"));
+            tree_control.Target.find("div#" + node.Value).click();
+        }
+
+        function filterState(data) {
+            _tmp(data);
+            function _tmp(data) {
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].ID == selectID) {
+                        node = data[i];
+                    } else if (data[i].Children && data[i].Children.length > 0) {
+                        _tmp(data[i].Children);
+                    }
+                }
+            }
+            if (!node) return;
+            _tmp2(node);
+            function _tmp2(node) {
+                node.State = "open";
+                if (node.Parent) {
+                    _tmp2(node.Parent);
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="nav">
+
+    </div>
+    <div class="page">
+        <iframe id="content" style="width:100%;height:100%;overflow:hidden;border:0" />
+    </div>
+</body>
+</html>

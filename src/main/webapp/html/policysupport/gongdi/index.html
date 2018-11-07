@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>coverflow-demo</title>
+    <link href="../../../css/icon.css" rel="stylesheet" />
+    <script src="../../../js/jquery.min.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .support-web {
+            position: relative;
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+            padding: 0;
+            margin: 0;
+            z-index: 5;
+            background-color: #08122e;
+            overflow: hidden;
+            border: 5px solid #3b5866;
+        }
+
+            .support-web > .support-left {
+                position: relative;
+                float: left;
+                width: 70px;
+                height: 100%;
+                color:#fff;
+            }
+
+                .support-web > .support-left > .menu-open {
+                    position: absolute;
+                    width: 60px;
+                    height: 190px;
+                    left: 5px;
+                    top: calc(50% - 90px );
+                    background-color: #0099cd;
+                    z-index: 2;
+                    font-size: 18px;
+                    border-radius:5px;
+                    overflow: hidden;
+                }
+                    .support-web > .support-left > .menu-open > .title {
+                        width:100%;
+                        height:100%;
+                    }
+                        .support-web > .support-left > .menu-open > .title > div:first-child {
+                            height:34px;
+                            width:34px;
+                            border-radius:10px;
+                            background-color:#000;
+                            font-size:20px;
+                            text-align:center;
+                            line-height:34px;
+                            margin:auto;
+                            margin-top:8px;
+                        }
+                .support-web > .support-left .support-left-menu {
+                    width: 100%;
+                    height: 100%;
+                    font-size: 14px;
+                    display:none;
+                    background-color:#d1d7e8;
+                }
+                    .support-web > .support-left .support-left-menu > .menu-title {
+                        width:100%;
+                        height:30px;
+                        line-height:30px;
+                        margin-bottom:10px;
+                        border-bottom:1px solid #08122e;
+                        background-color:#007097;
+                    }
+
+                    .support-web > .support-left .support-left-menu .close-btn {
+                        float:right;
+                        width: 18px;
+                        height: 18px;
+                        cursor: pointer;
+                        margin:7px 7px 0 0;
+                        text-align:center;
+                        line-height:16px;
+                        font-size:18px;
+                    }
+
+                    .support-web > .support-left .support-left-menu > .support-menus {
+                        width: calc(100% - 15px);
+                        height: auto;
+                        margin-left: 5px;
+                        border-left: 3px solid #7a909b;
+                    }
+
+                        .support-web > .support-left .support-left-menu > .support-menus > .left-menu {
+                            cursor: pointer;
+                            width: 170px;
+                            height: 36px;
+                            background-color: #315666;
+                            line-height: 36px;
+                            text-align: center;
+                            margin: 3px 0 0 -3px;
+                            border-left: 3px solid #7a909b;
+                        }
+
+            .support-web .support-left .support-left-menu .left-menu:hover {
+                background-color: #389cb4;
+                border-left: 3px solid #32ffff;
+            }
+
+            .support-web > .support-right {
+                position: relative;
+                float: left;
+                width: calc(100% - 75px);
+                height: 100%;
+                z-index: 1;
+                border-left: 5px solid #3b5866;
+            }
+
+                .support-web > .support-right > #mainpage {
+                    width: 100%;
+                    height: 100%;
+                    margin: 0;
+                    padding: 0;
+                    border-width: 0;
+                    float: left;
+                }
+
+        .left-menu-select {
+            background-color: #389cb4 !important;
+            border-left: 3px solid #32ffff !important;
+            width: 180px !important;
+        }
+        .index-title {
+            text-align: center;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="support-web">
+        <div class="support-left">
+            <div class="menu-open index-title">
+                <div class="title">
+                    <div>供</div>
+                    <br />供<br />地<br />专<br />题<br /><br />
+                </div>
+                <div class="support-left-menu">
+                    <div class="menu-title">
+                        <span style="margin-left:15px;">供地专题</span>
+                        <span class="close-btn">×</span>
+                    </div>
+                    <div class="support-menus">
+                        <div class="left-menu" tag="quotaPlan">指标与计划</div>
+                        <div class="left-menu" tag="supplyStructure">供应结构</div>
+                        <div class="left-menu" tag="contrast">批、供对比</div>
+                        <div class="left-menu" tag="landMarket">土地市场</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="support-right">
+            <iframe id="mainpage"></iframe>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var menuSelect = $(".left-menu[tag='quotaPlan']");
+        menuSelect.addClass("left-menu-select");
+        $("#mainpage").attr("src", menuSelect.attr("tag") + ".html");
+        $(".support-left-menu .left-menu").click(function () {
+            menuSelect.removeClass("left-menu-select");
+            menuSelect = $(this);
+            $("#mainpage").attr("src", menuSelect.attr("tag") + ".html");
+            menuSelect.addClass("left-menu-select");
+        });
+        $(".support-left-menu .close-btn").click(function (e) {
+            e.stopPropagation();
+            $(".menu-open").addClass("index-title");
+            $(".menu-open .title").show();
+            $(".support-left-menu").hide();
+            $(".support-left .menu-open").animate({ width:'60px',height:'190px'}, 200);
+        });
+        $(".support-left .menu-open").click(function () {
+            $(this).removeClass("index-title");
+            $(this).find(".title").hide();
+            $(".support-left-menu").show();
+            $(this).animate({width:'200px',height:'220px'},200);
+        });
+    </script>
+</body>
+</html>

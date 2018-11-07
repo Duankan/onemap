@@ -1,0 +1,463 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/echarts.js"></script>
+    <script src="../../js/echarts.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var xarray = [];
+        var dataGrid;
+        var winWidth;
+        var qdata=[];
+        var datamodules = [];
+        var myChart;
+        var ctr;
+        $(window).ready(function () {
+            ctr = new ktw.UCWaitBox({
+                Parent: $(".Content")
+            });
+            way = $(".active", ".stc-nav")[0].innerText;
+            //清除屏幕
+            Ktw.ClearFinal();
+            winWidth = $(window).width() >= 1000 ? $(window).width() : 1000;//初始化获取窗体宽度
+            initDataGrid();
+            var myDate = new Date();
+            var year = myDate.getFullYear();
+            $(".Button[operatetype]").click(function (evt) {
+                var type = $(this).attr("operatetype");
+                if (type == "Statistics") Statistics();
+                if (type == "Export") exportData(evt);
+            });
+            var date = [];
+            for (var i = 2008; i <= myDate.getFullYear() ; i++) {
+                date.push(i);
+            }
+            $("#year").prop("$this").SetData(date);
+            $("#year").prop("$this").SetValue(year);
+            Statistics();
+            $("#tab").bind("click", function (e) {
+                if ($("#tab").hasClass("active")) {
+                    $("#tab").removeClass("active");
+                    $("#statictable").hide();
+                }
+                else {
+                    $("#tab").addClass("active");
+                    $("#statictable").show();
+                }
+                windowresize();
+            });
+            $("#map").bind("click", function (e) {
+                if ($("#map").hasClass("active")) {
+                    $("#map").removeClass("active");
+                    $("#chartModule").hide();
+                }
+                else {
+                    $("#map").addClass("active");
+                    $("#chartModule").show();
+                }
+                windowresize();
+            });
+            Array.prototype.unique = function () {
+                var res = [];
+                var json = {};
+                for (var i = 0; i < this.length; i++) {
+                    if (!json[this[i]]) {
+                        res.push(this[i]);
+                        json[this[i]] = 1;
+                    }
+                }
+                return res;
+            }
+            $("#statictable").hide();
+            windowresize();
+        })
+        function windowresize(t) {
+            if ($("#searchModule").find("br").length > 0) {
+                $("#newline").remove();
+            }
+            if (t != null) Ktw.App.MenuInit.currentParent.Layout();
+            if ($("#map").hasClass("active")) {
+                if ($("#tab").hasClass("active")) {
+                    if (t == null) Ktw.App.MenuInit.currentParent.SetSize(1200, 600);
+                    document.getElementById("topport").style.height = (Ktw.App.MenuInit.currentParent.Height - 70) * 0.49 + "px";
+                    document.getElementById("searchModule").style.height = 40 + "px";
+                    document.getElementById("statictable").style.height = ((Ktw.App.MenuInit.currentParent.Height - 70) * 0.49 - 47) + "px";
+                    document.getElementById("chartModule").style.height = (Ktw.App.MenuInit.currentParent.Height - 70) * 0.49 + "px";
+                    $("#static").css({ "top": -5, "right": 90 });
+                    $("#export").css({ "top": -5, "right": 10 });
+                    $("#topport").css("min-width", 1000);
+                    $("#chartModule").css("min-width", 1000);
+                    $(".stc-nav").css("min-width", 1000);
+                    myChart.resize();
+                    initDataGrid();
+                    return;
+                }
+                else {
+                    if (t == null) { Ktw.App.MenuInit.currentParent.SetSize(550, 450); }
+                    document.getElementById("topport").style.height = 75 + "px";
+                    document.getElementById("searchModule").style.height = 75 + "px";
+                    document.getElementById("chartModule").style.height = (Ktw.App.MenuInit.currentParent.Height - 175) + "px";
+                    $("#topport").css("min-width", 500);
+                    $(".stc-nav").css("min-width", 500);
+                    $("#chartModule").css("min-width", 500);
+                    var brs = $("#searchModule").find("br");
+                    if (brs.length <= 0) {
+                        $("<br id='newline'/>").insertBefore("#newline1");
+                    }
+                    $("#static").css({ "top": -5, "right": 10 });
+                    $("#export").css({ "top": 30, "right": 10 });
+                    myChart.resize();
+                    initDataGrid();
+                    return;
+                }
+            }
+            else if ($("#tab").hasClass("active")) {
+                document.getElementById("topport").style.height = 40 + "px";
+                document.getElementById("searchModule").style.height = 40 + "px";
+                if (t == null) { Ktw.App.MenuInit.currentParent.SetSize(1200, 350); }
+                document.getElementById("statictable").style.height = (Ktw.App.MenuInit.currentParent.Height - 125) + "px";
+                document.getElementById("chartModule").style.height = 0 + "px";
+                $("#static").css({ "top": -5, "right": 90 });
+                $("#export").css({ "top": -5, "right": 10 });
+                $("#topport").css("min-width", 1000);
+                $("#chartModule").css("min-width", 1000);
+                $(".stc-nav").css("min-width", 1000);
+                myChart.resize();
+                initDataGrid();
+                return;
+            }
+            else {
+                $("#map").addClass("active");
+                $("#chartModule").show();
+                windowresize();
+            }
+        }
+        function initCharts(type) {
+            myChart = echarts.init(document.getElementById('chart'));
+            myChart.clear();
+            var data1 = [], data2 = [];
+            for (var i = 0; i < qdata.length; i++) {
+                data1.push(qdata[i].nf);
+                data2.push(qdata[i].gy_mj)
+            }
+            var series = [{
+                name: '面积',
+                type: "bar",
+                data: data2
+            }];
+            var yAxis = [
+                         {
+                             name: '单位/公顷',
+                             type: 'value',
+                         },
+            ];
+          
+            chartOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                toolbox: { left: 20, feature: { saveAsImage: { type: 'png' } } },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: 10,
+                    top: 70,
+                    containLabel: true
+                },
+                xAxis: [
+                   {
+                       type: 'category',
+                       data: data1,
+                       axisLabel: {
+                           interval: 0,//横轴信息全部显示  
+                       }
+                   }
+                ],
+                yAxis: yAxis,
+                series: series,
+            };
+            myChart.setOption(chartOption);
+            myChart.off('click');
+            myChart.on('click', function (param) {
+                if (way == "按年份" || way == "按季度") {
+                    chartOption.series.splice(3, 1);
+                }
+                d = [];
+                var pielegend = [];
+                for (var i = 0; i < result.length; i++) {
+                    if (result[i].XZQMC == param.name || result[i].time == param.name) {
+                        currentresult = result[i];
+                        for (var j = 0; j < chartOption.series.length - 1; j++) {
+                            d.push({
+                                name: chartOption.series[j].name,
+                                value: chartOption.series[j].data[i]
+                            });
+                            pielegend.push(chartOption.series[j].name);
+                            //}
+                        } break;
+                    }
+                }
+                chartOption1.legend.data = pielegend;
+                chartOption1.series[0].data = d;
+            });
+            window.onresize = function () {
+                Ktw.App.MenuInit.currentParent.Layout();
+                windowresize("a");
+                winWidth = $(window).width();
+                var height = $(window).height();
+                if (winWidth >= 1000) {
+                    winWidth = window.innerWidth;
+                    initDataGrid();
+                    $(".Content").css({
+                        "width": winWidth,
+                        "overflow": "hidden",
+                    });
+                    myChart.resize();
+                }
+                else {
+                    $(".Content").css({
+                        "width": winWidth,
+                        "overflow-x": "auto",
+                    });
+                    winWidth = 1000;
+                    initDataGrid();
+                    myChart.resize();
+                }
+            }
+        }
+        //最多保留4位小数
+        function fixed4(num) {
+            if (parseInt(num) != num && num.toString().split(".")[1].length > 4)
+                num = parseFloat(num.toFixed(4));
+            return num;
+        }
+        function Statistics() {
+            var y = $("#year").prop("$this").GetText();
+            $.ajax({
+                async: false,
+                type: "GET",
+                url: Ktw.App.ServerUrl + "jsydsp/getinfobyy/" + y,
+                beforeSend: function () {
+                    ctr.Show();
+                },
+                success: function (data) {
+                    var result = [];
+                    if (data.data.length > 0) {
+                        qdata = data.data;
+                        var opts = $('#dataModule').datagrid('getColumnFields');
+                        result[0] = {};
+                        result[0].sykg = data.data[0].gy_mj;
+                        result[0].pnf = $("#year").prop("$this").GetText();
+                        result[0].pz_xm_mj = fixed4(data.data[0].gy_mj);
+                        if (data.data.length > 1) {
+                            for (var i = 0; i < data.data.length - 1; i++) {
+                                if (i != 0) result[i] = {};
+                                result[i].nf = data.data[i + 1].nf;
+                                result[i].gy_mj =fixed4(data.data[i + 1].gy_mj);
+                                result[i].gybl = fixed4(data.data[i + 1].gy_mj / data.data[0].gy_mj * 100) + "%";
+                                if (i == 0) {
+                                    result[i].sykg = fixed4(result[0].sykg - data.data[i + 1].gy_mj)
+                                }
+                                else result[i].sykg = result[i - 1].sykg - fixed4(data.data[i + 1].gy_mj);
+                            }
+                        }
+                    }
+                    $('#dataModule').datagrid({
+                        data: result
+                    });
+                    datamodules = result;
+                    $('#dataModule').datagrid({
+                        onLoadSuccess: function () {
+                            var merges = [{
+                                index:0,
+                                rowspan: result.length
+                            }];
+                            for (var i = 0; i < merges.length; i++)
+                                $('#dataModule').datagrid('mergeCells', {
+                                    index: merges[i].index,
+                                    field: 'pnf',
+                                    rowspan: merges[i].rowspan
+                                });
+                            for (var i = 0; i < merges.length; i++)
+                                $('#dataModule').datagrid('mergeCells', {
+                                    index: merges[i].index,
+                                    field: 'pz_xm_mj',
+                                    rowspan: merges[i].rowspan
+                                });
+                        }
+                    });
+                     initCharts();
+                },
+                complete: function () {
+                    ctr.Close();
+                },
+                error: function (e) {
+                    var k = "";
+                    Ktw.Alert("服务请求失败！");
+                }
+            });
+        }
+        function exportData(e) {
+            if (qdata.length < 1) {
+                Ktw.Alert("当前无数据,不支持导出");
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(datamodules),
+                contentType: "application/json",
+                url: Ktw.App.ServerUrl + "jsydsp/pgexport",
+                success: function (e) {
+                    if (e.success) {
+                        var path = e.data;
+                        if (!ktw.IsNull(path)) {
+                            var downlaod = Ktw.App.Root + path;
+                            window.open(downlaod);
+                        }
+                    }
+                },
+                error: function (e) {
+                    var k = "";
+                    Ktw.Alert("服务请求失败!");
+                }
+            });
+        }
+        function initDataGrid() {
+            var width = (winWidth-55) / 6;
+            $('#dataModule').datagrid({
+                rownumbers: true,
+                fit: true,        //自动大小
+                fitColumns: false, //自适应列宽
+                singleSelect: true,  //是否单选
+                pagination: false,
+                idField: 'Project_id',
+                columns: [[
+                     { field: 'pnf', title: '批地年份', width: width, align: 'center', rowspan: 2, },
+                     { field: 'pz_xm_mj', title: '批地总面积', width: width, align: 'center', rowspan: 2 },
+                     { title: '供地', colspan: 3 },
+                     { field: 'sykg', title: '剩余可供面积', width: width, rowspan: 2 },
+                ], [
+                     { field: 'nf', title: '供应年份', width: width, align: 'center', colspan: 1, rowspan: 1 },
+                     { field: 'gy_mj', title: '供应面积', width: width,align: 'center', colspan: 1, rowspan: 1 },
+                     { field: 'gybl', title: '供应比例', width: width, align: 'center', colspan: 1, rowspan: 1 },
+                  
+                ],
+                ]
+            });
+        }
+    </script>
+    <style>
+        .Content {
+            width: 100%;
+            height: 100%;
+        }
+
+            .Content .ToolDiv {
+                width: 100%;
+                height: 40px;
+                border-bottom: 1px solid #E4E9EF;
+            }
+
+                .Content .ToolDiv .Title {
+                    width: 85px;
+                    text-align: center;
+                    line-height: 20px;
+                    height: 20px;
+                    display: inline-block;
+                    float: left;
+                }
+
+                    .Content .ToolDiv .Title .Icon {
+                        width: 16px;
+                        height: 16px;
+                        display: inline-block;
+                        margin-top: 11px;
+                    }
+
+                    .Content .ToolDiv .Title .Text {
+                        display: inline-block;
+                        float: right;
+                        width: 49px;
+                    }
+
+        div#statictable .panel-body-noheader {
+            border: 0;
+        }
+
+        .Content .HiddenBtn {
+            filter: alpha(Opacity=80);
+            -moz-opacity: 0.8;
+            opacity: 0.8;
+        }
+
+            .Content .HiddenBtn .ArrowBtn {
+                cursor: pointer;
+            }
+
+        .panel-body-noborder {
+            border-bottom-width: 1px;
+            border-bottom-color: #dddddd;
+            border-top-width: 1px;
+            border-top-color: #dddddd;
+        }
+
+        .stc-nav {
+            height: 30px;
+            padding-top: 4px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .Content .ToolDiv .Title .Icon {
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="Content" >
+        <div class="stc-nav">
+            <!--<span class="btng left" id="byyear">按年份</span>-->
+            <span class="btng right btng-right active" id="map" style="margin-right: 1%">图</span>
+            <span class="btng right btng-left" id="tab">表</span>
+        </div>
+        <div id="topport" style="width: 100%; height: 49%;">
+            <div id="searchModule" class="ToolDiv" style="position: relative; width: 98%; margin-left: 1%; margin-top: 5px; border-bottom: 0px; border: 1px solid #CACACA; border-radius: 10px;">
+                <div style="display: inline-block;">
+                    <div id="year" class="ktw-combobox" style="z-index: 3; position: relative; width: 180px; height: 20px; margin-left: 5px; margin-top: 10px" opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">批地年份</span></div>"}'></div>
+                </div>
+                <div class="Button" id="export" operatetype="Export" style="float: right; padding-top: 4px; padding-right: 10px; position: absolute">
+                    <span class="button">导出</span>
+                </div>
+                <div class="Button" id="static" operatetype="Statistics" style="float: right; padding-top: 4px; padding-right: 10px; position: absolute;">
+                    <span class="button">统计</span>
+                </div>
+                &nbsp;&nbsp;
+            </div>
+            <div id="statictable" style="width: 98%; height: calc(100% - 50px); margin: 0 auto; margin-top: 5px; border: 1px solid #CACACA; border-radius: 10px;">
+                <div id="dataModule" style="width: 100%;"></div>
+            </div>
+        </div>
+        <div id="chartModule" style="width: 98%; height: calc(49% - 40px);bottom: 0px; margin: 0 auto; margin-top: 5px; margin-bottom: 5px; margin-left: 1%; border: 1px solid #CACACA; border-radius: 10px;">
+            <div id="chart" style="width: 100%; height: 100%; float: left;"></div>
+        </div>
+    </div>
+</body>
+</html>

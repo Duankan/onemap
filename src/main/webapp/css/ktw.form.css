@@ -1,0 +1,130 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+.button {
+    height: 22px;
+    background-color: #01B6EF;
+    border-radius: 5px;
+    text-align: center;
+    line-height: 20px;
+    float: left;
+    margin-left: 5px;
+    margin-top: 5px;
+    cursor: pointer;
+    color: #FFFFFF;
+    padding: 5px 18px;
+}
+
+    .button:hover {
+        background-color: #0A94C2;
+    }
+
+.btng {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: 14px;
+    line-height: 20px;
+    color: #333333;
+    text-align: center;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: #f5f5f5;
+    border: 1px solid #cccccc;
+    border-color: #e6e6e6 #e6e6e6 #bfbfbf;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+    .btng:hover,
+    .btng:focus,
+    .btng.active {
+        color: #333333;
+        background-color: #e6e6e6;
+    }
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.btng-left {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.btng-right {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.btng-center {
+    border-left: 0;
+    border-right: 0;
+}
+
+.form-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.form-tbl {
+    width: 98%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+    .form-tbl td {
+        border: 1px solid #ccc;
+        height: 35px;
+    }
+
+.from-title {
+    text-align: center;
+    vertical-align: middle;
+    background-color: #ddd;
+}
+
+.form-text {
+    padding-left: 4px;
+}
+
+.form-kind {
+    padding-left: 10px;
+    background-color: #0A94C2;
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: bold;
+    border: 1px solid #0A94C2 !important;
+}
+
+
+.mask_back {
+    background-image: url('../image/bg.png');
+    height: 100%;
+    width: 100%;
+    /*z-index: 997;*/
+    position: fixed;
+    top: 0px;
+}
+
+.mask_loading {
+    background-image: url('../image/loading.gif');
+    background-repeat: no-repeat;
+    background-position: center;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    /*z-index: 998;*/
+    top: 0px;
+}

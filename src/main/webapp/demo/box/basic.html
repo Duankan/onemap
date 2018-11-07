@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Basic Box</title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+        table {
+            width: 400px;
+            height: 300px;
+            border-collapse: collapse;
+            border-style: solid;
+            border-width: 1px 0 0 1px;
+            border-color: #DDDDDD;
+            color: black;
+            font-size: 12px;
+            font-weight: normal;
+            font-family: SimSun, Arial, "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei", 宋体;
+        }
+
+        td {
+            border-width: 0 1px 1px 0;
+            border-style: solid;
+            border-color: #DDDDDD;
+            text-align: center;
+        }
+
+        th {
+            color: black;
+            font-weight: normal;
+            text-align: center;
+            border-width: 0 1px 1px 0;
+            border-style: solid;
+            border-color: #DDDDDD;
+            padding: 10px;
+            background-color: #F6F6F6;
+        }
+    </style>
+    <script type="text/javascript">
+
+        //部件通讯
+        function WidgetCommunication(s) {
+
+        }
+
+        $(window).ready(function () {
+            var ctr = new ktw.Box({
+                Width: 300,
+                Height: 200,
+                Padding: "0 10px 10px 10px",
+                HasBorder: true,
+                HorScroll: "auto",//默认是隐藏的
+                Content: $('table')
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <h2>Box</h2>
+    <p>基础用法示例，根据填充的内容自动出现滚动条</p>
+    <table>
+        <caption style="text-align: center; font-size: 14px; padding: 10px;">2017年部分城市高考前后日夜气温情况</caption>
+        <thead>
+            <tr style="height: 30px;">
+                <th>城市</th>
+                <th>6.4</th>
+                <th>6.5</th>
+                <th>6.6</th>
+                <th>6.7</th>
+                <th>6.8</th>
+                <th>6.9</th>
+                <th>6.10</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>北京</th>
+                <td>32/15℃</td>
+                <td>29/20℃</td>
+                <td>20/17℃</td>
+                <td>30/15℃</td>
+                <td>35/20℃</td>
+                <td>37/22℃</td>
+                <td>30/19℃</td>
+            </tr>
+            <tr>
+                <th>上海</th>
+                <td>28/21℃</td>
+                <td>28/19℃</td>
+                <td>29/20℃</td>
+                <td>28/20℃</td>
+                <td>31/23℃</td>
+                <td>32/24℃</td>
+                <td>30/25℃</td>
+            </tr>
+            <tr>
+                <th>广州</th>
+                <td>32/26℃</td>
+                <td>32/26℃</td>
+                <td>34/26℃</td>
+                <td>34/24℃</td>
+                <td>34/27℃</td>
+                <td>35/27℃</td>
+                <td>35/27℃</td>
+            </tr>
+            <tr>
+                <th>杭州</th>
+                <td>29/22℃</td>
+                <td>24/18℃</td>
+                <td>29/19℃</td>
+                <td>29/21℃</td>
+                <td>32/22℃</td>
+                <td>32/25℃</td>
+                <td>34/23℃</td>
+            </tr>
+            <tr>
+                <th>武汉</th>
+                <td>30/22℃</td>
+                <td>25/18℃</td>
+                <td>25/17℃</td>
+                <td>32/18℃</td>
+                <td>31/23℃</td>
+                <td>29/24℃</td>
+                <td>28/22℃</td>
+            </tr>
+            <tr>
+                <th>长沙</th>
+                <td>29/24℃</td>
+                <td>25/19℃</td>
+                <td>24/18℃</td>
+                <td>30/19℃</td>
+                <td>33/25℃</td>
+                <td>34/26℃</td>
+                <td>34/24℃</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

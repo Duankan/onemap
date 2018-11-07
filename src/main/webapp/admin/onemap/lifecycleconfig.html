@@ -1,0 +1,976 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link href="../../js/artDialog-7.0.0/css/dialog.css" rel="stylesheet" />
+    <link href="../../css/ktw.form2.css" rel="stylesheet" />
+    <link href="../../js/grid/css/grid.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog-plus.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script type="text/javascript" src="../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../js/ktw.onemap.js"></script>
+    <script type="text/javascript" src="../../js/appmana.js"></script>
+    <script src="../../js/grid/js/grid.js"></script>
+    <title></title>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var ServerUrl = null;
+        ServerUrl = Ktw.cookie.ServerUrl;
+        var layers;
+        var isblank = true;
+        var curlayer;
+        var state = "";
+        var curnode = null;
+        var editIndex = undefined;
+        var befonode = null;
+        $(function () {
+            ktw.appmana.init("../../config/app.xml");
+            initCombox();
+            initTree();
+            var node = $('#organizeTree').tree('find', 1001);
+            befonode = node;
+            $('#organizeTree').tree('select', node.target);
+            var maplayer = $('#maplayer').val();
+        })
+        function initTree() {
+            var Analysis = ktw.appmana.Config.Extend.LifeCycle;
+            var data = [{
+                text: '土地生命周期配置',
+                children: [{
+                    text: '批',
+                    path: "P",
+                    children: [
+                        {
+                            id: 1001,
+                            text: '图层',
+                            path: "P/Layer",
+                        },
+                    {
+                        text: '提示表格',
+                        path: "P/Tips",
+                    }
+                    ]
+                }, {
+                    text: '征',
+                    path: "Z",
+                    children: [
+                      {
+                          text: '图层',
+                          path: "Z/Layer",
+                      },
+                    {
+                        text: '提示表格',
+                        path: "Z/Tips",
+                    }
+                    ]
+                }, {
+                    text: '储',
+                    path: "C",
+                    children: [
+                    {
+                        text: '图层',
+                        path: "C/Layer",
+                    },
+                    {
+                        text: '提示表格',
+                        path: "C/Tips",
+                    }]
+                }, {
+                    text: '供',
+                    path: "G",
+                    children: [
+                     {
+                         text: '图层',
+                         path: "G/Layer",
+                     },
+                    {
+                        text: '提示表格',
+                        path: "G/Tips",
+                    }]
+                }, {
+                    text: '用',
+                    path: "Y",
+                    children: [
+                     {
+                         text: '图层',
+                         path: "Y/Layer",
+                     },
+                    {
+                        text: '提示表格',
+                        path: "Y/Tips",
+                    }]
+                }, {
+                    text: '补',
+                    path: "B",
+                    children: [
+                      {
+                          text: '图层',
+                          path: "B/Layer",
+                      },
+                    {
+                        text: '提示表格',
+                        path: "B/Tips",
+                    }]
+                }, {
+                    text: '查',
+                    path: "W",
+                    children: [
+                    {
+                        text: '图层',
+                        path: "W/Layer",
+                    },
+                    {
+                        text: '提示表格',
+                        path: "W/Tips",
+                    }]
+                }]
+            }];
+            $('#organizeTree').tree({
+                //dnd: true,
+                data: data,
+                formatter: function (node) {
+                    if (!node.children || node.children.length == 0) return node.text;
+                    return node.text + '<span style="color:blue">(' + node.children.length + ')</span>';
+                },
+                onSelect: function (node) {
+                    curnode = node;
+                    if (node.text == "图层") {
+                        befonode = node;
+                        $(".tableinfo").hide();
+                        $(".layerinfo").show();
+                        initData(node);
+                    }
+                    else if (node.text == "提示表格") {
+                        befonode = node;
+                        var tabledata = [];
+                        var paths = node.path.split("/");
+                        var Col = ktw.appmana.Config.Extend.LifeCycle[paths[0]]["Tips"]["Col"];
+                        if (((Col instanceof Array) == false) && (Col != null)) {
+                            tabledata.push(Col)
+                        }
+                        else if (Col instanceof Array) {
+                            tabledata = (Col)
+                        }
+                        $(".layerinfo").hide();
+                        $(".tableinfo").show();
+                        inittableGrid(tabledata);
+                    }
+                    else {
+                        $('#organizeTree').tree('select', befonode.target);
+                    }
+                }
+            })
+        }
+        //图层信息赋值
+        function initlayerdata(curmaplayer) {
+            $(".Type").val(curmaplayer.Type);
+            switch (curmaplayer.Type) {
+                case "WMS":
+                    $("#tableWMTS").hide();
+                    $("#tableTile").hide();
+                    $("#layerbaseinfo").show();
+                    $("#DetailFields").show();
+                    $("#WMSID1").val(curmaplayer.ID);
+                    $("#WMSText1").val(curmaplayer.Text);
+                    $("#WMSUrl1").val(curmaplayer.Url);
+                    $("#WMSVisible1").val(curmaplayer.Visible);
+                    $("#WMSFilter1").val(curmaplayer.Filter);
+                    $("#WMSEPSG1").val(curmaplayer.EPSG);
+                    $("#WMSIconCls1").val(curmaplayer.IconCls);
+                    $("#WMSTypeName1").val(curmaplayer.TypeName);
+                    $("#WMSSld1").val(curmaplayer.Sld);
+                    $("#WMSStyles1").val(curmaplayer.Styles);
+                    $("#WMSChecked1").val(curmaplayer.Checked);
+                    $("#WMSLifeCycle1").val(curmaplayer.LifeCycle);
+                    $("#WMSServerType1").val(curmaplayer.ServerType);
+                    $("#WMSMaxZoom1").val(curmaplayer.MaxZoom);
+                    $("#WMSMinZoom1").val(curmaplayer.MinZoom);
+                    $("#WMSArgs1").val(curmaplayer.Args);
+                    if (curmaplayer.Bounds != null) {
+                        $("#WMSXMin1").val(curmaplayer.Bounds.XMin);
+                        $("#WMSYMin1").val(curmaplayer.Bounds.YMin);
+                        $("#WMSXMax1").val(curmaplayer.Bounds.XMax);
+                        $("#WMSYMax1").val(curmaplayer.Bounds.YMax);
+                    };
+                    $("input[name='NoQuery']").get(0).checked = true;
+                    if (curmaplayer.NoQuery == "true")
+                        $("input[name='NoQuery']").get(1).checked = true;
+                    $("#WMSKey").val(curmaplayer.Key);
+                    $("#WMSGeometryName").val(curmaplayer.GeometryName);
+                    $("#WMSDefaultQuery").val(curmaplayer.DefaultQuery);
+                    $("#WFSVersion").val(curmaplayer.WFSVersion);
+                    $("#WMSSearchFields").val(curmaplayer.SearchFields);
+                    $("#DisplayFields").val(curmaplayer.DisplayFields);
+                    break;
+                case "WMTS":
+                    $("#tableWMTS").show();
+                    $("#tableTile").hide();
+                    $("#layerbaseinfo").hide();
+                    $("#DetailFields").hide();
+                    $("#WMTSID1").val(curmaplayer.ID);
+                    $("#WMTSText1").val(curmaplayer.Text);
+                    $("#WMTSUrl1").val(curmaplayer.Url);
+                    $("#WMTSVisible1").val(curmaplayer.Visible);
+                    $("#WMTSEPSG1").val(curmaplayer.EPSG);
+                    $("#WMTSArgs1").val(curmaplayer.Args);
+                    $("#WMTSTypeName1").val(curmaplayer.TypeName);
+                    $("#WMTSChecked1").val(curmaplayer.Checked);
+                    $("#WMTSMaxZoom1").val(curmaplayer.MaxZoom);
+                    $("#WMTSMinZoom1").val(curmaplayer.MinZoom);
+                    if (curmaplayer.Bounds != null) {
+                        $("#WMTSXMin1").val(curmaplayer.Bounds.XMin);
+                        $("#WMTSYMin1").val(curmaplayer.Bounds.YMin);
+                        $("#WMTSXMax1").val(curmaplayer.Bounds.XMax);
+                        $("#WMTSYMax1").val(curmaplayer.Bounds.YMax);
+                    };
+                    $("#WMTSIconCls1").val(curmaplayer.IconCls);
+                    break;
+                    //Tile
+                case "Tile":
+                    $("#tableWMTS").hide();
+                    $("#tableTile").show();
+                    $("#layerbaseinfo").hide();
+                    $("#DetailFields").hide();
+                    $("#tileID1").val(curmaplayer.ID);
+                    $("#tileText1").val(curmaplayer.Text);
+                    $("#tileUrl1").val(curmaplayer.Url);
+                    $("#tileVisible1").val(curmaplayer.Visible);
+                    $("#tileArgs1").val(curmaplayer.Args);
+                    $("#tileChecked1").val(curmaplayer.Checked);
+                    $("#tileIconCls1").val(curmaplayer.IconCls);
+                    $("#tileMaxZoom1").val(curmaplayer.MaxZoom);
+                    $("#tileMinZoom1").val(curmaplayer.MinZoom);
+                    if (curmaplayer.Bounds != null) {
+                        $("#tileXMin1").val(curmaplayer.Bounds.XMin);
+                        $("#tileYMin1").val(curmaplayer.Bounds.YMin);
+                        $("#tileXMax1").val(curmaplayer.Bounds.XMax);
+                        $("#tileYMax1").val(curmaplayer.Bounds.YMax);
+                    };
+                    break;
+                default: break;
+            }
+            var data = [];
+            if (curmaplayer.DetailFields != null) {
+                for (var i = 0; i < curmaplayer.DetailFields.Field.length; i++) {
+                    data.push({ "ByName": curmaplayer.DetailFields.Field[i].ByName, "Name": curmaplayer.DetailFields.Field[i].Name })
+                }
+            }
+            initdataGrid(data);
+        }
+        //初始化图例信息表格
+        function initdataGrid(data) {
+            var grid = new ktw.Grid();
+            grid.ID = "tableGrid";
+            grid.isPage = false;
+            grid.headArr = [
+                [
+                    { text: "序号", width: "20%" },
+                    { text: "字段名", width: "40%" },
+                    { text: "字段值", width: "40%" },
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "ByName", type: "lab", title: "Title" },
+                { name: "Name", type: "lab" }, ];
+            grid.initGrid = function () {
+                for (var i = 0; i < data.length; i++) {
+                    data.Index = i + 1;
+                }
+                grid.init({ DataList: data });
+            }
+            grid.initGrid();
+        }
+
+        //展示相应图层信息
+        function initData(node) {
+            var paths = node.path.split("/");
+            var Ref = ktw.appmana.Config.Extend.LifeCycle[paths[0]]["Layer"]["Ref"];
+            curlayer = Enumerable.From(layers).Where("x=>x.ID=='" + Ref + "'").ToArray();
+            $("#maplayer").val(curlayer[0].ID);
+            changeForm(curlayer[0].ID);
+        }
+        //初始化列表信息
+        function inittableGrid(data) {
+            var grid = new ktw.Grid();
+            grid.ID = "tipstable";
+            grid.isPage = false;
+
+            grid.headArr = [
+                [
+                    { text: "序号", width: "5%" },
+                    { text: "列头名称", width: "10%" },
+                    { text: "字段名称", width: "15%" },
+                    { text: "类型", width: "10%" },
+                    { text: "文本值", width: "10%" },
+                    { text: "宽度", width: "10%" },
+                    { text: "最大宽度", width: "10%" },
+                    { text: "最小宽度", width: "10%" },
+                    { text: "编辑", width: "10%" },
+                    { text: "删除", width: "10%" }
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "ByName", type: "lab", cutLen: 5, title: "ByName" },
+                { name: "Name", type: "lab" },
+                { name: "Type", type: "lab" },
+                { name: "Text", type: "lab" },
+                { name: "Width", type: "lab" },
+                { name: "MaxWidth", type: "lab" },
+                { name: "MinWidth", type: "lab" },
+                { text: "编辑", key: "ByName", type: "btn", clickName: "updatePanelFields", titleText: "进行编辑" },
+                { text: "删除", key: "ByName", type: "btn", clickName: "deletePanelFields", titleText: "删除前要确认" }];
+            grid.initGrid = function () {
+                for (var i = 0; i < data.length; i++) {
+                    data[i].Index = i + 1;
+                }
+                grid.init({ DataList: data });
+            }
+            grid.initGrid();
+        }
+        //function formatOper(val, row, i) {
+        //    return '<a id="deleterow" class="easyui-linkbutton" onclick="removeit(\'' + i + '\')">删除</a>';
+        //}
+        //获取当前点击节点图层信息
+        function getmaplayer(node) {
+            var paths = node.path.split("/");
+            var maplayers = ktw.appmana.Config.SystemMap.ArrayOfMapLayer.MapLayer;
+            var curmaplayer = null;
+            curmaplayer = maplayers;
+            //var alt = /'([^']*)'/g;
+            //alert(path.match(alt));
+            for (var i = 4; i < paths.length; i += 2) {
+                var data = [];
+                if ((maplayers instanceof Array) == false && maplayers != null) {
+                    data.push(maplayers);
+                    maplayers = data;
+                    curmaplayer = maplayers;
+                }
+                for (var j = 0; j < maplayers.length; j++) {
+                    if (curmaplayer[j].ID == paths[i].match(/'(\S*)'/)[1]) {
+                        curmaplayer = maplayers[j];
+                        if (paths[i + 1] == "Children") {
+                            curmaplayer = curmaplayer.Children.MapLayer;
+                        }
+                        break;
+                    }
+                }
+                maplayers = curmaplayer;
+            }
+            return curmaplayer;
+        }
+        //初始化图层选择框
+        function initCombox() {
+            layers = [];
+            var MapLayers = [];
+            var ArrayOfMapLayer = ktw.appmana.Config.SystemMap.ArrayOfMapLayer.MapLayer;
+            if (ArrayOfMapLayer != null && (ArrayOfMapLayer instanceof Array) == true) {
+                for (var i = 0; i < ArrayOfMapLayer.length; i++) {
+                    ArrayOfMapLayer[i].path = "/App/SystemMap/ArrayOfMapLayer/MapLayer[ID='" + ArrayOfMapLayer[i]["ID"] + "']"
+                    MapLayers.push(ArrayOfMapLayer[i])
+                    if ("Children" in ArrayOfMapLayer[i])
+                        A(ArrayOfMapLayer[i]);
+                }
+            }
+            else if (ArrayOfMapLayer != null) {
+                ArrayOfMapLayer.path = "/App/SystemMap/ArrayOfMapLayer/MapLayer[ID='" + ArrayOfMapLayer["ID"] + "']"
+                MapLayers.push(ArrayOfMapLayer);
+                if ("Children" in ArrayOfMapLayer)
+                    A(ArrayOfMapLayer);
+            }
+            function A(MapLayers) {
+                var Childrens = MapLayers["Children"]["MapLayer"];
+                if (Childrens != null && (Childrens instanceof Array) == true) {
+                    for (var j = 0; j < Childrens.length; j++) {
+                        Childrens[j].path = MapLayers.path + "/Children/MapLayer[ID='" + Childrens[j]["ID"] + "']"
+                        if ("Children" in Childrens[j])
+                            A(Childrens[j]);
+                        else layers.push(Childrens[j]);
+                    }
+                }
+                else if (Childrens != null) {
+                    Childrens.path = MapLayers.path + "/Children/MapLayer[ID='" + Childrens["ID"] + "']"
+                    if ("Children" in Childrens)
+                        A(Childrens);
+                    else layers.push(Childrens);
+                }
+            }
+            var curoption = $('#maplayer').val();
+            var data = [];
+            for (var j = layers.length - 1; j >= 0; j--) {
+                if (layers[j].Type != "WMS") {
+                    layers.splice(j, 1);
+                }
+            }
+            for (var i = 0; i < layers.length; i++) {
+                $("#maplayer").append("<option value=" + layers[i]["ID"] + " path=" + layers[i].path + ">" + layers[i]["Text"] + "&nbsp;&nbsp;(" + layers[i]["ID"] + ")&nbsp;&nbsp;(" + layers[i]["TypeName"] + ")</option>")
+            }
+        }
+        function changeForm(param) {
+            var layer = curlayer[0];
+            for (var i = 0; i < layers.length; i++) {
+                if (param == layers[i].ID) {
+                    layer = layers[i];
+                    break;
+                }
+            }
+            var curmaplayer = getmaplayer(layer);
+            initlayerdata(curmaplayer)
+        }
+        //修改图层
+        function updateRef() {
+            var arg = $('#maplayer').val();
+            ktw.appmana.updateRef(curnode, arg, function () {
+                ktw.appmana.tip("保存成功!");
+            }, function (res) {
+                conole.error(res);
+                ktw.appmana.alert("保存失败!");
+            });
+        }
+        //添加提示表格信息
+        function addPanelFields() {
+            $("#editByName,#editName,#editType,#editText,#editWidth,#editMaxWidth,#editMinWidth").val("");
+            var d = dialog({
+                title: "添加",
+                content: $('#editwin'),
+                okValue: '添 加',
+                ok: function () {
+                    var Col = {};
+                    Col.ByName = $("#editByName").val();
+                    Col.Name = $("#editName").val();
+                    Col.Type = $("#editType").val();
+                    Col.Text = $("#editText").val();
+                    Col.Width = $("#editWidth").val();
+                    Col.MaxWidth = $("#editMaxWidth").val();
+                    Col.MinWidth = $("#editMinWidth").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addPanelFields.validate(curnode, Col)) {
+                        ktw.appmana.addPanelFields(curnode, Col, function () {
+                            ktw.appmana.tip("保存成功!");
+                            ktw.appmana.refreshApp();
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+        //修改提示表格信息
+        function updatePanelFields(item) {
+            var id = $(item).attr("btnkey");
+            var Col = ktw.appmana.getColbyByName(curnode, id);
+            setData(Col);
+            var d = dialog({
+                title: Col.ByName,
+                content: $('#editwin'),
+                okValue: '确 定',
+                ok: function () {
+                    var Col = {};
+                    Col.ByName = $("#editByName").val();
+                    Col.Name = $("#editName").val();
+                    Col.Type = $("#editType").val();
+                    Col.Text = $("#editText").val();
+                    Col.Width = $("#editWidth").val();
+                    Col.MaxWidth = $("#editMaxWidth").val();
+                    Col.MinWidth = $("#editMinWidth").val();
+                    if (ktw.appmana.updatePanelFields.validate(curnode, id, Col)) {
+                        ktw.appmana.updatePanelFields(curnode, Col, id, function () {
+                            ktw.appmana.tip("更新成功!");
+                            ktw.appmana.refreshApp();
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+        //给编辑窗口赋值
+        function setData(Col) {
+            $("#editByName,#editName,#editType,#editText,#editWidth,#editMaxWidth,#editMinWidth").val("");
+            $("#editByName").val(Col.ByName);
+            $("#editName").val(Col.Name);
+            $("#editType").val(Col.Type);
+            $("#editText").val(Col.Text);
+            $("#editWidth").val(Col.Width);
+            $("#editMaxWidth").val(Col.MaxWidth);
+            $("#editMinWidth").val(Col.MinWidth);
+        }
+        //删除提示表格信息
+        function deletePanelFields(item) {
+            var id = $(item).attr("btnkey");
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个菜单?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deletePanelFields.validate(id)) {
+                        ktw.appmana.deletePanelFields(curnode, id, function () {
+                            ktw.appmana.tip("删除成功!");
+                            ktw.appmana.refreshApp();
+                            refreshGrid();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //刷新表格
+        function refreshGrid() {
+            var path = curnode.path.split("/");
+            $.ajax({
+                url: ServerUrl + "confmana/select",
+                type: "post",
+                async: true,
+                data: { path: "/App/Extend/LifeCycle/" + path[0] + "/Tips" },
+                success: function (res) {
+                    if (res.success) {
+                        if (res.data.length == 1) {
+                            var curMenu = $.xml2json(res.data[0]);
+                            inittableGrid(curMenu.Col || []);
+                        } else {
+
+                        }
+                    }
+                },
+                error: function () {
+                    console.error(arguments);
+                }
+            });
+        }
+    </script>
+    <style type="text/css">
+        .con-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 400px;
+            border-right: solid 1px #DDDDDD;
+        }
+
+        .header {
+            height: 25px;
+            padding-top: 5px;
+            padding-left: 10px;
+        }
+
+        #divtree {
+            padding-left: 5px;
+            height: 90%;
+        }
+
+        .con-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            left: 400px;
+            overflow: auto;
+        }
+
+        .bar {
+            margin-top: 5px;
+            margin-left: 10px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .bar-line {
+            width: 6px;
+            height: 20px;
+            position: absolute;
+            top: 50%;
+            margin-top: -10px;
+            background-color: #01B6EF;
+            display: inline-block;
+        }
+
+        .bar-txt {
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        .datagrid-toolbar {
+            border-top: 1px solid #DDDDDD;
+            text-align: right;
+        }
+
+        .box {
+            border: 1px solid #dddddd;
+            width: 96%;
+            margin: 0 auto;
+            box-shadow: #dddddd 0px 0px 20px;
+            padding: 5px;
+            margin-top: 5px;
+        }
+
+        #editwin {
+            display: none;
+            width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; height: 100%; background: #FFFFFF">
+        <div style="width: 30%; height: 100%; border-right: solid 1px #DDDDDD;">
+            <div class="header">土地生命周期配置</div>
+            <div id="divtree" style="width: 99%; height: 90%; overflow-x: hidden">
+                <ul id="organizeTree" style="width: 100%; height: 100%;"></ul>
+            </div>
+        </div>
+        <!--基本信息-->
+        <div id="rightdiv" style="position: absolute; right: 0px; top: 0px; height: 100%; width: calc(70% - 1px);overflow-y:auto;">
+            <div class="layerinfo" style="height: 100%">
+                <div style="margin-top: 5px; margin-left: 10px; margin-bottom: 5px; position: relative">
+                    <div style="width: 6px; height: 20px; position: absolute; top: 50%; margin-top: -10px; background-color: #01B6EF; display: inline-block"></div>
+                    <span id="layertitle" style="font-size: 16px; margin-left: 10px">图层信息</span>
+                </div>
+                <div id="layerbaseinfo" style="width: 98%; display: block; overflow-y: auto">
+                    <table class="form-tbl" style="margin-top: 10px" id="tableWMS">
+                        <colgroup>
+                            <col style="width: 18%" />
+                            <col style="width: 35%" />
+                            <col style="width: 18%" />
+                            <col style="width: 35%" />
+                        </colgroup>
+                        <tr>
+                            <td class="td-title">引用图层：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <select id="maplayer" class="form-select" onchange="changeForm(value)"></select>
+                                </div>
+                            </td>
+                            <td class="td-title">图层类型：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt Type" readonly="readonly" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">主键(ID)：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt layerID" id="WMSID1" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">名称：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSText1" readonly="readonly" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">是否可见：</td>
+                            <td class="td-txt">
+                                <select id="WMSVisible1" class="form-select" disabled="disabled">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </td>
+                            <td class="td-title">查询字段：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSFilter1" readonly="readonly" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">坐标参考系：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSEPSG1" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">图标样式：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSIconCls1" readonly="readonly" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">图层名称：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSTypeName1" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">样式文件：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSSld1" readonly="readonly" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">后台样式：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSStyles1" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">是否选中：</td>
+                            <td class="td-txt">
+                                <select id="WMSChecked1" class="form-select" disabled="disabled">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">生命周期：</td>
+                            <td class="td-txt">
+                                <select id="WMSLifeCycle1" class="form-select layerType" disabled="disabled"></select>
+                            </td>
+                            <td class="td-title">服务器类型：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <select id="WMSServerType1" class="form-select" disabled="disabled">
+                                        <option value="hgis">hgis</option>
+                                        <option value="geoserver">geoserver</option>
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">最大级别：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSMaxZoom1" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">最小级别：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSMinZoom1" readonly="readonly" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">XMin：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSXMin1" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">YMin：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSYMin1" readonly="readonly" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">XMax：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSXMax1" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">YMax：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSYMax1" readonly="readonly" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">图层地址：</td>
+                            <td class="td-txt" colspan="3">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSUrl1" readonly="readonly" style="width:98%" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">其他参数：</td>
+                            <td class="td-txt" colspan="3">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMSArgs1" readonly="readonly" style="width:98%" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">是否支持查询：</td>
+                            <td class="td-txt">
+                                <div id="WMSNoQuery1">
+                                    <label>
+                                        <input name="NoQuery" type="radio" value="false" disabled="disabled" />支持查询
+                                    </label>
+                                    <label>
+                                        <input name="NoQuery" type="radio" value="true" disabled="disabled" />
+                                        不支持查询
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="queryconfig">
+                        <div class="bar">
+                            <div class="bar-line"></div>
+                            <span class="bar-txt">查询配置</span>
+                        </div>
+                        <table class="form-tbl">
+                            <colgroup>
+                                <col style="width: 18%" />
+                                <col style="width: 30%" />
+                                <col style="width: 18%" />
+                                <col style="width: 30%" />
+                            </colgroup>
+                            <tr>
+                                <td class="td-title">查询主键：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input class="form-txt" id="WMSKey" readonly="readonly" />
+                                    </div>
+                                </td>
+                                <td class="td-title">几何字段：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input class="form-txt" id="WMSGeometryName" readonly="readonly" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">默认查询：</td>
+                                <td class="td-txt">
+                                    <select id="WMSDefaultQuery" class="form-select" disabled="disabled">
+                                        <option value="true">true</option>
+                                        <option value="false">false</option>
+                                    </select>
+                                </td>
+                                <td class="td-title">WFS版本：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input class="form-txt" id="WFSVersion" readonly="readonly" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">查询字段：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input class="form-txt" id="WMSSearchFields" readonly="readonly" />
+                                    </div>
+                                </td>
+                                <td class="td-title">字段名：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input class="form-txt" id="DisplayFields" readonly="readonly" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="tableGridinfo">
+                        <div class="bar">
+                            <div class="bar-line"></div>
+                            <span class="bar-txt">图层字段信息</span>
+                        </div>
+                        <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+                            <table id="tableGrid"></table>
+                        </div>
+                    </div>
+                    <div class="center">
+                        <button class="btn" onclick="updateRef()">保存</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tableinfo" style="display:none;">
+                <div class="basemapinfo">
+                    <div class="bar">
+                        <div class="bar-line"></div>
+                        <span class="bar-txt">提示表格</span>
+                    </div>
+                    <div class="right">
+                        <button class="btn" onclick="addPanelFields()">添加</button>
+                    </div>
+                    <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+                        <table id="tipstable"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="editwin">
+        <table class="form-tbl" style="width: 100%;">
+            <colgroup>
+                <col style="width: 18%" />
+                <col style="width: 35%" />
+                <col style="width: 18%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">列头名称：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editByName" />
+                </td>
+                <td class="td-title">字段名称：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editName" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">类型：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editType" />
+                </td>
+                <td class="td-title">文本值：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editText" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">宽度：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editWidth" />
+                </td>
+                <td class="td-title">最大宽度：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editMaxWidth" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">最小宽度：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editMinWidth" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

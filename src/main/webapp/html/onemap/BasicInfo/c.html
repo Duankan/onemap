@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/authorization.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script src="../../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../../js/guid.js"></script>
+    <script src="../../../js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../../js/md5.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.onemap.js"></script>
+    <link href="../../../css/ktw.form.css" rel="stylesheet" />
+    <style type="text/css">
+        html, body {
+            overflow: auto !important;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            width: 80%;
+            margin: 0 auto;
+            min-width: 900px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <table class="form-tbl">
+            <colgroup>
+                <col style="width: 18%" />
+                <col style="width: 30%" />
+                <col style="width: 18%" />
+                <col style="width: 30%" />
+            </colgroup>
+            <tr>
+                <td colspan="4" style="text-align: right; border: 0; padding-right: 2px;">单位:公顷、万元</td>
+            </tr>
+            <!--基本信息-->
+            <tr>
+                <td class="form-kind" colspan="4">
+                    <div><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>基本信息</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">录入时间</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.lrsj"></div>
+                </td>
+                <td class="from-title">年份</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.nf"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">案卷编号</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.ajbh"></div>
+                </td>
+                <td class="from-title">案卷名称</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.ajmc"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">流程类型</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.lclx"></div>
+                </td>
+                <td class="from-title">流程名称</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.lcmc"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">行政区代码</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.xzqdm"></div>
+                </td>
+                <td class="from-title">行政区名称</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.xzqmc"></div>
+                </td>
+            </tr>
+            <!--项目信息-->
+            <tr>
+                <td class="form-kind" colspan="4">
+                    <div><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>项目信息</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">项目名称</td>
+                <td class="form-text">
+                    <div id="xmmc" readname="T_INF_ONEMAP_CBYDXXB.xmmc"></div>
+                </td>
+                <td class="from-title">宗地号</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.zdh"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">宗地坐落</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.zdzl"></div>
+                </td>
+                <td class="from-title">土地取得成本</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.tdqdcb"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">储备地块名称</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.cbdkmc"></div>
+                </td>
+                <td class="from-title">纳入储备类型</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.cblx"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">入储时间</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.rcsj"></div>
+                </td>
+                <td class="from-title">入储依据</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.rcyj"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">备注</td>
+                <td class="form-text" colspan="3">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.bz"></div>
+                </td>
+            </tr>
+            <!--面积信息-->
+            <tr>
+                <td class="form-kind" colspan="4">
+                    <div><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>面积信息</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">宗地面积</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.zdmj"></div>
+                </td>
+                <td class="from-title">已供面积</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.ygmj"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">剩余可供面积</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_CBYDXXB.sykgmj"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/javascript">
+        function param(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+        var guid = param("guid");
+        $(function () {
+            ktw.cookie.init("../../../config/app.xml");
+            ktw.InitForm(guid);
+            $("#xmmc", window.parent.document).html($("#xmmc").html());
+            $("#type", window.parent.document).html(" 储地>> ");
+        });
+
+    </script>
+</body>
+</html>

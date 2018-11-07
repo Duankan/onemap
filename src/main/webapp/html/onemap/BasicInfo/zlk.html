@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/authorization.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/ktw.form.css" />
+
+   <!----加载jquery库----->
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script src="../../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../../js/guid.js"></script>
+    <script src="../../../js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../../js/md5.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.onemap.js"></script>
+
+
+    <style type="text/css">
+        html, body{
+            overflow: auto !important;
+        }
+        body{
+            background-color: #f5f5f5;
+        }
+
+        .form-container{
+            width: 80%;
+            margin: 0 auto;
+            min-width: 900px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <table class="form-tbl">
+            <colgroup>
+                <col style="width: 18%" />
+                <col style="width: 30%" />
+                <col style="width: 18%" />
+                <col style="width: 30%" />
+            </colgroup>
+            <tr>
+                <td colspan="4" style="text-align: right; border: 0; padding-right: 2px;">单位:米/平方米/万元</td>
+            </tr>
+            <!----基本信息---->
+            <tr>
+                <td  class="form-kind" colspan="4">
+                    <div><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>基本宗地信息</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">标识码</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.bsm"></div>
+                </td>
+                <td class="form-title">要素代码</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ysdm"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">宗地代码</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZDDM"></div>
+                </td>
+                <td class="form-title">不动产单元号</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.BDCDYH"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">宗地特征码</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZDTZM"></div>
+                </td>
+                <td class="form-title">坐落</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZL"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">宗地面积</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZDMJ"></div>
+                </td>
+                <td class="form-title">面积单位</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.MJDW"></div>
+                </td>
+            </tr>
+            <!-----项目信息------>
+            <tr>
+                <td class="form-kind" colspan="4">
+                    <div><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>项目宗地信息</div>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="form-title">用途</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.YT"></div>
+                </td>
+                <td class="form-title">权利设定方式</td>
+                <td class="form-text" >
+                    <div readname="BDC_ZDJBXX.QLSDFS"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">等级</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.DJ"></div>
+                </td>
+                <td class="form-title">价格</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.JG"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">权利类型</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.QLLX"></div>
+                </td>
+                <td class="form-title">权利性质</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.QLXZ"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">权利人</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.QLR"></div>
+                </td>
+                <td class="form-title">土地使用者</td>
+                <td class="form-text" >
+                    <div readname="BDC_ZDJBXX.TDSYZ"></div>
+                </td>
+            </tr>
+            <!-----建筑基本信息----->
+            <tr>
+                <td class="form-kind" colspan="4">
+                    <div ><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>建筑基本信息</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">容积率</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.RJL"></div>
+                </td>
+
+
+                <td class="form-title">建筑密度</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.JZMD"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">宗地四至-东</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZDSZD"></div>
+                </td>
+                <td class="form-title">宗地四至-南</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZDSZN"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">宗地四至-西</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZDSZX"></div>
+                </td>
+                <td class="form-title">宗地四至-北</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZDSZB"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">建筑限高</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZJXG"></div>
+                </td>
+            </tr>
+
+            <!----宗地其他信息----->
+            <tr>
+                <td class="form-kind" colspan="4">
+                    <div ><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>宗地其他信息</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">宗地图</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZDT"></div>
+                </td>
+                <td class="form-title">图幅号</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.TFH"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">地籍号</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.DJH"></div>
+                </td>
+                <td class="form-title">档案号</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.DAH"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="form-title">备注</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.BZ"></div>
+                </td>
+                <td class="form-title">状态</td>
+                <td class="form-text">
+                    <div readname="BDC_ZDJBXX.ZT"></div>
+                </td>
+            </tr>
+
+
+
+        </table>
+    </div>
+    <script type="text/javascript">
+        function param(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+        var guid = param("zddm");
+        
+        $(function () {
+            ktw.cookie.init("../../../config/app.xml");
+            ktw.InitForm(guid);
+            
+            $.ajax({
+                async: true,
+                //  请求后台地址
+                url: ktw.cookie.ServerUrl + "zdjbxx/getbyfilter/zddm=\'" + guid + "\'",
+                type: "get",
+                success: function (res) {
+                    if (res.success) {
+                        console.log(res.data);
+                        if(res.data==null && res.data.length<=0)
+                        	ktw.Error("该自然幢暂时无对应宗地信息");
+                    } else {
+                        ktw.Error(res.message);
+                    }
+                },
+                error: function (res) {
+                    ktw.Error("请求数据出错!");
+                    console.error("请求数据出错!");
+                }
+            });
+            
+            $("#xmmc", window.parent.document).html($("#xmmc").html());
+            $("#type", window.parent.document).html(" 用地>> ");
+        });
+
+    </script>
+
+</body>
+</html>

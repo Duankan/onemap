@@ -1,0 +1,241 @@
+﻿.login {
+    width:100%;
+    height:100%;
+    z-index:1;
+    background:url(../image/login/login-outerboder.png) no-repeat;
+    background-size:100% 100%;
+}
+
+.loginPanel {
+    width: 518px;
+    height: 500px;
+    position: absolute;
+    top: 50%;
+    right: 60px;
+    margin-top: -250px;
+    overflow: hidden;
+}
+
+.login_title {
+    width: 450px;
+    height: 120px;
+    position:absolute;
+    left:50%;
+    margin-left:-225px;
+    background: url(../image/login/login-logo.png) no-repeat;
+    background-position: center;
+}
+
+.login_content {
+    width: 100%;
+    position: relative;
+    /*background-color: #ededed;*/ /*#105cA8;*/
+    /*background-image: url(../image/login/content-bg2.png);*/
+    background-position-x: 200px;
+    background-repeat: no-repeat;
+    background-position-y: center;
+}
+
+.login_foot {
+    width: 100%;
+    height: 80px;
+    text-align: center;
+    line-height: 80px;
+    position:absolute;
+    bottom:0px;
+    color:#999999;
+}
+
+.sysTitle {
+    width: 518px;
+    height: 89px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-image: url('../image/login/title.png');
+}
+
+.loginBG {
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    /*background: #FFF;*/
+    /*opacity: 0.8;
+    filter: alpha(opacity=80);*/
+    /*border: 1px solid #FFF;*/
+    /*border-radius: 12px;
+    -moz-border-radius: 12px;
+    -webkit-border-radius: 12px;
+    box-shadow: 0 0 10px 0 #666666;
+    -moz-box-shadow: 0 0 10px 0 #666666;
+    -webkit-box-shadow: 0 0 10px 0 #666666;*/
+}
+
+.loginContent {
+    top: 50%;
+    left: 50%;
+    width: 490px;
+    height: 490px;
+    position: absolute;
+    margin-left:-245px;
+    margin-top: -245px;
+    /*margin-right: -245px;*/
+}
+    .loginContent #CheckBox {
+        width:18px;
+        height:18px;
+        position:absolute;
+    }
+    .loginContent .selected {
+    background: url('../image/login/login-check2.png') no-repeat;
+    background-size:100% 100%;
+    }
+     .loginContent .offselected {
+    background: url('../image/login/login-check1.png') no-repeat;
+    background-size:100% 100%;
+    }
+    .loginContent .loginHeader {
+        width: 130px;
+        height: 40px;
+        position: absolute;
+        background: url('../image/login/login_title1.png') no-repeat;
+        top: 85px;
+        left: 50%;
+        margin-left: -65px;
+    }
+
+    .loginContent .inputDiv {
+        width: 310px;
+        height: 44px;
+        position: absolute;
+        left: 50%;
+        margin-left: -155px;
+        background-repeat: no-repeat;
+        background-position: center center;
+    }
+
+        .loginContent .inputDiv .txtInput {
+            width: 240px;
+            height: 42px;
+            position:absolute;
+            right:2px;
+            /*border: 1px solid #5FBCEA;*/
+            /*border: 1px solid #cad2db;*/
+            /*background: url(../image/login/txt_input_bg.gif) no-repeat;*/
+            padding: 0 5px;
+            /*-moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            border-radius: 5px;*/
+            line-height: 42px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            /*color: #717171;*/
+            font-family: Arial;
+            padding-left: 40px;
+            background-color:transparent !important;
+            color:white;
+        }
+        .loginContent .inputDiv .userNamelogo {
+        width:80px;
+        height:100%;
+        background:url(../image/login/login-user.png) no-repeat;
+        background-position:center center;
+        position:absolute;
+        }
+         .loginContent .inputDiv .userPwdlogo{
+        width:80px;
+        height:100%;
+        background:url(../image/login/login-key.png) no-repeat;
+        background-position:center center;
+        position:absolute;
+        }
+            .loginContent .inputDiv .txtInput:focus {
+                /*transition: border linear .2s,box-shadow linear .2s;
+                -moz-transition: border linear .2s,-moz-box-shadow linear .2s;
+                -webkit-transition: border linear .2s,-webkit-box-shadow linear .2s;
+                outline: none;
+                border-color: rgba(173,173,173,0.75);
+                box-shadow: 0 0 8px rgba(173,173,173,.5);
+                -moz-box-shadow: 0 0 8px rgba(173,173,173,.5);
+                -webkit-box-shadow: 0 0 8px rgba(173,173,173,3);
+                border: 1px solid #6192c8;*/
+            }
+
+    .loginContent .userNameDiv {
+        top: 179px;
+        background-image: url('../image/login/login-box1.png');
+    }
+
+    .loginContent .userPwdDiv {
+        top: 261px;
+        background-image: url('../image/login/login-box2.png');
+    }
+
+    .loginContent .saveInfoDiv {
+        height: 18px;
+        width: 70px;
+        position: absolute;
+        bottom: 150px;
+        left: 25%;
+        /*margin-left:-16px;*/
+        color:white;
+        font-size: 12px;
+        line-height: 18px;
+    }
+
+    .loginContent #forgot {
+        position: absolute;
+        font-size: 12px;
+        line-height: 18px;
+        bottom: 150px;
+         right:25%;
+         /*margin-right:-20px;*/
+        color:white;
+    }
+    /*.loginContent .selectbox {
+    height:13px;
+    width:13px;
+    position:absolute;
+    background-size:13px 13px;
+    background:url('../image/login/login-check1.png') no-repeat;
+    }
+     .loginContent .selectbox:hover{
+     background:url('../image/login/login-check2.png') no-repeat;
+     }*/
+    .loginContent .inputButton {
+        width: 176px;
+        height: 45px;
+        position: absolute;
+        bottom: 90px;
+        /*background: url(../image/login/button1.png) no-repeat;*/
+        border: none;
+        color: #FFF;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+        .loginContent .inputButton:hover {
+            color: #FFF;
+            text-shadow: #000 0px 0px 30px;
+            background: url(../image/login/loginbutton1.png) no-repeat;
+        }
+
+    .loginContent .btnLogin {
+        left: 50%;
+        margin-left:-88px;
+        color: #999999;
+        background: url(../image/login/loginbutton2.png) no-repeat;
+    }
+
+    .loginContent .btnRegister {
+        right: 25%;
+         /*margin-right:-26px;*/
+        color: #999999;
+        background: url(../image/login/login-button2-1.png) no-repeat;
+    }
+.login_background {
+     background:url(../image/login/login-bg.png) no-repeat;
+     background-size:100% 100%;
+}

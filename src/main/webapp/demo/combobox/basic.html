@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Combobox </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/linq.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+     
+    </style>
+    <script type="text/javascript">
+        var sexData = [{ Name: "男", Value: "male" }, { Name: "女", Value: "female" }];
+
+        function getJob() {
+            return [{
+                id: '0', text: "前端设计师"
+            }, {
+                id: '1', text: "测试工程师"
+            }, {
+                id: '2', text: "研发工程师"
+            }, {
+                id: '3', text: "项目经理"
+            }];
+        }
+
+        $(window).ready(function () {
+            //combobox绑定事件方式一
+            $("#cmbSex").prop("$this").bind("onSelectChanged", function (s, e) {
+                alert(e.Name);
+            });
+            //combobox绑定事件方式二
+            $("#cmbJob")[0].$this.bind("onSelectChanged", function (s, e) {
+                var items = this.$this.GetSelectedItem();
+                var str = Enumerable.From(items).Select("$.text").ToArray().toString();
+                alert(str);
+            });
+        });
+    </script>
+</head>
+<body>
+    <h2>Combobox</h2>
+    <p>下拉框的用法</p>
+
+    <!--绑定数据的方式 2.1-->
+    <p><b>1.单选下拉框</b></p>
+    <div id="cmbSex" style="margin-top: 10px; margin-left: 20px;" class="ktw-combobox" opt='{"Width":200,"TextField":"Name","ValueField":"Value","Data":"<$sexData$>","IsOverShow":true, "Border":"1px","Padding":"0px","TextAlign":"center","Title":"性&nbsp;别"}'></div>
+    <!--绑定数据的方式 2.2-->
+    <p><b>2.多选选下拉框</b></p>
+    <div id="cmbJob" style="margin-top: 10px; margin-left: 20px;" class="ktw-combobox" opt='{"MultiSelect":true,"Width":200,"TextField":"text","ValueField":"id","Data":"<$fun:getJob$>","IsOverShow":true, "Border":"1px","Padding":"0px","TextAlign":"center","Title":"职&nbsp;位"}'></div>
+</body>
+</html>

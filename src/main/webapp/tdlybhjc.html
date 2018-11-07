@@ -1,0 +1,1143 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>土地利用变化监测</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="Shortcut Icon" href="image/site.jpg" />
+    <link href="js/ktop/ktop.css" rel="stylesheet" />
+    <link href="css/admin.css" rel="stylesheet" />
+    <script src="js/ktop/ktop.js"></script>
+    <script src="js/ktop/proj4-compressed.js"></script>
+    <script src="js/ktop/proj4leaflet.js"></script>
+    <link href="css/ktw.form.css" rel="stylesheet" />
+    <link rel="stylesheet" href="theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="css/app.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <link rel="stylesheet" type="text/css" href="css/icon.css" />
+    <!-- JS框架 jQuery -->
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <!--提示框插件-->
+    <link href="js/tooltip/tooltip.css" rel="stylesheet" />
+    <script src="js/tooltip/tooltip.js"></script>
+    <!-- 第三方UI框架 easyUI -->
+    <script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="js/easyui-lang-zh_CN.js"></script>
+    <!-- JS实现的LINQ -->
+    <script type="text/javascript" src="js/linq.min.js"></script>
+    <script type="text/javascript" src="js/ajaxfileupload.js"></script>
+    <!-- json、xml类型数据格式的操作 -->
+    <script type="text/javascript" src="js/data.util.js"></script>
+
+    <!-- 提供对旧浏览器一些特性的兼容 -->
+    <script type="text/javascript" src="js/polyfill.min.js"></script>
+
+    <!-- loading动画加载效果，框架中UCWaitBox控件就是借助它实现的 -->
+    <script type="text/javascript" src="js/spin.js"></script>
+
+    <!-- 生成32位GUID -->
+    <script type="text/javascript" src="js/guid.js"></script>
+
+    <!-- 框架界面布局 -->
+    <script type="text/javascript" src="js/ktw.ui.js"></script>
+    <script type="text/javascript" src="js/ktw.onemap.js"></script>
+
+    <!--md5密码加密 -->
+    <script type="text/javascript" src="js/md5.js"></script>
+
+    <!-- 登陆验证及使用cookie保存用户信息 -->
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+
+    <!-- jQuery.form.js是一个form插件，支持ajax表单提交和ajax文件上传 -->
+    <script type="text/javascript" src="js/jquery.form.js"></script>
+
+    <!-- 基于openlayers3封装，在涉及到地图相关操作时可引入 -->
+    <script type="text/javascript" src="js/ktw.gis.js"></script>
+    <script type="text/javascript" src="js/jsts.min.js"></script>
+    <!--表格js highcharts-->
+     <script type="text/javascript" src="js/highcharts.js"></script>
+
+    <script type="text/javascript">
+        var Map1, Map2, Map3;
+        var Config, basemapconfig;
+        var mapsmap1 = new Array();
+        var mapsmap2 = new Array();
+        var mapsmap3 = new Array();
+        var pageIndex = 1, pageSize = 5;
+        var strArray = null;//统计具体某一类型
+        var dataGrid;//表格对象
+        var MapAID, MapBID;  //变化前后两个年度数据ID
+        var GeomA, GeomB,GeomC;//变化前后两个年度数据几何图形
+        var layerA;//输入图层
+        var layerB;//输出图层
+        //是否正在请求
+        var isonload = false;
+        var currentA;
+        var currentB;
+        var tjzd;//统计地类名称值
+        var StatisticalDataGrid;//汇总统计表格
+        var StatisticalDataGridAll;//汇总统计表格  
+        var ctr;//流向矩阵window
+        //增加面积
+        var addarea = 0;
+        //增加记录数
+        var addcount = 0;
+        //减少面积
+        var reducearea = 0;
+        //减少记录数
+        var reducecount = 0;
+        var layerAdata = null;
+        var templayername = null;//叠加分析临时图层名
+        var Styles = "";
+        var StatisticsWin = null;
+        var StatisticsWinAll = null;
+        //var field1, field2;//比较字段，field1表示输入图层对比字段，field2表示叠加图层对比字段，
+        var LayerData;
+        var ComboboxData = [
+            { Name: "耕地", Value: "耕地" },
+            { Name: "林地", Value: "林地" },
+            { Name: "其他土地", Value: "其他土地" },
+            { Name: "水域及水利设施用地", Value: "水域及水利设施用地" },
+            { Name: "园地", Value: "园地" },
+            { Name: "草地", Value: "草地" },
+            { Name: "城镇及工矿用地", Value: "城镇及工矿用地" },
+            { Name: "交通运输用地", Value: "交通运输用地" }
+        ];
+        var isSpitScreen = false; //是否双屏
+        var HighLight1, HighLight2, HighLight3;// 对应map的高亮对象
+        var waitbox = null;
+        var UserState = null;
+        var EPSG = "EPSG:4326";//map坐标参考系
+        var startindex = 0;
+        var msg;
+        var ActiveMap = "Map1";
+        //点击切换显示选择框
+        var isOff = true;
+        $(window).ready(function () {
+            msg = new ktw.Messager({
+                AutoShow: false,
+                Height: 120,
+                HideOk: true,
+                HideCancle: true
+            });
+            reloadconfig();
+            InitMap();
+
+
+            //联动
+            mapsmap1.push(Map1);
+            mapsmap2.push(Map2);
+            mapsmap3.push(Map3);
+
+            mapsmap1.map(function (t) {
+                t.on({ moveend: maplink1, mouseover: offmaplink1 })
+            });
+            mapsmap2.map(function (t) {
+                t.on({ moveend: maplink2, mouseover: offmaplink2 })
+            });
+            mapsmap3.map(function (t) {
+                t.on({ moveend: maplink3, mouseover: offmaplink3 })
+            });
+
+
+            $("#mapdiv3").hide();
+            $("#datagriddiv").hide();
+            $("#cmbLayer1").prop("$this").bind("onSelectChanged", function (s, e) {
+                for (var i = 0; i < Config.Extend.Tdlybh.analysislayer.length; i++) {
+                    if (e.Value == Config.Extend.Tdlybh.analysislayer[i].layername) {
+                        currentA = Config.Extend.Tdlybh.analysislayer[i];
+                    }                    
+                }
+                $("#Amaptext").text(currentA.name);
+                ktw.MapUtils.RemoveLayer("tempmap1", Map1);
+				var url="";
+				if((currentA.layerurl||"").indexOf("http://")>=0){
+					url=currentA.layerurl;
+				}else{
+					url="http://" + currentA.layerurl + "/hgis/ows";
+				}
+                var args = {
+                    "EPSG": currentA.layerepsg,
+                    "ID": "tempmap1",
+                    "Styles": Styles,
+                    "Layers": currentA.layername,
+                    "Map": Map1,
+                    "ServerType": "hgis",
+                    "Url": url,
+                    "ZIndex": 501
+                };
+                ktw.MapLoad.AddWMSLayer(args);
+            });
+            $("#cmbLayer2").prop("$this").bind("onSelectChanged", function (s, e) {
+                for (var i = 0; i < Config.Extend.Tdlybh.analysislayer.length; i++) {
+                    if (e.Value == Config.Extend.Tdlybh.analysislayer[i].layername) {
+                        currentB = Config.Extend.Tdlybh.analysislayer[i];
+                    }
+                }
+                $("#Bmaptext").text(currentB.name);
+                ktw.MapUtils.RemoveLayer("tempmap2", Map2);
+				var url="";
+				if((currentB.layerurl||"").indexOf("http://")>=0){
+					url=currentB.layerurl;
+				}else{
+					url="http://" + currentB.layerurl + "/hgis/ows";
+				}
+                var args = {
+                    "EPSG": currentB.layerepsg,
+                    "ID": "tempmap2",
+                    "Styles": Styles,
+                    "Layers": currentB.layername,
+                    "Map": Map2,
+                    "ServerType": "hgis",
+                    "Url": url,
+                    "ZIndex": 501
+                };
+                ktw.MapLoad.AddWMSLayer(args);
+            });
+            
+            $("#Icondjfxxz").click(function () {
+                if (!isOff) {
+                    FadeIn();
+                } else {
+                    FadeOut();
+                }
+            });
+            
+        });       
+        //展开
+        function FadeIn() {
+            $("#djfxxz").stop().fadeIn(500);
+            isOff = true;
+        }
+        //收缩
+        function FadeOut() {
+            $("#djfxxz").stop().fadeOut(500);
+            isOff = false;
+        }
+        //地图联动实现
+        function offmaplink1(e) {
+            if (ActiveMap != "Map1")
+            {
+                mapsmap1.map(function (t) {
+                    t.on({ moveend: maplink1})
+                });
+                ActiveMap="Map1"
+            }
+            mapsmap2.map(function (t) {
+                t.off({ moveend: maplink2 })
+            });
+            mapsmap3.map(function (t) {
+                t.off({ moveend: maplink3 })
+            });
+        }
+        function maplink1(e) {
+            var _this = this;
+            mapsmap2.map(function (t) {
+                t.setView(_this.getCenter(), _this.getZoom())
+            });
+            mapsmap3.map(function (t) {
+                t.setView(_this.getCenter(), _this.getZoom())
+            });
+        }
+        function offmaplink2(e) {
+            if (ActiveMap != "Map2") {
+                mapsmap2.map(function (t) {
+                    t.on({ moveend: maplink2 })
+                });
+                ActiveMap = "Map2"
+            }
+            mapsmap1.map(function (t) {
+                t.off({ moveend: maplink1 })
+            });
+            mapsmap3.map(function (t) {
+                t.off({ moveend: maplink3 })
+            });
+        }
+        function maplink2(e) {
+            var _this = this;
+            mapsmap1.map(function (t) {
+                t.setView(_this.getCenter(), _this.getZoom())
+            });
+            mapsmap3.map(function (t) {
+                t.setView(_this.getCenter(), _this.getZoom())
+            });
+        }
+        function offmaplink3(e) {
+            if (ActiveMap != "Map3") {
+                mapsmap3.map(function (t) {
+                    t.on({ moveend: maplink3 })
+                });
+                ActiveMap = "Map3";
+            }
+            mapsmap1.map(function (t) {
+                t.off({ moveend: maplink1 })
+            });
+            mapsmap2.map(function (t) {
+                t.off({ moveend: maplink2 })
+            });
+        }
+        function maplink3(e) {
+            var _this = this;
+            mapsmap1.map(function (t) {
+                t.setView(_this.getCenter(), _this.getZoom())
+            });
+            mapsmap2.map(function (t) {
+                t.setView(_this.getCenter(), _this.getZoom())
+            });
+        }
+        //读取配置文件内容并赋值
+        function loadconfigdata() {
+            Styles = Config.Extend.Tdlybh.Styles;
+            LayerData = [];
+            for (var i = 0; i < Config.Extend.Tdlybh.analysislayer.length; i++) {
+                var a = {
+                    Name: Config.Extend.Tdlybh.analysislayer[i].name,
+                    Value: Config.Extend.Tdlybh.analysislayer[i].layername
+                }
+                LayerData.push(a);
+            }
+            $("#cmbLayer1").prop("$this").SetData(LayerData);
+            $("#cmbLayer2").prop("$this").SetData(LayerData);
+        }
+        //显示双屏
+        function changemap() {           
+            $("#Amaptext").text(currentA.name);
+            $("#Bmaptext").text(currentB.name);
+            $("#Cmaptext").text("分析结果");
+            $("#mapdiv1").addClass("mapdiv1css2");
+            $("#mapdiv2").addClass("mapdiv2css2");
+            setTimeout(function () {
+                Map1._onResize();
+                Map2._onResize();
+                 Map3._onResize();
+            }, 13);
+           
+            $("#mapdiv3").show();          
+        }
+        //读取配置文件
+        function reloadconfig() {
+            var config = null;
+            $.ajax({
+                url: "config/app.xml",
+                dataType: 'xml',
+                type: 'GET',
+                cache: false,
+                timeout: 2000,
+                async: false,
+                error: function (xml) {
+                    ktw.Alert("加载系统配置文件出错！", { "Type": 'error' });
+                    //console.error(arguments);
+                },
+                success: function (xml) {
+                    config = $.xml2json(xml);
+                }
+            });
+            Config = config;
+            loadconfigdata();
+        }
+
+        //初始化地图
+        function InitMap() {
+            //解析基础配置图层的服务地址
+            if (Config.SystemMap.LayerInfo == "") {
+                Config.SystemMap.LayerInfo = {};
+                Config.SystemMap.LayerInfo.BaseLayers = [];
+            }
+            if (!Config.SystemMap.LayerInfo.BaseLayers || !Config.SystemMap.LayerInfo.BaseLayers.length) {
+                Config.SystemMap.LayerInfo.BaseLayers = [Config.SystemMap.LayerInfo.BaseLayers];
+            }
+            for (var i = 0; i < Config.SystemMap.LayerInfo.BaseLayers.length; i++) {
+                if (ktw.IsNull(Config.SystemMap.LayerInfo.BaseLayers[i].Url)) {
+                    continue;
+                }
+                var tmp = ktw.GetSystemUrlByRelID(Config.SystemMap.LayerInfo.BaseLayers[i].Url);
+                Config.SystemMap.LayerInfo.BaseLayers[i].Url = tmp == "" ? Config.SystemMap.LayerInfo.BaseLayers[i].Url : tmp;
+            }
+            ktw.Project.InitProjectParam();
+            basemapconfig = Config.SystemMap;
+            var minZoom = parseInt(basemapconfig.MinZoom);
+            var maxZoom = parseInt(basemapconfig.MaxZoom);
+            var resolutions;
+            if (!ktw.IsNull(basemapconfig.LevelInfo) && !ktw.IsNull(basemapconfig.LevelInfo.IsVisibleLevel)
+                && basemapconfig.LevelInfo.IsVisibleLevel == "true") {
+                basemapconfig.LevelInfo.Levels = ktw.OrderBy(basemapconfig.LevelInfo.Levels, "Resolution", ktw.OrderWay.DESC, true);
+                resolutions = [];
+                for (var i = 0; i < basemapconfig.LevelInfo.Levels.length; i++)
+                    resolutions.push(parseFloat(basemapconfig.LevelInfo.Levels[i].Resolution));
+            }
+            var zoom = parseInt(Config.SystemMap.Zoom);
+            var center = { lon: basemapconfig.Center.split(",")[0], lat: basemapconfig.Center.split(",")[1] };
+
+            Map1 = L.map('map1', {
+                center: center,
+                zoom: zoom,
+                minZoom: minZoom,//地图最小级数
+                maxZoom: maxZoom,//地图最大级数
+                attributionControl: false,
+                zoomControl: false,
+                crs: ktw.Project.GetCRSByCode(EPSG.split(":")[1])
+            });
+            HighLight1 = new ktw.HighLight(Map1);//初始化高亮对象                   
+            Map2 = L.map('map2', {
+                center: center,
+                zoom: zoom,
+                minZoom: minZoom,//地图最小级数
+                maxZoom: maxZoom,//地图最大级数
+                attributionControl: false,
+                zoomControl: false,
+                crs: ktw.Project.GetCRSByCode(EPSG.split(":")[1])
+            });
+            HighLight2 = new ktw.HighLight(Map2);//初始化高亮对象           
+
+            Map3 = L.map('map3', {
+                center: center,
+                zoom: zoom,
+                minZoom: minZoom,//地图最小级数
+                maxZoom: maxZoom,//地图最大级数
+                attributionControl: false,
+                zoomControl: false,
+                crs: ktw.Project.GetCRSByCode(EPSG.split(":")[1])
+            });
+            HighLight3 = new ktw.HighLight(Map3);//初始化高亮对象
+            $("#mapdiv3").hide();            
+            ktw.MapLoad.InitMap($.extend({ Map: Map1 }, basemapconfig));
+            ktw.MapLoad.InitMap($.extend({ Map: Map2 }, basemapconfig));
+            ktw.MapLoad.InitMap($.extend({ Map: Map3 }, basemapconfig));
+        };
+        //叠加分析
+        function djfx() {
+            isonload = true;
+            var queryurl;
+            if (currentA.layerurl == currentB.layerurl) {
+                queryurl = "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=intersection_new&RELLAYERS={'optype':'clip','tolerance':'0.000001','usegrid':'1','layers':[{'typename':'" + currentA.layername + "'},{'typename':'" + currentB.layername + "'}]}";
+            }
+            else {
+                queryurl = "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=intersection_new&RELLAYERS={'optype':'clip','tolerance':'0.000001','usegrid':'1','layers':[{'typename':'" + currentA.layername + "'},{'typename':'" + currentB.layername + "','host':'" + currentB.layerurl + "'}]}";
+            }
+            $.ajax({
+                url: queryurl,
+                type: 'GET',
+                error: function (data) {
+                    msg.Alert('服务请求失败！', { "Type": 'error' });
+                    waitbox.Close();
+                    isonload = false;
+                    //templayername = "cite:DLTB09_zt";
+                    //var args = {
+                    //    "EPSG": currentA.layerepsg,
+                    //    "ID": "tempmap3",
+                    //    "Styles": Styles,
+                    //    "Layers": templayername,
+                    //    "Map": Map3,
+                    //    "ServerType": "hgis",
+                    //    "Url": "http://" + currentA.layerurl + "/hgis/ows",
+                    //    "ZIndex": 501
+                    //};
+                    //ktw.MapLoad.AddWMSLayer(args);
+                    //pageIndex = 1;
+                    //querydata();
+                },
+                success: function (data) {
+                    templayername = data.layers;
+                   // templayername = "cite:DLTB09_zt";
+                    var args = {
+                        "EPSG": currentA.layerepsg,
+                        "ID": "tempmap3",
+                        "Styles": Styles,
+                        "Layers": templayername,
+                        "Map": Map3,
+                        "ServerType": "hgis",
+                        "Url": "http://" + currentA.layerurl + "/hgis/ows",
+                        "ZIndex": 501
+                    };
+                    ktw.MapLoad.AddWMSLayer(args);                   
+                    pageIndex = 1;
+                    querydata();
+                }
+            });
+        }
+
+        //请求数据
+        function querydata() {
+            var queryPram = new L.QueryParameter.WfsQueryParameter({
+                url: "http://" + currentA.layerurl + "/hgis/ows",
+                typename: templayername,
+                srsName: EPSG,
+                startIndex: (pageIndex - 1) * pageSize,
+                count: pageSize,
+                sortBy: "标识码"
+            });
+            var queryTack = new L.QueryTask(queryPram);
+            UserState = "Search";
+            isSpitScreen = false;
+            //临时 2017年11月18日11:23:45
+            //isSpitScreen = true;
+            queryTack.execute(QueryDataSuccess, fail);
+
+        }
+
+        function analysis() {
+            if(parseInt(currentA.nf)<=parseInt(currentB.nf))
+            {
+                msg.Alert('选择图层顺序不正确，请重新选择！', { "Type": 'warn' })
+                return;
+            }
+            if (isonload == true) {
+                msg.Alert('正在请求，请稍候！', { "Type": 'warn' })
+                return;
+            }
+            layerA = $("#cmbLayer1").prop("$this").GetValue();
+            layerB = $("#cmbLayer2").prop("$this").GetValue();
+            if (ktw.IsNull(layerB) == true || ktw.IsNull(layerA) == true) {
+                msg.Alert('请选择图层！', { "Type": 'warn' });
+                return;
+            }
+            $("#combobox3").prop("$this").SetSelectedIndex(0);
+            //$("#datagriddiv").show();
+            ////initDataGrid();
+            waitbox = new ktw.UCWaitBox($("#djfxxz"));
+            waitbox.Show();
+            
+            djfx();
+        }
+
+        function QueryDataSuccess(data) {
+            if (UserState == "Search") {
+                //叠加分析及查询请求结束标志
+                isonload = false;
+                layerAdata = data;//返回与系统坐标系对应数据，用于定位渲染。
+                var datagriddata = [];
+                for (var i = 0; i < data.features.length; i++) {
+                    datagriddata.push(data.features[i].properties)
+                }
+                waitbox.Close();
+                FadeOut();
+                var pageInfo = {
+                    pageIndex: pageIndex,
+                    pageSize: pageSize,
+                    totalCount: data.totalFeatures,
+                    msg: "当前页显示记录" + (((pageIndex - 1) * pageSize) + 1) + "-" + ((pageIndex - 1) * pageSize + datagriddata.length) + "条记录,共{total}条数据"
+                };
+                $("#datagriddiv").show();
+                initDataGrid();
+                dataGrid.Load(datagriddata, pageInfo);
+                changemap();
+            }
+            else if (UserState == "SearchMapA") {
+                if (data.features.length > 0) {
+                    GeomA = data.features[0];
+                }
+                var queryPram = new L.QueryParameter.WfsQueryParameter({
+                    url: "http://" + currentB.layerurl + "/hgis/ows",
+                    typename: layerB,
+                    srsName: EPSG,
+                    CQL_FILTER: "gid='" + MapBID + "'",
+                    startIndex: 0,
+                    count: 5,
+                    sortBy: "标识码"
+                });
+                var queryTack = new L.QueryTask(queryPram);
+                UserState = "SearchMapB";
+                queryTack.execute(QueryDataSuccess, fail);
+            }
+            else if (UserState == "SearchMapB") {
+                if (data.features.length > 0) {
+                    GeomB = data.features[0];
+                }
+                waitbox.Close();
+                changemap();
+                offmaplink1();
+                offmaplink2();
+                offmaplink3();
+                HighLight1.hightLightFit(GeomA);
+                HighLight2.hightLightFit(GeomB);
+                HighLight3.hightLightFit(GeomC);
+            }
+        }
+
+        function fail(data) {
+            msg.Alert('服务请求失败！', { "Type": 'error' });
+            waitbox.Close();
+            isonload = false;
+        }
+        function reset() {
+            window.location.reload();
+            //isonload = false;
+           // HighLight1.clearHighLight();
+           // ktw.MapUtils.RemoveLayer("tempmap1", Map1);
+           // ktw.MapUtils.RemoveLayer("tempmap2", Map2);
+           // ktw.MapUtils.RemoveLayer("tempmap3", Map3);
+           // $("#cmbLayer1").prop("$this").SetValue("");
+            //$("#cmbLayer2").prop("$this").SetValue("");
+           // $("#datagriddiv").hide();          
+           // $("#mapdiv3").hide();
+           // FadeIn();
+        }
+        /**
+       ** 表格初始化
+       */
+        function initDataGrid() {
+            //获取对应的column;
+            if (dataGrid == null) {
+                var columns = [];
+                columns.push({ field: "over_标识码", title: currentB.nf + "标识码", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "标识码", title: currentA.nf + "标识码", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "over_地类编码", title: currentB.nf + "地类编码", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "地类编码", title: currentA.nf + "地类编码", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "over_一级分类", title: currentB.nf + "一级分类", width: 180, align: 'center', sortable: false });
+                columns.push({ field: "一级分类", title: currentA.nf + "一级分类", width: 180, align: 'center', sortable: false });
+                columns.push({ field: "over_地类名称", title: currentB.nf + "二级分类", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "地类名称", title: currentA.nf + "二级分类", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "over_权属单位名", title: currentB.nf + "权属单位名", width: 110, align: 'center', sortable: false });
+                columns.push({ field: "权属单位名", title: currentA.nf + "权属单位名", width: 110, align: 'center', sortable: false });
+                columns.push({ field: "over_座落单位名", title: currentB.nf + "座落单位名", width: 110, align: 'center', sortable: false });
+                columns.push({ field: "座落单位名", title: currentA.nf + "座落单位名", width: 110, align: 'center', sortable: false });
+                columns.push({ field: "over_批准文号", title: currentB.nf + "批准文号", width: 160, align: 'center', sortable: false });
+                columns.push({ field: "批准文号", title: currentA.nf + "批准文号", width: 160, align: 'center', sortable: false });
+                columns.push({ field: "over_图斑面积", title: currentB.nf + "图斑面积", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "图斑面积", title: currentA.nf + "图斑面积", width: 100, align: 'center', sortable: false });
+                dataGrid = new ktw.UCDataGrid({
+                    PageIndex: pageIndex,
+                    PageSize: pageSize,
+                    RowNumbers: true,
+                    ID: "taxSourceGrid",
+                    FitColumns: false,//是否显示水平滚动条 默认true 不显示
+                    pagequery: false,
+                    TextPrompt: "输入项目名称...",
+                    buttons: [],
+                    CSS: {
+                        "height": "182px",
+                        "width": "100%"
+                    }
+                });
+                $("#content").append(dataGrid.Target);
+                dataGrid.Layout(columns);
+                //下方列表分页事件
+                dataGrid.Target.bind("onSelectPage", function (s, e) {
+                    pageIndex = e.index;
+                    pageSize = e.size;
+                    if (isSpitScreen == false) {
+                        querydata();
+                    }
+                    else {
+                        pageIndex = e.index;
+                        pageSize = e.size;
+                        waitbox = new ktw.UCWaitBox($("#datagriddiv"));
+                        waitbox.Show();
+                        querystatisticaldata();
+                    }
+                });
+                //下方列表行点击事件
+                dataGrid.Target.bind("onClickRow", function (s, e) {
+                    //if (isSpitScreen == false) {
+                    //    GeomA = layerAdata.features[e.index];
+                    //    GeomB = layerAdata.features[e.index + 1];
+                    //    GeomC = layerAdata.features[e.index];
+                    //    changemap();
+                    //    HighLight2.hightLightFit(GeomA);
+                    //    HighLight3.hightLightFit(GeomB);
+                    //    HighLight1.hightLightFit(GeomC);
+                    //    //SelectRowData1 = layerAdata.features[e.index];
+                    //    //HighLight1.hightLightFit(SelectRowData1);
+                    //}
+                    //else if (isSpitScreen == true) {
+                        GeomC = layerAdata.features[e.index];
+                        MapAID = e.Row["gid1"];
+                        //MapBID = e.Row["标识码"];
+                        MapBID = e.Row["over_gid"];
+                        var queryPram = new L.QueryParameter.WfsQueryParameter({
+                            url: "http://" + currentA.layerurl + "/hgis/ows",
+                            typename: layerA,
+                            srsName: EPSG,
+                            CQL_FILTER: "gid='" + MapAID + "'",
+                            startIndex: 0,
+                            count: 5,
+                            sortBy: "标识码"
+                        });
+                        var queryTack = new L.QueryTask(queryPram);
+                        UserState = "SearchMapA";
+                        queryTack.execute(QueryDataSuccess, fail);
+                        waitbox = new ktw.UCWaitBox($("#datagriddiv"));
+                        waitbox.Show();
+                    }
+                );
+            }
+        }
+
+        //变化监测结果界面展示
+        function Statistical() {
+            //  StatisticalDataGrid.Close();
+            if (ktw.IsNull(StatisticsWin)) {
+                var content = $("<div style=\"height:100%;width:100%;\"></div>");
+                StatisticalDataGrid = new ktw.UCDataGrid({
+                    PageIndex: 1,
+                    PageSize: 10,
+                    RowNumbers: true,
+                    ID: "StatisticsSourceGrid",
+                    pagequery: false,
+                    CSS: {
+                        "height": "100%",
+                        "width": "100%"
+                    }
+                });
+                // 分页变化事件
+                StatisticalDataGrid.Target.bind("onSelectPage", function (s, e) {
+                    //统计结果分页
+                    pageIndex = e.index;
+                    startindex = (e.index - 1) * e.size;
+                    GetStatisticalData(startindex);
+
+                });
+                //行选中事件
+                StatisticalDataGrid.Target.bind("onSelectRow", function (s, e) {
+                    strArray = e.Row.type.split("变");
+                    pageIndex = 1;
+                    pageSize = 5;
+                    waitbox = new ktw.UCWaitBox($("#StatisticsSourceGrid"));
+                    waitbox.Show();
+                    querystatisticaldata();
+                });
+
+                content.append(StatisticalDataGrid.Target);
+                StatisticsWin = new ktw.Window({
+                    ID: "ktw-Statistics",
+                    Content: content,
+                    IconCls: "icon-Search2 ",
+                    Height: 340,
+                    Width: 410,
+                    Left: top.document.body.clientWidth - 450,
+                    Top: 80,
+                    Draggable: true,
+                    Title: '变化监测',
+                    Parent: $(window).Target,
+                    InitVisible: false,
+                    Modal: false,
+                    IsMaximize: false,
+                    IsMinimize: false,
+                    Maximizable: false,
+                    Minimizable: true
+                });
+                StatisticsWin.Target.bind('onClosed', function () {
+                    //closesplitscreen();
+                    pageIndex = 1;
+                    HighLight2.clearHighLight();
+                    HighLight1.clearHighLight();
+                    querydata();
+                });
+                var columns = [];
+
+                columns.push({ field: "type", title: "变化类型", width: 140, align: 'center', sortable: false });
+                columns.push({ field: "count", title: "记录数", width: 50, align: 'center', sortable: false });
+                columns.push({ field: "area", title: "面积（公顷）", width: 100, align: 'center', sortable: false });
+                StatisticalDataGrid.Layout(columns);
+            }
+            StatisticsWin.Open();
+            ////请求统计数据
+            startindex = 0;
+            pageIndex = 1;
+            GetStatisticalData(startindex);
+        }
+        //汇总统计界面展示
+        function StatisticalAll() {
+            if (ktw.IsNull(StatisticsWinAll)) {
+                var content = $("<div style=\"height:378px;width:100%;\"></div>");
+                var textdiv = $("<div  class=\"alldiv\"><div id=\"hztxtdiv\" style=\"height:90%;width:90%;margin: auto;overflow: auto;\"></div></div>").appendTo(content);
+                StatisticalDataGridAll = new ktw.UCDataGrid({
+                    PageIndex: 1,
+                    PageSize: 10,
+                    RowNumbers: true,
+                    ID: "StatisticsSourceGridAll",
+                    IsPage: false,
+                    pagequery: false,
+                    CSS: {
+                        "top": 95,
+                        "position": "absolute",
+                        "bottom": 0,
+                        "height": 280,
+                        "width": "100%"
+                    }
+                });
+                //行选中事件
+                StatisticalDataGridAll.Target.bind("onSelectRow", function (s, e) {
+                    strArray = e.Row.type.split("变");
+                    pageIndex = 1;
+                    pageSize = 5;
+                    waitbox = new ktw.UCWaitBox($("#StatisticsSourceGridAll"));
+                    waitbox.Show();
+                    querystatisticaldata();
+                });
+
+                content.append(StatisticalDataGridAll.Target);
+                StatisticsWinAll = new ktw.Window({
+                    ID: "ktw-StatisticsAll",
+                    Content: content,
+                    IconCls: "icon-Search2 ",
+                    Height: 410,
+                    Width: 410,
+                    Left: top.document.body.clientWidth - 450,
+                    Top: 80,
+                    Draggable: true,
+                    Parent: $(window).Target,
+                    InitVisible: false,
+                    Modal: false,
+                    IsMaximize: false,
+                    IsMinimize: false,
+                    Maximizable: false,
+                    Minimizable: true
+                });
+                StatisticsWinAll.Target.bind('onClosed', function () {
+                    //closesplitscreen();
+                    pageIndex = 1;
+                    HighLight2.clearHighLight();
+                    HighLight1.clearHighLight();
+                    querydata();
+                });
+                var columns = [];
+                columns.push({ field: "type", title: "土地变化类型", width: 140, align: 'center', sortable: false });
+                columns.push({ field: "count", title: "记录数", width: 50, align: 'center', sortable: false });
+                columns.push({ field: "area", title: "面积（公顷）", width: 100, align: 'center', sortable: false });
+                StatisticalDataGridAll.Layout(columns);
+            }
+            var title = "统计汇总-" + $("#combobox3").prop("$this").GetValue();
+            StatisticsWinAll.SetTitle(title);
+            StatisticsWinAll.Open();
+            //请求统计数据
+            startindex = 0;
+            pageIndex = 1;
+            GetStatisticalDataAll();
+        }
+
+        function querystatisticaldata() {
+            var queryPram = new L.QueryParameter.WfsQueryParameter({
+                url: "http://" + currentA.layerurl + "/hgis/ows",
+                typename: templayername,
+                srsName: EPSG,
+                CQL_FILTER: "over_" + currentB.analysisfield + "='" + strArray[0] + "' " + "and " + currentA.analysisfield + "='" + strArray[1] + "'",
+                startIndex: (pageIndex - 1) * pageSize,
+                count: pageSize,
+                sortBy: "标识码"
+            });
+          
+            var queryTack = new L.QueryTask(queryPram);
+            UserState = "Search";
+            isSpitScreen = true;
+            queryTack.execute(QueryDataSuccess, fail);
+           
+        }
+        //退出双屏
+        function closesplitscreen() {
+            $("#mapdiv3").hide();
+            $("#datagriddiv").hide();
+            $("#mapdiv1").removeClass("mapdiv1css2");
+            $("#mapdiv2").removeClass("mapdiv2css2");
+            $("#mapdiv1").addClass("mapdiv1css1");
+            $("#mapdiv2").addClass("mapdiv2css1");
+            setTimeout(function () {
+                Map1._onResize();
+                Map2._onResize();
+            }, 13);
+            
+        }
+        //获取变化监测结果
+        function GetStatisticalData(startindex) {
+            //请求数据等待状态
+            waitbox = new ktw.UCWaitBox($("#ktw-Statistics"));
+            waitbox.Show();
+            $.ajax({
+                url: "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + "over_" + currentB.analysisfield + "," + currentB.analysisfield + "&destcrs=" + currentA.destcrs + "&start=" + startindex + "&end=10",
+                type: 'GET',
+                error: function (data) {
+                    msg.Alert('服务请求失败！', { "Type": 'error' });
+                    waitbox.Close();
+                    isonload = false;
+                },
+                success: function (data) {				
+                    //data = errordata();
+                    var tempdata = [];
+                    for (var i = 0; i < data.arr.length; i++) {
+                        var temp = {
+                            "type": data.arr[i].fromDl + "变" + data.arr[i].toDl,
+                            "count": data.arr[i].count,
+                            "area": (data.arr[i].area/10000).toFixed(4)
+                        }
+                        tempdata.push(temp);
+                    }
+                    var pageInfo = {
+                        pageIndex: pageIndex,
+                        pageSize: 10,
+                        totalCount: data.count,
+                        msg: "共{total}条数据"
+                    };
+                    StatisticalDataGrid.Load(tempdata, pageInfo);
+                    waitbox.Close();
+                }
+            });
+        }
+
+        //获取汇总统计结果
+        function GetStatisticalDataAll() {
+            //请求数据等待状态
+            waitbox = new ktw.UCWaitBox($("#ktw-StatisticsAll"));
+            waitbox.Show();
+            tjzd = $("#combobox3").prop("$this").GetValue();
+            isonload = true;
+            $.ajax({
+                url: "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + "over_" + currentB.analysisfield + "," + currentA.analysisfield + "&destcrs=" + currentA.destcrs + "&getOne=" + tjzd,
+                type: 'GET',
+                error: function (data) {
+                    msg.Alert('服务请求失败！', { "Type": 'error' });
+                    waitbox.Close();
+                    isonload = false;
+                },
+                success: function (data) {
+                    isonload = false;
+                    var tempdata = [];
+                    addarea = 0;
+                    addcount = 0;
+                    reducearea = 0;
+                    reducecount = 0;
+                    //减少的
+                    for (var i = 0; i < data.arr1.length; i++) {
+                        reducearea += data.arr1[i].area/10000;
+                        reducecount += data.arr1[i].count;
+                        var temp = {
+                            "type": data.arr1[i].fromDl + "变" + data.arr1[i].toDl,
+                            "count": data.arr1[i].count,
+                            "area": (data.arr1[i].area/10000).toFixed(4)
+                        }
+                        tempdata.push(temp);
+                    }
+                    //增加的
+                    for (var i = 0; i < data.arr2.length; i++) {
+                        addarea += data.arr2[i].area/10000;
+                        addcount += data.arr2[i].count;
+                        var temp = {
+                            "type": data.arr2[i].fromDl + "变" + data.arr2[i].toDl,
+                            "count": data.arr2[i].count,
+                            "area": (data.arr2[i].area/10000).toFixed(4)
+                        }
+                        tempdata.push(temp);
+                    }
+                    var str = "&nbsp;&nbsp;&nbsp;" + currentA.name + "相对于" + currentB.name + "新增" + tjzd + addcount + "条记录，新增";
+                    str += addarea.toFixed(4) + "公顷，减少" + tjzd + reducecount + "条记录，减少" + reducearea.toFixed(4) + "公顷，合计";
+                    if ((addarea - reducearea) > 0) {
+                        str += "增加" + tjzd + (addarea - reducearea).toFixed(4) + "公顷";
+                    }
+                    else {
+                        str += "减少" + tjzd + (reducearea - addarea).toFixed(4) + "公顷";
+                    }
+                    $("#hztxtdiv").html(str);
+                    StatisticalDataGridAll.Load(tempdata);
+                    waitbox.Close();
+                }
+            });
+        }
+
+        //流向矩阵
+        function StatistiLXJZ() {
+            if (ktw.IsNull(ctr)) {
+                ctr = new window.top.ktw.Window({
+                ID: "ktw_lxfx",
+                Title: "流向分析",
+                Height: 475,
+                Width: 900,
+                Left: 20,
+                Top: 80,
+                Parent: $(window).Target,
+                IsMaximize: false,
+                IsMinimize: false,
+                Maximizable: true,
+                Minimizable: true,
+                Draggable: true,
+                Resizable: true,
+                Url: "lxjz.html",
+                Parameters: {
+                    owsurl: "http://" + currentA.layerurl + "/hgis/ows",
+                    templayername: templayername,
+                    field1: "over_" + currentB.analysisfield,
+                    field2: currentA.analysisfield,
+                    destcrs: currentA.destcrs
+                }
+            });
+            ctr.Layout();
+            }
+            ctr.Open();
+        }        
+    </script>
+    <style>
+        .djfxbtn {
+            width: 45px;
+            height: 30px;
+            cursor: pointer;
+            background-color: rgb(0, 153, 204);
+            margin-top: 10px;
+            position: absolute;
+            color: white;
+            text-align: center;
+            line-height: 30px;
+            font-size: 12px;
+            opacity: 0.5;
+        }
+
+            .djfxbtn:hover {
+                opacity: 0.7;
+            }
+
+            .djfxbtn:active {
+                opacity: 1;
+            }
+
+        .alldiv {
+            height: 100px;
+            width: 100%;
+            height: 100px;
+            width: 100%;
+            line-height: 30px;
+            font-size: 13px;
+            margin: auto;
+            /* font-family: serif; */
+            background-color: #f2f2f2;
+        }
+
+        .mapdiv1css {
+            left: 0px;
+            top: 0px;
+            right: 50%;
+            bottom: 0px;
+            position: absolute;
+        }
+
+        .mapdiv2css {
+            left: 50%;
+            top: 0px;
+            bottom: 0px;
+            position: absolute;
+            display: block;
+            right:0px;
+            border-left: 2px solid rgb(0, 153, 204);
+        }
+        .mapdiv1css2 {
+            top: 0px;
+            /*right: 66%;*/
+            bottom: 210px;
+            position: absolute;
+            width: 33%;
+            left: 0px;
+        }
+         .mapdiv2css2 {
+            left: 33%;
+            top: 0px;
+            bottom: 210px;
+            position: absolute;
+            display: block;
+            width: 33%;
+            border-left: 2px solid rgb(0, 153, 204);
+            
+        }
+
+         .mapdiv3css {
+            left: 66%;
+            top: 0px;
+            right: 0px;
+            bottom: 210px;
+            position: absolute;            
+            display: block;
+            width: 34%;
+             border-left: 2px solid rgb(0, 153, 204);
+        }
+
+        
+        /*表格header，body偶数行颜色修改，可分开修改颜色*/
+        /*#datagriddiv .datagrid-view2 .datagrid-header td:nth-child(even),*/
+        #datagriddiv .datagrid-view2 .datagrid-body td:nth-child(even){
+            background:rgb(216,209,209);
+        }
+        /*头部*/        
+        #datagriddiv .datagrid-view2 .datagrid-header td:nth-child(even){
+            background:rgb(216,209,209);
+        }
+        /*行点击颜色修改统一JS*/
+        #datagriddiv .datagrid-view2 .datagrid-body .datagrid-row-selected td:nth-child(even) {
+            background: #ffe48d;
+        }
+        /*.datagrid-view2 .datagrid-body .datagrid-row-selected td:nth-child(odd) {
+            background:#ffe48d;
+        }*/
+        /*行移入颜色修改统一JS*/
+        #datagriddiv .datagrid-body .datagrid-row-over td:nth-child(even) {
+            background: #eaf2ff;
+        }
+        /*头部列表名字*/
+        .titleText {
+            width:200px;
+            height:40px;
+            float:left;
+            color:#fff;
+            background:rgba(64,64,64,.8);
+            font-size: 16px;
+            font-weight: bold;
+            line-height:40px;
+            text-indent:30px;
+            white-space:nowrap; 
+            overflow:hidden; 
+            text-overflow:ellipsis;
+        }
+
+    </style>
+</head>
+<body>
+ <!--   <div class="lay lay-top">
+        <div class="top-logo"></div>
+        <div class="top-right"></div>
+        <div class="top-title">大数据土地利用变化监测</div>
+    </div>-->
+
+    <div class="mapdiv1css" id="mapdiv1">
+         <div style="width:250px;height:30px;position:absolute;top:0;left:0;z-index:999;">
+            <div id="Bmaptext" class="titleText"></div>
+            <div style="width:40px;height:40px;float:left;background:url(image/textname.png) no-repeat;    background-size: contain;"></div>
+        </div>
+        <div style="height: 100%; width: 100%" id="map2"></div>
+    </div>
+
+    <div class="mapdiv2css" id="mapdiv2">
+        <div style="width:250px;height:30px;position:absolute;top:0;left:0;z-index:999;">
+            <div id="Amaptext" class="titleText"></div>
+            <div style="width:40px;height:40px;float:left;background:url(image/textname.png) no-repeat;    background-size: contain;"></div>
+        </div>
+        <div style="height: 100%; width: 100%" id="map1"></div>
+    </div>
+
+    <div class="mapdiv3css" id="mapdiv3">
+        <div style="width:250px;height:30px;position:absolute;top:0;left:0;z-index:999;">
+            <div id="Cmaptext" class="titleText"></div>
+            <div style="width:40px;height:40px;float:left;background:url(image/textname.png) no-repeat;    background-size: contain;"></div>
+        </div><div style="position: absolute; z-index: 999; right: 0px; font-size: 16px; font-weight: bold; top: 0px; height: 16px; width: 16px; cursor: pointer; background-image: url('image/tip-close.png')" onclick="closesplitscreen()"></div>
+        <div style="height: 100%; width: 100%" id="map3"></div>
+    </div>  
+     
+  <!--显示隐藏按钮-->
+    <div id="Icondjfxxz" style="width:35px;height:35px;position:absolute;top:60px;left:20px;z-index:999;background:#0099cc;cursor:pointer;"><img src="image/diejiafx.png" alt="" /></div>
+    <div id="djfxxz" style="background-color: #ffffff; float: left; width: 250px; height: 150px; top: 95px; left: 20px; position: absolute;">
+        <div style="height:120px;">
+            <div style="height: 30px; line-height: 30px; font-size: 14px; background-color: #0099cc; font-weight: bold; padding-left: 10px; color: white;">叠加分析</div>
+            <div id="cmbLayer2" style="margin-top: 10px; margin-left: 20px;" class="ktw-combobox" opt='{"Width":220,"TextField":"Name","ValueField":"Value","IsOverShow":true, "Border":"1px","Padding":"0px","TextAlign":"center","Title":"叠加图层"}'></div>
+            <div id="cmbLayer1" style="margin-top: 10px; margin-left: 20px;" class="ktw-combobox" opt='{"Width":220,"TextField":"Name","ValueField":"Value","IsOverShow":true, "Border":"1px","Padding":"0px","TextAlign":"center","Title":"输入图层"}'></div>
+            <div onclick="analysis()" id="btndjfx" class="djfxbtn" style="margin-left: 125px;">执行</div>
+            <div onclick="reset()" id="btnreset" class="djfxbtn" style="margin-left: 180px;">重置</div>
+        </div>
+    </div>
+
+    <div id="datagriddiv" style="height: 210px; width: 100%; bottom: 0px; left: 0px; right: 0px; position: absolute;">
+        <div style="height: 30px; width: 100%; background-color: rgba(221, 221, 221, 1)">
+            <div style="margin-left: 10px; float: left; line-height: 30px;">叠加分析</div>
+            <a id="Statistical" onclick="Statistical()" style="margin-top: 2px; margin-left: 20px; float: left;" class="easyui-linkbutton" data-options="iconCls:'icon-bhjc',height:'25px'">变化监测</a>
+            <div style="margin-left: 10px; float: left; line-height: 30px;">汇总地类:</div>
+            <div id="combobox3" style="margin-top: 3px; margin-left: 3px; float: left;" class="ktw-combobox" opt='{"Width":100,"PopupHeight":130,"TextField":"Name","ValueField":"Value","Data":"<$ComboboxData$>","IsOverShow":true, "Border":"1px","Padding":"0px","TextAlign":"center"}'></div>
+            <a id="A1" onclick="StatisticalAll()" style="margin-top: 2px; margin-left: 5px; float: left;" class="easyui-linkbutton" data-options="iconCls:'icon-hztj',height:'25px'">统计汇总</a>
+            <a id="A2" onclick="StatistiLXJZ()" style="margin-top: 2px; margin-left: 5px; float: left;" class="easyui-linkbutton" data-options="iconCls:'icon-lxjz',height:'25px'">流向分析</a>
+        </div>
+        <div style="top: 30px; width: 100%; left: 0px; right: 0px; bottom: 0px; position: absolute; height: 162px;" id="content"></div>
+    </div>
+</body>
+</html>

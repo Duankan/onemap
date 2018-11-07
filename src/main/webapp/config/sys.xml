@@ -1,0 +1,148 @@
+﻿<Sys>
+  <Menus>
+    <Title>系统配置</Title>
+    <IconCls>fa fa-home</IconCls>
+    <IsVisible>true</IsVisible>
+    <Open>false</Open>
+    <Widgets>
+      <ID>ZuZhiGuanLi</ID>
+      <Title>组织管理</Title>
+      <IconCls>fa fa-sitemap</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../html/authorization/organize.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>GangWeiGuanLi</ID>
+      <Title>岗位管理</Title>
+      <IconCls>fa fa-mortar-board</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../html/authorization/post.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>YongHuGuanLi</ID>
+      <Title>用户管理</Title>
+      <IconCls>fa fa-user</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../html/authorization/person.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>ShouQuanGuanLi</ID>
+      <Title>授权管理</Title>
+      <IconCls>fa fa-lock</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../html/authorization/perm.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>ShouJuZiDian</ID>
+      <Title>数据字典</Title>
+      <IconCls>fa fa-book</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../html/dictionary/manage.html</Url>
+    </Widgets>
+  </Menus>
+  <Menus>
+    <Title>一张图</Title>
+    <IconCls>fa fa-map font-16</IconCls>
+    <IsVisible>true</IsVisible>
+    <Open>true</Open>
+    <Widgets>
+      <ID>ZhuTiPeiZhi</ID>
+      <Title>主题配置</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/themeconfig.html</Url>
+      <Active>true</Active>
+    </Widgets>
+    <Widgets>
+      <ID>DiZhiGuanLi</ID>
+      <Title>地址管理</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/Addmanage.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>DiTuPeiZhi</ID>
+      <Title>底图切换配置</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/baseconfig.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>TuCengShuPeiZhi</ID>
+      <Title>图层树配置</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/layertreeconfig.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>TuDiShengMingZhouQi</ID>
+      <Title>土地生命周期</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/lifecycleconfig.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>YiJianShiFenXi</ID>
+      <Title>一键式分析</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <!--<Url>../html/onemap/analysisconfig2.html</Url>-->
+      <Url>../admin/onemap/otherconfig.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>FuZhuShenPiPeiZhi</ID>
+      <Title>辅助审批配置</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <!--<Url>../html/onemap/exapprove.html</Url>-->
+      <Url>../admin/onemap/otherconfig.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>QiTaPeiZhi</ID>
+      <Title>其他配置</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/otherconfig.html</Url>
+    </Widgets>
+  </Menus>
+  <Menus>
+    <Title>综合监管</Title>
+    <IconCls>fa fa-eye font-16</IconCls>
+    <IsVisible>true</IsVisible>
+    <Open>false</Open>
+    <Widgets>
+      <ID>JianGuanYinZiGuanLi</ID>
+      <Title>监管因子管理</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/otherconfig.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>JianGuanTiaoJianGuanLi</ID>
+      <Title>监管条件管理</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/otherconfig.html</Url>
+    </Widgets>
+  </Menus>
+  <Menus>
+    <Title>决策支持</Title>
+    <IconCls>fa fa-television font-16</IconCls>
+    <IsVisible>true</IsVisible>
+    <Open>false</Open>
+    <Widgets>
+      <ID>ZhiBiaoGuanLi</ID>
+      <Title>指标管理</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/otherconfig.html</Url>
+    </Widgets>
+    <Widgets>
+      <ID>MoXingGuanLi</ID>
+      <Title>模型管理</Title>
+      <IconCls>fa fa-reorder</IconCls>
+      <IsVisible>true</IsVisible>
+      <Url>../admin/onemap/otherconfig.html</Url>
+    </Widgets>
+  </Menus>
+</Sys>

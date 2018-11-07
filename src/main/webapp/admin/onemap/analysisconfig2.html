@@ -1,0 +1,707 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link href="../../js/artDialog-7.0.0/css/dialog.css" rel="stylesheet" />
+    <link href="../../css/ktw.form2.css" rel="stylesheet" />
+    <link href="../../js/grid/css/grid.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog-plus.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script type="text/javascript" src="../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../js/ktw.onemap.js"></script>
+    <script type="text/javascript" src="../../js/appmana.js"></script>
+    <script src="../../js/grid/js/grid.js"></script>
+    <title></title>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var isdelete = false;
+        //reloadconfig();//加载配置文件
+        var ServerUrl = null;
+        ServerUrl = Ktw.cookie.ServerUrl;
+        var curnode = null;
+        var curdata;
+        $(function () {
+            ktw.appmana.init("../../config/app.xml");
+            initTree();
+            var node = $('#organizeTree').tree('find', 1001);
+            $('#organizeTree').tree('select', node.target);
+        });
+        //读取配置文件
+        //function reloadconfig() {
+        //    var config = null;
+        //    $.ajax({
+        //        url: "../../config/app.xml",
+        //        dataType: 'xml',
+        //        type: 'GET',
+        //        cache: false,
+        //        timeout: 2000,
+        //        async: false,
+        //        error: function (xml) {
+        //            ktw.Alert("加载系统配置文件出错！");
+        //            console.error(arguments);
+        //        },
+        //        success: function (xml) {
+        //            config = $.xml2json(xml);
+        //        }
+        //    });
+        //    Config = config;
+        //}
+        function initTree() {
+            var Analysis = ktw.appmana.Config.Extend.Analysis;
+            var data = [{
+                text: '一键式分析',
+                children: [{
+                    text: '批',
+                    path: "P",
+                    children: []
+                }, {
+                    text: '征',
+                    path: "Z",
+                    children: []
+                }, {
+                    text: '储',
+                    path: "C",
+                    children: []
+                }, {
+                    text: '供',
+                    path: "G",
+                    children: []
+                }, {
+                    text: '用',
+                    path: "Y",
+                    children: []
+                }, {
+                    text: '补',
+                    path: "B",
+                    children: []
+                }, {
+                    text: '查',
+                    path: "W",
+                    children: []
+                }]
+            }];
+            for (var i = 0; i < data[0].children.length; i++) {
+                var BtnAnalysis = Analysis[data[0].children[i].path]["BtnAnalysis"];
+                if ((BtnAnalysis instanceof Array) == false && BtnAnalysis != null) {
+                    data[0].children[i].children.push({ "text": BtnAnalysis["BtnName"], "path": data[0].children[i].path + "/BtnAnalysis[BtnName='" + BtnAnalysis["BtnName"] + "']", "BtnName": BtnAnalysis["BtnName"] });
+                }
+                else if (BtnAnalysis != null && BtnAnalysis.length > 1) {
+                    for (var j = 0; j < BtnAnalysis.length; j++) {
+                        data[0].children[i].children.push({ "text": BtnAnalysis[j]["BtnName"], "path": data[0].children[i].path + "/BtnAnalysis[BtnName='" + BtnAnalysis[j]["BtnName"] + "']", "BtnName": BtnAnalysis[j]["BtnName"] });
+                    }
+                }
+                data[0].children[0].children[0].id = 1001;
+            }
+            $('#organizeTree').tree({
+                dnd: true,
+                data: data,
+                onSelect: function (node) {
+                    if (node == null) node = curnode;
+                    curnode = node;
+                    if (!("children" in node) && (node.text != "一键式分析")) {
+                        $(".detailinfo").show();
+                        var curBtnAnalysis = null;
+                        var BtnAnalysis = ktw.appmana.Config.Extend.Analysis[node.path.split("/")[0]]["BtnAnalysis"];
+                        if ((BtnAnalysis instanceof Array) == false && BtnAnalysis != null) {
+                            curBtnAnalysis = BtnAnalysis
+                        }
+                        else if (BtnAnalysis != null && BtnAnalysis.length > 1) {
+                            for (var i = 0; i < BtnAnalysis.length; i++) {
+                                if (BtnAnalysis[i]["BtnName"] == node.path.match(/'(\S*)'/)[1]) {
+                                    curBtnAnalysis = BtnAnalysis[i];
+                                    break;
+                                }
+                            }
+                        }
+                        //BtnName Tag EPSG GeometryName OWS AnalysisLayer Ref Key
+                        $("#BtnName,#Tag,#EPSG,#GeometryName,#OWS,#AnalysisLayer,#Ref,#Key,#ByName,#Name").val("");
+                        $("#BtnName").val(curBtnAnalysis.BtnName);
+                        $("#Tag").val(curBtnAnalysis.Tag);
+                        $("#EPSG").val(curBtnAnalysis.EPSG);
+                        $("#GeometryName").val(curBtnAnalysis.GeometryName);
+                        $("#OWS").val(curBtnAnalysis.OWS);
+                        $("#AnalysisLayer").val(curBtnAnalysis.AnalysisLayer);
+                        $("#Ref").val(curBtnAnalysis.Ref);
+                        $("#Key").val(curBtnAnalysis.Key);
+                        if (curBtnAnalysis.DetailFields != null) {
+                            var Fields = curBtnAnalysis.DetailFields.Field;
+                            if ((Fields instanceof Array) == false && Fields != null) {
+                                $("#ByName").val(Fields.ByName);
+                                $("#Name").val(Fields.Name);
+                            } else if (Fields != null && Fields.length > 1) {
+                                var ByName = [];
+                                var Name = [];
+                                for (var i = 0; i < Fields.length; i++) {
+                                    ByName.push(Fields[i]["ByName"]);
+                                    Name.push(Fields[i]["Name"])
+                                }
+                                $("#ByName").val(ByName.join(","));
+                                $("#Name").val(Name.join(","));
+                            }
+                        }
+                        //获取列表数据
+                        //var data = [];
+                        //var Statistics = curBtnAnalysis.Statistics;
+                        //if ((Statistics instanceof Array) == false && Statistics != null) {
+                        //    data.push({ "ByName": Statistics["ByName"], "Name": Statistics["Name"], "GroupBy": Statistics["GroupBy"] })
+                        //}
+                        //else if (Statistics != null && Statistics.length > 1) {
+                        //    for (var i = 0; i < Statistics.length; i++) {
+                        //        data.push({ "ByName": Statistics[i]["ByName"], "Name": Statistics[i]["Name"], "GroupBy": Statistics[i]["GroupBy"] })
+                        //    }
+                        //}
+                        refreshGrid();
+                    }
+                    else {
+                        $(".detailinfo").hide();
+                    }
+                },
+                onContextMenu: function (e, node) {
+                    curnode = node;
+                    $(this).tree('select', node.target);
+                    if (("children" in node) && (node.text != "一键式分析")) {
+                        $('#addnodetree').menu('show', { left: e.pageX, top: e.pageY });
+                    }
+                    if (!("children" in node) && (node.text != "一键式分析")) {
+                        $('#delnodetree').menu('show', { left: e.pageX, top: e.pageY });
+                    }
+                    $("div[name=delnode]").unbind("click");
+                    $("div[name=delnode]").click(function () {
+                        deleteBtnAnalysis(node);
+                    })
+                    $("div[name=addnode]").unbind("click");
+                    $("div[name=addnode]").click(function () {
+                        addBtnAnalysis();
+                    })
+                },
+                onDrop: function (target, source, point) {
+                    if (point == 'append') { initTree(); return }
+                    else {
+                        var items = [];
+                        var parent = $('#organizeTree').tree('getParent', target);
+                        var childrens = parent.children;;
+                        for (var i = 0; i < childrens.length; i++) {
+                            items.push("/App/Extend/Analysis/" + childrens[i].path);
+                        }
+                        var data = { path: "/App/Extend/Analysis/" + parent.path, items: JSON.stringify(items) }
+                        $.ajax({
+                            type: "POST",
+                            data: data,
+                            url: ServerUrl + "confmana/order",
+                            success: function (data) {
+                                if (data.success == true) {
+                                ktw.appmana.alert('拖动成功！');
+                                reloadconfig();
+                                initTree();
+                                } else ktw.appmana.alert('拖动失败！');
+                            },
+                            error: function (data) {
+                                ktw.appmana.alert('服务请求失败！');
+                            }
+                        });
+                    }
+                },
+            });
+        }
+        //删除分析按钮信息
+        function deleteBtnAnalysis(node) {
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个菜单?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteBtnAnalysis.validate(node)) {
+                        ktw.appmana.deleteBtnAnalysis(node, function () {
+                            ktw.appmana.tip("删除成功!");
+                            ktw.appmana.refreshApp();
+                            initTree();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //添加分析按钮信息
+        function addBtnAnalysis() {
+            $("#BtnName").val("");
+            var d = dialog({
+                title: "添加菜单",
+                content: $('#addBtn'),
+                okValue: '添 加',
+                ok: function () {
+                    var adddata = {};
+                    adddata.BtnName = $("#BtnName1").val();
+                    adddata.AnalysisLayer = null;
+                    adddata.OWS = null;
+                    adddata.EPSG = null;
+                    adddata.GeometryName = null;
+                    adddata.ID = null;
+                    adddata.Tag = null;
+                    adddata.Key = null;
+                    adddata.DetailFields = null;
+                    adddata.Statistics = null;
+                    adddata.Ref = null;
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addBtnAnalysis.validate(curnode, adddata)) {
+                        ktw.appmana.addBtnAnalysis(curnode, adddata, function () {
+                            ktw.appmana.tip("保存成功!");
+                            ktw.appmana.refreshApp();
+                            initTree();
+                            curnode = { "text": $("#BtnName1").val(), "path": curnode.path + "/BtnAnalysis[BtnName='" + adddata["BtnName"] + "']" }
+                            $("#organizeTree").tree('select', curnode);
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+        //初始化表格
+        function initdataGrid(data) {
+            var grid = new ktw.Grid();
+            grid.ID = "tableGrid";
+            grid.isPage = false;
+
+            grid.headArr = [
+                [
+                    { text: "序号", width: "5%" },
+                    { text: "按钮名称", width: "15%" },
+                    { text: "分类字段(列表表头:中文)", width: "30%" },
+                    { text: "类字段(图层字段名)", width: "30%" },
+                    { text: "编辑", width: "10%" },
+                    { text: "删除", width: "10%" }
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "ByName", type: "lab", cutLen: 5, title: "Title" },
+                { name: "Name", type: "lab" },
+                { name: "GroupBy", type: "lab" },
+                { text: "编辑", key: "ByName", type: "btn", clickName: "updateStatistics", titleText: "进行编辑" },
+                { text: "删除", key: "ByName", type: "btn", clickName: "deleteStatistics", titleText: "删除前要确认" }];
+            grid.initGrid = function () {
+                for (var i = 0; i < data.length; i++) {
+                    data[i].Index = i + 1;
+                }
+                grid.init({ DataList: data});
+            }
+            grid.initGrid();
+        }
+        //删除叠加后分类
+        function deleteStatistics(item) {
+            var id = $(item).attr("btnkey");
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个菜单?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteStatistics.validate(curnode,id)) {
+                        ktw.appmana.deleteStatistics(curnode,id, function () {
+                            ktw.appmana.tip("删除成功!");
+                            ktw.appmana.refreshApp();
+                            refreshGrid();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //添加叠加后分类
+        function addStatistics() {
+            $("#editByName,#editName,#editGroupBy").val("");
+            var d = dialog({
+                title: "添加菜单",
+                content: $('#editwin'),
+                okValue: '添 加',
+                ok: function () {
+                    var Statistics = {};
+                    Statistics.ByName = $("#editByName").val();
+                    Statistics.Name = $("#editName").val();
+                    Statistics.GroupBy = $("#editGroupBy").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addStatistics.validate(curnode, Statistics)) {
+                        ktw.appmana.addStatistics(curnode, Statistics, function () {
+                            ktw.appmana.tip("保存成功!");
+                            ktw.appmana.refreshApp();
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+
+        //修改叠加后分类
+        function updateStatistics(item) {
+            var id = $(item).attr("btnkey");
+            var Statistics = ktw.appmana.getStatisticsbyByName(curdata, id);
+            setData(Statistics);
+            var d = dialog({
+                title: Statistics.Title,
+                content: $('#editwin'),
+                okValue: '确 定',
+                ok: function () {
+                    var Statistics = {};
+                    Statistics.ByName = $("#editByName").val();
+                    Statistics.Name = $("#editName").val();
+                    Statistics.GroupBy = $("#editGroupBy").val();
+                    if (ktw.appmana.updateStatistics.validate(curnode, id, Statistics)) {
+                        ktw.appmana.updateStatistics(curnode, id, Statistics, function () {
+                            ktw.appmana.tip("更新成功!");
+                            ktw.appmana.refreshApp();
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+        //给编辑窗口赋值
+        function setData(Statistics) {
+            $("#editByName,#editName,#editGroupBy").val("");
+            $("#editByName").val(Statistics.ByName);
+            $("#editName").val(Statistics.Name);
+            $("#editGroupBy").val(Statistics.GroupBy);
+        }
+        //刷新表格
+        function refreshGrid() {
+            $.ajax({
+                url: ServerUrl + "confmana/select",
+                type: "post",
+                async: true,
+                data: { path: "/App/Extend/Analysis/" + curnode.path},
+                success: function (res) {
+                    if (res.success) {
+                        if (res.data.length == 1) {
+                            curdata = $.xml2json(res.data[0]);
+                            initdataGrid(curdata.Statistics || []);
+                        } else {
+
+                        }
+                    }
+                },
+                error: function () {
+                    console.error(arguments);
+                }
+            });
+        }
+
+        function updateBtnAnalysis() {
+            var BtnAnalysis = {};
+            BtnAnalysis.BtnName = $("#BtnName").val();
+            BtnAnalysis.Tag = $("#Tag").val();
+            BtnAnalysis.EPSG = $("#EPSG").val();
+            BtnAnalysis.GeometryName = $("#GeometryName").val();
+            BtnAnalysis.OWS = $("#OWS").val();
+            BtnAnalysis.AnalysisLayer = $("#AnalysisLayer").val();
+            BtnAnalysis.Ref = $("#Ref").val();
+            BtnAnalysis.Key = $("#Key").val();
+            var ByName = $("#ByName").val().split(",");
+            var Name = $("#Name").val().split(",");
+            if(ByName.length!=Name.length){
+                ktw.appmana.alert("叠加字段名称个数应保持一致");
+                return;
+            }
+            var Field = [];
+            for (var i = 0; i < ByName.length; i++) {
+                Field.push({ "Field": { "ByName": ByName[i], "Name": Name[i] } });
+            }
+            BtnAnalysis.DetailFields = Field;
+            if (ktw.appmana.updateBtnAnalysis.validate(curnode, BtnAnalysis)) {
+                ktw.appmana.updateBtnAnalysis(curnode, BtnAnalysis, function () {
+                    ktw.appmana.tip("保存成功!");
+                }, function (res) {
+                    conole.error(res);
+                    ktw.appmana.alert("保存失败!");
+                });
+            }
+        }
+    </script>
+    <style type="text/css">
+        .con-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 400px;
+            border-right: solid 1px #DDDDDD;
+        }
+
+        .header {
+            height: 25px;
+            padding-top: 5px;
+            padding-left: 10px;
+        }
+
+        #divtree {
+            padding-left: 5px;
+            height: 90%;
+        }
+
+        .con-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            left: 400px;
+            overflow:auto;
+        }
+
+        .bar {
+            margin-top: 5px;
+            margin-left: 10px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .bar-line {
+            width: 6px;
+            height: 20px;
+            position: absolute;
+            top: 50%;
+            margin-top: -10px;
+            background-color: #01B6EF;
+            display: inline-block;
+        }
+
+        .bar-txt {
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        .datagrid-toolbar {
+            border-top: 1px solid #DDDDDD;
+            text-align: right;
+        }
+
+        .box {
+            border: 1px solid #dddddd;
+            width: 96%;
+            margin: 0 auto;
+            box-shadow: #dddddd 0px 0px 20px;
+            padding: 5px;
+            margin-top: 5px;
+        }
+
+        #editwin {
+            display: none;
+            width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; height: 100%; background: #FFFFFF">
+        <div style="width: 30%; height: 100%; border-right: solid 1px #DDDDDD;">
+            <div class="header">一键式分析</div>
+            <div id="divtree" style="width: 100%; height: 90%; overflow-x: hidden">
+                <ul id="organizeTree" style="width: 100%; height: 100%;">
+                </u>
+            </div>
+        </div>
+        <!--基本信息-->
+        <div id="rightdiv" style="position: absolute; right: 0px; top: 0px; height: 100%; width: calc(70% - 1px)">
+
+            <div class="detailinfo">
+                  <div class="box">
+                <div style="margin-top: 5px; margin-left: 10px; margin-bottom: 5px; position: relative">
+                    <div style="width: 6px; height: 20px; position: absolute; top: 50%; margin-top: -10px; background-color: #01B6EF; display: inline-block"></div>
+                    <span id="title" style="font-size: 16px; margin-left: 10px">叠加配置</span>
+                </div>
+                <table class="form-tbl" style="margin-top: 10px">
+                        <colgroup>
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                        </colgroup>
+                        <tr>
+                            <td class="td-title">按钮名称：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="BtnName" name="BtnName" />
+                                </div>
+                            </td>
+                            <td class="td-title">Tag：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="Tag" name="Tag" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">坐标参考系：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="EPSG" name="EPSG" />
+                                </div>
+                            </td>
+                            <td class="td-title">几何字段：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="GeometryName" name="GeometryName" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">OWS：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="OWS" name="OWS" />
+                                </div>
+                            </td>
+                            <td class="td-title">图层名称：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="AnalysisLayer" name="AnalysisLayer" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">引用图层树ID：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="Ref" name="Ref" />
+                                </div>
+                            </td>
+                            <td class="td-title">查询主键：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="Key" name="Key" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">叠加字段名称(列表表头:中文,以逗号分隔)：</td>
+                            <td class="td-txt" colspan="3">
+                                <div>
+                                    <input class="form-txt" id="ByName" name="ByName" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">叠加字段名称(图层字段名,以逗号分隔)：</td>
+                            <td class="td-txt" colspan="3">
+                                <div>
+                                    <input class="form-txt" id="Name" name="Name" />
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                <div class="center">
+                    <button id="detailinfosave" class="btn" onclick="updateBtnAnalysis()">保存</button>
+                </div>
+                      </div>
+                     <div class="box">
+                <div class="basemapinfo">
+                    <div class="bar">
+                        <div class="bar-line"></div>
+                        <span class="bar-txt">叠加后分类汇总</span>
+                    </div>
+                    <div class="right">
+                        <button class="btn" onclick="addStatistics()">添加</button>
+                    </div>
+                    <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+                        <table id="tableGrid"></table>
+                    </div>
+                </div>
+
+            </div>
+                    <div style="clear:both;height:0"></div>   
+                     <div id="basehint" style="width:100%; text-align:center;color:red">
+                    </div>
+            </div>
+        </div>
+    </div>
+    <div id="addnodetree" class="easyui-menu" style="width: 120px; border: 0px">
+        <div name="addnode" data-options="iconCls:'icon-remove'" onclick="addBtnAnalysis">新增分析按钮</div>
+    </div>
+    <div id="delnodetree" class="easyui-menu" style="width: 120px; border: 0px">
+        <div name="delnode" data-options="iconCls:'icon-remove'">删除</div>
+    </div>
+    <div id="addBtn" >
+            <table class="form-tbl" style="margin-top: 10px">
+                <colgroup>
+                    <col style="width: 20%" />
+                    <col style="width: 80%" />
+                </colgroup>
+                <tr>
+                    <td class="td-title">按钮名称:</td>
+                    <td class="td-text">
+                        <div>
+                            <input class="form-txt" id="BtnName1" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+    </div>
+     <div id="editwin">
+        <table class="form-tbl" style="width: 100%;">
+            <colgroup>
+                <col style="width: 30%" />
+                <col style="width: 70%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">按钮名称：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editByName" />
+                </td>
+            </tr>
+            <tr>
+                  <td class="td-title">分类字段(列表表头:中文)：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editName" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">类字段(图层字段名)：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="editGroupBy" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

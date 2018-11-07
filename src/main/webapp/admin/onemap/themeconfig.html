@@ -1,0 +1,552 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>主题配置管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link href="../../js/artDialog-7.0.0/css/dialog.css" rel="stylesheet" />
+    <link href="../../css/ktw.form2.css" rel="stylesheet" />
+    <link href="../../js/grid/css/grid.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog-plus.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script type="text/javascript" src="../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../js/ktw.onemap.js"></script>
+    <script type="text/javascript" src="../../js/appmana.js"></script>
+    <script src="../../js/grid/js/grid.js"></script>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var curMenu;
+        var editIndex = undefined;
+        var isblank = true;
+        ServerUrl = Ktw.cookie.ServerUrl;
+        var editIndex = undefined;
+        $(function () {
+            ktw.appmana.init("../../config/app.xml");
+            initTree();
+            var node = $('#organizeTree').tree('find', 1001);
+            $('#organizeTree').tree('select', node.target);
+        });
+
+        //保存Menu
+        function saveMenu() {
+            var arg = {};
+            arg.ID = curMenu.ID;
+            arg.Title = $("#menuTitle").val();
+            arg.IsVisible = $("#menuIsVisible").val();
+            if (ktw.appmana.updateMenu.validate(curMenu.ID, arg)) {
+                ktw.appmana.updateMenu(curMenu.ID, arg, function () {
+                    curMenu = arg;
+                    ktw.appmana.tip("修改成功，刷新页面!");
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                }, function () {
+                    ktw.appmana.alert("保存失败!");
+                });
+            }
+        }
+
+        //更新主题
+        function saveTheme() {
+            var arg = {};
+            arg.AreaCode = $("#AreaCode").val();
+            arg.AreaName = $("#AreaName").val();
+            if (ktw.appmana.updateTheme.validate(arg)) {
+                ktw.appmana.updateTheme(arg, function () {
+                    ktw.appmana.tip("保存成功!");
+                }, function (res) {
+                    console.error(res);
+                    ktw.appmana.alert("保存失败!");
+                });
+            }
+        }
+        function initTree() {
+            var data = [{
+                text: '主题配置',
+                children: [{
+                    id: 1001,
+                    text: '基本信息',
+                }, {
+                    text: '一张图',
+                    children: [
+                    ]
+                }]
+            }];
+            for (var i = 0; i < ktw.appmana.Config.SystemTheme.SubSystems.Menus.length; i++) {
+                data[0]["children"][1].children.push({
+                    text: ktw.appmana.Config.SystemTheme.SubSystems.Menus[i]["Title"],
+                    path: ktw.appmana.Config.SystemTheme.SubSystems.Menus[i]["ID"]
+                })
+            }
+            $('#organizeTree').tree({
+                data: data,
+                formatter: function (node) {
+                    if (!node.children || node.children.length == 0) return node.text;
+                    return node.text + '<span style="color:blue">(' + node.children.length + ')</span>';
+                },
+                onSelect: function (node) {
+                    if (node.text == "基本信息") {
+                        $(".baseinfo").show();
+                        $(".detailinfo").hide();
+                        ktw.appmana.refreshApp();
+                        initData();
+                    }
+                    else if (node.text != "一张图" && node.text != "主题配置") {
+                        $(".baseinfo").hide();
+                        $(".detailinfo").show();
+                        $.ajax({
+                            url: ServerUrl + "confmana/select",
+                            type: "post",
+                            async: false,
+                            data: { path: "/App/SystemTheme/SubSystems/Menus/ID[text()='" + node.path + "']/..'" },
+                            success: function (res) {
+                                if (res.success) {
+                                    if (res.data.length == 1) {
+                                        curMenu = $.xml2json(res.data[0])
+                                    } else {
+
+                                    }
+                                }
+                            },
+                            error: function () {
+                                console.error(arguments);
+                            }
+                        });
+                        initDatasub();
+                        initdataGrid();
+                    }
+                    else {
+                        $(".baseinfo").hide();
+                        $(".detailinfo").hide();
+                    }
+                }
+            })
+        }
+        function initData() {
+            $("#AreaCode").val(ktw.appmana.Config.SystemTheme.AreaCode);
+            $("#AreaName").val(ktw.appmana.Config.SystemTheme.AreaName);
+        }
+        function initDatasub() {
+            $("#menuID").val(curMenu.ID);
+            $("#menuTitle").val(curMenu.Title);
+            $("#menuOrder").val(curMenu.Order);
+            $('#menuIsVisible').val(curMenu.IsVisible);
+        }
+        //初始化表格
+        function initdataGrid() {
+            var grid = new ktw.Grid();
+            grid.ID = "tableGrid";
+            grid.isPage = false;
+
+            grid.headArr = [
+                [
+                    { text: "序号", width: "5%" },
+                    { text: "名称", width: "10%" },
+                    { text: "ID", width: "10%" },
+                    { text: "页面地址", width: "35%" },
+                    { text: "是否可见", width: "15%" },
+                    { text: "编辑", width: "8%" },
+                    { text: "删除", width: "8%" }
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "Title", type: "lab", cutLen: 5, title: "Title" },
+                { name: "ID", type: "lab" },
+                { name: "Url", type: "lab" },
+                { name: "IsVisible", type: "lab" },
+                { text: "编辑", key: "ID", type: "btn", clickName: "editItem", titleText: "进行编辑" },
+                { text: "删除", key: "ID", type: "btn", clickName: "deleteItem", titleText: "删除前要确认" }];
+            grid.initGrid = function () {
+                curMenu.Widgets = curMenu.Widgets || [];
+                for (var i = 0; i < curMenu.Widgets.length; i++) {
+                    curMenu.Widgets[i].Index = i + 1;
+                }
+                grid.init({ DataList: curMenu.Widgets });
+            }
+            grid.initGrid();
+        }
+
+        //给编辑窗口赋值
+        function setData(widget) {
+            $("#widname,#widid,#widpic,#widorder").val("");
+            $("#widid").val(widget.ID);
+            $("#widname").val(widget.Title);
+            $("#widvisible").val(widget.IsVisible);
+            $("#addr").val(widget.Url);
+            $("#param").val("");
+            if (widget.Parameters) {
+                $.ajax({
+                    type: "post",
+                    url: ServerUrl + "confmana/selectcontent",
+                    data: { path: "/App/SystemTheme/SubSystems/Menus/Widgets/ID[text()='" + widget.ID + "']/../Parameters" },
+                    async: false,
+                    success: function (res) {
+                        if (res.success && res.data && res.data.length > 0) {
+                            var str = "";
+                            for (var i = 0; i < res.data.length; i++) {
+                                str += res.data[i] + "\r\n";
+                            }
+                            $("#param").val(str);
+                        }
+                    },
+                    error: function () {
+                        console.error("未找到widget菜单:" + widget.Title + " 的参数");
+                        console.error(arguments);
+                    }
+                });
+            }
+        }
+
+        //编辑按钮
+        function editItem(item) {
+            var id = $(item).attr("btnkey");
+            var widget = ktw.appmana.getMenubyid(id);
+            $("#widid").attr("readonly", "readonly");
+
+            setData(widget);
+            var d = dialog({
+                title: widget.Title,
+                content: $('#editwin'),
+                okValue: '确 定',
+                ok: function () {
+                    var widget = {};
+                    widget.ID = $("#widid").val();
+                    widget.Title = $("#widname").val();
+                    widget.IsVisible = $("#widvisible").val();
+                    widget.Url = $("#addr").val();
+                    widget.Parameters = $("#param").val();
+                    if (ktw.appmana.updateWidget.validate(curMenu, id, widget)) {
+                        var b = ktw.appmana.updateWidget(id, widget, function () {
+                            ktw.appmana.tip("更新成功!");
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+
+        //删除按钮
+        function deleteItem(item) {
+            var id = $(item).attr("btnkey");
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个菜单?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteWidget.validate(id)) {
+                        ktw.appmana.deleteWidget(id, function () {
+                            ktw.appmana.tip("删除成功!");
+                            refreshGrid();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+
+        //添加Widget
+        function addWidget() {
+            $("#widname,#widid,#widvisible,#addr").val("");
+            $("#param").val("");
+            $("#widid").removeAttr("readonly");
+            $("#widvisible").val("true");
+            var d = dialog({
+                title: "添加widget",
+                content: $('#editwin'),
+                okValue: '添 加',
+                ok: function () {
+                    var widget = {};
+                    widget.ID = $("#widid").val();
+                    widget.Title = $("#widname").val();
+                    widget.Url = $("#addr").val();
+                    widget.IsVisible = $("#widvisible").val();
+                    widget.Parameters = $("#param").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addWidget.validate(curMenu, curMenu.ID, widget)) {
+                        ktw.appmana.addWidget(curMenu.ID, widget, function () {
+                            ktw.appmana.tip("保存成功!");
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+
+        //刷新表格
+        function refreshGrid() {
+            $.ajax({
+                url: ServerUrl + "confmana/select",
+                type: "post",
+                async: true,
+                data: { path: "/App/SystemTheme/SubSystems/Menus/ID[text()='" + curMenu.ID + "']/..'" },
+                success: function (res) {
+                    if (res.success) {
+                        if (res.data.length == 1) {
+                            curMenu = $.xml2json(res.data[0]);
+                            initdataGrid();
+                        } else {
+
+                        }
+                    }
+                },
+                error: function () {
+                    console.error(arguments);
+                }
+            });
+        }
+
+        //更新页面显示行政区划名称
+        function updateareaname() {
+            var areacode = $("#AreaCode").val();
+            $.ajax({
+                type: "get",
+                url: ServerUrl + "sysareacode/getbyid/" + areacode,
+                async: true,
+                success: function (res) {
+                    if (res.success && res.data) {
+                        $("#AreaName").val(res.data.fullname);
+                    } else {
+                        $("#AreaName").val("");
+                    }
+                },
+                error: function () {
+                    $("#AreaName").val("");
+                }
+            });
+        }
+    </script>
+    <style type="text/css">
+        .con-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 400px;
+            border-right: solid 1px #DDDDDD;
+        }
+
+        .header {
+            height: 25px;
+            padding-top: 5px;
+            padding-left: 10px;
+        }
+
+        #divtree {
+            padding-left: 5px;
+            height: 90%;
+        }
+
+        .con-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            left: 400px;
+            overflow:auto;
+        }
+
+        .bar {
+            margin-top: 5px;
+            margin-left: 10px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .bar-line {
+            width: 6px;
+            height: 20px;
+            position: absolute;
+            top: 50%;
+            margin-top: -10px;
+            background-color: #01B6EF;
+            display: inline-block;
+        }
+
+        .bar-txt {
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        .datagrid-toolbar {
+            border-top: 1px solid #DDDDDD;
+            text-align: right;
+        }
+
+        .box {
+            border: 1px solid #dddddd;
+            width: 96%;
+            margin: 0 auto;
+            box-shadow: #dddddd 0px 0px 20px;
+            padding: 5px;
+            margin-top: 5px;
+        }
+
+        #editwin {
+            display: none;
+            width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="con-left">
+        <div class="header">主题配置</div>
+        <div id="divtree">
+            <div id="organizeTree" class="ztree" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+    <div class="con-right">
+        <div class="baseinfo">
+            <div class="box">
+                <div class="siteinfo">
+                    <div class="bar">
+                        <div class="bar-line"></div>
+                        <span class="bar-txt">基本信息</span>
+                    </div>
+                    <table class="form-tbl">
+                        <colgroup>
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                        </colgroup>
+                        <tr>
+                            <td class="td-title">行政区代码(6位)：</td>
+                            <td class="td-txt">
+                                <input type="text" class="form-txt" id="AreaCode" onchange="updateareaname()" />
+                            </td>
+                            <td class="td-title">行政区划名称：</td>
+                            <td class="td-txt">
+                                <input type="text" class="form-txt" id="AreaName" readonly="readonly" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="center">
+                    <button id="baseinfosave" class="btn" onclick="saveTheme()">保存</button>
+                </div>
+            </div>
+        </div>
+        <div class="detailinfo">
+            <div class="box">
+                <div class="bar">
+                    <div class="bar-line"></div>
+                    <span class="bar-txt">基本信息</span>
+                </div>
+                <table class="form-tbl" style="margin-top: 10px">
+                    <colgroup>
+                        <col style="width: 15%" />
+                        <col style="width: 35%" />
+                        <col style="width: 15%" />
+                        <col style="width: 35%" />
+                    </colgroup>
+                    <tr>
+                        <td class="td-title">名称：</td>
+                        <td class="td-text"><input class="form-txt" id="menuTitle" /></td>
+                        <td class="td-title">是否可见：</td>
+                        <td class="td-text">
+                            <select id="menuIsVisible" class="form-select">
+                                <option value="true">true</option>
+                                <option value="false">false</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <div class="center">
+                    <button class="btn" onclick="saveMenu()">保存</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="basemapinfo">
+                    <div class="bar">
+                        <div class="bar-line"></div>
+                        <span class="bar-txt">子菜单</span>
+                    </div>
+                    <!--<div class="right">
+                        <button class="btn" onclick="addWidget()">添加</button>
+                    </div>-->
+                    <div style="width: calc(100%-1); height: 100%; margin-top: 20px; margin-left: 1px;">
+                        <table id="tableGrid"></table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="editwin">
+        <table class="form-tbl" style="width: 100%;">
+            <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">ID：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="widid" />
+                </td>
+                <td class="td-title">名称：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="widname" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">是否可见：</td>
+                <td class="td-txt">
+                    <select id="widvisible" class="form-select">
+                        <option value="true">true</option>
+                        <option value="false">false</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">地址：</td>
+                <td class="td-txt" colspan="3">
+                    <input type="text" class="form-txt" id="addr" style="width:97%;" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">参数：</td>
+                <td class="td-txt" colspan="3">
+                    <textarea id="param" class="form-textarea"></textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

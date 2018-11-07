@@ -1,0 +1,633 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>建设用地供应宏观分析</title>
+    <link rel="stylesheet" href="../../../css/icon.css" />
+    <link rel="stylesheet" href="../../../js/ktop/ktop.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/echarts.min.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../../js/ktop/ktop.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var areaGDPOpt, unitInvestOpt, industryOpt, useOpt, ratifyOpt, supplyOpt, mapOption;  //统计图表的配置项和数据
+        var areaGDPChart, unitInvestChart, industryChart, useChart, ratifyChart, supplyChart, mapChart; //echarts实例
+        //var dialog = new Ktw.Messager({ AutoShow: false, Height: "124", Type: "question", Modal: false });  //提示框对象
+        /*人均建设用地面积与单位面积GDP
+        * GDP 单位建设用地GDP（万元/公顷）
+        * percapita 人均建设用地面积
+        * unitinvest 单位投资
+        */
+        var areaGDPData = [
+            { year: '2011年', GDP: 1000, percapita: 220, unitinvest: 1350 },
+            { year: '2012年', GDP: 856, percapita: 182, unitinvest: 2000 },
+            { year: '2013年', GDP: 922, percapita: 191, unitinvest: 2500 },
+            { year: '2014年', GDP: 1100, percapita: 234, unitinvest: 2300 },
+            { year: '2015年', GDP: 1300, percapita: 290, unitinvest: 2400 },
+            { year: '2016年', GDP: 1250, percapita: 330, unitinvest: 2600 },
+            { year: '2017年', GDP: 1400, percapita: 310, unitinvest: 3000 }
+        ];
+        /*建设用地供应用途(产业)结构*/
+        var useStructureData = [
+               { name: '住宅用地', value: 251, rate: '' },
+               { name: '商服用地', value: 125, rate: '' },
+               { name: '工矿仓储用地', value: 135, rate: '' },
+               { name: '公共管理与公共服务用地', value: 80, rate: '' },
+               { name: '交通运输用地', value: 65, rate: '' },
+               { name: '水域及水利设施用地', value: 60, rate: '' },
+        ];
+        var industryData = [
+            { name: '一产业', value: 352, rate: '' },
+            { name: '二产业', value: 452, rate: '' },
+            { name: '三产业', value: 520, rate: '' },
+        ];
+        /*历年建设用地批准（供应）情况*/
+        var ratifySplyData = [
+            { year: '2011年', ratify: 5000, supply: 6000, ratifygrowth: 5, supplygrowth: 10 },
+            { year: '2012年', ratify: 5500, supply: 7000, ratifygrowth: 10, supplygrowth: 12 },
+            { year: '2013年', ratify: 7000, supply: 9000, ratifygrowth: 20, supplygrowth: 20 },
+            { year: '2014年', ratify: 9000, supply: 11000, ratifygrowth: 18, supplygrowth: 18 },
+            { year: '2015年', ratify: 12000, supply: 10000, ratifygrowth: 30, supplygrowth: -8 },
+            { year: '2016年', ratify: 11000, supply: 8000, ratifygrowth: -10, supplygrowth: -20 },
+            { year: '2017年', ratify: 9000, supply: 7000, ratifygrowth: -15, supplygrowth: -15 }
+        ];
+        $(function () {
+            initRatifySply();
+            initMap();
+            initUseIndustry();
+            initInvestAndGDP();
+        });
+        /*历年建设用地批准（供应）情况*/
+        function initRatifySply() {
+            ratifyChart = echarts.init($("#ratify-case")[0]);
+            supplyChart = echarts.init($("#supply-case")[0]);
+            var option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6caced',
+                        },
+                        crossStyle: {
+                            color: '#999'
+                        }
+                    }
+                },
+                legend: {
+                    data: [],
+                    top: '10%',
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                color: [],
+                grid: {
+                    top: '25%',
+                    left: '2%',
+                    right: '2%',
+                    bottom: '6%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: [],
+                    axisPointer: {
+                        type: 'shadow'
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '公顷',
+                        axisLine: {
+                            lineStyle: {
+                                color: "#fff"
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                type: 'dashed'
+                            }
+                        },
+                        splitNumber: 5
+                    },
+                    {
+                        type: 'value',
+                        name: '增幅',
+                        axisLabel: {
+                            formatter: '{value} %'
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "#fff"
+                            }
+                        },
+                        splitLine: {
+                            show: false,
+                            lineStyle: {
+                                type: 'dashed'
+                            }
+                        }
+                    }
+                ],
+                series: [
+                {
+                    name: '战略储备',
+                    type: 'bar',
+                    barWidth: '60%',
+                    data: [],
+                    itemStyle: {
+                        normal: { color: '' }
+                    }
+                }, {
+                    name: '中国占全球比重',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    //splitNumber: 5,
+                    data: [],
+                    itemStyle: {
+                        normal: { color: '' }
+                    }
+                }]
+            };
+            function getSeriesData(type) {
+                var array = [];
+                array.push({
+                    name: dataObj[type].legend[0],
+                    type: 'bar',
+                    barWidth: '60%',
+                    data: dataObj[type].bar,
+                    itemStyle: { normal: { color: dataObj[type].colors[0] } }
+                }, {
+                    name: dataObj[type].legend[1],
+                    type: 'line',
+                    yAxisIndex: 1,
+                    //splitNumber: 5,
+                    data: dataObj[type].line,
+                    itemStyle: { normal: { color: dataObj[type].colors[1] } }
+                });
+                return array;
+            }
+            ratifyOpt = $.extend(true, {}, option);
+            supplyOpt = $.extend(true, {}, option);
+            var dataObj = {
+                ratify: { bar: [], line: [], legend: ['批准建设用地', '增幅'], colors: ['#6389e9', '#28dafa'] },
+                supply: { bar: [], line: [], legend: ['供应建设用地', '增幅'], colors: ['#8e75f2', '#28dafa'] }
+            };
+            var years = Enumerable.From(ratifySplyData).Select("s=>s.year").ToArray();
+            dataObj.ratify.bar = Enumerable.From(ratifySplyData).Select("s=>s.ratify").ToArray();
+            dataObj.ratify.line = Enumerable.From(ratifySplyData).Select("s=>s.ratifygrowth").ToArray();
+            dataObj.supply.bar = Enumerable.From(ratifySplyData).Select("s=>s.supply").ToArray();
+            dataObj.supply.line = Enumerable.From(ratifySplyData).Select("s=>s.supplygrowth").ToArray();
+            ratifyOpt.xAxis.data = supplyOpt.xAxis.data = years
+            ratifyOpt.legend.data = dataObj.ratify.legend;
+            ratifyOpt.series = getSeriesData('ratify');
+            supplyOpt.legend.data = dataObj.supply.legend;
+            supplyOpt.series = getSeriesData('supply');
+            supplyChart.setOption(supplyOpt);
+            ratifyChart.setOption(ratifyOpt);
+        }
+        /*建设用地供应用途/产业结构*/
+        function initUseIndustry() {
+            var colors = ['#015557', '#30b2bd', '#6cacde', '#2888bf', '#2c9dbe', '#026bae'];
+            industryChart = echarts.init($("#industry")[0]);
+            useChart = echarts.init($("#use")[0]);
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                color: ['#015557', '#30b2bd', '#6cacde'],
+                legend: {
+                    orient: 'vertical',
+                    left: 10,
+                    bottom: 10,
+                    data: [],
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                series: {
+                    name: '',
+                    type: 'pie',
+                    radius: '60%',
+                    center: ['60%', '50%'],
+                    data: [],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            };
+            useOpt = $.extend(true, {}, option);
+            industryOpt = $.extend(true, {}, option);
+            //useOpt.legend.data = ['住宅用地', '商服用地', '工矿仓储用地', '公共管理与公共服务用地', '交通运输用地', '水域及水利设施用地'];
+            useOpt.color = industryOpt.color = colors;
+            useOpt.series.data = useStructureData;
+            industryOpt.legend.data = ['一产业', '二产业', '三产业'];
+            industryOpt.series.data = industryData;
+            industryChart.setOption(industryOpt);
+            useChart.setOption(useOpt);
+        }
+        /*读取json地图数据*/
+        function initMap() {
+            //mapChart = echarts.init($("#map")[0]);
+            //mapOption = {
+            //    title: { subtext: '湘潭市行政区划', subtextStyle: { color: "#32ffff", fontSize: 16 } },
+            //    visualMap: {
+            //        left: 'right',
+            //        top: 'bottom',
+            //        text: ['高', '低'],           // 文本，默认为数值文本
+            //        calculable: true,
+            //        show: true,
+            //        inRange: {
+            //            color: ['#00d2db', '#30b2bd', '#2888bf'],
+            //            symbolSize: [0, 100]
+            //        },
+            //        textStyle: {
+            //            color: "#fff"
+            //        }
+            //    },
+            //    tooltip: {
+            //        show: false,
+            //        trigger: 'item'
+            //    },
+            //    roam: true,
+            //    series: [{
+            //        name: '',
+            //        type: 'map',
+            //        map: '湘潭',
+            //        label: {
+            //            normal: {
+            //                show: true
+            //            },
+            //            emphasis: {
+            //                show: true
+            //            }
+            //        },
+            //        itemStyle: {
+            //            emphasis: {
+            //                areaColor: '#35ffff'
+            //            }
+            //        },
+            //        data: [
+            //            { name: '雨湖区', value: 0 },
+            //            { name: '岳塘区', value: 50 },
+            //            { name: '湘乡市', value: 100 },
+            //            { name: '韶山市', value: 150 },
+            //            { name: '湘潭县', value: 200 }
+            //        ]
+            //    }]
+            //}
+            //$.ajax({
+            //    url: '../data/湘潭市.json',
+            //    type: 'get',
+            //    datatype: 'json',
+            //    success: function (res) {
+            //        echarts.registerMap('湘潭', res);
+            //        mapChart.setOption(mapOption, true);
+            //    },
+            //    error: function (e) {
+            //        dialog.Alert("加载地图失败！", "error");
+            //    }
+            //});
+            var map = L.map('map-panel', {
+                center: { lon: 112.9068374633789, lat: 27.83239696415806 },
+                zoomControl: false,
+                zoom: 11,
+                minZoom: 3,//地图最小级数
+                maxZoom: 18,//地图最大级数
+                attributionControl: false
+            });
+            //$(map.getContainer()).css("background", 'transparent');  //TODO 返回map容器（dom对象）并设置样式
+            var option = {
+                layers: 'onemap:t_inf_onemap_jsydspxxb',
+                format: 'image/png',
+                transparent: true
+            };
+            option.SLD_BODY = loadSLD('style.sld'); //TODO 嵌入项目后调用封装的公用函数
+            var baseLayer = new L.nonTiledLayer.wms('http://192.168.1.70:8081/hgis/onemap/wms', option);
+            map.addLayer(baseLayer);
+        }
+        /*获取图层样式xml文件*/
+        function loadSLD(url) {
+            var strXml = null;
+            $.ajax({
+                url: url,
+                dataType: 'text',
+                type: 'GET',
+                timeout: 2000,
+                async: false,
+                success: function (xml) {
+                    strXml = xml.replace(/\r\n\s*/g, "");
+                },
+                error: function (xml) {
+                    dialog.Alert("加载XML文件出错！");
+                }
+            });
+            return strXml;
+        }
+        /*获取人均建设用地面积与单位面积GDP数据\单位投资*/
+        function initInvestAndGDP() {
+            areaGDPChart = echarts.init($("#area-gdp")[0]);
+            unitInvestChart = echarts.init($("#unit-invest")[0]);
+            var option = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [],
+                    top: '10%',
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    top: '25%',
+                    left: '3%',
+                    right: '5%',
+                    bottom: '6%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            type: 'dashed'
+                        }
+                    }
+                },
+                series: []
+            };
+            //TODO 请求后台服务获取数据
+            var dataStyle = { percapita: { name: '人均用地面积', color: '#6cd8cc' }, GDP: { name: '单位面积GDP', color: '#9400d3' }, unitinvest: { name: '单位投资', color: '#9400d3' } };
+            var legendGDP = ['人均用地面积', '单位面积GDP'];
+            var legendInvest = ['人均用地面积', '单位投资'];
+            var dataObj = { percapita: [], GDP: [], unitinvest: [] };
+            dataObj.GDP = Enumerable.From(areaGDPData).Select("s=>s.GDP").ToArray();
+            dataObj.percapita = Enumerable.From(areaGDPData).Select("s=>s.percapita").ToArray();
+            dataObj.unitinvest = Enumerable.From(areaGDPData).Select("s=>s.unitinvest").ToArray();
+            var years = Enumerable.From(areaGDPData).Select("s=>s.year").ToArray();
+            areaGDPOpt = $.extend(true, {}, option);
+            unitInvestOpt = $.extend(true, {}, option);
+            areaGDPOpt.xAxis.data = unitInvestOpt.xAxis.data = years;
+            areaGDPOpt.legend.data = legendGDP;
+            areaGDPOpt.series = getSeriesData('unitinvest');
+            unitInvestOpt.legend.data = legendInvest;
+            unitInvestOpt.series = getSeriesData('GDP');;
+            areaGDPChart.setOption(areaGDPOpt, true);
+            unitInvestChart.setOption(unitInvestOpt, true);
+            function getSeriesData(type) {
+                var array = [];
+                for (var k in dataObj) {
+                    if (k == type) continue;
+                    array.push({
+                        name: dataStyle[k].name,
+                        type: 'line',
+                        data: dataObj[k],
+                        itemStyle: { normal: { color: dataStyle[k].color } }
+                    });
+                }
+                return array;
+            }
+        }
+        /*窗体变化时页面自适应*/
+        $(window).resize(function () {
+            areaGDPChart.resize();
+            unitInvestChart.resize();
+            industryChart.resize();
+            useChart.resize();
+            ratifyChart.resize();
+            supplyChart.resize();
+            //mapChart.resize();
+        });
+
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .macro-analysis {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-image:url(image/bg.png);
+            background-size:100% 100%;
+            overflow: hidden;
+        }
+
+            .macro-analysis > div {
+                position: absolute;
+                display: inline-block;
+                height: 100%;
+            }
+
+            /*leftPanel布局*/
+            .macro-analysis > .macro-analysis-left {
+                width: 22%;
+                left: 2%;
+            }
+            /*centerPanel布局*/
+            .macro-analysis > .macro-analysis-center {
+                width: 50%;
+                left: 25%;
+            }
+
+                .macro-analysis > .macro-analysis-center > .macro-analysis-title {
+                    position: relative;
+                    margin: auto;
+                    margin-top: 15px;
+                    width: 96%;
+                    height: 40px;
+                    text-align: center;
+                    font-size: 24px;
+                    color: #3dcfff;
+                }
+
+                .macro-analysis > .macro-analysis-center > .map {
+                    position: relative;
+                    width: 100%;
+                    height: calc(100% - 60px);
+                    /*border: 1px solid #30b2bd;*/
+                    /*border-radius: 8px;*/
+                    /*background-color:#30b2bd;*/
+                    margin: auto;
+                    /*top: 7%;*/
+                }
+
+                    .macro-analysis > .macro-analysis-center > .map > div {
+                        width: 100%; 
+                        height: 90%;
+                        top:5%;
+                        background-color:transparent;
+                    }
+
+            /*rightPanel布局*/
+            .macro-analysis > .macro-analysis-right {
+                width: 22%;
+                right: 2%;
+            }
+
+            .macro-analysis > .left-right > div {
+                position: relative;
+                width: 100%;
+                height: 28%;
+                border-width:1px 0;
+                border-style:solid;
+                border-color:#026bae;
+            }
+
+            .macro-analysis div > .title {
+                position: absolute;
+                top: -12px;
+                left: 10%;
+                color: #32ffff;
+                background-color: #08122e;
+                border: 1px solid #026bae;
+                text-indent: 6px;
+                height: 22px;
+                line-height: 22px;
+                font-size: 14px;
+                transform: skew(-30deg);
+            }
+
+                .macro-analysis div > .title > .describe-btn {
+                    cursor: pointer;
+                    width: 22px;
+                    display: inline-block;
+                    color: #f6d94d;
+                    transform: skew(30deg);
+                }
+
+
+                    .macro-analysis div > .title > .describe-btn:hover:before {
+                        width: 160px;
+                        content: attr(describe-info);
+                        background-color: #2462d4;
+                        border-radius: 8px;
+                        color: #fff;
+                        padding: 10px;
+                        position: absolute;
+                        /*left: 130%;
+                        top: -50%;*/
+                        left: 0;
+                        top: 100%;
+                        margin-top: 8px;
+                        text-indent: 2em;
+                        /*white-space: pre;*/
+                        font-size: 12px;
+                        z-index:1;
+                    }
+
+                    .macro-analysis div > .title > .describe-btn:hover:after {
+                        content: "";
+                        position: absolute;
+                        /*top: 10%;
+                        left: 80%;*/
+                        top: 100%;
+                        left: 50%;
+                        width: 0;
+                        height: 0;
+                        /*border-right: 12px solid #2085c5;
+                        border-top: 12px solid transparent;
+                        border-bottom: 12px solid transparent;*/
+                        border-right: 8px solid transparent;
+                        border-left: 8px solid transparent;
+                        border-bottom: 8px solid #65564c;
+                    }
+    </style>
+</head>
+<body>
+    <div class="macro-analysis">
+        <div class="macro-analysis-left left-right">
+            <div class="ratify-case" style="top: 4%;">
+                <div id="ratify-case" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">历年建设用地批准情况</div>
+                    <div class="describe-btn" describe-info="反映湘潭市批准建设用地的总体情况，结合历年数据反映其随时间变化趋势以及增长趋势">?</div>
+                </div>
+            </div>
+            <div class="supply-case" style="top: 8%;">
+                <div id="supply-case" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">历年建设用地供应情况</div>
+                    <div class="describe-btn" describe-info="反映湘潭市供应建设用地的总体情况，结合历年数据反映其随时间变化趋势以及增长趋势">?</div>
+                </div>
+            </div>
+            <div class="use" style="top: 12%; ">
+                <div id="use" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">建设用地供应用途结构</div>
+                    <div class="describe-btn" describe-info="各用地供应面积分别占建设用地供应总面积的比例。结合湘潭市历年同期数据，反映各用途结构比例的变化情况">?</div>
+                </div>
+            </div>
+        </div>
+        <div class="macro-analysis-center">
+            <div class="macro-analysis-title">
+                 <div style="height:26px;width:100%;position:absolute;bottom:0;">
+                    <div style="height:100%;width:43%;background-image:url(image/title-l.png);background-size:100% 100%;float:left;"></div>
+                    <div style="height:100%;width:43%;background-image:url(image/title-r.png);background-size:100% 100%;float:right;"></div>
+                 </div>
+                <div style="height:30px;width:100%;line-height:30px;position:absolute;text-align:center;">建设用地供应宏观分析</div>
+            </div>
+            <div class="map">
+                <div id="map-panel"></div>
+            </div>
+        </div>
+        <div class="macro-analysis-right left-right">
+            <div class="area-gdp" style="top: 4%;">
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">人均建设用地面积与单位面积GDP</div>
+                    <div class="describe-btn" describe-info="反映湘潭市历年建设用地单位面积上产生的国民经济效益">?</div>
+                </div>
+                <div id="area-gdp" style="width: 100%; height: 100%;">
+                </div>
+            </div>
+            <div class="unit-invest" style="top: 8%;">
+                <div id="unit-invest" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">人均建设用地面积与单位投资</div>
+                    <div class="describe-btn" describe-info="反映湘潭市历年建设用地单位面积上的资本投资程度">?</div>
+                </div>
+            </div>
+            <div class="industry" style="top: 12%;">
+                <div id="industry" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">建设用地供应产业结构</div>
+                    <div class="describe-btn" describe-info=" 一、二、三产业供应面积分别占建设用地供应总面积的比例。结合湘潭市历年同期数据，反映各产业结构比例的变化情况">?</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

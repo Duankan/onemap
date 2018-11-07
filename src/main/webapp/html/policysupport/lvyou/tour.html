@@ -1,0 +1,791 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>旅游专题分析</title>
+    <link rel="stylesheet" href="../../../css/icon.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/echarts.min.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <style type="text/css">
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            min-width: 600px;
+            overflow: hidden;
+            background: url(images/bg1.jpg);
+            background-size: 100% 100%;
+        }
+
+        .top-title {
+            height: 75px;
+            width: 100%;
+            color: #0ff;
+            font-size: 33px;
+            line-height: 65px;
+            text-align: center;
+            background: url(images/lv_top1.png) no-repeat;
+            background-position: center;
+            background-size: contain;
+            margin-top: 5px;
+            user-select: none;
+        }
+
+        .top-content {
+            height: calc(24% + 40px);
+            width: 100%;
+        }
+
+        /*统计图的总标题样式*/
+        .total-title {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-indent: 100px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #61c157;
+            background-color: #010510;
+            float: left;
+            user-select: none;
+        }
+
+        .chart-title {
+            width: 100%;
+            height: 47px;
+            line-height: 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #f57846;
+            text-align: center;
+            background: url(images/lv_charttitle.png) no-repeat center center;
+            z-index: 3;
+            user-select: none;
+        }
+
+        .leftBottom-content {
+            width: 25%;
+            height: calc(76% - 130px);
+            float: left;
+        }
+
+        .fixedSizePanel {
+            width: 100%;
+            padding: 10px 0;
+            height: calc(50% - 20px);
+        }
+
+        #ageRange, #wayOut, #bypass, #payfor {
+            margin: 0 10px;
+            height: calc(100% - 47px);
+        }
+
+        .leftBottom-content .agepanel {
+            width: 100%;
+            height: 50%;
+        }
+
+        .leftBottom-content .waypanel {
+            width: 100%;
+            height: 50%;
+        }
+
+        .centerBottom-content {
+            width: 50%;
+            height: calc(76% - 120px);
+            float: left;
+        }
+
+        .rightBottom-content {
+            width: 25%;
+            height: calc(76% - 130px);
+            float: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-title">城市旅游专题</div>
+
+    <!-- <div class="total-title">城市旅游客源大数据分析情况</div>-->
+    <div class="leftBottom-content">
+        <div class="fixedSizePanel">
+            <div class="chart-title">游客年龄段分布</div>
+            <div id="ageRange"></div>
+        </div>
+        <div class="fixedSizePanel">
+            <div class="chart-title">游客出行方式占比</div>
+            <div id="wayOut"></div>
+        </div>
+    </div>
+    <div id="passagerMap" class="centerBottom-content"></div>
+    <div class="rightBottom-content">
+        <div class="fixedSizePanel">
+            <div class="chart-title">各景点游客去向构成</div>
+            <div id="bypass"></div>
+        </div>
+        <div class="fixedSizePanel">
+            <div class="chart-title">主要特产销售额</div>
+            <div id="payfor"></div>
+        </div>
+    </div>
+    <div id="flowNum" class="top-content"></div>
+    <script type="text/javascript">
+        var opt_flowNum, chart_flowNum;
+        var opt_passagerMap, chart_passagerMap;
+        var opt_ageRange, chart_ageRange;
+        var opt_wayOut, chart_wayOut;
+        var opt_bypass, chart_bypass;
+        var opt_payfor, chart_payfor;
+        var startYear = 2014;
+        var xiangtanLocation = [112.5439, 27.7075];
+        var totalTitle = "城市旅游客源大数据分析情况";
+
+        var ageRangeData = {
+            '2014': [89, 142, 200, 134, 67, 36, 21],
+            '2015': [125, 179, 379, 160, 95, 70, 49],
+            '2016': [168, 205, 439, 185, 138, 102, 67]
+        };
+
+        var wayOutData = {
+            '2014': [{ value: 335, name: '火车', selected: true },
+                     { value: 310, name: '汽车' },
+                     { value: 234, name: '飞机' }],
+            '2015': [{ value: 464, name: '火车', selected: true },
+                     { value: 376, name: '汽车' },
+                     { value: 264, name: '飞机' }],
+            '2016': [{ value: 546, name: '火车', selected: true },
+                     { value: 265, name: '汽车' },
+                     { value: 123, name: '飞机' }]
+        };
+
+        var bypassData = {
+            '2014': [23, 34, 16, 25, 2],
+            '2015': [30, 34, 16, 16, 4],
+            '2016': [12, 42, 8, 32, 6]
+        };
+
+        var payforData = {
+            '2014': [{ value: 335, name: '湘莲子', selected: true },
+                    { value: 310, name: '槟榔' },
+                    { value: 234, name: '沙子岭猪' }],
+            '2015': [{ value: 464, name: '湘莲子', selected: true },
+                     { value: 376, name: '槟榔' },
+                     { value: 264, name: '沙子岭猪' }],
+            '2016': [{ value: 546, name: '湘莲子', selected: true },
+                     { value: 265, name: '槟榔' },
+                     { value: 123, name: '沙子岭猪' }]
+        };
+
+        var geoCoordMap = {};
+        $(window).resize(function () {
+            chart_flowNum.resize();
+            chart_passagerMap.resize();
+            chart_ageRange.resize();
+            chart_wayOut.resize();
+            chart_bypass.resize();
+            chart_payfor.resize();
+        });
+
+        $(document.body).ready(function () {
+            initchart_flowNum();
+            initchart_ageRange();
+            initchart_wayOut();
+            getMapData();
+            initchart_bypass();
+            initchart_payfor();
+
+        });
+
+        /*初始化客流量统计图*/
+        function initchart_flowNum() {
+            var oneDay = 24 * 3600 * 1000;
+            var timelinedate = [];
+            var data = [];
+            var xdate = {};
+            var serise_flowNum = [];
+
+            chart_flowNum = echarts.init($("#flowNum")[0]);
+            for (var i = startYear; i < new Date().getFullYear() ; i++) {
+                timelinedate.push(i);
+                var dayofyear = getDay(i);
+                var base = +new Date(i, 0, 1);
+                data = [];
+                xdate[i] = [];
+                for (var j = 0; j < dayofyear ; j++) {
+                    var now = new Date(base + oneDay * j);
+                    xdate[i].push([now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'));//生成 x轴日期
+                    data.push({ name: xdate[i][j], value: Math.round(Math.abs((Math.random() - 0.5)) * 100) });
+                }
+
+                var seriseItem = {
+                    title: {
+                        show: true,
+                        text: i + '年各时期客流量变化'
+                    },
+                    visualMap: {
+                        show: false,
+                        dimension: 0,
+                        pieces: [{ color: '#1ec6b9', lt: getDayByDate(i, 4, 30) },
+                                { color: '#f00', gte: getDayByDate(i, 4, 30), lt: getDayByDate(i, 5, 7) },
+                                { color: '#1ec6b9', gte: getDayByDate(i, 5, 7), lt: getDayByDate(i, 7, 9) },
+                                { color: '#f00', gte: getDayByDate(i, 7, 9), lt: getDayByDate(i, 8, 19) },
+                                { color: '#1ec6b9', gte: getDayByDate(i, 8, 19), lt: getDayByDate(i, 9, 30) },
+                                { color: '#f00', gte: getDayByDate(i, 9, 30), lt: getDayByDate(i, 10, 6) },
+                                { color: '#1ec6b9', gte: getDayByDate(i, 10, 6) }]
+                    },
+                    series: [{
+                        name: i,
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'none',
+                        sampling: 'average',
+                        itemStyle: {
+                            normal: {
+                                color: '#d5ac3a'
+                            }
+                        },
+                        areaStyle: {
+                            normal: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#032f2e'
+                                }, {
+                                    offset: 1,
+                                    color: '#027673'
+                                }])
+                            }
+                        },
+                        data: data,
+                        markArea: {
+                            itemStyle: {
+                                normal: {
+                                    color: '#c1b1ff',
+                                    borderColor: '#fff'
+                                }
+                            },
+                            data: [
+                             [{ name: '五一', xAxis: i + '/5/1' }, { xAxis: i + '/5/8' }],
+                             [{ name: '暑假', xAxis: i + '/7/10' }, { xAxis: i + '/8/20' }],
+                             [{ name: '十一', xAxis: i + '/10/1' }, { xAxis: i + '/10/7' }]
+                            ]
+                        }
+                    }]
+                };
+
+                serise_flowNum.push(seriseItem);
+            }
+
+            opt_flowNum = {
+                baseOption: {
+                    timeline: {
+                        axisType: 'category',
+                        orient: 'vertical',
+                        inverse: true,
+                        left: null,
+                        right: 40,
+                        top: 70,
+                        bottom: 40,
+                        width: 55,
+                        height: null,
+                        label: {
+                            normal: {
+                                textStyle: {
+                                    color: '#fff'
+                                }
+                            },
+                            emphasis: {
+                                textStyle: {
+                                    color: '#2ddf93'
+                                }
+                            }
+                        },
+                        symbol: 'none',
+                        lineStyle: {
+                            color: '#ccc'
+                        },
+                        checkpointStyle: {
+                            color: '#2ddf93',
+                            borderColor: '#2ddf93',
+                            borderWidth: 2
+                        },
+                        controlStyle: {
+                            showPlayBtn: false,
+                            showNextBtn: false,
+                            showPrevBtn: false,
+                            normal: {
+                                color: '#2acd94',
+                                borderColor: '#2acd94'
+                            },
+                            emphasis: {
+                                color: '#2acdf4',
+                                borderColor: '#2acd94'
+                            }
+                        },
+                        data: timelinedate
+                    },
+
+                    textStyle: {
+                        color: '#0ff'
+                    },
+                    title: {
+                        left: '120',
+                        textStyle: {
+                            color: '#61c157',
+                            fontSize: 22,
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        position: function (pt) {
+                            return [pt[0], '10%'];
+                        }
+                    },
+                    toolbox: {
+                        itemGap: 17,
+                        right: 30,
+                        top: 20,
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            restore: {}
+                        },
+                        iconStyle: {
+                            normal: {
+                                textPosition: 'top',
+                                borderColor: '#fff'
+                            },
+                            emphasis: {
+                                borderColor: '#0ff'
+                            }
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        data: xdate[startYear]
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: '客流量/ 人次',
+                        nameTextStyle: { color: '#fff' },
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } },
+                        boundaryGap: [0, '80%']
+                    },
+                    grid: {
+                        left: '5%',
+                        right: '10%',
+                        top: '25%',
+                        bottom: '20%'
+
+                    }
+                },
+                options: serise_flowNum
+            };
+
+
+            chart_flowNum.on("timelinechanged", function (e) {
+                var curyear = opt_flowNum.baseOption.timeline.data[e.currentIndex];
+                opt_flowNum.baseOption.xAxis.data = xdate[curyear];
+                chart_flowNum.setOption(opt_flowNum);
+            });
+            chart_flowNum.setOption(opt_flowNum);
+
+            chart_flowNum.on('dblclick', function (s) {
+                var year = '2014';
+                if (s.name == '五一') year = '2014';
+                else if (s.name == '暑假') year = '2015';
+                else if (s.name == '十一') year = '2016';
+                refreshDatabyYear(year);
+            });
+
+        }
+        /*游客年龄段分布统计图*/
+        function initchart_ageRange() {
+            chart_ageRange = echarts.init($("#ageRange")[0]);
+            opt_ageRange = {
+                color: ['#9b81ff'],
+                backgroundColor: '#071b24',
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                grid: {
+                    left: '15',
+                    right: '15',
+                    top: '18%',
+                    bottom: '6%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff', interval: 0 },
+                        data: ['≤15', '15~25', '25~35', '35~45', '45~55', '55~65', '≥65']
+
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '人数',
+                        nameTextStyle: { color: '#fff' },
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } }
+                    }
+                ],
+                series: [
+                    {
+                        name: '年龄段人数',
+                        type: 'bar',
+                        barWidth: '50%',
+                        data: ageRangeData['2014']
+                    }
+                ]
+            };
+            chart_ageRange.setOption(opt_ageRange);
+        }
+        /*游客出行方式构成统计图*/
+        function initchart_wayOut() {
+            chart_wayOut = echarts.init($("#wayOut")[0]);
+            opt_wayOut = {
+                color: ['#2a3eeb', '#1f88e3', '#314955'],
+                backgroundColor: '#071b24',
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                legend: {
+                    //orient: 'vertical',
+                    right: '10',
+                    bottom: '10',
+                    data: ['火车', '汽车', '飞机'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                series: [
+                    {
+                        name: '出行方式',
+                        type: 'pie',
+                        selectedMode: 'single',
+                        radius: '50%',
+                        center: ['47%', '45%'],
+                        label: {
+                            normal: {
+                                //position:'inner',
+                                color: '#0ff',
+                                formatter: '   {b} \n\n {c}人 ({d}% ) ',
+                                fontSize: 12
+                            }
+                        },
+                        data: wayOutData['2014'],
+                        itemStyle: {
+                            emphasis: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+            chart_wayOut.setOption(opt_wayOut);
+        }
+        /*读取json地图数据*/
+        function getMapData() {
+            $.getJSON('../data/china.json', function (res) {
+                echarts.registerMap('全国', res);
+                for (var i = 0; i < res.features.length; i++) {
+                    geoCoordMap[res.features[i].properties.name] = res.features[i].properties.cp;
+                }
+                initchart_passagerMap();
+            });
+        }
+
+        /*初始化游客分布图*/
+        function initchart_passagerMap() {
+            chart_passagerMap = echarts.init($("#passagerMap")[0]);
+            opt_passagerMap = {
+                title: { text: '游客来源分布', left: '30', top: '10', textStyle: { color: "#f57846", fontSize: 20, fontWeight: "bold" } },
+                visualMap: {
+                    left: 'right',
+                    top: 'bottom',
+                    text: ['最大值', '最小值'],           // 文本，默认为数值文本
+                    calculable: true,
+                    show: false,
+                    inRange: {
+                        symbolSize: [0, 100]
+                    },
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                tooltip: {
+                    trigger: ''
+                },
+                roam: true,
+                geo: {
+                    name: '',
+                    type: 'map',
+                    map: '全国',
+                    zoom: 2,
+                    center: [112.5439, 30.4],
+                    label: {
+                        normal: {
+                            show: true,
+                            offset: [130, 0],
+                            color: '#fff'
+                        },
+                        emphasis: {
+                            show: true,
+                            color: '#fff'
+                        }
+                    },
+                    itemStyle: {
+                        normal: {
+                            areaColor: '#101a26',   //地图背景色
+                            borderColor: '#2e99bd',    //行政区边界线
+                            shadowColor: '#0e2a36',
+                            shadowOffsetX: 2,
+                            shadowOffsetY: 2
+                        },
+                        emphasis: {
+                            areaColor: '#3f71ad'
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '',
+                        type: 'lines',
+                        zlevel: 2,
+                        effect: {
+                            show: true,
+                            color: '#2b6a00',
+                            period: 4,
+                            trailLength: 0,
+                            symbol: 'path://M1705.06,1318.313v-89.254l-319.9-221.799l0.073-208.063c0.521-84.662-26.629-121.796-63.961-121.491c-37.332-0.305-64.482,36.829-63.961,121.491l0.073,208.063l-319.9,221.799v89.254l330.343-157.288l12.238,241.308l-134.449,92.931l0.531,42.034l175.125-42.917l175.125,42.917l0.531-42.034l-134.449-92.931l12.238-241.308L1705.06,1318.313z',
+                            symbolSize: 18
+                        },
+                        lineStyle: {
+                            normal: {
+                                color: '#c23531',
+                                width: 1,
+                                opacity: 0.4,
+                                curveness: 0.2
+                            }
+                        },
+                        markPoint: {
+                            symbol: 'emptyCircle',
+                            symbolSize: 3,
+                            effect: {
+                                show: true,
+                                shadowBlur: 0
+                            },
+                            itemStyle: {
+                                normal: {
+                                    label: { show: false }
+                                },
+                                emphasis: {
+                                    label: { position: 'top' }
+                                }
+                            },
+                            data: [
+                                { name: '陕西', coord: geoCoordMap['陕西'] },
+                                { name: '北京', coord: geoCoordMap['北京'] },
+                                { name: '湖北', coord: geoCoordMap['湖北'] },
+                                { name: '四川', coord: geoCoordMap['四川'] },
+                                { name: '重庆', coord: geoCoordMap['重庆'] },
+                                { name: '江西', coord: geoCoordMap['江西'] },
+                                { name: '云南', coord: geoCoordMap['云南'] },
+                                { name: '贵州', coord: geoCoordMap['贵州'] }
+                            ]
+                        },
+                        data: toFlowData(['陕西', '北京', '湖北', '四川', '重庆', '江西', '云南', '贵州'])
+                    },
+                    {
+                        name: '',
+                        type: 'effectScatter',
+                        coordinateSystem: 'geo',
+                        zlevel: 2,
+                        rippleEffect: {
+                            period: 2,
+                            scale: 5,
+                            brushType: 'fill'
+                        },
+                        symbolOffset: ['-100%', '100%'],
+                        symbolSize: function (val) {
+                            return val[2];
+                        },
+                        itemStyle: {
+                            normal: {
+                                opacity: 0.1
+                            }
+                        },
+                        data: [
+                                { name: '陕西', value: geoCoordMap['陕西'].concat(30) },
+                                { name: '北京', value: geoCoordMap['北京'].concat(30) },
+                                { name: '湖北', value: geoCoordMap['湖北'].concat(30) },
+                                { name: '四川', value: geoCoordMap['四川'].concat(30) },
+                                { name: '重庆', value: geoCoordMap['重庆'].concat(30) },
+                                { name: '江西', value: geoCoordMap['江西'].concat(30) },
+                                { name: '云南', value: geoCoordMap['云南'].concat(30) },
+                                { name: '贵州', value: geoCoordMap['贵州'].concat(30) }
+                        ]
+                    }
+                ]
+            };
+            chart_passagerMap.setOption(opt_passagerMap);
+        }
+        /*各景点游客去向统计图*/
+        function initchart_bypass() {
+            chart_bypass = echarts.init($("#bypass")[0]);
+            opt_bypass = {
+                color: ['#465eff'],
+                backgroundColor: '#071b24',
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    show: false,
+                    data: ['2011年', '2012年']
+                },
+                grid: {
+                    left: '3%',
+                    right: '30',
+                    top: '20',
+                    bottom: '10',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value',
+                    name: '%',
+                    nameTextStyle: { color: '#fff' },
+                    axisLine: { lineStyle: { color: '#c3c5c8' } },
+                    axisLabel: { color: '#fff' },
+                    boundaryGap: [0, 0.01]
+                },
+                yAxis: {
+                    type: 'category',
+                    axisLine: { lineStyle: { color: '#c3c5c8' } },
+                    axisLabel: { color: '#fff' },
+                    splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } },
+                    data: ['水府旅游区', '韶山滴水洞', '毛主席故居', '盘龙大观园', '韶山旅游区']
+                },
+                series: [
+                    {
+                        name: '2011年',
+                        type: 'bar',
+                        data: bypassData['2014']
+                    }
+                ]
+            };
+            chart_bypass.setOption(opt_bypass);
+        }
+        /*特产销售额统计图*/
+        function initchart_payfor() {
+            chart_payfor = echarts.init($("#payfor")[0]);
+            opt_payfor = {
+                backgroundColor: '#071b24',
+                color: ['#9b81ff', '#465eff', '#4eadfd'],
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                legend: {
+                    //orient: 'vertical',
+                    right: '10',
+                    bottom: '10',
+                    data: ['湘莲子', '槟榔', '沙子岭猪'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                series: [
+                    {
+                        name: '销售额',
+                        type: 'pie',
+                        selectedMode: 'single',
+                        radius: '50%',
+                        center: ['47%', '45%'],
+                        label: {
+                            normal: {
+                                //position: 'inner',
+                                color: '#0ff',
+                                formatter: '{b}\n\n  {c}元 ( {d}% ) ',
+                                fontSize: 12
+                            }
+                        },
+                        data: payforData['2014'],
+                        itemStyle: {
+                            emphasis: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+            chart_payfor.setOption(opt_payfor);
+        }
+
+        //根据年份选择刷新数据源
+        function refreshDatabyYear(year) {
+
+            opt_ageRange.series[0].data = ageRangeData[year];
+            opt_wayOut.series[0].data = wayOutData[year];
+            opt_bypass.series[0].data = bypassData[year];
+            opt_payfor.series[0].data = payforData[year];
+
+            chart_ageRange.setOption(opt_ageRange, true);
+            chart_wayOut.setOption(opt_wayOut, true);
+            chart_bypass.setOption(opt_bypass, true);
+            chart_payfor.setOption(opt_payfor, true);
+        }
+
+        //获取一年的总天数
+        function getDay(year) {
+            var month = 12;
+            return getDayByDate(year, month, 0);
+        }
+
+        function getDayByDate(year, month, day) {
+            var sum = 0;
+            var nowtime = new Date();
+            for (var i = 0; i < month; i++) {
+                if (i == month - 1) sum += new Date(year, i, day).getDate();
+                else sum += new Date(year, i, 0).getDate();
+            }
+            return sum;
+        }
+
+        function toFlowData(arryCity) {
+            if (!arryCity) return;
+            var data = [];
+            var destination = { coord: xiangtanLocation };
+            for (var i = 0; i < arryCity.length; i++) {
+                if (geoCoordMap[arryCity[i]]) {
+                    data.push([{ coord: geoCoordMap[arryCity[i]] }, destination]);
+                }
+            }
+            return data;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1115 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>房地产专题分析</title>
+    <link rel="stylesheet" href="../../../css/icon.css" />
+    <link href="../../../css/app.css" rel="stylesheet" />
+    <link href="../../../css/main.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../../js/ktop/ktop.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/echarts.min.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../../js/ktop/ktop.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var houseAreaOpt, houseIndexOpt, houseSupplyOpt, houseEconomyOpt; //统计图表的配置项和数据
+        var houseAreaChart, housePriceChart, houseIndexChart, houseSupplyChart, houseEconomyChart;  //echarts实例
+        var xAxisCombobox, yAxisCombobox; //房地产与社会经济环境x轴y轴切换combox
+        var mapPanel; //地图容器
+        $(function () {
+            initHouseMarket();
+            initMap();
+            initHouseIndex();
+            initHouseSupply();
+            initTable();
+            initHouseEconomy();
+        });
+        /*房屋市场*/
+        function initHouseMarket() {
+            var houseMarket = [  //TODO 需从服务端获取数据
+              { NF: '2012', QFZQ: 2, XJXSMJ: 4000, DSMJ: 568, FJ: 6700 },
+              { NF: '2013', QFZQ: 5, XJXSMJ: 6000, DSMJ: 1000, FJ: 8000 },
+              { NF: '2014', QFZQ: 7, XJXSMJ: 5000, DSMJ: 1400, FJ: 9000 },
+              { NF: '2015', QFZQ: 8, XJXSMJ: 7000, DSMJ: 2200, FJ: 11000 },
+              { NF: '2016', QFZQ: 2, XJXSMJ: 1000, DSMJ: 1800, FJ: 15000 }
+            ];
+            housePriceChart = echarts.init(document.getElementById("house-price"));
+            houseAreaChart = echarts.init(document.getElementById("house-area"));
+            var housePriceOpt = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#254772',
+                        },
+                        crossStyle: {
+                            color: '#999'
+                        }
+                    }
+                },
+                legend: {
+                    data: [],
+                    textStyle: {
+                        color: "#fff"
+                    },
+                    top: '5%'
+                },
+                grid: {
+                    top: '25%',
+                    left: '2%',
+                    right: '2%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: [],
+                    axisPointer: {
+                        type: 'shadow',
+                        label: {
+                            formatter: function (params) {
+                                return params.value + '年'
+                            }
+                        }
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '元',
+                        nameGap: 10,
+                        axisLabel: {
+                            formatter: '{value}元'
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "#fff"
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                type: 'dashed'
+                            }
+                        }
+                    },
+                    {
+                        type: 'value',
+                        name: '年',
+                        nameGap: 10,
+                        axisLabel: {
+                            formatter: '{value} '
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "#fff"
+                            }
+                        },
+                        splitLine: {
+                            show: false
+                        }
+                    }
+                ],
+                series: []
+            };
+            var houseAreaOpt = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [],
+                    textStyle: {
+                        color: "#fff"
+                    },
+                    top: '5%'
+                },
+                grid: {
+                    top: '25%',
+                    left: '2%',
+                    right: '2%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: [],
+                    axisPointer: {
+                        type: 'shadow'
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '平方米(㎡)',
+                    nameGap: 8,
+                    axisLabel: {
+                        formatter: '{value} '
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            type: 'dashed'
+                        }
+                    }
+                },
+                series: []
+            };
+            var dataObj = { 
+                XJXSMJ: { name: '新建商品房销售面积', data: [], color: '#0056ff' },
+                DSMJ: { name: '待售商品房面积', data: [], color: '#3df4d1' },
+                QFZQ: { name: '待建成房地产用地去化周期', data: [], color: '#6532e8' },
+                FJ: { name: '房价', data: [], color: '#a0fd00' }
+            };
+            var years = [];
+            for (var i = 0, length = houseMarket.length; i < length; i++) {
+                years.push(houseMarket[i].NF);
+                dataObj.QFZQ.data.push(houseMarket[i].QFZQ);
+                dataObj.FJ.data.push(houseMarket[i].FJ);
+                dataObj.XJXSMJ.data.push(houseMarket[i].XJXSMJ);
+                dataObj.DSMJ.data.push(houseMarket[i].DSMJ);
+            }
+            for (var k in dataObj) {
+                var seriesObj = {
+                    name: dataObj[k].name,
+                    type: 'bar',
+                    barWidth: '30%',
+                    data: dataObj[k].data,
+                    itemStyle: { normal: { color: dataObj[k].color } }
+                };
+                if (k == 'QFZQ' || k == 'FJ') {
+                    housePriceOpt.legend.data.push(dataObj[k].name);
+                    if (k == 'QFZQ') {
+                        seriesObj.barWidth = '50%';
+                        seriesObj.yAxisIndex = 1;
+                    } else {
+                        seriesObj.barWidth = null;
+                        seriesObj.yAxisIndex = 0;
+                        seriesObj.type = 'line';
+                    }
+                    housePriceOpt.series.push(seriesObj);
+                } else {
+                    houseAreaOpt.legend.data.push(dataObj[k].name);
+                    houseAreaOpt.series.push(seriesObj);
+                }
+            }
+            houseAreaOpt.xAxis.data = housePriceOpt.xAxis.data = years;
+            houseAreaChart.setOption(houseAreaOpt);
+            housePriceChart.setOption(housePriceOpt);
+        }
+        /*初始化地图*/
+        function initMap() {
+            var imglayer = L.tileLayer("http://192.168.1.251/yz/googlemaps/satellite_en/{z}/{x}/{y}.jpg", {
+                continuousWorld: true,
+                worldCopyJump: false
+            });
+            var valayer = L.tileLayer("http://192.168.1.251/yz/tianditu/overlay_s/{z}/{x}/{y}.png", {
+                continuousWorld: true,
+                worldCopyJump: false
+            });
+            mapPanel = L.map('map-panel').setView([26.63, 111.65], 10).addLayer(imglayer).addLayer(valayer);
+            //聚合
+            var markers = new L.MarkerClusterGroup({
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false, //hover时是否显示分布区域
+                animate: false,
+                //iconCreateFunction: function (cluster) {
+                //    return L.divIcon({ html: '<div style="width:50px;height:30px;background-color:#f00;"></div>' });
+                //}
+            });
+            $.getJSON('data/addressPoints.json', function (res) {
+                for (var i = 0, length = res.length; i < length; i++) {
+                    var divPop = '<div class="bubble"><div class="value">' + res[i][2] + '元/㎡</div><div class="position">长沙房价</div></div>';
+                    var myicon = L.divIcon({ html: divPop, className: '' });
+                    var m = new L.Marker(new L.LatLng(res[i][0], res[i][1]), { icon: myicon });
+                    markers.addLayer(m);
+                }
+                mapPanel.addLayer(markers);
+            });
+        }
+        /*土地市场 房产指标*/
+        function initHouseIndex() {
+            var houseIndexData = [  //TODO 需从服务端获取数据
+               { NF: '2012', GYL: 10000, CB: 4000, DJ: 0.57 },
+               { NF: '2013', GYL: 12000, CB: 6000, DJ: 1.10 },
+               { NF: '2014', GYL: 15000, CB: 5000, DJ: 1.14 },
+               { NF: '2015', GYL: 13000, CB: 7000, DJ: 1.22 },
+               { NF: '2016', GYL: 9000, CB: 1000, DJ: 1.18 }
+            ];
+            houseIndexChart = echarts.init(document.getElementById("house-index"));
+            var houseIndexOpt = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#254772',
+                        },
+                        crossStyle: {
+                            color: '#999'
+                        }
+                    }
+                },
+                legend: {
+                    data: [],
+                    textStyle: {
+                        color: "#fff"
+                    },
+                    top: '5%'
+                },
+                grid: {
+                    top: '25%',
+                    left: '2%',
+                    right: '2%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: [],
+                    axisPointer: {
+                        type: 'shadow',
+                        label: {
+                            formatter: function (params) {
+                                return params.value + '年'
+                            }
+                        }
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '㎡',
+                        nameGap: 10,
+                        axisLabel: {
+                            formatter: '{value} '
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: "#fff"
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                type: 'dashed'
+                            }
+                        }
+                    },
+                    {
+                        type: 'value',
+                        name: '万元',
+                        nameGap: 10,
+                        axisLine: {
+                            lineStyle: {
+                                color: "#fff"
+                            }
+                        },
+                        splitLine: {
+                            show: false
+                        }
+                    }
+                ],
+                series: []
+            };
+            var years = [];
+            var dataObj = {
+                GYL: { name: '房地产用地供应量', data: [], color: '#0056ff' },
+                CB: { name: '房地产用地储备', data: [], color: '#3df4d1' },
+                DJ: { name: '居民用地地价', data: [], color: '#4a7a85' },
+            };
+            for (var i = 0, length = houseIndexData.length; i < length; i++) {
+                years.push(houseIndexData[i].NF);
+                dataObj.GYL.data.push(houseIndexData[i].GYL);
+                dataObj.CB.data.push(houseIndexData[i].CB);
+                dataObj.DJ.data.push(houseIndexData[i].DJ);
+            }
+            for (var k in dataObj) {
+                houseIndexOpt.legend.data.push(dataObj[k].name);
+                var seriesObj = {
+                    name: dataObj[k].name,
+                    type: 'bar',
+                    data: dataObj[k].data,
+                    itemStyle: { normal: { color: dataObj[k].color } }
+                };
+                if (k == 'DJ') {
+                    seriesObj.type = 'line';
+                    seriesObj.yAxisIndex = 1;
+                }
+                houseIndexOpt.series.push(seriesObj);
+            }
+            houseIndexOpt.xAxis.data = years;
+            houseIndexChart.setOption(houseIndexOpt);
+        }
+        /*土地市场 房地产用地供应*/
+        function initHouseSupply() {
+            //TODO 数据需从服务端获取
+            var houseSupplyData = [
+                { id: '1', parentid: '000000000000', name: '住宅用地', value: 18567 },
+                { id: '2', parentid: '000000000000', name: '商务用地', value: 9452 },
+                { id: '1-1', parentid: '1', name: '保障性住房', value: 567 },
+                { id: '1-2', parentid: '1', name: '普通商品房', value: 10000 },
+                { id: '1-3', parentid: '1', name: '高档住宅', value: 8000 },
+                { id: '1-1-1', parentid: '1-1', name: '经济适用住房', value: 100 },
+                { id: '1-1-2', parentid: '1-1', name: '廉租住房', value: 200 },
+                { id: '1-1-3', parentid: '1-1', name: '公共租赁房', value: 267 },
+                { id: '1-2-1', parentid: '1-2', name: '中低价位、中小套型', value: 7000 },
+                { id: '1-2-2', parentid: '1-2', name: '其他商品住房', value: 3000 }
+            ];
+            houseSupplyChart = echarts.init(document.getElementById("house-supply"));
+            houseSupplyOpt = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                color: ['#00a7ff', '#465eff', '#0056ff'],
+                legend: {
+                    orient: 'vertical',
+                    left: 10,
+                    bottom: 10,
+                    data: [],
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                series: {
+                    name: '',
+                    type: 'pie',
+                    radius: '50%',
+                    center: ['50%', '50%'],
+                    data: [],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            };
+            houseSupplyChart.on('click', function (param) {
+                $(".house-sel").removeClass("house-sel");
+                var id = param.data.id;
+                getSeriesData(id, param.name);
+            });
+            initBtnClick();
+            getSeriesData();
+            function initBtnClick(){
+                $(".house-supply .button").click(function (e) {
+                    var id = $(this).attr("tag");
+                    $(".house-sel").removeClass("house-sel");
+                    $(this).addClass('house-sel');
+                    $(this).next().remove();
+                    getSeriesData(id);
+                });
+            }
+            function getSeriesData(id,name) {
+                if (Ktw.IsNull(id)) id = '000000000000';
+                var data = Enumerable.From(houseSupplyData).Where("s=>s.parentid == '" + id + "'").ToArray();
+                if (data.length == 0){
+                    data = Enumerable.From(houseSupplyData).Where("s=>s.id == '" + id + "'").ToArray();
+                } else if (!Ktw.IsNull(name)) {
+                    $(".house-supply .buttons").append($('<div class="button house-sel" tag="' + id + '">' + name + '</div>'));
+                    initBtnClick();
+                } 
+                houseSupplyOpt.series.data = data;
+                houseSupplyOpt.legend.data = Enumerable.From(data).Select("s=>s.name").ToArray();;
+                houseSupplyChart.setOption(houseSupplyOpt);
+            }
+        }
+        /*房地产与社会经济环境 统计图*/
+        function initHouseEconomy() {
+            var option;
+            houseEconomyChart = echarts.init(document.getElementById("house-economy"));
+            var schema = [
+                { name: 'GDP', index: 2 },
+                { name: '房地产投资', index: 3 },
+                { name: '地价', index: 4 },
+                { name: '房价', index: 5 },
+                { name: '城镇居民人均可支配收入', index: 6 },
+                { name: '房地产用地供应量', index: 7 }
+            ];
+            var fieldIndices = schema.reduce(function (obj, item) {
+                obj[item.name] = item.index;
+                return obj;
+            }, {});
+            var groupCategories = [];
+            var data;
+            // zlevel 为 1 的层开启尾迹特效
+            houseEconomyChart.getZr().configLayer(1, { motionBlur: 0.5 });
+            $.ajax('data/nutrients.json', {
+                type: 'GET',
+                dataType:'json',
+                async: false,
+                success: function (originData) {
+                    data = normalizeData(originData);
+                    houseEconomyChart.setOption(option = getOption(data));
+                }
+            });
+            function normalizeData(originData) {
+                var groupMap = {};
+                originData.slice(0, 1000).forEach(function (row) {
+                    if (!groupMap.hasOwnProperty(row[1])) {
+                        groupMap[row[1]] = 1;
+                    }
+                });
+                for (var groupName in groupMap) {
+                    if (groupMap.hasOwnProperty(groupName)) {
+                        groupCategories.push(groupName);
+                    }
+                }
+                return originData.slice(0, 1000);
+            }
+            function getOption(data) {
+                return {
+                    tooltip: {
+                        padding: 10,
+                        backgroundColor: '#222',
+                        borderColor: '#777',
+                        borderWidth: 1,
+                        formatter: function (params) {
+                            return params.value[4] + ':' + params.value[0] + '<br/>' + params.value[5] + ':' + params.value[1]
+                        }
+                    },
+                    grid: {
+                        top: '15%',
+                        left: '8%',
+                        right: '5%',
+                        bottom: '15%'
+                    },
+                    xAxis: {
+                        name: '',
+                        splitLine: { show: false },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        axisLabel: {
+                            textStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        axisTick: {
+                            lineStyle: {
+                                color: '#fff'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        name: '',
+                        splitLine: { show: false },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        axisLabel: {
+                            textStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        axisTick: {
+                            lineStyle: {
+                                color: '#fff'
+                            }
+                        }
+                    },
+                    visualMap: [{
+                        show: false,
+                        type: 'piecewise',
+                        categories: groupCategories,
+                        dimension: 2,
+                        inRange: {
+                            color: ['#6532e8', '#0056ff', '#3df4d1', '#a0fd00', '#4d67ff'] 
+                        },
+                        outOfRange: {
+                            color: ['#ccc'] //['#d94e5d','#eac736','#50a3ba']
+                        },
+                        top: 20,
+                        textStyle: {
+                            color: '#fff'
+                        },
+                        realtime: false
+                    }, {
+                        show: false,
+                        dimension: 3,
+                        max: 1000,
+                        inRange: {
+                            colorLightness: [0.15, 0.6]
+                        }
+                    }],
+                    series: {
+                        zlevel: 1,
+                        name: 'nutrients',
+                        type: 'scatter',
+                        data: data.map(function (item, idx) {
+                            return [item[2], item[3], item[1], idx];
+                        }),
+                        animationThreshold: 5000,
+                        progressiveThreshold: 5000
+                    },
+                    animationEasingUpdate: 'cubicInOut',
+                    animationDurationUpdate: 2000
+                };
+            }
+            var xAxisSel, yAxisSel;
+            xAxisCombobox = $("#xAxis").prop("$this");
+            yAxisCombobox = $("#yAxis").prop("$this");
+            xAxisCombobox.SetData(schema);
+            yAxisCombobox.SetData(schema);
+            xAxisCombobox.unbind("onSelectChanged");
+            yAxisCombobox.unbind("onSelectChanged");
+            function updateItem() {
+                option.series.data = data.map(function (item, index) {
+                    return [
+                        item[fieldIndices[xAxisSel]],
+                        item[fieldIndices[yAxisSel]],
+                        item[1],
+                        index,
+                        xAxisSel,
+                        yAxisSel
+                    ];
+                });
+                houseEconomyChart.setOption(option);
+            }
+            xAxisCombobox.bind("onSelectChanged", function (e, s) {
+                xAxisSel = s.name;
+                //option.xAxis.name = s.name;
+                updateItem();
+            });
+            xAxisCombobox.SetSelectedIndex(0);
+            yAxisCombobox.bind("onSelectChanged", function (e, s) {
+                yAxisSel = s.name;
+                //option.yAxis.name = s.name;
+                updateItem();
+            });
+            yAxisCombobox.SetSelectedIndex(1);
+            //x轴,y轴配置关闭与展开
+            $("#close-config").click(function () {
+                var _this = $(this);
+                var status = _this.attr('tag');
+                if (status == 'close') {
+                    _this.attr('tag', 'open')
+                    _this.html('<br />打<br />开<br />');
+                    _this.prev().animate({ width: '0' }, 500, function () {
+                        $(this).css("overflow", "hidden");
+                    });
+                } else {
+                    _this.attr('tag', 'close');
+                    _this.html('<br />关<br />闭<br />');
+                    _this.prev().animate({ width: '180px' }, 500, function () {
+                        $(".axis-config").css("overflow", "");
+                    });
+                }
+            });
+        }
+        /*房地产与社会经济环境 统计表*/
+        function initTable() {
+            /*TODO 需从服务端获取*/
+            var tableData = [
+               { index: '房地产用地地价与房价指数比值', year: '2012', value: '32%' },
+               { index: '房地产用地地价与房价指数比值', year: '2013', value: '15%' },
+               { index: '房地产用地地价与房价指数比值', year: '2014', value: '56%' },
+               { index: '房地产用地地价与房价指数比值', year: '2015', value: '15%' },
+               { index: '房地产用地地价与房价指数比值', year: '2016', value: '56%' },
+
+               { index: '地均GDP与房价指数比值', year: '2012', value: '28%' },
+               { index: '地均GDP与房价指数比值', year: '2013', value: '12%' },
+               { index: '地均GDP与房价指数比值', year: '2014', value: '60%' },
+               { index: '地均GDP与房价指数比值', year: '2015', value: '15%' },
+               { index: '地均GDP与房价指数比值', year: '2016', value: '56%' },
+
+               { index: '房价增长率与GDP增长率比值', year: '2012', value: '32%' },
+               { index: '房价增长率与GDP增长率比值', year: '2013', value: '15%' },
+               { index: '房价增长率与GDP增长率比值', year: '2014', value: '56%' },
+               { index: '房价增长率与GDP增长率比值', year: '2015', value: '15%' },
+               { index: '房价增长率与GDP增长率比值', year: '2016', value: '56%' },
+
+               { index: '房地产用地供应量与新建商品房销售面积比', year: '2012', value: '32%' },
+               { index: '房地产用地供应量与新建商品房销售面积比', year: '2013', value: '15%' },
+               { index: '房地产用地供应量与新建商品房销售面积比', year: '2014', value: '56%' },
+               { index: '房地产用地供应量与新建商品房销售面积比', year: '2015', value: '15%' },
+               { index: '房地产用地供应量与新建商品房销售面积比', year: '2016', value: '56%' }
+            ];
+            var byIndex = Enumerable.From(tableData).GroupBy("s=>s.index").ToArray();
+            var tableBody = $(".table-body table");
+            var tableHead = $("#table-head");
+            for (var i = 0, len = byIndex.length; i < len; i++) {
+                var tr = $('<tr><td>' + byIndex[i].source[0].index + '</td></tr>');
+                for (var j = 0, length = byIndex[i].source.length; j < length; j++) {
+                    if (i == 0) {
+                        tableHead.append('<td>' + byIndex[i].source[j].year + '</td>');
+                    }
+                    tr.append($('<td>' + byIndex[i].source[j].value + '</td>'));
+                }
+                tableBody.append(tr);
+            }
+            tableResize(); //自适应页面
+        }
+        /*table自适应*/
+        function tableResize() {
+            var slash_h = $("#index-year").height() + 1;
+            var slash_w = $("#index-year").width() + 2;
+            $(".slash[tag='bottom']").css({ "border-width": slash_h + 'px ' + slash_w + 'px' });
+            $(".slash[tag='top']").css({ "border-width": slash_h + 'px ' + slash_w + 'px' });
+        }
+        /*页面自适应*/
+        $(window).resize(function () {
+            tableResize();
+            houseAreaChart.resize();
+            houseIndexChart.resize();
+            houseSupplyChart.resize();
+            houseEconomyChart.resize();
+            housePriceChart.resize();
+        });
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .house-property {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-image: url(image/bg.png);
+            background-size: 100% 100%;
+        }
+            /*标题*/
+            .house-property > .house-property-title {
+                position: relative;
+                width: 100%;
+                height: 70px;
+            }
+
+                .house-property > .house-property-title > .title {
+                    position:relative;
+                    width: 64%;
+                    height: 100%;
+                    text-align: center;
+                    font-size: 28px;
+                    font-weight: bold;
+                    letter-spacing: 5px;
+                    color: #40f4fe;
+                    line-height: 70px;
+                    margin: auto;
+                    background-image: url(image/title-bg.png);
+                    background-size: 100% 100%;
+                }
+
+                .house-property > .house-property-title > .ornament {
+                    position:absolute;
+                    width:70px;
+                    height:70px;
+                    top:0;
+                    background-size:100% 100%;
+                }
+
+                .house-property > .house-property-title > .top-left {
+                    left:0;
+                    background-image: url(image/top-left.png);
+                }
+
+                .house-property > .house-property-title > .top-right {
+                    right:0;
+                    background-image: url(image/top-right.png);
+                }
+
+            /*详细内容*/
+            .house-property > .house-property-main {
+                position: relative;
+                width: 100%;
+                height: calc(100% - 70px);
+            }
+
+                /*房屋市场*/
+                .house-property > .house-property-main > .house-market {
+                    position: absolute;
+                    height: 65%;
+                    width: 20%;
+                    left: 2%;
+                }
+
+                /*地图*/
+                .house-property > .house-property-main > .map-panel {
+                    position: absolute;
+                    height: 60%;
+                    width: 54%;
+                    right: 23%;
+                    top:5%;
+                    overflow:hidden;
+                }
+
+                    .house-property > .house-property-main > .map-panel > .map-bg {
+                        position:absolute;
+                        width:100%;
+                        height:130px;
+                        background-size:100% 100%;
+                        /*z-index:1;*/
+                    }
+
+                    .house-property > .house-property-main > .map-panel > #map-panel {
+                        position:relative;
+                        width:95%;
+                        height:92%;
+                        margin:0 auto;
+                        margin-top:2%;
+                    }
+
+                /*房地产与社会经济*/
+                .house-property > .house-property-main > .house-economy {
+                    position: absolute;
+                    height: 32%;
+                    width: 75%;
+                    bottom: 1%;
+                    left: 2%;
+                }
+
+                    .house-property > .house-property-main > .house-economy > .chart > div {
+                        width: calc(50% - 2px);
+                        height: 100%;
+                        left: 0;
+                    }
+
+                        .house-property > .house-property-main > .house-economy > .chart > div > .data-config {
+                            position: absolute;
+                            width: 170px;
+                            height: 54px;
+                            right: 30px;
+                            top: 10px;
+                            font-size: 12px;
+                        }
+
+                            .house-property > .house-property-main > .house-economy > .chart > div > .data-config > #close-config {
+                                position: relative;
+                                width: 22px;
+                                height: 54px;
+                                background-color: #144ec0;
+                                left: 170px;
+                                top: 0;
+                                color: #fff;
+                                text-align: center;
+                                cursor: pointer;
+                            }
+
+                                .house-property > .house-property-main > .house-economy > .chart > div > .data-config > #close-config:hover {
+                                    background-color:#106dce;
+                                }
+
+                            .house-property > .house-property-main > .house-economy > .chart > div > .data-config > .axis-config {
+                                position: absolute;
+                                width: 170px;
+                                height: 54px;
+                                background-color: #063a7a;
+                                right: 0;
+                            }
+
+                            .house-property > .house-property-main > .house-economy > .chart > div > .data-config .div-row {
+                                position: relative;
+                                width: 100%;
+                                height: 26px;
+                                line-height: 26px;
+                                border-bottom: 1px solid #2c2c2c;
+                            }
+
+                                .house-property > .house-property-main > .house-economy > .chart > div > .data-config .div-row > .axis-name {
+                                    position:absolute;
+                                    width:70px;
+                                    height:100%;
+                                    left:0;
+                                    color:#fff;
+                                    line-height:26px;
+                                    text-align:center;
+                                }
+
+                                .house-property > .house-property-main > .house-economy > .chart > div > .data-config .div-row > .ktw-combobox {
+                                    position: absolute;
+                                    right:0;
+                                    top:4px;
+                                    width: 100px;
+                                    height: 20px;
+                                    background-color: rgba(121,255,6,0.5);
+                                }
+
+                    .house-property > .house-property-main > .house-economy > .chart > .table table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        font-size: 14px;
+                        color: #fff;
+                    }
+
+                    .house-property > .house-property-main > .house-economy > .chart > .table tr td {
+                        border-right: 1px solid #071019;
+                        border-bottom: 1px solid #071019;
+                        border-collapse: collapse;
+                        text-align: center;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        word-break: keep-all;
+                    }
+
+                        .house-property > .house-property-main > .house-economy > .chart > .table tr td:first-child {
+                            width: 40%;
+                        }
+
+                        .house-property > .house-property-main > .house-economy > .chart > .table tr td:last-child {
+                            border-right: 0;
+                        }
+
+                    .house-property > .house-property-main > .house-economy > .chart > .table thead tr td {
+                        height: 36px;
+                        background-color: #144ec0;
+                    }
+
+                        .house-property > .house-property-main > .house-economy > .chart > .table thead tr td .slash {
+                            position: absolute;
+                            border-style: solid;
+                            width: 0px;
+                            height: 0px;
+                        }
+
+                        .house-property > .house-property-main > .house-economy > .chart > .table thead tr td .head-name {
+                            position: absolute;
+                            width: 50%;
+                            height: 50%;
+                            line-height: 18px;
+                        }
+
+                    .house-property > .house-property-main > .house-economy > .chart > .table tbody tr {
+                        background-color: #0e203d;
+                        font-size: 12px;
+                    }
+
+                        .house-property > .house-property-main > .house-economy > .chart > .table tbody tr td {
+                            height: 30px;
+                        }
+
+                        .house-property > .house-property-main > .house-economy > .chart > .table tbody tr:hover {
+                            background-color: #035c8b;
+                        }
+
+                /*土地市场*/
+                .house-property > .house-property-main > .land-market {
+                    height: 100%;
+                    width: 20%;
+                    position: absolute;
+                    bottom: 1%;
+                    right: 2%;
+                }
+
+                    .house-property > .house-property-main > .land-market > .chart > .house-supply {
+                        position: relative;
+                        width: 92%;
+                        height: 42%;
+                        margin:0 auto;
+                        margin-top:8%;
+                        border:1px solid #044676;
+                        border-radius:8px;
+                        background-color:rgba(31, 61, 92, 0.3);
+                    }
+
+                        .house-property > .house-property-main > .land-market > .chart > .house-supply > .buttons {
+                            position: absolute;
+                            top: -15px;
+                            left: 10px;
+                            width: 279px;
+                            height: 28px;
+                            line-height: 28px;
+                            text-indent:25px;
+                            color: #fff;
+                            font-size: 12px;
+                        }
+
+                            .house-property > .house-property-main > .land-market > .chart > .house-supply > .buttons > .button {
+                                float: left;
+                                width: 93px;
+                                height: 100%;
+                                background-image:url(image/s-banner1.png);
+                                background-size:100% 100%;
+                                cursor: pointer;
+                            }
+
+                                .house-property > .house-property-main > .land-market > .chart > .house-supply > .buttons > .button:hover {
+                                    background-image:url(image/s-banner2.png);
+                                }
+
+                /*公共样式*/
+                .house-property > .house-property-main > div > .title {
+                    position: relative;
+                    margin:0 auto;
+                    color: #fff;
+                    font-size: 16px;
+                    width: 170px;
+                    height: 32px;
+                    line-height: 32px;
+                    text-align: center;
+                    z-index: 1;
+                    background-image:url(image/t-bg.png);
+                    background-size:100% 100%;
+                }
+
+                .house-property > .house-property-main > div > .chart {
+                    position: absolute;
+                    width: 100%;
+                    height: calc(100% - 36px);
+                    top:36px;
+                    border:1px solid #0172b8;
+                    background-color:rgba(15, 30, 83, 0.36);
+                }
+
+                    .house-property > .house-property-main > div > .chart > div {
+                        position: relative;
+                        width: 100%;
+                        height: 50%;
+                    }
+
+        /*地图聚合气泡样式*/
+        .bubble {
+            position: absolute;
+            width: 135px;
+            height: 30px;
+            background-color: rgba(121,255,6,0.5);
+            border-radius: 5px;
+            left: -50px;
+            top: -20px;
+            line-height: 30px;
+            text-align: center;
+        }
+
+            .bubble:after {
+                position: absolute;
+                content: '';
+                width: 0px;
+                height: 0px;
+                left: 15px;
+                top: 30px;
+                border-width: 10px;
+                border-style: solid;
+                border-color: rgba(121,255,6,0.5) transparent transparent transparent;
+            }
+
+            .bubble .value {
+                float:left;
+                width:65px;
+                height:100%;
+            }
+            .bubble .position {
+                float:right;
+                width:68px;
+                height:28px;
+                margin-top:1px;
+                margin-right:1px;
+                border-radius:5px;
+                background-color:#f5f5f5;
+            }
+
+        .house-sel {
+            background-image:url(image/s-banner2.png) ! important;
+        }
+    </style>
+</head>
+<body>
+    <div class="house-property">
+        <div class="house-property-title">
+            <div class="title">房地产专题分析</div>
+            <div class="top-left ornament"></div>
+            <div class="top-right ornament"></div>
+        </div>
+        <div class="house-property-main">
+            <div class="house-market">
+                <div class="title">房屋市场</div>
+                <div class="chart">
+                    <div id="house-price"></div>
+                    <div id="house-area"></div>
+                </div>
+            </div>
+            <div class="map-panel">
+                <div class="map-bg" style="background-image:url(image/map-bg-top.png);top:0;"></div>
+                <div class="map-bg" style="background-image:url(image/map-bg-foot.png);bottom:0;"></div>
+                <div id="map-panel"></div>
+            </div>
+            <div class="house-economy">
+                <div class="title" style="width:200px;">房地产与社会经济环境</div>
+                <div class="chart">
+                    <div style="float: left;">
+                        <div id="house-economy" style="width: 100%; height: 100%;"></div>
+                        <div class="data-config">
+                            <div class="axis-config">
+                                <div class="div-row">
+                                    <div class="axis-name">x轴</div>
+                                    <div id="xAxis" class="ktw-combobox" opt='{"Height":20,"PopupHeight":120,"TextField":"name","ValueField":"name","IsOverShow":true, "Border":"1px","Padding":"0px","TextAlign":"center"}'></div>
+                                </div>
+                                <div class="div-row">
+                                    <div class="axis-name">y轴</div>
+                                    <div id="yAxis" class="ktw-combobox" opt='{"Height":20,"PopupHeight":120,"TextField":"name","ValueField":"name","IsOverShow":true, "Border":"1px","Padding":"0px","TextAlign":"center"}'></div>
+                                </div>
+                            </div>
+                            <div id="close-config" tag="close">
+                                <br />
+                                关<br />
+                                闭<br />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table" style="float: right;">
+                        <div style="width: 98%; margin-right: 2%; margin-top: 3%;">
+                            <table cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr id="table-head">
+                                        <td id="index-year">
+                                            <div style="width: 100%; height: 100%; position: relative;">
+                                                <div class="slash" tag="bottom" style="border-color: transparent transparent #000 #000;"></div>
+                                                <div class="slash" tag="top" style="border-color: transparent transparent #144ec0 #144ec0; top: 1px;"></div>
+                                                <div class="head-name" style="left: 0; bottom: 0;">指标</div>
+                                                <div class="head-name" style="right: 0; top: 0;">年份</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <div class="table-body">
+                                <table cellspacing="0" cellpadding="0"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="land-market">
+                <div class="title">土地市场</div>
+                <div class="chart">
+                    <div id="house-index" style="width: 100%; height: 52%;"></div>
+                    <div class="house-supply">
+                        <div id="house-supply" style="width: 100%; height: 100%;"></div>
+                        <div class="buttons">
+                            <div class="button house-sel" tag="">房地产用地</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

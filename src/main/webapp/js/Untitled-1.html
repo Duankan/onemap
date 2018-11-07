@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+    </head>
+    <body>
+        <div id="app">
+            <!--
+            Vue.js使用{{}}绑定表达式，用于将表达式的内容输出到页面中。
+            表达式可以是文字，运算符，变量等，也可以在表达式中进行运算输出结果
+            -->
+            {{message}}    
+        </div>
+        
+        <script type="text/javascript" src="js/vue.js" ></script>
+        <script type="text/javascript">
+            //声明式渲染
+            var app = new Vue({   //创建Vue对象
+                el:"#app",   //把当前Vue对象挂载到div标签上,#app是ID选择器
+                data:{
+                    message:"Hello Vue!",//message是自定义的数据
+                }
+            
+            });
+        </script>
+    </body>
+</html>

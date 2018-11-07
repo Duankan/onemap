@@ -1,0 +1,306 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wfs服务组合查询</title>
+    <link href="../../../js/ktop/ktop.css" rel="stylesheet" />
+    <script src="../../../js/ktop/ktop.js"></script>
+    <script src="../../../js/ktop/proj4-compressed.js"></script>
+    <script src="../../../js/ktop/proj4leaflet.js"></script>
+        <!-- JS框架 jQuery -->
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <!-- 第三方UI框架 easyUI -->
+    <link href="../../../theme/default/easyui.css" rel="stylesheet" />
+    <link href="../../../theme/icon.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../../js/easyui-lang-zh_CN.js"></script>
+    <!--ktw控件UI-->
+    <link href="../../../css/icon.css" rel="stylesheet" />
+    <link href="../../../css/app.css" rel="stylesheet" />
+    <link href="../../../css/main.css" rel="stylesheet" />
+    <script src="../../../js/ktw.ui.js"></script>
+    <script src="../../../js/ktw.onemap.js"></script>
+    <script src="../../../js/ktw.gis.js"></script>
+    <!-- json、xml类型数据格式的操作 -->
+    <script type="text/javascript" src="../../../js/data.util.js"></script>
+    <!-- JS实现的LINQ -->
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ajaxfileupload.js"></script>
+    <style type="text/css">
+        html,body{
+            margin:0;
+            padding:0;
+            width:100%;
+            height:100%;
+            overflow:hidden;
+        }
+        #map{
+            width:100%;
+            height:100%;
+            background-color:#ffffff;
+        }
+        .control-but{
+            position:absolute;
+            top:10px;
+            left:10%;
+            width:auto;
+            height:auto;
+            z-index:2!important;
+        }
+        .control-but span{
+            margin-bottom:10px;
+            text-align:center;
+            display:inline-block;
+            padding:5px 15px;
+            border-radius:5px;
+            background-color:#242B3D;
+            cursor:pointer;
+            font-size:12px;
+            color:#ffffff;
+        }
+        .text{
+            margin-bottom:10px;
+            display:inline-block;
+            border-radius: 5px;
+            padding:3px;
+            box-shadow:0 0 0 0 #242B3D;
+        }
+    </style>
+    <script type="text/javascript">
+        var geometry, latlng, options, rectangle, copyRectangle,
+                isDrawing = false;
+        var features;
+        var owsUrl = 'http://192.168.1.226:8080/hgis/ows';
+        //var owsUrl = 'http://192.168.1.226:8080/geoserver/wfs';
+        function query() {
+            layerGroup.clearLayers();
+            var whereStr = document.getElementById('queryWhere').value;
+            var queryPram = new L.QueryParameter.WfsQueryParameter({
+                url: owsUrl, //wfs服务地址
+                typename: 'onemap:world', //查询图层名称
+                where: whereStr //过滤条件
+            });
+            var queryTack = new L.QueryTask(queryPram);
+            queryTack.execute(testS, fail);
+        }
+
+        function test(data) {         
+            if (data) {
+                new L.GeoJSON(data).addTo(layerGroup);
+                var features = [];
+                for (var param in data.features["0"].properties) {
+                    features.push(param + ':' + data.features["0"].properties[param]);
+                };
+                geometry.bindPopup(features.join('</br>')).openPopup();
+            }
+        }
+
+        function fail(str) {
+            alert("查询失败：" + str);
+        }
+
+        var type;
+        function drawMark() {
+            type = "point";
+            layerGroup.clearLayers();
+            map.off('click', addClickLatlng);
+            map.on('click', addClickLatlng);
+        }
+
+        function addClickLatlng(e) {
+            layerGroup.clearLayers();
+            if (type == "point") {
+                proj4.defs("EPSG:2382", "+proj=tmerc +lat_0=0 +lon_0=111 +k=1 +x_0=500000 +y_0=0 +a=6378140 +b=6356755.288157528 +units=m +no_defs");
+                var crs = new L.Proj.CRS("EPSG:2382");
+                var mark = L.marker(e.latlng);
+                geometry = mark;
+                var point = L.marker([e.latlng.lng, e.latlng.lat]);
+                layerGroup.addLayer(mark);
+                var queryPram = new L.QueryParameter.WfsQueryParameter({
+                    url: owsUrl,
+                    typename: 'onemap:world',
+                    geometry: mark
+                });
+                var queryTack = new L.QueryTask(queryPram);
+                queryTack.execute(test, fail);
+            } else if (type == "line") {
+                polyline.addLatLng(e.latlng);
+            } else if (type == "Rectangle") {
+                map.off('click', addClickLatlng);
+                map.dragging.disable();
+                if (map) {
+                    map
+                            .on('mousedown', onMouseDown)
+                            .on('mousemove', onMouseMove)
+                            .on('touchstart', onMouseDown)
+                            .on('touchmove', onMouseMove);
+                }
+            }
+        }
+
+        function query1() {
+            layerGroup.clearLayers();
+            var queryPram = new L.QueryParameter.WfsQueryParameter({
+                url: owsUrl,
+                typename: 'onemap:world',
+            });
+            var queryTack = new L.QueryTask(queryPram);
+            queryTack.executeForDescribeFeatureType(showData, fail);
+        }
+
+        function showData(data) {
+            alert(JSON.stringify(data));
+        }
+
+        function drawPolygon() {
+            type = 'Rectangle';
+            addClickLatlng();
+        }
+        function onMouseDown(e) {
+            isDrawing = true;
+            latlng = e.latlng;
+            L.DomEvent
+                    .on(document, 'mouseup', onMouseUp, this)
+                    .on(document, 'touchend', onMouseUp, this)
+                    .preventDefault(e.originalEvent);
+        }
+        function onMouseMove(e) {
+            options = {
+                color: '#F9B140',
+                weight: 3,
+                fillColor: '#ffffff',
+                fillOpacity: 0.5,
+            };
+            if (isDrawing) {
+                if (!rectangle) {
+                    rectangle = new L.Rectangle(new L.LatLngBounds(latlng, e.latlng), options);
+                    layerGroup.addLayer(rectangle);
+                } else {
+                    rectangle.setBounds(new L.LatLngBounds(latlng, e.latlng));
+                }
+            }
+        }
+        function onMouseUp() {
+            isDrawing = false;
+            copyRectangle = new L.Rectangle(rectangle.getBounds(), options);
+            var args = {
+                Url: owsUrl,
+                TypeName: 'onemap:world',
+                Geometry: copyRectangle,
+                SourceProject: 'EPSG:4326',
+                TargetProject: 'EPSG:3857'
+            }
+
+            var GlandArea = new ktw.GetGlandArea();
+            GlandArea.call(args);
+            $(GlandArea.obj).bind("onGlandAreaSuccess", function (arg1, arg2) {
+                var Features = arg2.Features;//压盖地块（图层中的完整图形）
+                var a = arg2.Features[0].properties.glandarea;//压占地块重叠部分所占面积
+                var b = arg2.Features[0].properties.allarea;//压占地块原地块总面积
+                var c = arg2.GlandGeomerys;//压盖重叠部分的图形
+                var d = arg2.Features_Geometry;//相交地块的几何图形
+            });
+
+            
+        }
+
+        function testS(data) {
+            var graphs = [];
+            features = data.features;
+            for (var i = 0; i < data.features.length; i++) {
+                graphs.push(data.features[i].geometry);
+            }
+            var graph = new L.QueryParameter.GraphAnalysis({
+                url: owsUrl,
+                geometry: JSON.stringify(copyRectangle.toGeoJSON().geometry),
+                geometries: JSON.stringify(graphs)
+            });
+            var gra = new L.GeometryService(graph);
+            //求交集部分
+            gra.intersection(intersectioncompelete, fail);
+
+            var measurePram = new L.QueryParameter.MeasureParameter({
+                url: owsUrl,
+                geometry: JSON.stringify(graphs)
+            });
+            var gs = new L.GeometryService(measurePram);
+            //算总面积
+            gs.getArea(areaSucess, fail);           
+        }
+        function intersectioncompelete(data) {
+            var poly = JSON.parse(data);
+            var geomerys = [];
+            for (var i = 0, len = poly.length; i < len; i++) {
+                var geoPoly = L.GeoJSON.geometryToLayer((JSON.parse(data))[i]);
+                layerGroup.addLayer(geoPoly);
+                geomerys.push(geoPoly.toGeoJSON().geometry)
+            }
+            var measurePram = new L.QueryParameter.MeasureParameter({
+                url: owsUrl,
+                geometry: JSON.stringify(geomerys)
+            });
+            var gs = new L.GeometryService(measurePram);
+            //算交集部分面积
+            gs.getArea(areaSucess2, fail);
+        }
+        
+        function areaSucess(data) {
+            var allarea = JSON.parse(data);
+            for (var i = 0; i < allarea.length; i++)
+            {
+                features[i].properties.allarea = allarea[i];
+            }
+        }
+        function areaSucess2(data) {            
+            var glandarea = JSON.parse(data);
+            for (var i = 0; i < glandarea.length; i++) {
+                features[i].properties.glandarea = glandarea[i];
+            }
+            alert(features);
+        }
+        function fail(data) {
+            alert('查询失败');
+        }
+        function removeHooks() {
+            if (map) {
+                this.map.dragging.enable();
+                map
+                        .off('mousedown', onMouseDown)
+                        .off('mousemove', onMouseMove)
+                        .off('touchstart', onMouseDown)
+                        .off('touchmove', onMouseMove);
+                L.DomEvent.off(document, 'mouseup', onMouseUp, this);
+                L.DomEvent.off(document, 'touchend', onMouseUp, this);
+            }
+            rectangle = undefined;
+        }
+    </script>
+</head>
+<body>
+<div class="control-but">
+    <span onclick="query1()">字段查询</span>
+    <input class="text" type="text" id="queryWhere" value="name='Cyprus'" style="width:150px"/>
+    <span onclick="query()">属性过滤查询</span>
+    <span onclick="drawMark()">点查询</span>
+    <span id="ygcsfx" onclick="drawPolygon()">压盖分析</span>
+</div>
+<div id="map"></div>
+<script type="text/javascript">
+    var map = L.map('map', {
+        center: { lon: 113.1665, lat: 27.8399 },
+        zoom: 4,
+        minZoom: 4,//地图最小级数
+        maxZoom: 18,//地图最大级数
+        crs: L.CRS.EPSG4326,//地图参考系
+        attributionControl: false
+    });
+    var layerGroup = new L.layerGroup().addTo(map);
+    //var layer = L.imageOverlay.wms('http://192.168.1.226:8080/geoserver/wms', { layers: 'onemap:world', format: 'image/png' });
+    var layer = L.imageOverlay.wms('http://192.168.1.226:8080/hgis/wms', { layers: 'onemap:world', format: 'image/png' });
+    //http://192.168.1.226:8080/geoserver/landtax/wms
+    map.addLayer(layer);
+</script>
+</body>
+</html>

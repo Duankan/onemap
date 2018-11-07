@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>查看审批详细信息</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">   
+          .Content {
+            width:100%;
+            height:100%
+        }      
+        .Content .RowDiv {
+                border: 1px solid #E4E9EF;
+                width:100%;
+                height: 30px;
+                line-height: 30px;   
+            }
+         .Content .left, .Content .right {
+                width: 50%;
+                float: left;
+            }
+                .Content .RowDiv div {
+                    float: left;
+                }
+                .Content .RowDiv .ToolDiv {
+                    width: 224px;
+                    height: 100%;
+                }
+                  .Content .RowDiv .Field {
+                    width: 120px;
+                    height: 100%;
+                    display: inline-block;     
+                    text-align: center;
+                    background-color:#EAF0FB   
+                }
+
+                .Content .RowDiv .Value {
+                  height: 100%;
+                  background-color:White;
+                 
+                }
+             
+    </style>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var feature;
+
+        function WidgetCommunication(s) {//部件通讯
+            var parent = s.parent;
+            feature = s.param.feature;
+            init();
+        }
+        function init() {
+            var fields = $(".Value").attr("field");
+            $.each($(".Value"), function (o, s) {
+                var name = $(s).attr("field");
+                var value = feature.getProperties()[name];
+                $(s).html(value);  
+            });
+            if ($("#txt1") != null) $("#txt1").remove();
+            if ($("#txt2") != null) $("#txt2").remove();
+            $("#phaseTwo").append('<div id="txt1" style="width:100%;line-height: 30px;text-align:right;">未征收土地面积1公顷</div>');
+            $("#landSup").append('<div  id="txt2" style="width:100%;line-height: 30px;text-align:right;">剩余未供地面积1公顷</div>')
+            var data = [];
+            var props = feature.getProperties();
+            if (props) {
+                data.push(props);
+            }
+            $('#Table0').datagrid({
+                columns: [[
+                    { field: '文件名称', title: '文件名称', width: 300, align: "center" },
+                    { field: '下载', title: '下载', width: 40, align: "center" },
+                ]],
+                rownumbers: true,
+                data: data
+            });
+            $('#tab').tabs({
+                border: false,
+                onSelect: function (title, index) {
+                    var tab = $('#tab').tabs('getSelected');
+                    if (tab.attr("bind") == "true") return;
+                    switch (index) {
+                        case 1:
+                            tab.attr("bind", true);
+                            $('#Table1').datagrid({
+                                columns: [[
+                                    { field: '文件名称', title: '文件名称', width: 300, align: "center" },
+                                    { field: '下载', title: '下载', width: 40, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            }); break;
+                        case 2:
+                            tab.attr("bind", true);
+                            $('#Table2').datagrid({
+                                columns: [[
+                                    { field: '文件名称', title: '文件名称', width: 300, align: "center" },
+                                    { field: '下载', title: '下载', width: 40, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            }); break;
+                        case 3:
+                            tab.attr("bind", true);
+                            $('#Table3').datagrid({
+                                columns: [[
+                                    { field: '本次征收土地面积', title: '本次征收土地面积', width: 100, align: "center" },
+                                    { field: '二期公告日期', title: '二期公告日期', width: 100, align: "center" },
+                                    { field: '二期公告签发状态', title: '二期公告签发状态', width: 100, align: "center" },
+                                    { field: '补偿安置方案审批单状态', title: '补偿安置方案审批单状态', width: 130, align: "center" },
+                                    { field: '完成征地证明状态', title: '完成征地证明状态', width: 100, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            }); break;
+                        case 4:
+                            tab.attr("bind", true);
+                            $('#Table4').datagrid({
+                                columns: [[
+                                    { field: '审批文号', title: '审批文号', width: 100, align: "center" },
+                                    { field: '供地项目名称', title: '供地项目名称', width: 100, align: "center" },
+                                    { field: '用地单位', title: '用地单位', width: 100, align: "center" },
+                                    { field: '供地面积', title: '供地面积', width: 100, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            });
+                        case 5:
+                            tab.attr("bind", true);
+                            $('#Table5').datagrid({
+                                columns: [[
+                                    { field: '项目名称', title: '项目名称', width: 100, align: "center" },
+                                    { field: '验收单位', title: '验收单位', width: 100, align: "center" },
+                                    { field: '补充耕地面积', title: '补充耕地面积', width: 100, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            });
+                        default: return;
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="Content" style="overflow-y:scroll;overflow-x:hidden">
+        <div class="basicInfo" >
+            <div class="RowDiv" style="text-align: center;font-size:20px; background-color:#EAF0FB"><strong>项目审批信息</strong></div>
+            <div class="left">
+            <div class="RowDiv">
+                <div class="Field">项目名称</div>
+                <div class="Value" field="建设项目名"></div>
+            </div>
+             <div class="RowDiv">
+                <div class="Field">运作单位:</div>
+                <div class="Value" field="运作单位"></div>
+            </div>
+           <div class="RowDiv">
+                <div class="Field">项目立项机关:</div>
+                <div class="Value" field="项目立项机关"></div>
+            </div>
+            <div class="RowDiv">
+                <div class="Field">新增建设用地面积:</div>
+                <div class="Value" field="新增建设用地面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>
+             <div class="RowDiv">
+                <div class="Field">占用地耕地面积:</div>
+                <div class="Value" field="占用地耕地面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>
+               <div class="RowDiv">
+                <div class="Field">集体建设用地面积:</div>
+                <div class="Value" field="集体建设用地面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>
+              <div class="RowDiv">
+                <div class="Field">审批文号:</div>
+                <div class="Value" field="审批文号"></div>
+            </div>
+                 <div class="RowDiv">
+                <div class="Field">批准日期:</div>
+                <div class="Value" field="批准日期"></div>
+            </div>            
+            </div>
+             <div class="right">
+            <div class="RowDiv">
+                <div class="Field">用地预审机关:</div>
+                <div class="Value" field="项目名称"></div>
+            </div>
+               <div class="RowDiv">
+                <div class="Field">用地类型:</div>
+                <div class="Value" field="用地类型"></div>
+            </div>
+            <div class="RowDiv">
+                <div class="Field">规划用途:</div>
+                <div class="Value" field="规划用途"></div>
+            </div>
+            <div class="RowDiv">
+                <div class="Field">总用地面积:</div>
+                <div class="Value" field="总用地面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>    
+               <div class="RowDiv">
+                <div class="Field">农用地转用面积:</div>
+                <div class="Value" field="农用地转用面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>
+               <div class="RowDiv">
+                <div class="Field">征收土地面积:</div>
+                <div class="Value" field="征收土地面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>
+             <div class="RowDiv">
+                <div class="Field">受理日期:</div>
+                <div class="Value" field="受理日期"></div>
+            </div>
+              <div class="RowDiv">
+                <div class="Field">联系人:</div>
+                <div class="Value" field="联系人"></div>
+            </div>         
+            </div>         
+      </div>
+        <div class="otherInfo" style="margin-top:0px">
+             <div class="RowDiv" style="text-align: center;font-size:20px; background-color:#EAF0FB;margin-top:255px"><strong>其他信息</strong></div>
+              <div id="tab" class="easyui-tabs" data-options="border:false" style="width:100%;border:1px solid #E4E9EF">
+                   <div title="子地块信息" tabindex="0" style="overflow: hidden">
+                     <table id="Table0"></table>
+                   </div>
+                   <div id="scan" title="扫描件" tabindex="1" style="overflow: hidden">   <table id="Table1"></table></div>
+                   <div id="phasehOne" title="一期公告" tabindex="2"  style="overflow: hidden"> 
+                       <div style="width:120px;line-height: 30px; background-color:#EAF0FB;border-right:1px solid #E4E9EF;display: inline-block;text-align: center;">一期公告时间：</div>
+                        <table id="Table2"></table>
+                   </div>
+                   <div id="phaseTwo" title="二期公告" tabindex="3" style="overflow: hidden"> <table id="Table3"></table></div>
+                  <div id="landSup" title="供地信息" tabindex="4" style="overflow: hidden"> <table id="Table4"></table></div>
+                  <div id="supple" title="补充耕地" tabindex="5" style="overflow: hidden"> <table id="Table5"></table></div>
+              </div>
+                    <div style="width:100%;text-align:center"><input type="button" style="width:90px;height:20px;background-color:#EAF0FB;text-align:center" value="返回" onclick="javascript: history.go(-1);"></div>
+        </div>
+   </div>
+</body>
+</html>

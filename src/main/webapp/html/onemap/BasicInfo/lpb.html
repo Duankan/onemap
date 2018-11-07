@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/authorization.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script src="../../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../../js/guid.js"></script>
+    <script src="../../../js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../../js/md5.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.onemap.js"></script>
+    <link href="../../../css/ktw.form.css" rel="stylesheet" />
+    <style type="text/css">
+        html, body {
+            overflow: auto !important;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .form-container {
+            width: 80%;
+            margin: 0 auto;
+            min-width: 900px;
+        }
+        .span-legend {
+            width: 50px ;
+            height: 50px;
+            display:inline-block;
+            text-align: center;
+            line-height:50px;
+            margin-left: 6%;
+            border:1px solid  #000000;
+
+        }
+        .span-z {
+            width: 190px ;
+            height: 190px;
+            display:inline-block;
+            border:1px solid  #000000;
+            vertical-align:top;
+        }
+        .span-zc {
+            width: 190px ;
+            height: 190px;
+            display:inline-block;
+            text-align: center;
+            line-height:190px;
+            border:1px solid  #000000;
+            vertical-align:top;
+        }
+        .poptoshow{
+            z-index:999;
+            color:#000;
+            border:1px solid #aaaaaa;
+            position:fixed;
+            left:300px;
+            top: 200px;
+            display: none;-moz-box-shadow: 0 0 35px #aca99f ;
+            box-shadow: 0 0 35px #aca99f;
+            background-color:white;
+        }
+        .list{
+            width: 800px;
+        }
+        .listP{
+             display:inline-block;
+             width: 20px;
+	         height: 20px;
+	         line-height: 20px;
+	         text-align: center;
+	         margin-left: 20px;
+	         margin-top: 5px;
+	         background-color: blue; 
+	         border-radius: 50%; 
+	         float:left;     
+        }
+        .listT{
+            display:inline-block;            
+            width: 740px;
+            height: 30px;
+            font-size:12px;
+            line-height:30px;
+            text-align: center;
+        }
+        .span-fc
+        {
+            display:inline-block;
+            word-break:break-all;
+            word-wrap:break-word;
+        }
+        .flr
+        {
+        height:200px;       
+        }
+       .navigation-box .navigation{
+            position: fixed;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    height: 100%;
+    max-width: 150px;
+    min-width: 90px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+     flex-direction: column;
+     font-size: 28px;
+     color: #ccc;
+      text-align: center;
+     -webkit-transition: all 350ms ease;
+     -moz-transition: all 350ms ease;
+      -o-transition: all 350ms ease;
+       transition: all 350ms ease;
+        }
+       
+.navigation-box .navigation-next {
+    right: 30px;
+}
+.navigation-box .navigation:hover {
+    color: #444;
+}
+.navigation-box .navigation-prev {
+    left: 10px;
+} 
+.icon-chevron-left{
+border-right:20px solid #ccc;
+border-top:20px solid transparent;
+border-bottom:20px solid transparent;
+width:20px;
+height:34px;
+}
+.icon-chevron-right{
+border-left:20px solid #ccc;
+border-top:20px solid transparent;
+border-bottom:20px solid transparent;
+width:20px;
+height:34px;
+}
+    </style>
+</head>
+<body>
+<div class="form-container" style="overflow:auto;">
+    <div style=" margin-top: 50px;">
+    <span class="span-legend" style="background-color: white ; ">正常</span>
+    <span class="span-legend" style="background-color: #3388ff; ">抵押</span>
+    <span class="span-legend" style="background-color: #ED616C ;">查封</span>
+   <!--  <span class="span-legend" style="background-color: #00CC99 ;">异议</span>
+    <span class="span-legend" style="background-color: #86763b ;">预告</span>
+    <span class="span-legend" style="background-color: #4646a3 ;">地役权</span> -->
+    </div >
+    <div id="navbox" class="navigation-box"  style="margin-top: 30px;overflow:scroll;overflow-y: hidden;">
+    <a href="#" id="prev" class="navigation navigation-prev"><i class="icon-chevron-left"></i></a>
+     <table id="zhuang">
+     </table>
+     <a href="#" id="nextint" class="navigation navigation-next"><i class="icon-chevron-right"></i></a>
+    </div>
+    <div id="over" class="poptoshow" >
+    </div>
+</div>
+
+<script type="text/javascript">
+    function param(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return null;
+    }
+
+    var chnNumChar = ["零","一","二","三","四","五","六","七","八","九"];
+    var chnUnitSection = ["","万","亿","万亿","亿亿"];
+    var chnUnitChar = ["","十","百","千"];
+
+    function SectionToChinese(section){
+        var strIns = '', chnStr = '';
+        var unitPos = 0;
+        var zero = true;
+        while(section > 0){
+            var v = section % 10;
+            if(v === 0){
+                if(!zero){
+                    zero = true;
+                    chnStr = chnNumChar[v] + chnStr;
+                }
+            }else{
+                zero = false;
+                strIns = chnNumChar[v];
+                strIns += chnUnitChar[unitPos];
+                chnStr = strIns + chnStr;
+            }
+            unitPos++;
+            section = Math.floor(section / 10);
+        }
+        if( typeof(chnStr) == undefined)chnStr="X";
+        return chnStr;
+    }
+
+    var guid = param("guid");
+    
+    var prevint;
+	function prev()
+	{
+		var newscrollLeft=$("#navbox")[0].scrollLeft-6;
+		if(newscrollLeft<0)newscrollLeft=0;
+		$("#navbox")[0].scrollLeft=newscrollLeft;
+	}
+	
+	 var nextint;
+		function next()
+		{
+			var newscrollLeft=$("#navbox")[0].scrollLeft+6;
+			$("#navbox")[0].scrollLeft=newscrollLeft;
+		}
+	
+    $(function () {
+    	
+    	
+		$("#prev").mousedown(function(){
+			window.clearInterval(prevint);
+			window.clearInterval(nextint);
+			prevint=window.setInterval("prev()",10);
+		})
+		$("#prev").mouseup(function(){
+			window.clearInterval(prevint);
+		})
+		
+		
+		$("#nextint").mousedown(function(){
+			window.clearInterval(prevint);
+			window.clearInterval(nextint);
+			nextint=window.setInterval("next()",10);
+		})
+		$("#nextint").mouseup(function(){
+			window.clearInterval(nextint);
+		})
+		
+        ktw.cookie.init("../../../config/app.xml");
+       // ktw.InitForm(guid);
+
+       var colarrays=["white","#3388ff","#ED616C","#00CC99","#86763b","#4646a3"];
+        $.ajax({
+            async: false,
+            url: ktw.cookie.ServerUrl  + "fwsx/getbyfilterlike/bdcdyh=" +guid ,
+            type: "get",
+            success: function (res) {
+                if (res.success) {
+                    var data=  Enumerable.From(res.data).OrderBy("s=>s.nameflr").OrderBy("s=>s.bdcdyh").GroupBy("s=>s.nameflr").ToArray();
+                    //循环查询到的数据 根据 名义层分组  再排序
+                    for (var i=0;i<data.length;i++)
+                    {
+                        var appstr="<tr><td><span class='span-zc'  style='margin-left: 4%;'>第"+SectionToChinese(data[i].source[0].nameflr)+"层</span></td>";
+                        for (var j=0;j<data[i].source.length;j++)
+                        {
+                            appstr+= "<td><div><span class='span-z'  style='background-color:"+colarrays[data[i].source[j].registerType]+"; '>"
+                                    +"<span class='span-fc'>地址："        +data[i].source[j].bsit+    "</span>"
+                                    +"<span class='span-fc' data='"+data[i].source[j].bdcdyh+"'>不动产单元号："+data[i].source[j].bdcdyh+"</span>"
+                                    +"<span class='span-fc'>建筑结构："+data[i].source[j].bstruct+"</span>"
+                                    +"<span class='span-fc'>房间用途："+data[i].source[j].buse+"</span>"
+                                    +"<span class='span-fc'>登记时间："    +data[i].source[j].cssj+  "</span>"
+                                    +"<span class='span-fc'>建筑面积："    +data[i].source[j].barea+ "</span>"     
+                                    +"</span></div></td>";
+                        }
+                        appstr+="</tr>";
+                        $("#zhuang").append(appstr);
+                    }
+                } else {
+                    ktw.Error(res.message);
+                }
+            },
+            error: function (res) {
+                ktw.Error("请求数据出错!");
+                console.error(res);
+            }
+        });
+
+
+
+   
+
+        $("#xmmc", window.parent.document).html($("#xmmc").html());
+        $("#type", window.parent.document).html(" 补地>> ");
+
+
+
+        
+        $(".span-z").mouseover(function(){
+        	
+        	var bdcdyh= this.children[1].getAttribute("data");
+        	    bdcdyh="'"+bdcdyh.replace(/(^\s*)|(\s*$)/g, "")+"'";
+        
+            
+            var x_index= event.clientX-500;
+            var y_index= event.clientY;
+            var overdoc=document.getElementById('over');
+            overdoc.style.display='block';
+            overdoc.style.left=x_index+'px';
+            overdoc.style.top=y_index+'px';
+
+            var str="";
+            var strarr ;
+           //{djType:登记类型，djTime:登记时间，djJG:登记机构}
+            $.ajax({
+                async: false,
+                url: ktw.cookie.ServerUrl + "fwsx/getdjfull/bdcdyh=" +bdcdyh ,
+                type: "get",
+                success: function (res) {
+                    if (res.success) {
+                    	var data=  Enumerable.From(res.data).OrderBy("s=>s.djTime").ToArray();
+                    	strarr=res.data;
+                    } else {
+                        ktw.Error(res.message);
+                    }
+                },
+                error: function (res) {
+                    ktw.Error("请求数据出错!");
+                    console.error("请求数据出错!");
+                }
+            });
+            //循环查询的数据
+            for (var i=0;i<strarr.length;i++)
+            {
+                str+="<div class='list'><span class='listP'></span><span class='listT'>"
+                        +strarr[i].djType
+                        +" 登记机构："
+                        +strarr[i].djJG
+                        +" 登记时间："
+                        +strarr[i].djTime
+                        +"</span></div>";
+            }
+            if(strarr.length==0)
+            	str+="<div class='list'><span class='listP'></span><span class='listT'>暂无查封，抵押登记信息！</span></div>";
+            $(overdoc).append(str);
+        });
+
+
+ 
+        $(".span-z").mouseout(function(){
+            var overdoc=document.getElementById('over');
+            overdoc.style.display='none';
+            overdoc.style.left=0;
+            overdoc.style.top=0;
+            $(overdoc).empty();
+        }); 
+
+    });
+
+</script>
+</body>
+</html>

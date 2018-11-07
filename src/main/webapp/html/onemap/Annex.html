@@ -1,0 +1,567 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/authorization.css" />
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script src="../../js/data.util.js"></script>
+    <script src="../../js/ktw.onemap.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script>
+        var serviceUrl;
+        var select = false;
+        var current = 0;
+        var now = 0;
+        var data;
+        var array1 = [], array2 = [], array3 = [];
+        //var beforeurl, afterurl;
+        var guid;
+        var type;
+        $(function () {
+            ktw.cookie.init("../../config/app.xml");
+            ktw.cookie.validateUser();
+            serviceUrl = ktw.cookie.ServerUrl;
+            guid = ktw.UrlPara("guid");
+            type = ktw.UrlPara("type");
+            getBaseInfo(guid, type);
+            initleft();
+
+            $(".rightbutton").hide();
+            //$("#before").mouseover(function () {
+            //    if (($("#info").css("display") == "none") && $("#info").css("display") == "none") return;
+            //    $("#before").css("opacity", 1);
+            //    $("#turnabove").show();
+            //});
+            //$("#before").mouseleave(function () {
+            //    if (($("#info").css("display") == "none") && $("#info").css("display") == "none") return;
+            //    $("#before").css("opacity", 0);
+            //    $("#turnabove").hide();
+            //});
+            //$("#after").mouseover(function () {
+            //    if (($("#info").css("display") == "none") && $("#info").css("display") == "none") return;
+            //    $("#after").css("opacity", 1);
+            //    $("#turnfollow").show();
+            //});
+            //$("#after").mouseleave(function () {
+            //    if (($("#info").css("display") == "none") && $("#info").css("display") == "none") return;
+            //    $("#after").css("opacity", 0);
+            //    $("#turnfollow").hide();
+            //});
+
+            $("input[type=checkbox]").click(function () {
+                select = true;
+            });
+            $(".button[operatetype]").click(function (evt) {
+                var type = $(this).attr("operatetype");
+                var oImg = document.getElementById("info");
+                if (type == "forward") { Forward(oImg); return; }
+                if (type == "direct") { Direct(oImg); return; }
+            });
+            //图片放大或缩小
+            var oDiv = document.getElementById("info");
+            $(oDiv).click(function () {
+                if ($(this).css("cursor") == "zoom-in") {
+                    $(this).css("cursor", "zoom-out");
+                    $(this).css("max-width", "");
+                } else {
+                    $(this).css("cursor", "zoom-in");
+                    $(this).css("max-width", "500px");
+                }
+            });
+            //前翻
+            $("#turnabove").on("click", function () {
+                if (now <= 0) { ktw.Alert("当前页为第一页!"); return; }
+                load(data[now - 1].path);
+                now = now - 1;
+            })
+
+            //后翻
+            $("#turnfollow").on("click", function () {
+                if (now < data.length - 1) {
+                    load(data[parseInt(now + 1)].path);
+                    now = now + 1;
+                }
+                else {
+                    ktw.Alert("已经到达最后一页");
+                }
+            })
+            window.onresize = function () {
+                load();
+            }
+        });
+        function getBaseInfo(guid, type) {
+            var business;
+            switch (type) {
+                case "p":
+                    {
+                        $("#base").attr("src", "BasicInfo/p.html?guid=" + guid);
+                        break;
+                    }
+                case "z":
+                    {
+                        $("#base").attr("src", "BasicInfo/z.html?guid=" + guid);
+                        break;
+                    }
+                case "c":
+                    {
+                        $("#base").attr("src", "BasicInfo/c.html?guid=" + guid);
+                        break;
+                    }
+                case "g":
+                    {
+                        $("#base").attr("src", "BasicInfo/g.html?guid=" + guid);
+                        break;
+                    }
+                case "y":
+                    {
+                        $("#base").attr("src", "BasicInfo/y.html?guid=" + guid);
+                        break;
+                    }
+                case "b":
+                    {
+                        $("#base").attr("src", "BasicInfo/b.html?guid=" + guid);
+                        break;
+                    }
+                case "w":
+                    {
+                        $("#base").attr("src", "BasicInfo/w.html?guid=" + guid);
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+        //数组去重
+        function unique1(array) {
+            var n = []; //一个新的临时数组 
+            for (var i = 0; i < array.length; i++) {
+                if (n.indexOf(array[i]) == -1) n.push(array[i]);
+            }
+            return n;
+        }
+        //初始化左侧导航
+        function initleft() {
+            $.ajax({
+                type: "GET",
+                url: serviceUrl + "fjgl/getaffix/" + guid,
+                success: function (e) {
+                    var k = "";
+                    data = e.data || {};
+                    if (data.length == 0 || data.length == undefined) return;
+                    for (var i = 1; i < data.length; i++) {
+                        array1.push(data[i].kindname);
+
+                    }
+                    array1 = unique1(array1);
+                    for (var i = 0; i < array1.length; i++) {
+                        $("#nav")[0].innerHTML += "<li class=\"fjc\"><a onclick=\"DoMenu('ChildMenu" + i + "')\"><input id=\"" + i + "o" + "\" class=\"cbox\" type=\"checkbox\" onclick=\"selectAll('ChildMenu" + i + "','" + array1[i] + "'," + i + ", this)\" /><div class=\"icon\"><img class=\"mark\" src=\"../../image/fold.jpg\" /></div>" + array1[i] + "</a> <ul class=\"chlid\" id=\"ChildMenu" + i + "\" class=\"collapsed\"></ul><\/li>";
+                    }
+                    var src;
+                    var wordTypes = [".xls", ".xlsx", ".ppt", ".pptx", ".doc", ".docx"];
+                    var imageTypes = [".jpg", ".png"];
+                    for (var i = 0; i < data.length; i++) {
+                        if (wordTypes.indexOf(data[i].filetype) > -1) src = "../../image/word.jpg";
+                        else if (imageTypes.indexOf(data[i].filetype) > -1) src = "../../image/image.png";
+                        else if (data[i].filetype == ".pdf") src = "../../image/pdf.jpg"
+
+                        for (var j = 0; j < array1.length; j++) {
+
+                            if (data[i].kindname == array1[j]) {
+                                $(".chlid")[j].innerHTML += "<li class=\"second\" onclick=\"chlidTC(" + i + ")\"><a><input id=\"" + i + "\" class=\"cboxc\" type=\"checkbox\"  /><div class=\"iconc\"><img class=\"mark\" src=" + src + " /></div>" + data[i].name + "</a></li>"
+
+                            }
+                        }
+                    }
+
+                    $(".cboxc", $("#nav")).bind('click', function () {
+                        var isCheck = $("#" + this.id).is(':checked');
+                        now = this.id;
+                        data[now].remark = isCheck;
+                        console.log("remark", data[now].remark);
+                    });
+                },
+                error: function () {
+                    var k = "";
+                }
+            });
+        }
+
+        function chlidTC(parm) {
+            $("#base,#pdf,#info").hide();
+            if (select == true) { select = false; return; }
+            now = parm;
+            var path = data[now].path;
+            load(path);
+        }
+
+        function initTree() {
+            var a = $(".fjc");
+            for (var i = 0; i < a.length; i++) {
+                var count = a[i].childNodes.length - 2;
+                $(".fjc")[i].childNodes[0].innerText += "(" + count + ")";
+            }
+        }
+        function load(path) {
+            var t = path;
+            //if ($('#before').css('display') == 'none') $("#before").show();
+            //if ($('#after').css('display') == 'none') $("#after").show();
+            $.ajax({
+                type: "POST",
+                data: t,
+                contentType: "application/json",
+                url: serviceUrl + "fjgl/getfile",
+                success: function (e) {
+                    var k = "";
+                    ktw.Alert(e.responseText);
+                    return;
+                },
+                error: function (e) {
+                    var k = "";
+                    param = e.responseText;
+                    if (param == null) {
+                        ktw.Alert("预览失败!");
+                        return;
+                    }
+                    var fileTypes = [".xls", ".xlsx", ".ppt", ".pptx", ".doc", ".docx"];
+                    if (fileTypes.indexOf('.' + path.split('.')[1]) > -1) {
+                        var waitbox = new ktw.UCWaitBox($(window.top.document.body));
+                        waitbox.Show();
+                        $.ajax({
+                            type: "GET",
+                            url: serviceUrl + "file/view?reluri=" + e.responseText,
+                            success: function (res) {
+                                waitbox.Close();
+                                if (res.success) {
+                                    var param = res.data;
+                                    $(".rightbutton").hide();
+                                    $("#info").hide();
+                                    $("#pdf").show();
+                                    document.getElementById("pdf").src = "../../" + param;
+                                } else {
+                                    ktw.Alert("ftp请求错误！");
+                                }
+                            },
+                            error: function (res) {
+                                waitbox.Close();
+                                ktw.Alert("服务请求失败！");
+                            }
+                        });
+                    }
+                    else if (param.substr(param.lastIndexOf('.')) != ".pdf") {
+                        document.getElementById("info").src = "../../" + param;
+                        $(".rightbutton").show();
+                        $("#pdf").hide();
+                        $("#info").show();
+                    }
+                    else if (param.substr(param.lastIndexOf('.')) == ".pdf") {
+                        $(".rightbutton").hide();
+                        $("#info").hide();
+                        $("#pdf").show();
+                        document.getElementById("pdf").src = "../../" + param;
+                    }
+                }
+            });
+        }
+
+        //var LastLeftID = "";
+        function selectAll(emid, value, i, e) {
+            var isCheck = $("#" + i + "o").is(':checked');
+            if (data.length == 0) return;
+            for (var i = 0; i < data.length; i++) {
+                if (value == data[i].kindname) {
+                    data[i].remark = isCheck;
+                }
+
+            }
+
+            select = true;
+            var obj = document.getElementById(emid);
+            var itemss = obj.getElementsByTagName("input");
+            var a;
+            (e["checked"] == true ? a = true : a = false);
+            for (var i = 0; i < itemss.length; i++) {
+                itemss[i]["checked"] = a;
+                obj.className = "expanded";
+            }
+        }
+        function DoMenu(emid) {
+            if (select == true) {
+                select = false;
+                return;
+            }
+            var obj = document.getElementById(emid);
+            obj.className = (obj.className.toLowerCase() == "collapsed" ? "expanded" : "collapsed");
+        }
+        function Forward(oImg) {
+            current = (current + 90) % 360;
+            oImg.style.transform = 'rotate(' + current + 'deg)';
+        }
+        function Direct(oImg) {
+            current = (current - 90) % 360;
+            oImg.style.transform = 'rotate(' + current + 'deg)';
+        }
+        //下载全部
+        function DownLoadA() {
+            var k = "";
+            var ids = [];
+            for (var i = 0; i < data.length; i++) {
+                ids.push(data[i].id);
+            }
+            if (ids.length <= 0) {
+                ktw.Alert("无附件信息!");
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(ids),
+                contentType: "application/json",
+                url: serviceUrl + "fjgl/download",
+                success: function (e) {
+                    if (e.success) {
+                        var path = e.data;
+                        if (!ktw.IsNull(path)) {
+                            var downlaod = serviceUrl + path;
+                            window.open(downlaod);
+                        }
+
+                    }
+                },
+                error: function (e) {
+
+                }
+            });
+        }
+        //下载所选
+        function DownLoad() {
+            var ids = [];
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].remark)
+                    ids.push(data[i].id);
+            }
+            if (ids.length <= 0) {
+                ktw.Alert("请选择附件!");
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(ids),
+                contentType: "application/json",
+                url: serviceUrl + "fjgl/download",
+                success: function (e) {
+                    if (e.success) {
+                        var path = e.data;
+                        if (!ktw.IsNull(path)) {
+                            var downlaod = serviceUrl + path;
+                            window.open(downlaod);
+                        }
+
+                    }
+                },
+                error: function (e) {
+
+                }
+            });
+        }
+        function baseInfo() {
+            //$("#before").hide();
+            //$("#after").hide();
+            $("#info").hide();
+            $("#pdf").hide();
+            $(".rightbutton").hide();
+            $("#base").show();
+        }
+        function flod() {
+            var ularr = $("#nav").children();
+            if (ularr.length > 2) {
+                for (var i = 2; i <= ularr.length; i++) {
+                    ularr[i].className = "collapsed";
+                    ularr[i].style.display = (ularr[i].style.display == "none" ? "" : "none");
+                }
+            }
+        }
+    </script>
+    <style type="text/css">
+        .Content {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-size: 12px;
+        }
+
+        #nav {
+            width: 100%;
+            line-height: 24px;
+            list-style-type: none;
+            text-align: left;
+        }
+
+            #nav a {
+                width: 250px;
+                display: block;
+                padding-left: 36px;
+                color: black;
+                /*Width(一定要)，否则下面的Li会变形*/
+            }
+
+            #nav li {
+                float: left;
+                /*font-weight: bold;*/
+                font-size: 14px;
+                padding-bottom: 2px;
+                color: black;
+            }
+
+            #nav a:hover {
+                color: white;
+                color: #CA498C;
+                background-color: #E5F1FB;
+                /*background-color:#AAAAAA;*/
+                /*border:1px solid #D2E4F5;*/
+                text-decoration: none;
+            }
+            /*二级目录*/
+            #nav li ul {
+                list-style: none;
+                text-align: left;
+            }
+
+                #nav li ul li {
+                    border-right: #cccccc 1px solid;
+                    font-size: 11px;
+                    padding-bottom: 2px;
+                    padding-top: 2px;
+                }
+
+                #nav li ul a {
+                    padding-left: 50px;
+                    width: 260px;
+                }
+
+        #mrc {
+            clear: left;
+        }
+
+        #nav ul.collapsed {
+            display: none;
+        }
+
+        #PARENT {
+            width: calc(100%-10px);
+            padding-top: 5px;
+        }
+
+        .Content .rightpart {
+            position: absolute;
+            right: 0px;
+            top: 40px;
+            left: 260px;
+            bottom: 0px;
+            text-align: center;
+            overflow: auto;
+            background-color: #F5F5F5;
+        }
+
+        #PARENT #nav li .icon {
+            width: 16px;
+            height: 16px;
+            float: left;
+            margin: 4px;
+        }
+
+        #PARENT #nav li .iconc {
+            width: 16px;
+            height: 16px;
+            float: left;
+            margin: 4px;
+        }
+
+        .mark {
+            width: 16px;
+            height: 16px;
+        }
+
+        .cbox {
+            vertical-align: middle;
+            float: left;
+            margin-top: 7px;
+        }
+
+        .cboxc {
+            vertical-align: middle;
+            float: left;
+            margin-top: 7px;
+        }
+    </style>
+</head>
+<body>
+    <div class="Content">
+        <div style="width: 100%; height: 40px; background-color: #E8E7E3; line-height: 40px;">
+            <div class="title" style="width: 70%; height: 40px; text-align: left; padding-left: 60px; font-size: 14px; float: left; color: #777777">
+                <span style="display: inline-block; top: 2px; width: 16px; height: 16px; background-image: url(../../image/home.png);"></span>
+                <span>一张图 >> 附件及详细信息 >><span id="type"></span><span id="xmmc"></span></span>
+
+            </div>
+            <div class="rightbutton" style="width: 20%; height: 20px; float: right; margin-right: 20px">
+                <div class="button" style="float: right" operatetype="forward">正向旋转</div>
+                <div class="button" style="float: right" operatetype="direct">反向旋转</div>
+            </div>
+        </div>
+        <div class="leftpart" style="width: 259px; border-right: solid 1px #bbb; background-color: #F5F5F5; overflow: hidden; position: absolute; left: 0; top: 40px; bottom: 0;">
+            <div class="leftbut" style="width: 100%; height: 20px; padding: 10px">
+                <div class="button" onclick="DownLoadA()">下载全部</div>
+                <div class="button" style="margin-left: 10px;" onclick="DownLoad()">下载</div>
+            </div>
+            <div id="divtree" style="width: 100%; height: calc(100%-30px); overflow: hidden">
+                <div id="PARENT">
+                    <ul id="nav">
+                        <li style="padding-left: 0px">
+                            <a style="font-size: 16px; padding-left: 20px" href="#Menu=ChildMenu1" onclick="baseInfo()">
+                                <div class="icon">
+                                    <img class="mark" src="../../image/table.jpg" />
+                                </div>
+                                基本信息</a></li>
+                        <li style="padding-left: 0px"><a style="font-size: 16px; padding-left: 20px" href="#Menu=ChildMenu1" onclick="flod()">
+                            <div class="icon">
+                                <img class="mark" src="../../image/fj.jpg" />
+                            </div>
+                            附件</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="rightpart" style="">
+            <!--右侧附件信息-->
+            <!--  <div id="before" style="width: 80px; height: 100%; background: #EAEAEA; float: left; z-index: 1; display: none; opacity: 0; position: absolute;">
+                <img id="turnabove" style="width: 60px; height: 60px; padding-top: 300px;display:none" src="../../image/before.png" />
+            </div>
+            <div id="after" style="width: 80px; height: 100%; background: #EAEAEA; float: right; z-index: 1; display: none; right: 0px; opacity: 0; position: absolute">
+                <img id="turnfollow" style="width: 60px; height: 60px; padding-top: 300px;display:none" src="../../image/after.png" />
+            </div>-->
+            <img id="info" style="max-width: 500px; margin-left: 0; cursor: zoom-in;" />
+            <iframe id="pdf" style="position: absolute; width: 100%; height: 100%; left: 0; display: none"></iframe>
+            <!--基本信息-->
+            <iframe id="base" src="BasicInfo/p.html" style="position: absolute; width: 100%; height: 100%; left: 0; overflow: hidden;"></iframe>
+        </div>
+    </div>
+</body>
+</html>

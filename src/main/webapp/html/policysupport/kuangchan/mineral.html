@@ -1,0 +1,504 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>矿产专题分析</title>
+    <link href="../../../js/ktop/ktop.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../../css/icon.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/echarts.min.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script src="../../../js/ktop/ktop.js"></script>
+
+    <style type="text/css">
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            min-width: 600px;
+            overflow: hidden;
+            background: url(images/bg.jpg) repeat;
+        }
+
+        .top-title {
+            height: 80px;
+            width: 100%;
+            color: white;
+            font-size: 34px;
+            line-height: 65px;
+            text-align: center;
+            background: url(images/lv_top.png) no-repeat;
+            background-position: center;
+        }
+
+        .fixedSizePanel {
+            width: 25%;
+            height: calc(100% - 50px);
+            margin-top: -30px;
+            float: left;
+        }
+
+        .lt-content {
+            width: 100%;
+            height: 55%;
+        }
+
+        .lb-content {
+            width: 100%;
+            height: 45%;
+        }
+
+        .centermap {
+            width: 50%;
+            height: calc(100% - 80px);
+            float: left;
+            background-color: transparent;
+        }
+
+        .rt-content {
+            width: 100%;
+            height: 32%;
+        }
+
+        .rc-content {
+            width: 100%;
+            height: 32%;
+        }
+
+        .rb-content {
+            width: 100%;
+            height: 36%;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-title">矿产专题分析</div>
+    <div class="fixedSizePanel">
+        <div id="mineralAmount" class="lt-content" title="矿产资源情况"></div>
+        <div id="supplyStruct" class="lb-content" title="矿产勘查年度投入"></div>
+    </div>
+    <div id="kuangmap" class="centermap"></div>
+    <div class="fixedSizePanel" title="矿业权市场">
+        <div id="marketAmount" class="rt-content"></div>
+        <div id="marketStruct" class="rc-content"></div>
+        <div id="mineralClass" class="rb-content"></div>
+    </div>
+    <script type="text/javascript">
+        var opt_mineralAmount, chart_mineralAmount;
+        var opt_supplyStruct, chart_supplyStruct;
+        var opt_marketAmount, chart_marketAmount;
+        var opt_marketStruct, chart_marketStruct;
+        var opt_mineralClass, chart_mineralClass;
+
+        $(window).resize(function () {
+            chart_mineralAmount.resize();
+            chart_supplyStruct.resize();
+            chart_marketAmount.resize();
+            chart_marketStruct.resize();
+            chart_mineralClass.resize();
+
+        });
+
+        $(document.body).ready(function () {
+            initchart_mineralAmount();
+            initchart_supplyStruct();
+            initchart_marketAmount();
+            initchart_marketStruct();
+            initchart_mineralClass();
+            initMap();
+
+        });
+
+        function initMap() {
+            var map = L.map('kuangmap', {
+                center: { lon: 110.16, lat: 27.53 },
+                zoomControl: false,
+                zoom: 8,
+                minZoom: 3,//地图最小级数
+                maxZoom: 18,//地图最大级数
+                attributionControl: false
+            });
+            //$(map.getContainer()).css("background", 'transparent');  //TODO 返回map容器（dom对象）并设置样式
+            var option = {
+                layers: 'higis-sdk:Export_Output',
+                format: 'image/png',
+                transparent: true
+            };
+            option.SLD_BODY = loadSLD('../landResources/style.sld'); //TODO 嵌入项目后调用封装的公用函数
+            baseLayer = new L.imageOverlay.wms('http://192.168.1.226:8080/geoserver/higis-sdk/wms', option);
+            var tempLayer = new L.imageOverlay.wms('http://192.168.1.226:8080/geoserver/higis-sdk/wms', {
+                layers: 'higis-sdk:KFZLFKNEW_Project',
+                format: 'image/png',
+                transparent: true
+            });
+            map.addLayer(baseLayer);
+            map.addLayer(tempLayer);
+        }
+
+        /*获取图层样式xml文件*/
+        function loadSLD(url) {
+            var strXml = null;
+            $.ajax({
+                url: url,
+                dataType: 'text',
+                type: 'GET',
+                timeout: 2000,
+                async: false,
+                success: function (xml) {
+                    strXml = xml.replace(/\r\n\s*/g, "");
+                },
+                error: function (xml) {
+                    //dialog.Alert("加载XML文件出错！");
+                }
+            });
+            return strXml;
+        }
+
+        /*主要矿产勘查新增查明资源储量*/
+        function initchart_mineralAmount() {
+            chart_mineralAmount = echarts.init($('#mineralAmount')[0]);
+            opt_mineralAmount = {
+                title: {
+                    text: '主要矿产勘查新增查明资源储量',
+                    left: '10',
+                    top: '20',
+                    textStyle: {
+                        color: '#00ffff',
+                        fontSize: 18,
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    top: 60,
+                    right: '6%',
+                    data: ['煤炭', '铁矿', '磷矿', '锰矿', '铅锌'],
+                    itemGap: 20,
+                    textStyle: {
+                        color: '#fff'
+                    },
+                },
+                grid: {
+                    show: true,
+                    top: '30%',
+                    left: '7%',
+                    right: '6%',
+                    bottom: '5%',
+                    containLabel: true
+                },
+                xAxis: [{
+                    type: 'category',
+                    boundaryGap: true,
+                    axisTick: { alignWithLabel: true },
+                    axisLine: { lineStyle: { color: '#c3c5c8' } },
+                    axisLabel: { color: '#fff' },
+                    data: ['2010年', '2011年', '2012年', '2013年', '2014年', '2015年', '2016年']
+                }],
+                yAxis: [{
+                    type: 'value',
+                    name: '(吨)',
+                    nameTextStyle: {
+                        fontSize: 16,
+                        color: '#7E9AE8'
+                    },
+                    axisLine: { lineStyle: { color: '#c3c5c8' } },
+                    axisLabel: { color: '#fff' },
+                    splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } }
+                }],
+                series: [
+                    { name: '煤炭', type: 'line', smooth: true, data: [20, 32, 70, 34, 90, 130, 110], symbol: 'emptyCircle', symbolSize: 8, itemStyle: { normal: { color: "#1dd6d1" } } },
+                    { name: '铁矿', type: 'line', smooth: true, data: [60, 72, 71, 74, 109, 110, 120], symbol: 'triangle', symbolSize: 8, itemStyle: { normal: { color: "#4886ff" } } },
+                    { name: '磷矿', type: 'line', smooth: true, data: [43, 38, 28, 62, 94, 83, 75], symbol: 'circle', symbolSize: 8, itemStyle: { normal: { color: "#11d631" } } },
+                    { name: '锰矿', type: 'line', smooth: true, data: [85, 62, 62, 62, 13, 53, 82], symbol: 'rect', symbolSize: 8, itemStyle: { normal: { color: "#f886ff" } } },
+                    { name: '铅锌', type: 'line', smooth: true, data: [82, 47, 70, 61, 62, 74, 77], symbol: 'roundRect', symbolSize: 8, itemStyle: { normal: { color: "#c23531" } } }
+                ]
+            };
+            chart_mineralAmount.setOption(opt_mineralAmount);
+        }
+
+        /*矿产勘查年度投入*/
+        function initchart_supplyStruct() {
+            chart_supplyStruct = echarts.init($('#supplyStruct')[0]);
+            opt_supplyStruct = {
+                title: {
+                    text: '矿产勘查年度投入',
+                    left: '10',
+                    top: '20',
+                    textStyle: {
+                        color: '#00ffff',
+                        fontSize: 18,
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    top: 60,
+                    right: '6%',
+                    data: ['社会投资', '财政投资'],
+                    itemGap: 20,
+                    textStyle: {
+                        color: '#fff'
+                    },
+                },
+                grid: {
+                    show: true,
+                    top: '30%',
+                    left: '7%',
+                    right: '6%',
+                    bottom: '5%',
+                    containLabel: true
+                },
+                xAxis: [{
+                    type: 'category',
+                    boundaryGap: true,
+                    axisTick: { alignWithLabel: true },
+                    axisLine: { lineStyle: { color: '#c3c5c8' } },
+                    axisLabel: { color: '#fff' },
+                    data: ['2010年', '2011年', '2012年', '2013年', '2014年', '2015年', '2016年']
+                }],
+                yAxis: [{
+                    type: 'value',
+                    name: '(公顷)',
+                    nameTextStyle: {
+                        fontSize: 16,
+                        color: '#7E9AE8'
+                    },
+                    axisLine: { lineStyle: { color: '#c3c5c8' } },
+                    axisLabel: { color: '#fff' },
+                    splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } }
+                }],
+                series: [
+                    { name: '社会投资', type: 'line', smooth: true, data: [20, 32, 70, 34, 90, 130, 110], symbol: 'emptyCircle', symbolSize: 8, itemStyle: { normal: { color: "#1dd6d1" } } },
+                    { name: '财政投资', type: 'line', smooth: true, data: [60, 72, 71, 74, 109, 110, 120], symbol: 'triangle', symbolSize: 8, itemStyle: { normal: { color: "#4886ff" } } }
+                ]
+            };
+            chart_supplyStruct.setOption(opt_supplyStruct);
+        }
+
+        /*新立探矿权和采矿权情况*/
+        function initchart_marketAmount() {
+            chart_marketAmount = echarts.init($('#marketAmount')[0]);
+            opt_marketAmount = {
+                title: {
+                    text: '新立探矿权和采矿权情况',
+                    left: '10',
+                    top: 5,
+                    textStyle: {
+                        color: '#00ffff',
+                        fontSize: 18,
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    textStyle: {
+                        color: '#fff'
+                    },
+                    data: ['新立勘查许可证', '新立采矿许可证'],
+                    right: '6%',
+                    top: '40'
+                },
+                grid: {
+                    left: '5%',
+                    right: '4%',
+                    top: '30%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        data: ['2010年', '2011年', '2012年', '2013年', '2014年', '2015年', '2016年']
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } }
+                    }
+                ],
+                series: [
+                    {
+                        name: '新立勘查许可证',
+                        type: 'bar',
+                        itemStyle: {
+                            normal: {
+                                color: '#006699'
+                            }
+                        },
+                        data: [620, 732, 701, 734, 1090, 1130, 1120]
+                    },
+                    {
+                        name: '新立采矿许可证',
+                        type: 'bar',
+                        itemStyle: {
+                            normal: {
+                                color: '#f0f'
+                            }
+                        },
+                        barGap: 0,
+                        data: [60, 72, 71, 74, 190, 130, 110]
+                    }
+                ]
+            };
+            chart_marketAmount.setOption(opt_marketAmount);
+        }
+
+        /*矿业权出让个数构成*/
+        function initchart_marketStruct() {
+            chart_marketStruct = echarts.init($('#marketStruct')[0]);
+            opt_marketStruct = {
+                title: {
+                    text: '探矿权出让个数占比情况',
+                    left: '10',
+                    top: 5,
+                    textStyle: {
+                        color: '#00ffff',
+                        fontSize: 18,
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    textStyle: {
+                        color: '#fff'
+                    },
+                    data: ['申请在先出让', '协议出让', '招拍挂出让'],
+                    right: '6%',
+                    top: '16%'
+                },
+                grid: {
+                    left: '5%',
+                    right: '4%',
+                    top: '30%',
+                    bottom: '5%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        data: ['2010年', '2011年', '2012年', '2013年', '2014年', '2015年', '2016年']
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } }
+                    }
+                ],
+                series: [
+
+                    {
+                        name: '申请在先出让',
+                        type: 'bar',
+                        barWidth: 20,
+                        stack: '搜索引擎',
+                        data: [620, 732, 701, 734, 1090, 1130, 1120]
+                    },
+                    {
+                        name: '协议出让',
+                        type: 'bar',
+                        stack: '搜索引擎',
+                        data: [120, 132, 101, 134, 290, 230, 220]
+                    },
+                    {
+                        name: '招拍挂出让',
+                        type: 'bar',
+                        stack: '搜索引擎',
+                        data: [60, 72, 71, 74, 190, 130, 110]
+                    }
+                ]
+            };
+            chart_marketStruct.setOption(opt_marketStruct);
+        }
+
+        /*新立勘查许可证矿种构成*/
+        function initchart_mineralClass() {
+            chart_mineralClass = echarts.init($('#mineralClass')[0]);
+            opt_mineralClass = {
+                title: {
+                    text: '新立勘查许可证矿种构成',
+                    top: 5,
+                    left: '10',
+                    textStyle: {
+                        color: '#00ffff',
+                        fontSize: 18,
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    textStyle: {
+                        color: '#fff'
+                    },
+                    top: 40,
+                    right: '6%',
+                    data: ['2014年', '2015年', '2016年']
+                },
+                grid: {
+                    left: '5%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value', axisLine: { lineStyle: { color: '#c3c5c8' } },
+                    axisLabel: { color: '#fff' },
+                    boundaryGap: [0, 0.01]
+                },
+                yAxis: {
+                    type: 'category',
+                    axisLine: { lineStyle: { color: '#c3c5c8' } },
+                    axisLabel: { color: '#fff' },
+                    splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } },
+                    data: ['其他', '磷矿', '铁矿', '锰矿', '铅锌', '煤矿']
+                },
+                series: [
+                    {
+                        name: '2014年',
+                        type: 'bar',
+                        data: [17.5, 16.2, 3.5, 1.6, 2.9, 2.7]
+                    },
+                    {
+                        name: '2015年',
+                        type: 'bar',
+                        data: [21.5, 16.2, 3.5, 1.6, 1.9, 2.7]
+                    },
+                    {
+                        name: '2016年',
+                        type: 'bar',
+                        data: [13.5, 16.2, 3.5, 1.6, 6.9, 2.7]
+                    }
+                ]
+            };
+            chart_mineralClass.setOption(opt_mineralClass);
+        }
+
+    </script>
+</body>
+</html>

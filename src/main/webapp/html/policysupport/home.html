@@ -1,0 +1,587 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>决策分析系统</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" href="../../theme/icon.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
+    <link rel="stylesheet" href="../../css/main.css" />
+    <link rel="stylesheet" href="../../css/icon.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/jquery.color.min.js"></script>
+    <style type="text/css">
+        .support-web {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+            /*左侧面板*/
+            .support-web > .support-left {
+                position: absolute;
+                top: 0;
+                width: 300px;
+                height: 100%;
+                background-color: #c0cad6; /*c0cad6,597eaa*/
+                z-index: 2;
+            }
+                /*左侧面板---头部容器*/
+                .support-web > .support-left > .support-leftHeader {
+                    position: relative;
+                    height: 50px;
+                    line-height: 50px;
+                    width: 100%;
+                    cursor: default;
+                    background-color: #333;
+                    font-size: 14px;
+                }
+                    /*左侧面板---头部标题图标*/
+                    .support-web > .support-left > .support-leftHeader > .support-leftHeaderIcon {
+                        position: absolute;
+                        left: 5px;
+                        top: 0;
+                        bottom: 0;
+                        margin: auto;
+                        width: 25px;
+                        height: 25px;
+                        background-size: cover;
+                    }
+                    /*左侧面板---头部标题文本*/
+                    .support-web > .support-left > .support-leftHeader > .support-leftHeaderText {
+                        position: absolute;
+                        left: 40px;
+                        color: white;
+                    }
+
+                    /*左侧面板---展开/收缩按钮*/
+                    .support-web > .support-left > .support-leftHeader > .support-leftExpandBtn {
+                        position: absolute;
+                        right: 10px;
+                        top: 0;
+                        bottom: 0;
+                        height: 25px;
+                        width: 30px;
+                        text-align: center;
+                        line-height: 25px;
+                        margin: auto;
+                        color: #bbb;
+                        font-size: 1.25rem;
+                    }
+
+                        .support-web > .support-left > .support-leftHeader > .support-leftExpandBtn:hover {
+                            color: #fff;
+                        }
+
+                /*左侧面板---内容区域*/
+                .support-web > .support-left > .support-leftContent {
+                    position: relative;
+                    height: calc(100% - 50px);
+                    width: 100%;
+                    cursor: default;
+                }
+
+                    .support-web > .support-left > .support-leftContent > .autoContentPanel {
+                        height: 50px;
+                        line-height: 40px;
+                        width: 94%;
+                        margin: auto;
+                        clear: both;
+                    }
+
+                        .support-web > .support-left > .support-leftContent > .autoContentPanel > .autoNormalBtn {
+                            width: 50%;
+                            text-align: center;
+                            margin-top: 10px;
+                            background-color: #0099cc;
+                            color: white;
+                            font-size: 14px;
+                            float: left;
+                        }
+
+                        .support-web > .support-left > .support-leftContent > .autoContentPanel > .selectedColor {
+                            background-color: #315666;
+                        }
+
+                        .support-web > .support-left > .support-leftContent > .autoContentPanel > .autoNormalBtn:hover {
+                            opacity: 0.8;
+                            box-shadow: 0 0 3px #fff;
+                        }
+
+                    .support-web > .support-left > .support-leftContent > .zhibiaoPanel {
+                        width: 100%;
+                        height: calc(100% - 100px);
+                        background-color: #315666;
+                        color: white;
+                    }
+                        /*修改树默认样式*/
+                        .support-web > .support-left > .support-leftContent > .zhibiaoPanel .ktw-tree .node:hover {
+                            background-color: #5882a5;
+                        }
+
+                        .support-web > .support-left > .support-leftContent > .zhibiaoPanel .ktw-tree .node-selected {
+                            background-color: #0ea7e9;
+                        }
+
+                    .support-web > .support-left > .support-leftContent > .casePanel {
+                        width: 100%;
+                        height: calc(100% - 100px);
+                        background-color: #315666;
+                        color: white;
+                    }
+                        /*datagrid行单元格样式*/
+                        .support-web > .support-left > .support-leftContent > .casePanel .tdRow {
+                            padding: 10px 5px;
+                            width: calc(100% - 20px);
+                            border-width: 0 0 1px 0;
+                            border-color: white;
+                            border-style: solid;
+                        }
+
+                        /*专题描述容器*/
+                        .support-web > .support-left > .support-leftContent > .casePanel .infoPanel {
+                            width: 270px;
+                            color: white;
+                        }
+                            /*专题描述--专题名称*/
+                            .support-web > .support-left > .support-leftContent > .casePanel .infoPanel h2 {
+                                padding: 0;
+                                margin: 0;
+                                text-align: center;
+                            }
+
+                            /*专题描述--专题正文*/
+                            .support-web > .support-left > .support-leftContent > .casePanel .infoPanel p {
+                                padding: 3px;
+                                margin: 5px 0;
+                                line-height: 20px;
+                            }
+
+                            /*专题描述--专题访问链接*/
+                            .support-web > .support-left > .support-leftContent > .casePanel .infoPanel a {
+                                float: right;
+                                color: #8bc34a;
+                                font-size: 13px;
+                                font-weight: bold;
+                            }
+
+                                .support-web > .support-left > .support-leftContent > .casePanel .infoPanel a:hover {
+                                    color: #bee491;
+                                }
+
+                        /*覆盖easyui的datagrid控件样式*/
+                        .support-web > .support-left > .support-leftContent > .casePanel .panel-body {
+                            background-color: transparent; /*#c7ccd1*/
+                            border: 0;
+                        }
+
+                        /*datagrid鼠标移入样式*/
+                        .support-web > .support-left > .support-leftContent > .casePanel .datagrid-row-over {
+                            background-color: #56869a;
+                        }
+
+                        /*datagrid行选中样式*/
+                        .support-web > .support-left > .support-leftContent > .casePanel .datagrid-row-selected {
+                            background-color: #ab5a0a; /*0a74b5 蓝 ,995aa2 紫, ab5a0a 棕黄 */
+                        }
+
+        /*查询按钮样式*/
+        .searchBox {
+            position: relative;
+            width: 100%;
+            height: 30px;
+            padding: 10px 0;
+            margin: auto;
+            background-color: #315666;
+        }
+
+            .searchBox #txtKey {
+                width: calc(100% - 70px);
+                margin-left: 10px;
+            }
+
+            .searchBox .searchButton {
+                position: absolute;
+                top: 10px;
+                right: 11px;
+                width: 48px;
+                height: 28px;
+                line-height: 28px;
+                text-align: center;
+                border: 1px solid #95b8e7;
+                background-color: #0099cc;
+                color: white;
+                font-size: 13px;
+                cursor: pointer;
+            }
+
+                .searchBox .searchButton:hover {
+                    background-color: #0692be;
+                }
+
+                .searchBox .searchButton:active {
+                    background-color: #008dbf;
+                }
+
+        /*右侧面板*/
+        .support-web > .support-right {
+            position: absolute;
+            left: 300px;
+            width: calc(100% - 300px);
+            height: 100%;
+            background-color: white;
+            z-index: 1;
+        }
+            /*右侧面板---页面展示区*/
+            .support-web > .support-right > #mainpage {
+                width: 100%;
+                height: calc(100%);
+                margin: 0;
+                padding: 0;
+                border-width: 0;
+            }
+            /*右侧面板---隐藏的nav*/
+            .support-web > .support-right .hidden-nav {
+                /*filter: alpha(Opacity=80);
+                -moz-opacity: 0.8;
+                opacity: 0.8;
+                background-color: #5882a5;*/
+                width: 100%;
+                height: 40px;
+                position: absolute;
+                z-index: 1;
+                top: 0px;
+            }
+
+                .support-web > .support-right .hidden-nav .nav-button {
+                    width: 100%;
+                    height: 100%;
+                    filter: alpha(Opacity=80);
+                    -moz-opacity: 0.8;
+                    opacity: 0.8;
+                    background-color: #5882a5;
+                    display: none;
+                }
+
+                    .support-web > .support-right .hidden-nav .nav-button .full-screen {
+                        position: relative;
+                        float: right;
+                        width: 16px;
+                        height: 16px;
+                        margin: 12px 12px 0 0;
+                        cursor: pointer;
+                    }
+        /*指标管理搜索模糊匹配的树节点样式*/
+        .treeSelect {
+            /*background-color:#cce8ff;*/
+            color: #32ffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="support-web">
+        <div class="support-left">
+            <div class="support-leftHeader">
+                <span class="support-leftHeaderIcon icon-nav-fzjc"></span>
+                <h3 class="support-leftHeaderText">决策分析平台</h3>
+                <a title="折叠" class="support-leftExpandBtn" astatus="open">☰</a>
+            </div>
+            <div class="support-leftContent">
+                <div class="autoContentPanel">
+                    <div tag="zhibiao" class="autoNormalBtn selectedColor">指标管理</div>
+                    <div tag="case" class="autoNormalBtn">模型管理</div>
+                </div>
+                <div class="searchBox">
+                    <div id="txtKey" class="ktw-textbox" opt='{"TipInfo":"请输入名称","TextAlign":"center","Height":"30px","LineHeight":"30px"}'></div>
+                    <div class="searchButton">搜索</div>
+                </div>
+                <div tag="zhibiao" class="zhibiaoPanel">
+                    <div id="index-tree" class="ktw-tree" style="height: 100%;" opt='{"ValueField":"id","TextField":"text","ChildrenField":"children"}'></div>
+                </div>
+                <div tag="case" class="casePanel">
+                    <div style="height: 100%;">
+                        <table id="tt" style="width: 300px; height: 100%;">
+                            <thead>
+                                <tr>
+                                    <th field="itemid" width="80" sortable="true">专题名称</th>
+                                    <th field="listprice" width="120" sortable="true">专题简介</th>
+                                    <th field="unitcost" width="80" sortable="true">访问地址</th>
+                                    <th field="attr1" width="250" sortable="true">attr</th>
+                                    <th field="status" width="60" sortable="true">Status</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="support-right">
+            <div class="hidden-nav">
+                <div class="nav-button">
+                    <div class="full-screen icon-maptool-fullscreen1"></div>
+                </div>
+            </div>
+            <iframe id="mainpage"></iframe>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var widgetArgs, widgetParent;
+        var obj_status = { open: 300, close: 50 };
+        var indexTree; //指标树
+        var likeData = []; //模糊匹配的数据
+        var leftPanelTag;  //指标与专题切换类型
+        var isFirst = true; //是否是初始化加载
+        var nodeSelect;     //树节点选择
+        //TODO 界面设计数据 需从服务端获取 用于构造树结构数据模型
+        var treeData = [
+            { id: '1', text: '基本指标', datatype: '', parentid: '000000000000' },  //orgid
+            { id: '1-1', text: '地均GDP与房价指数之比', datatype: 'gdp', parentid: '1' },
+            { id: '1-2', text: '基本指标数据展示', datatype: '', parentid: '1' },
+            { id: '1-2-1', text: '地均GDP与房价指数之比', datatype: 'houseprice', parentid: '1-2' },
+            { id: '1-2-2', text: '待建成房地产用地区划周期', datatype: 'landuse', parentid: '1-2' },
+            { id: '2', text: '综合指标', datatype: '', parentid: '000000000000' },//orgid
+            { id: '2-1', text: '地均GDP与房价指数之比', datatype: 'synthesise1', parentid: '2' },
+            { id: '2-2', text: '待建成房地产用地区划', datatype: 'synthesise2', parentid: '2' }
+        ];
+        var cardview = $.extend({}, $.fn.datagrid.defaults.view, {
+            renderRow: function (target, fields, frozen, rowIndex, rowData) {
+                var cc = [];
+                cc.push('<td colspan=' + fields.length + ' class="tdRow">');
+                if (!frozen && rowData.itemid) {
+                    var aa = rowData.itemid.split('-');
+                    var img = 'shirt' + aa[1] + '.gif';
+                    cc.push('<img src="../../image/policy/0' + (rowIndex + 2) + '.jpg" style="width:100%;">');
+                    cc.push('<div class="infoPanel" >');
+                    cc.push('<h2>' + rowData[fields[0]] + '</h2>');
+                    cc.push('<p>&emsp;&emsp;' + rowData[fields[1]] + '</p>');
+                    cc.push('<a deurl="' + encodeURI(rowData[fields[2]]) + '" href="javascript:void(0);" onclick="linkTocasePage(' + rowIndex + ');">访问地址&#10149;</a>');
+                    cc.push('</div>');
+                }
+                cc.push('</td>');
+                return cc.join('');
+            }
+        });
+
+        //插件通信方法
+        function WidgetCommunication(s, e) {
+            widgetParent = s.parent;
+            widgetArgs = s.param;
+            indexTree = $('#index-tree').prop("$this");
+            indexTree.LoadData(getTreeData(treeData, '000000000000')); //绑定指标树数据 (构造树 TODO 根节点id通过cookie获取)
+            indexTree.bind("onSelectChanged", function (e, s) {
+                nodeSelect = s.$this.datatype;
+                if (Ktw.IsNull(nodeSelect)) return;
+                //点击任意子节点去掉模糊匹配样式
+                removeMatchClass();
+                //document.getElementById("mainpage").contentWindow.test("ssss"); //页面调用子页面的原始方法
+                if (isFirst) {
+                    indexView();
+                } else {
+                    Ktw.CallWidgetCommunication($("#mainpage")[0], $(".support-web > .support-right"), nodeSelect);
+                }
+            })
+            defaultSelect(indexTree.GetRoots()[0]);
+            initEvent();
+            isFirst = false;
+            widgetParent.one("onClosing", function () {
+                //TODO 解绑事件
+            });
+        }
+
+        $(document.body).ready(function () {
+            //TODO 调后台服务
+            $('#tt').datagrid({
+                view: cardview,
+                method: 'get',
+                url: 'data/case.json',
+                showHeader: false,
+                singleSelect: true,
+                fitColumns: true
+            });
+
+            //TODO 加载指标数据      
+        });
+
+        //折叠与展开按钮
+        $('.support-leftExpandBtn').click(function () {
+            var code = $(this).attr("astatus");
+            var leftW = obj_status[code];
+            var finalLeftW = leftW == obj_status.close ? obj_status.open : obj_status.close;
+            var finalRightW = 'calc(100% - ' + finalLeftW + 'px)';
+
+            $('.support-left').animate({ 'width': finalLeftW }, 200);
+            $('.support-left').next().css({ 'left': finalLeftW, 'width': finalRightW });
+            //【头部容器】图标及文本隐藏
+            leftW == obj_status.close ? $(this).siblings().show() : $(this).siblings().hide();
+            leftW == obj_status.close ? $(this).attr("title", "折叠") : $(this).attr("title", "展开");
+
+            //按钮换行效果
+            $('.autoNormalBtn').css("width", (leftW == obj_status.close ? '50%' : '100%'));
+            $('.autoNormalBtn:eq(0)').html(leftW == obj_status.close ? '指标管理' : '<br/>指<br/>标<br/>管<br/>理<br/><br/>');
+            $('.autoNormalBtn:eq(1)').html(leftW == obj_status.close ? '模型管理' : '<br/>模<br/>型<br/>管<br/>理<br/><br/>');
+
+            $('.autoContentPanel').css({
+                "width": (leftW == obj_status.close ? '94%' : '100%'),
+                'line-height': (leftW == obj_status.close ? '50px' : '26px')
+            });
+            if (leftW == obj_status.close) {
+                $('.autoContentPanel').siblings().show();
+                $('.autoNormalBtn:eq(0)').hasClass('selectedColor') ? $('.casePanel').hide() : $('.zhibiaoPanel').hide();
+            }
+            else $('.autoContentPanel').siblings().hide();
+
+            //状态更新
+            $(this).attr("astatus", leftW == obj_status.close ? "open" : "close");
+        });
+
+        //指标与专题切换按钮
+        $('.autoNormalBtn').click(function () {
+            $('.autoNormalBtn').removeClass('selectedColor');
+            $(this).addClass('selectedColor');
+            //折叠状态时如果点击【指标、专题】按钮就展开
+            var code = $('.support-leftExpandBtn').attr("astatus");
+            if (obj_status[code] == obj_status.close) $('.support-leftExpandBtn').click();
+            //根据切换按钮控制面板显示
+            $('.zhibiaoPanel').hide();
+            $('.casePanel').hide();
+            leftPanelTag = $(this).attr('tag');
+            $('div[tag="' + leftPanelTag + '"]', '.support-leftContent').show();
+            //TODO 专题浏览未做默认页面设置
+            if ('zhibiao' == leftPanelTag) {
+                indexView();
+            }
+        });
+
+        //查询
+        $('.searchButton').click(function () {
+            //TODO 实现指标与专题查询
+            var searchKey = $("#txtKey").prop("$this").GetValue();
+            if (Ktw.IsNull(searchKey)) return;
+            if ("zhibiao" == leftPanelTag || !leftPanelTag) { //指标查询
+                removeMatchClass();
+                var reg = new RegExp(searchKey);
+                for (var i = 0, len = treeData.length; i < len; i++) {
+                    if (treeData[i].text.match(reg)) {
+                        likeData.push(treeData[i]);
+                        var children = Enumerable.From(treeData).Where("s=>s.parentid=='" + treeData[i].id + "'").ToArray();
+                        if (!children.length) { //有子节点则不高亮
+                            likeData.push(treeData[i]);
+                            var node = $("#index-tree #" + treeData[i].id);
+                            node.addClass("treeSelect");
+                            parentNodeExpand(node[0]); //找父节点,所有的父节点展开
+                        }
+                    }
+                }
+            }
+        });
+
+        //专题系统访问链接
+        function linkTocasePage(rowindex) {
+            var url = decodeURI($('.infoPanel a:eq(' + rowindex + ')').attr('deurl'));
+            $('#mainpage', '.support-right').attr('src', url);
+        }
+        /*指标管理*/
+        function indexView() {
+            $("#mainpage").attr("src", 'indexView.html');
+            $("#mainpage").one('load', function () {
+                Ktw.CallWidgetCommunication($("#mainpage")[0], $(".support-web > .support-right"), nodeSelect);
+            });
+        }
+        /*构造树结构数据*/
+        function getTreeData(data, id) {
+            var rootData = Enumerable.From(data).Where("s=>s.parentid=='" + id + "'").ToArray();
+            if (Ktw.IsNull(rootData) || rootData.length == 0) return rootData;
+            for (var i = 0, length = rootData.length; i < length; i++) {
+                rootData[i].children = getTreeData(data, rootData[i].id);
+            }
+            return rootData;
+        }
+        /*初始化树时默认选中叶子节点*/
+        function defaultSelect(dom) {
+            var nodes = indexTree.GetChildren(dom);
+            if (!Ktw.IsNull(nodes) && nodes.length) {
+                indexTree.Expand(dom, false);//如果有子节点则展开当前节点
+                defaultSelect(nodes[0]);
+            } else {
+                indexTree.SetSelectNode(dom); //默认选中根节点第一项的最终子节点
+                return;
+            }
+        }
+        /*叶子节点高亮时父节点展开*/
+        function parentNodeExpand(dom) {
+            var parentNode = indexTree.GetParent(dom);
+            if (Ktw.IsNull(parentNode) || !parentNode.length) return;
+            var isExpand = $(".arrow", parentNode).hasClass("expanded");  //该父节点是否已展开
+            if (!isExpand) {
+                indexTree.Expand(parentNode[0], false);//如果有父节点则展开父节点
+            }
+            parentNodeExpand(parentNode[0]);
+        }
+        /*移除搜索模糊匹配样式*/
+        function removeMatchClass() {
+            for (var i = 0, len = likeData.length; i < len; i++) {
+                $("#index-tree #" + likeData[i].id).removeClass("treeSelect");
+            }
+        }
+        /*初始化全屏点击事件*/
+        function initEvent() {
+            var timer;  //定时器
+            //全屏
+            $(".hidden-nav .full-screen").click(function () {
+                var isFullScreen = $(this).hasClass("icon-maptool-fullscreen1");
+                if (isFullScreen) {
+                    $(this).removeClass("icon-maptool-fullscreen1").addClass("icon-maptool-fullscreen");
+                } else {
+                    $(this).removeClass("icon-maptool-fullscreen").addClass("icon-maptool-fullscreen1");
+                }
+                fullScreen(isFullScreen);
+            });
+            //隐藏显示全屏按钮
+            $(".support-right .hidden-nav").mouseenter(function () {
+                //$(this).animate({
+                //    backgroundColor: 'red',
+                //    left: '+50px',
+                //    top:'+50px'
+                //}, 1000);
+
+                var isShow = $(".hidden-nav .nav-button").attr("tag");
+                if ('show' == isShow) return;
+                $(".hidden-nav .nav-button").attr("tag", "show");
+                $(".hidden-nav .nav-button").fadeIn("normal");
+            }).mouseleave(function () {
+                if (null != timer) clearTimeout(timer);
+                timer = setTimeout(function () {
+                    $(".hidden-nav .nav-button").attr("tag", "hide");
+                    $(".hidden-nav .nav-button").fadeOut("normal");
+                }, 3000);
+            });
+        }
+        /*右侧展示面板全屏切换*/
+        function fullScreen(status) {
+            if (status) {
+                Ktw.App.TopPanel.SetVisible(false);
+                $('.support-left').css({ "display": "none" });
+                $(widgetParent[0]).css({ 'top': 0, 'height': '100%' });
+                $(".support-web .support-right").css({ 'left': 0, 'width': '100%' });
+            } else {
+                var status = $(".support-leftExpandBtn").attr("astatus");
+                $('.support-left').css({ "display": "block" });
+                Ktw.App.TopPanel.SetVisible(true);
+                $(widgetParent[0]).css({ 'top': 60, 'height': 'calc(100% - 60px)' });
+                $(".support-web .support-right").css({ 'left': obj_status[status], 'width': 'calc(100% - ' + obj_status[status] + 'px)' });
+            }
+        }
+    </script>
+</body>
+</html>

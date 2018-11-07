@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>一张图</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="theme/default/easyui.css" />
+	    <link rel="stylesheet" type="text/css" href="theme/icon.css" />
+	    <link rel="stylesheet" type="text/css" href="css/app.css" />
+	    <link rel="stylesheet" type="text/css" href="css/newLogin4.css" />
+        <link rel="stylesheet" type="text/css" href="css/swiper-4.2.2.min.css" />
+	    <script type="text/javascript" src="js/jquery.min.js"></script>
+	    <script type="text/javascript" src="js/linq.min.js"></script>
+	    <script type="text/javascript" src="js/data.util.js"></script>
+	    <script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+	    <script type="text/javascript" src="js/easyui-lang-zh_CN.js"></script>
+	    <script type="text/javascript" src="js/md5.js"></script>
+	    <script type="text/javascript" src="js/ktw.ui.js"></script>
+	    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+        <script type="text/javascript" src="js/swiper-4.2.2.min.js"></script>
+	</head>
+	<body>
+		<div class="header">
+			<div class="logo"><img src="image/newLogo.png"/></div>
+		</div>
+        <div class="swiper-container">
+			<div class="swiper-wrapper">
+				<div class="swiper-slide"><img src="image/bg1_banner.png"/></div>
+				<div class="swiper-slide"><img src="image/bg2_banner.png"/></div>
+				<div class="swiper-slide"><img src="image/bg3_banner.png"/></div>
+                <div class="swiper-slide"><img src="image/bg4_banner.png"/></div>
+                <div class="swiper-slide"><img src="image/loginbg4.png"/></div>
+                <div class="swiper-slide"><img src="image/loginbg1.png"/></div>
+			</div>
+		</div>
+		<div class="content">
+			<div class="content_img1">
+				<img src="image/FDJ_07.png"/>
+			 </div>
+			 <div class="content_img2">
+				 <img src="image/WZ_07.png"/>
+			 </div>
+			 <div class="login-box">
+				 <div class="login-header">用户登录</div>
+				 <p class="userName"><span><img src="image/u1.png"/></span><input type="text" name="" id="txtUserName" value="admin"/></p>
+				 <p class="password"><span><img src="image/p1.png"/></span><input type="password" class="txtInput txtUserPwd" name="" id="pswd" value="123456" /></p>
+				 <!--<p class="rPassword"><input type="checkbox" name="" id="remember" value="" /><span>记住密码</span></p>-->
+				 <p class="register"><input type="button" name="" id="btnLogin" value="登录" /></p>
+			</div>
+		</div>
+		<div class="footer">
+            <p class="copyright">版权所有:湖北金拓维信息技术有限公司</p>
+            <!--<p>国土资源综合管理平台</p>-->
+		</div>
+		<script type="text/javascript">
+		    var dialog;
+		    var screenWidth;
+		    $(function () {
+		        ktw.cookie.init();
+		        msg = {
+		            title: "系统提示",
+		            userName: "请输入用户名！",
+		            userPwd: "请输入密码！",
+		            validate: "用户名或密码错误，请重试!",
+		            timeout: "用户名失效，请与管理员联系！",
+		            netout: "网络超时，请稍后再试！"
+		        };
+		        dialog = $.messager;
+		        dialog.defaults.ok = "确定";
+		        dialog.defaults.cancel = "取消";
+		        dialog.defaults.height = 150;
+		        dialog.defaults.width = 250;
+		        $("#btnLogin").click(function () {
+		            var name = $("#txtUserName").val();
+		            var pwd = $(".txtUserPwd").val();
+		            if (ktw.IsNull(name)) {
+		                dialog.alert(msg.title, msg.userName, "info");
+		                return;
+		            }
+		            if (ktw.IsNull(pwd)) {
+		                dialog.alert(msg.title, msg.userPwd, "info");
+		                return;
+		            }
+		            var user = { name: name, password: hex_md5(pwd) };
+		            $.ajax({
+		                type: "POST",
+		                data: JSON.stringify(user),
+		                contentType: "application/json",
+		                url: ktw.cookie.ServerUrl + "user/ login",
+		                success: function (res) {
+		                    if (!res.success) {
+		                        $.messager.alert(msg.title, res.message, "error");
+		                        return;
+		                    }
+		                    if (ktw.IsNull(res.data.photouri)) {
+		                        res.data.photouri = "image/authorization/default.jpg";
+		                    }
+		                    $.cookie("usertoken", JSON.stringify(res.data), { expires: 1 });
+		                    location.href = ktw.cookie.Root + "index.html";
+		                },
+		                error: function () {
+		                    $.messager.alert(msg.title, msg.netout, "error");
+		                }
+		            });
+		        });
+		        var mySwiper = new Swiper('.swiper-container', {
+		            direction: 'vertical',
+		            loop: true,
+		            autoplay: true,
+		            effect: 'fade',
+		            autoplay: {
+		                delay: 3000,//1秒切换一次
+		            },
+		            fadeEffect: {
+		                crossFade: true,
+		            },
+		        })
+		    });
+	    </script>
+	</body>
+</html>

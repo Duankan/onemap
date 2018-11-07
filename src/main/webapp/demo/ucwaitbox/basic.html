@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>UCWaitBox </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+     
+    </style>
+    <script type="text/javascript">
+
+        var ctr;
+
+        $(window).ready(function () {
+            ctr = new ktw.UCWaitBox({
+                Parent: $("#panel")
+
+            });
+
+
+        });
+
+        //打开窗体
+        function show() {
+            ctr.Show();
+        }
+
+        function cancle() {
+            ctr.Close();
+        }
+
+    </script>
+</head>
+<body>
+    <h2>UCWaitBox</h2>
+    <p>等待框用法示例</p>
+    <div style="margin-left: 20px;">
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="show();">显示</button>
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="cancle();">取消</button>
+    </div>
+    <div id="panel" style="width: 400px; height: 400px; border: 1px solid #0099cc; margin-left: 20px; position: relative;">
+        <p>
+            ·easyui is a collection of user-interface
+            <br />
+            ·plugin based on jQuery.<br />
+            <br />
+            ·complete framework for HTML5 web page.<br />
+            <br />
+            ·easyui saves your time and scales
+            <br />
+            · while developing your products.<br />
+            <br />
+            ·easyui is very easy but powerful.<br />
+        </p>
+    </div>
+</body>
+</html>

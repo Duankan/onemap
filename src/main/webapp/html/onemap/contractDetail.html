@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>业务详细信息</title>
+<link rel="stylesheet" type="text/css"
+	href="../../theme/default/easyui.css" />
+
+<link rel="stylesheet" type="text/css" href="../../css/app.css" />
+<link rel="stylesheet" type="text/css" href="../../css/main.css" />
+<link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+<link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+
+<style type="text/css">
+.Content {
+	width: 100%;
+	height: 100%
+}
+
+.Content .RowDiv {
+	border: 1px solid #E4E9EF;
+	width: 100%;
+	height: 30px;
+	line-height: 30px;
+}
+
+.Content .left, .Content .right {
+	width: 50%;
+	float: left;
+}
+
+.Content .RowDiv div {
+	float: left;
+}
+
+.Content .RowDiv .ToolDiv {
+	width: 224px;
+	height: 100%;
+}
+
+.Content .RowDiv .Field {
+	width: 120px;
+	height: 100%;
+	display: inline-block;
+	text-align: center;
+	background-color: #EAF0FB
+}
+
+.Content .RowDiv .Value {
+	height: 100%;
+	background-color: White;
+}
+
+.radioSpan {
+	position: relative;
+	border-right: 1px solid #95B8E7;
+	border-left: 1px solid #95B8E7;
+	background-color: #fff;
+	vertical-align: middle;
+	overflow: hidden;
+	white-space: nowrap;
+	margin: 0;
+	padding: 0;
+	height: 30px;
+	display: block;
+}
+
+.radioSpan input {
+	margin-left: 10px;
+}
+
+.RowDiv {
+	min-width: 300px;
+}
+
+.Value {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 60%;
+}
+
+.ktw-textbox {
+	white-space: normal;
+	overflow: visible;
+	text-overflow: inherit;
+	width: 100%
+}
+</style>
+
+</head>
+<body>
+	<div class="Content" style="overflow-y: scroll; overflow-x: hidden">
+		<div class="basicInfo">
+			<div class="RowDiv"
+				style="text-align: center; font-size: 20px; background-color: #EAF0FB">
+				<strong>项目基本信息</strong>
+			</div>
+			<div class="left">
+				<div class="RowDiv">
+					<div class="Field">项目名称</div>
+					<div class="Value" field="建设项目名"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">总用地面积:</div>
+					<div class="Value" field="总用地面积">
+						<div style="position: relative; left: 150px">公顷</div>
+					</div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">审批文号:</div>
+					<div class="Value" field="审批文号"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">土地坐落:</div>
+					<div class="Value" field="土地坐落"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">出让价款:</div>
+					<div class="Value" field="出让价款">
+						<div style="position: relative; left: 150px">万元</div>
+					</div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">规划用途:</div>
+					<div class="Value" field="规划用途"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">出让方式:</div>
+					<div class="Value" field="出让方式"></div>
+				</div>
+			</div>
+			<div class="right">
+				<div class="RowDiv">
+					<div class="Field">用地单位:</div>
+					<div class="Value" field="用地单位"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">宗地号:</div>
+					<div class="Value" field="宗地号"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">审批日期:</div>
+					<div class="Value" field="审批日期"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">电子监管号:</div>
+					<div class="Value" field="电子监管号"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">合同签订日期:</div>
+					<div class="Value" field="合同签订日期"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">联系人:</div>
+					<div class="Value" field="联系人"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">联系电话:</div>
+					<div class="Value" field="联系电话"></div>
+				</div>
+			</div>
+			<div style="clear: both; height: 0"></div>
+			<div style="width: 100%; height: 70px">
+				<div
+					style="width: 120px; line-height: 70px; background-color: #EAF0FB; text-align: center; float: left; vertical-align: middle">其他约定情况:</div>
+				<div class="Value ktw-textbox" 
+					opt='{"Height":70,"Type":"multi-text","LineHeight":70}'
+					style="position: relative; left: 120px; right: 0px"></div>
+			</div>
+			<div style="width: 50%; height: 30px">
+				<div
+					style="width: 120px; line-height: 30px; background-color: #EAF0FB; text-align: center; float: left; vertical-align: middle">是否进行开发建设:</div>
+				<div class="RowDiv">
+					<span class="radioSpan" style="line-height: 30px;">
+						<div id="raditem3"  class="ktw-radio"
+							opt='{"Name":"是否进行开发建设", "Value":"true","Text":"是"}'></div>
+						<div id="raditem4" class="ktw-radio"
+							opt='{"Name":"是否进行开发建设", "Value":"false","Text":"否"}'></div>
+					</span>
+				</div>
+			</div>
+			<div style="width: 100%; height: 70px; ">
+				<div
+					style="width: 120px; line-height: 70px; background-color: #EAF0FB; text-align: center; vertical-align: middle;float: left;">不进行开发建设原因:</div>
+				<div class="Value ktw-textbox" 
+					opt='{"Height":70,"Type":"multi-text","LineHeight":70}'
+					style="position: relative; left: 120px; right: 0px"></div>
+			</div>
+			<div style="width: 100%; height: 30px;overflow-y:auto">
+				<div style="width: 50%; height: 30px; float: left;">
+					<div
+						style="width: 120px; line-height: 30px; background-color: #EAF0FB; text-align: center; float: left; vertical-align: middle;white-space:normal;word-break:break-all; word-wrap:break-word; ">约定动工日期:</div>
+					<div class="Value" field="约定动工日期"></div>
+				</div>
+				<div style="width: 50%; height: 30px; float: left;">
+					<div
+						style="width: 120px; line-height: 30px; background-color: #EAF0FB; text-align: center; float: left; vertical-align: middle">约定竣工日期:</div>
+					<div class="Value" field="约定竣工日期"></div>
+				</div>
+			</div>
+		</div>
+		<div class="otherInfo" style="position: relative">
+			<div id="tab" class="easyui-tabs" data-options="border:false"
+				style="width: 100%; height: auto; border: 1px solid #E4E9EF;">
+				<div id="land" title="规划使用条件" tabindex="0" style="overflow: hidden">
+					<div class="landTab">
+						<div style="width: 50%; float: left">
+							<div class="RowDiv">
+								<div class="Field">总建筑面积：</div>
+								<div class="Value" field="总建筑面积"></div>
+							</div>
+							<div class="RowDiv">
+								<div class="Field">建筑密度:</div>
+								<div class="Value" field="建筑密度"></div>
+							</div>
+						</div>
+						<div style="width: 50%; float: left">
+							<div class="RowDiv">
+								<div class="Field">容积率:</div>
+								<div class="Value" field="容积率"></div>
+							</div>
+							<div class="RowDiv">
+								<div class="Field">绿地率:</div>
+								<div class="Value" field="绿地率"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div title="导入相关文件信息" style="overflow: hidden">
+					<div
+						style="width: 100%; height: 30px; line-height: 30px; background-color: #EAF0FB; text-align: center;">
+						<div style="width: 50%; height: 30px; float: left;">
+							<div style="width: 120px; float: left; vertical-align: middle">附件列表</div>
+						</div>
+						<div style="width: 50%; height: 30px; float: left;">
+							<div style="width: 120px; float: left; vertical-align: middle">界址点文件列表</div>
+						</div>
+					</div>
+					<div class="landTab">
+						<div style="width: 50%; float: left">
+							<div class="RowDiv">
+								<div class="Field">导入图件资料：</div>
+								<div class="Value" field="导入图件资料"></div>
+							</div>
+						</div>
+						<div style="width: 50%; float: left">
+							<div class="RowDiv">
+								<div class="Field">导入界址点文件:</div>
+								<div class="Value" field="导入界址点文件"></div>
+							</div>
+						</div>
+					</div>
+					<div class="landTab">
+						<div style="width: 50%; float: left">
+							<table id="table-imagefile" style="width: 100%;"></table>
+						</div>
+						<div style="width: 50%; float: left">
+							<table id="table-landfile" style="width: 100%;"></table>
+						</div>
+
+					</div>
+				</div>
+				<div title="供应土地来源" style="overflow: hidden">
+					<div
+						style="font-size: 14px; line-height: 30px; background-color: rgb(234, 240, 251)">
+						<strong>农转征项目（面积：</strong>
+					</div>
+					<table id="table-nongzhuanzheng" style="width: 100%;"></table>
+					<div
+						style="font-size: 14px; line-height: 30px; background-color: rgb(234, 240, 251)">
+						<strong>储备土地（面积：</strong>
+					</div>
+					<table id="table-chubei" style="width: 100%;"></table>
+					<div
+						style="font-size: 14px; line-height: 30px; background-color: rgb(234, 240, 251)">
+						<strong>其他来源（面积：</strong>
+					</div>
+					<div style="width: 100%; float: left">
+						<div class="RowDiv">
+							<div class="Field">面积：</div>
+							<div class="Value" field="面积">
+								<div style="position: relative; left: 585px">公顷</div>
+							</div>
+						</div>
+					</div>
+					<div style="width: 100%; height: 70px; float: left">
+						<div
+							style="width: 120px; line-height: 70px; background-color: #EAF0FB; text-align: center; float: left; vertical-align: middle">其他来源说明:</div>
+						<div class="Value ktw-textbox" field="其他来源说明"
+							opt='{"Height":70,"Type":"multi-text","LineHeight":70, "Width":750}'
+							style="position: relative; left: 120px; right: 0px"></div>
+					</div>
+				</div>
+				<div title="土地登记发证" style="overflow: hidden">
+					<div
+						style="font-size: 14px; line-height: 30px; background-color: rgb(234, 240, 251)">
+						<strong>土地登记发证</strong>
+					</div>
+					<table id="table-dengji"></table>
+					<div style="float: right">
+						<span>剩余可登记面积：</span>
+						<div class="Value" style="display: inline; margin-left: 2px"
+							field="剩余可登记面积">
+							<span style="margin-left: 3px">公顷</span>
+						</div>
+					</div>
+				</div>
+				<div title="开工竣工情况" style="overflow: hidden">
+					<div
+						style="font-size: 14px; line-height: 30px; background-color: rgb(234, 240, 251)">
+						<strong>开工竣工情况</strong>
+					</div>
+					<table id="table-kaigong"></table>
+				</div>
+			</div>
+			<div style="width: 100%; text-align: center; margin-top: 15px;">
+				<input type="button"
+					style="width: 90px; height: 20px; background-color: #EAF0FB; text-align: center"
+					value="返回" onclick="javascript: history.go(-1);">
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="../../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+	<script type="text/javascript" src="../../js/linq.min.js"></script>
+	<script type="text/javascript" src="../../js/guid.js"></script>
+	<script src="../../js/ktw.ui.js"></script>
+	<script src="../../js/loader.js"></script>
+	<script type="text/javascript">
+		var Ktw = window.top.window.ktw;
+		var feature;
+		function WidgetCommunication(s) {//部件通讯
+			//parent = s.parent;
+			feature = s.param.feature;
+			init();
+		}
+		function init() {
+			var fields = $(".Value").attr("field");
+			$.each($(".Value"), function(o, s) {
+				var name = $(s).attr("field");
+				var value = feature.getProperties()[name];
+				$(s).html(value);
+				$(s).attr("title", value);
+			});
+			var data;
+			$('#table-imagefile').datagrid({
+				columns : [ [ {
+					field : '文件名称',
+					title : '文件名称',
+					width : 300,
+					align : "center"
+				}, {
+					field : '下载',
+					title : '下载',
+					width : 40,
+					align : "center"
+				}, ] ],
+				rownumbers : true,
+				data : data
+			});
+			$('#table-landfile').datagrid({
+				columns : [ [ {
+					field : '文件名称',
+					title : '文件名称',
+					width : 300,
+					align : "center"
+				}, {
+					field : '下载',
+					title : '下载',
+					width : 40,
+					align : "center"
+				}, ] ],
+				rownumbers : true,
+				data : data
+			});
+			$('#table-nongzhuanzheng').datagrid({
+				columns : [ [ {
+					field : '项目名称',
+					title : '项目名称',
+					width : 70,
+					align : "center"
+				}, {
+					field : '总面积',
+					title : '总面积',
+					width : 70,
+					align : "center"
+				}, {
+					field : '入储状态',
+					title : '入储状态',
+					width : 130,
+					align : "center"
+				}, {
+					field : '可供地面积',
+					title : '可供地面积',
+					width : 130,
+					align : "center"
+				}, {
+					field : '供地面积',
+					title : '供地面积',
+					width : 130,
+					align : "center"
+				}, ] ],
+				rownumbers : true,
+				data : data
+			});
+			$('#table-chubei').datagrid({
+				columns : [ [ {
+					field : '土地储备',
+					title : '土地储备',
+					width : 300,
+					align : "center"
+				}, {
+					field : '可供应地面积',
+					title : '可供应地面积',
+					width : 40,
+					align : "center"
+				}, {
+					field : '供地面积',
+					title : '供地面积',
+					width : 40,
+					align : "center"
+				} ] ],
+				rownumbers : true,
+				data : data
+			});
+			$('#table-dengji').datagrid({
+				columns : [ [ {
+					field : '土地证号',
+					title : '土地证号',
+					width : 300,
+					align : "center"
+				}, {
+					field : '宗地号',
+					title : '宗地号',
+					width : 40,
+					align : "center"
+				}, {
+					field : '发证日期',
+					title : '发证日期',
+					width : 40,
+					align : "center"
+				}, {
+					field : '登记发证日期',
+					title : '登记发证日期',
+					width : 40,
+					align : "center"
+				} ] ],
+				rownumbers : true,
+				data : data
+			});
+			$('#table-kaigong').datagrid({
+				columns : [ [ {
+					field : '实际开工日期',
+					title : '实际开工日期',
+					width : 300,
+					align : "center"
+				}, {
+					field : '实际竣工日期',
+					title : '实际竣工日期',
+					width : 40,
+					align : "center"
+				}, {
+					field : '实际用地面积',
+					title : '实际用地面积',
+					width : 40,
+					align : "center"
+				}, {
+					field : '实际总建筑面积',
+					title : '实际总建筑面积',
+					width : 40,
+					align : "center"
+				}, {
+					field : '实际土地用途',
+					title : '实际土地用途',
+					width : 300,
+					align : "center"
+				}, {
+					field : '实际容积率',
+					title : '实际容积率',
+					width : 40,
+					align : "center"
+				}, {
+					field : '实际绿化率',
+					title : '实际绿化率',
+					width : 40,
+					align : "center"
+				}, {
+					field : '实际建筑密度',
+					title : '实际建筑密度',
+					width : 40,
+					align : "center"
+				}, {
+					field : '实际竣工其他情况',
+					title : '实际竣工其他情况',
+					width : 40,
+					align : "center"
+				} ] ],
+				rownumbers : true,
+				data : data
+			});
+			//初始化tab
+			$('#tab').tabs({
+				border : false,
+				onSelect : function(title, index) {
+					switch (index) {
+					case 0:
+						$("#land").append($(".landTab"));
+						break;
+					case 1:
+						$("#water").append($(".landTab"));
+						break;
+					case 2:
+						$("#relic").append($(".landTab"));
+						break;
+					default:
+						return;
+					}
+				}
+			});
+		}
+	</script>
+</body>
+</html>

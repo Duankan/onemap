@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="Shortcut Icon" href="../image/site.jpg" />
+    <title>一张图运维</title>
+    <link rel="stylesheet" type="text/css" href="../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../css/authorization.css" />
+    <link href="../css/font-awesome-4.7.0/css/font-awesome.css" rel="stylesheet" />
+    <link href="../css/ktw.form.css" rel="stylesheet" />
+    <link href="../css/admin.css" rel="stylesheet" />
+    <link href="../js/tooltip/tooltip.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../js/ktw.ui.js"></script>
+    <script src="../js/data.util.js"></script>
+    <script type="text/javascript" src="../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../js/guid.js"></script>
+    <script src="../js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../js/linq.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../js/md5.js"></script>
+    <script src="../js/ktw.onemap.js"></script>
+    <script src="../js/tooltip/tooltip.js"></script>
+    <script src="../js/admin.js"></script>
+    <script type="text/javascript">
+        
+    </script>
+</head>
+<body>
+    <div class="dia-mask">
+    </div>
+    <div id="winlogin" class="dia-login">
+        <div class="login-header">
+            <div class="login-title">管理员登陆</div>
+            <div class="login-close">x</div>
+        </div>
+        <div class="login-content">
+            <div class="login-row">
+                <div class="login-lbl">
+                    <span>用户名：</span>
+                </div>
+                <div class="login-input">
+                    <input type="text" id="username" />
+                </div>
+            </div>
+            <div class="login-row">
+                <div class="login-lbl">
+                    <span>密&nbsp;码：</span>
+                </div>
+                <div class="login-input">
+                    <input type="password" id="userpwd" />
+                </div>
+            </div>
+        </div>
+        <div class="login-btn">
+            <div class="error-msg">
+            </div>
+            <div class="login-item">
+                <span class="button" id="btnlogin">登&nbsp;录</span>
+            </div>
+        </div>
+    </div>
+    <div id="winpwd" class="dia-login">
+        <div class="login-header">
+            <div class="login-title">修改密码</div>
+            <div class="login-close">x</div>
+        </div>
+        <div class="login-content">
+            <div class="login-row letter-space">
+                <div class="login-lbl">
+                    <span>原密码：</span>
+                </div>
+                <div class="login-input letter-space">
+                    <input type="password" id="oldpwd" />
+                </div>
+            </div>
+            <div class="login-row letter-space">
+                <div class="login-lbl">
+                    <span>新密码：</span>
+                </div>
+                <div class="login-input">
+                    <input type="password" id="newpwd" />
+                </div>
+            </div>
+            <div class="login-row">
+                <div class="login-lbl">
+                    <span>确认密码：</span>
+                </div>
+                <div class="login-input">
+                    <input type="password" id="newpwd2" />
+                </div>
+            </div>
+        </div>
+        <div class="login-btn">
+            <div class="error-msg">
+            </div>
+            <div class="login-item">
+                <span class="button" id="chgpwd">修&nbsp;改</span>
+                <span class="button" id="cacelpwd">取&nbsp;消</span>
+            </div>
+        </div>
+    </div>
+    <div class="lay lay-top">
+        <div class="top-logo"></div>
+        <div class="top-right"></div>
+        <div class="top-title">国土资源一张图后台管理系统</div>
+        <div class="top-user">
+            <span class="top-user-name">管理员</span>
+            <img src="../image/authorization/default.jpg" />
+        </div>
+    </div>
+    <div class="info-tip">
+        <div class="info-arrow"></div>
+        <div class="info-content">
+            <div class="info-item" id="changepwd">修改密码</div>
+            <div class="info-item" id="logout">注销</div>
+        </div>
+    </div>
+    <div class="tab-select-tip">
+        <div class="tab-select-arrow"></div>
+        <div class="tab-select-content">
+        </div>
+    </div>
+    <div class="lay lay-left"></div>
+    <div class="lay lay-right">
+        <div class="lay lay-tab">
+            <span id="sysicon" class="sysicon fa fa-home font-20"></span> <span id="sysname">一张图</span> > <span id="menuname">主题配置</span>
+            <div class="tab-select">
+                <div class="tab-select-icon"></div>
+            </div>
+        </div>
+        <div class="lay lay-content">
+            <iframe id="srcframe" style="height: 100%; width: 100%; display: inline;"></iframe>
+        </div>
+    </div>
+</body>
+</html>

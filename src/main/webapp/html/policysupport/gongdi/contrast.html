@@ -1,0 +1,369 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link href="../../../js/ktop/ktop.css" rel="stylesheet" />
+    <script src="../../../js/jquery.min.js"></script>
+    <script src="../../../js/echarts.min.js"></script>
+    <script src="../../../js/ktop/ktop.js"></script>
+    <script>
+        var chartOption;  //统计图表的配置项和数据
+        var chart; //echarts实例
+        var landMap; //供地与批地双屏对比图层容器
+        var baseLayer, scrillayer;//双屏图层
+        var splitoption;
+        $(function () {
+            initChart();
+            initMap();
+            $("#land-grant").css({ "left": $("#map").width() - 52 + 'px' });
+        });
+        /*初始化统计图表的配置项和数据以及echarts实例*/
+        function initChart() {
+            chart = echarts.init($("#chart")[0]);
+            var dataMap = {};
+            dataMap.dataMonth = dataFormatter({
+                '2011': [865, 30, 45, 50, 25, 30, 42, 24, 23, 34, 24, 25, 20],
+                '2012': [1020, 45, 45, 34, 25, 43, 37, 31, 32, 26, 33, 25, 35],
+                '2013': [928, 39, 42, 27, 29, 39, 36, 34, 38, 25, 30, 31, 34],
+                '2014': [1024, 29, 26, 37, 48, 41, 34, 26, 45, 21, 39, 35, 37],
+                '2015': [878, 26, 34, 24, 31, 36, 20, 24, 28, 30, 25, 22, 32],
+                '2016': [902, 28, 27, 38, 26, 22, 32, 28, 39, 36, 31, 35, 29],
+                '2017': [914, 31, 29, 31, 30, 34, 40, 32, 38, 16, 31, 27, 25]
+            });
+            chartOption = {
+                baseOption: {
+                    //backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+                    //    offset: 0,
+                    //    color: '#f7f8fa'
+                    //}, {
+                    //    offset: 1,
+                    //    color: '#cdd0d5'
+                    //}]),
+                    timeline: {
+                        axisType: 'category',
+                        autoPlay: true,
+                        playInterval: 1500,
+                        data: ['2011', '2012', '2013', '2014', '2015', '2016', '2017'],
+                        label: {
+                            formatter: function (s) {
+                                return s + "年"
+                            },
+                            normal: {
+                                color: "#32ffff"  //轴圆圈
+                            },
+                            emphasis: {
+                                color: "#32ffff" //轴圆圈填充
+                            }
+                        },
+                        lineStyle: {
+                            color: "#32ffff"
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: "#32ffff"  //轴圆圈
+                            },
+                            emphasis: {
+                                color: "#32ffff" //轴圆圈填充
+                            }
+                        },
+                        checkpointStyle: {
+                            color: "#32ffff",  //选中时填充色
+                            borderColor: "#3385ff"  //选中时的边框颜色
+                        },
+                        controlStyle: {
+                            normal: {
+                                color: '#304654',
+                                borderColor: '#304654'
+                            },
+                            emphasis: {
+                                color: '#32ffff',
+                                borderColor: '#32ffff'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        x: 'right',
+                        data: ['批地', '供地'],
+                        top: 10,
+                        right: 20,
+                        textStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    calculable: true,
+                    grid: {
+                        top: 80,
+                        bottom: 100
+                    },
+                    xAxis: [
+                        {
+                            name: "月",
+                            'type': 'category',
+                            'axisLabel': { 'interval': 0 },
+                            'data': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+                            //splitLine: { show: false }
+                            axisLine: {
+                                lineStyle: {
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            name: '万亩',
+                            max: 80,
+                            axisLine: {
+                                lineStyle: {
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    ],
+                    series: [
+                        { name: '批地', type: 'line' },
+                        { name: '供地', type: 'line' }
+                    ]
+                },
+                options: [
+                    {
+                        title: { subtext: '2011年批地与供地变化情况', subtextStyle: { color: "#32ffff" } },
+                        series: [
+                            {
+                                data: dataMap.dataMonth['2011'],
+                                itemStyle: {
+                                    normal: {
+                                        color: "#5793f3"
+                                    }
+                                },
+                            }, {
+                                data: dataMap.dataMonth['2017'],
+                                itemStyle: {
+                                    normal: {
+                                        color: "#e01f54"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+
+                        title: { subtext: '2012年批地与供地变化情况', subtextStyle: { color: "#32ffff" } },
+                        series: [{
+                            data: dataMap.dataMonth['2017'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#5793f3"
+                                }
+                            }
+                        }, {
+                            data: dataMap.dataMonth['2016'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#e01f54"
+                                }
+                            }
+                        }]
+                    },
+                    {
+                        title: { subtext: '2013年批地与供地变化情况', subtextStyle: { color: "#32ffff" } },
+                        series: [{
+                            data: dataMap.dataMonth['2013'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#5793f3"
+                                }
+                            },
+                        }, {
+                            data: dataMap.dataMonth['2015'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#e01f54"
+                                }
+                            }
+                        }]
+                    },
+                    {
+                        title: { subtext: '2014年批地与供地变化情况', subtextStyle: { color: "#32ffff" } },
+                        series: [{
+                            data: dataMap.dataMonth['2014'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#5793f3"
+                                }
+                            },
+                        }, {
+                            data: dataMap.dataMonth['2014'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#e01f54"
+                                }
+                            }
+                        }]
+                    },
+                    {
+                        title: { subtext: '2015年批地与供地变化情况', subtextStyle: { color: "#32ffff" } },
+                        series: [{
+                            data: dataMap.dataMonth['2015'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#5793f3"
+                                }
+                            }
+                        }, {
+                            data: dataMap.dataMonth['2013'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#e01f54"
+                                }
+                            }
+                        }]
+                    },
+                    {
+                        title: { subtext: '2016年批地与供地变化情况', subtextStyle: { color: "#32ffff" } },
+                        series: [{
+                            data: dataMap.dataMonth['2016'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#5793f3"
+                                }
+                            }
+                        }, {
+                            data: dataMap.dataMonth['2012'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#e01f54"
+                                }
+                            }
+                        }]
+                    },
+                    {
+                        title: { subtext: '2017年批地与供地变化情况', subtextStyle: { color: "#32ffff" } },
+                        series: [{
+                            data: dataMap.dataMonth['2017'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#5793f3"
+                                }
+                            },
+                        }, {
+                            data: dataMap.dataMonth['2011'],
+                            itemStyle: {
+                                normal: {
+                                    color: "#e01f54"
+                                }
+                            }
+                        }]
+                    }
+                ]
+            };
+            chart.setOption(chartOption, true);
+        }
+        /*处理数据*/
+        function dataFormatter(obj) {
+            var pList = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+            var temp;
+            for (var year = 2011; year <= 2017; year++) {
+                temp = obj[year.toString()];
+                obj[year + 'sum'] = temp[0];
+                for (var i = 1, len = temp.length; i < len; i++) {
+                    obj[year.toString()][i] = {
+                        name: pList[i],
+                        value: temp[i]
+                    }
+                }
+                obj[year.toString()].shift()
+            }
+            return obj;
+        }
+
+        /*初始化地图*/
+        function initMap() {
+            landMap = L.map('map', {
+                center: { lon: 112.9068374633789, lat: 27.83239696415806 },
+                zoom: 11,
+                minZoom: 3,//地图最小级数
+                maxZoom: 18,//地图最大级数
+                attributionControl: false
+            });
+            baseLayer = new L.nonTiledLayer.wms('http://192.168.1.70:8081/hgis/onemap/wms', {
+                layers: 'onemap:t_inf_onemap_jsydspxxb',
+                format: 'image/png'
+            });
+            landMap.addLayer(baseLayer);
+            scrillayer = new L.nonTiledLayer.wms('http://192.168.1.70:8081/hgis/onemap/wms', {
+                layers: 'onemap:t_inf_onemap_tdgyxxb',
+                format: 'image/png'
+            });
+            splitoption = {
+                view: {
+                    center: { lon: 112.9068374633789, lat: 27.83239696415806 },
+                    zoom: 10,
+                    minZoom: 4,//地图最小级数
+                    maxZoom: 18,//地图最大级数
+                    attributionControl: true,
+                    crs: L.CRS.EPSG4326//地图参考系
+                }
+            };
+            new L.Control.Split(baseLayer, scrillayer, splitoption).addTo(landMap);
+        }
+        /*页面自适应*/
+        $(window).resize(function () {
+            chart.resize();
+            $("#land-grant").css({ "left": $("#map").width() - 52 + 'px' });
+        });
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #08122e;
+        }
+
+        .contrast {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+            .contrast .contrast-left {
+                position: relative;
+                float: left;
+                width: calc(65% - 10px);
+                height: 100%;
+                border-right: 5px solid #3b5866;
+            }
+
+                .contrast .contrast-left > span {
+                    position: absolute;
+                    color: #000;
+                    top: 20px;
+                    z-index: 10;
+                }
+
+            .contrast .contrast-right {
+                float: left;
+                width: 35%;
+                height: 100%;
+                border-left: 5px solid #3b5866;
+            }
+    </style>
+</head>
+<body>
+    <div class="contrast">
+        <div class="contrast-left">
+            <span id="land-grant" style="float:left;left:20px;">批地</span>
+            <span style="float:right;right:20px;">供地</span>
+            <div id="map" style="position:relative;width:100%;height:100%;"></div>
+        </div>
+        <div id="chart" class="contrast-right"></div>
+    </div>
+</body>
+</html>

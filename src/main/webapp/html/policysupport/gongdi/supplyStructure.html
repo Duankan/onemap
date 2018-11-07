@@ -1,0 +1,486 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <script src="../../../js/jquery.min.js"></script>
+    <script src="../../../js/echarts.min.js"></script>
+    <script>
+        var totalOption, proportionOption, houseOption, landOption;  //统计图表的配置项和数据
+        var supplyTotalChart, proportionChart, focusHouseChart, focusLandChart; //echarts实例
+        $(function () {
+            initChart();
+        });
+        /*初始化统计图表的配置项和数据以及echarts实例*/
+        function initChart() {
+            supplyTotalChart = echarts.init($("#supply-total-chart")[0]);
+            proportionChart = echarts.init($("#proportion-chart")[0]);
+            focusHouseChart = echarts.init($("#focus-house-chart")[0]);
+            focusLandChart = echarts.init($("#focus-land-chart")[0]);
+            supplyTotalChart.setTheme("macarons");
+            proportionChart.setTheme("macarons");
+            totalOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['商服', '工矿仓储', '住宅', '公共管理与服务', '交通运输'],
+                    bottom: 10,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: ['2011年', '2012年', '2013年', '2014年', '2015年', '2016年', '2017年']
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '商服',
+                        type: 'line',
+                        data: [120, 132, 101, 134, 90, 230, 210],
+                        itemStyle: {
+                            normal: {
+                                color: "#ef9037"
+                            }
+                        }
+                    },
+                    {
+                        name: '工矿仓储',
+                        type: 'line',
+                        data: [220, 182, 191, 234, 290, 330, 310],
+                        itemStyle: {
+                            normal: {
+                                color: "#e5e605"
+                            }
+                        }
+                    },
+                    {
+                        name: '住宅',
+                        type: 'line',
+                        data: [150, 232, 201, 154, 190, 330, 410],
+                        itemStyle: {
+                            normal: {
+                                color: "#006400"
+                            }
+                        }
+                    },
+                    {
+                        name: '公共管理与服务',
+                        type: 'line',
+                        data: [320, 332, 301, 334, 390, 330, 320],
+                        itemStyle: {
+                            normal: {
+                                color: "#dd393e"
+                            }
+                        }
+                    },
+                    {
+                        name: '交通运输',
+                        type: 'line',
+                        data: [820, 932, 901, 934, 1290, 1330, 1320],
+                        itemStyle: {
+                            normal: {
+                                color: "#5793f3"
+                            }
+                        }
+                    }
+                ]
+            };
+            supplyTotalChart.setOption(totalOption, true);
+
+            proportionOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    data: ['商服', '工矿仓储', '住宅', '公共管理与服务', '交通运输'],
+                    bottom: 10,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: ['2011年', '2012年', '2013年', '2014年', '2015年', '2016年', '2017年']
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    axisLabel: {
+                        formatter: '{value} %'
+                    }
+                },
+                series: [
+                    {
+                        name: '商服',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        data: [25, 18, 15, 16, 17, 19, 22],
+                        itemStyle: {
+                            normal: {
+                                color: "#ef9037",
+                                label: {
+                                    show: true,
+                                    positiong: 'top',
+                                    formatter: '{c}%',
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        name: '工矿仓储',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        data: [15, 22, 25, 24, 23, 21, 18],
+                        itemStyle: {
+                            normal: {
+                                color: "#e5e605",
+                                label: {
+                                    show: true,
+                                    positiong: 'top',
+                                    formatter: '{c}%',
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        name: '住宅',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        data: [25, 22, 18, 17, 20, 23, 16],
+                        itemStyle: {
+                            normal: {
+                                color: "#006400",
+                                label: {
+                                    show: true,
+                                    positiong: 'top',
+                                    formatter: '{c}%',
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        name: '公共管理与服务',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        data: [17, 16, 24, 21, 17, 20, 20],
+                        itemStyle: {
+                            normal: {
+                                color: "#dd393e",
+                                label: {
+                                    show: true,
+                                    positiong: 'top',
+                                    formatter: '{c}%',
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        name: '交通运输',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        data: [18, 22, 18, 22, 23, 17, 24],
+                        itemStyle: {
+                            normal: {
+                                color: "#5793f3",
+                                label: {
+                                    show: true,
+                                    positiong: 'top',
+                                    formatter: '{c}%',
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+            proportionChart.setOption(proportionOption, true);
+            echarts.connect([supplyTotalChart, proportionChart]);
+
+            houseOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['普通商品房', '经济适用房', '廉租房'],
+                    bottom: 10,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                series: [
+                     {
+                         name: '普通商品房',
+                         type: 'line',
+                         data: [220, 182, 191, 234, 290, 330, 310, 220, 182, 191, 234, 290],
+                         itemStyle: {
+                             normal: {
+                                 color: "#24babc"
+                             }
+                         }
+                     },
+                    {
+                        name: '经济适用房',
+                        type: 'line',
+                        data: [120, 132, 101, 134, 90, 230, 210, 120, 132, 101, 134, 90],
+                        itemStyle: {
+                            normal: {
+                                color: "#ef9037"
+                            }
+                        }
+                    },
+                    {
+                        name: '廉租房',
+                        type: 'line',
+                        data: [150, 164, 132, 180, 200, 160, 120, 200, 230, 150, 180, 240],
+                        itemStyle: {
+                            normal: {
+                                color: "#5793f3"
+                            }
+                        }
+                    }
+                ]
+            };
+            focusHouseChart.setOption(houseOption, true);
+
+            landOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['高能耗产业用地', '高新技术产业用地'],
+                    bottom: 10,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: ['2010年', '2011年', '2012年', '2013年', '2014年', '2015年', '2016年', '2017年']
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '高能耗产业用地',
+                        type: 'line',
+                        data: [220, 182, 191, 234, 290, 330, 310, 220],
+                        itemStyle: {
+                            normal: {
+                                color: "#6cd8cc"
+                            }
+                        }
+                    },
+                    {
+                        name: '高新技术产业用地',
+                        type: 'line',
+                        data: [120, 132, 101, 134, 90, 230, 210, 120],
+                        itemStyle: {
+                            normal: {
+                                color: "#9400d3"
+                            }
+                        }
+                    }
+                ]
+            };
+            focusLandChart.setOption(landOption, true);
+        }
+        $(window).resize(function () {
+            supplyTotalChart.resize();
+            proportionChart.resize();
+            focusHouseChart.resize();
+            focusLandChart.resize();
+        });
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .supply-structure {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+            .supply-structure .supply-structure-left {
+                position:relative;
+                float: left;
+                width: calc(60% - 10px);
+                height: 100%;
+                border-right: 5px solid #3b5866;
+            }
+
+            .supply-structure .supply-top-chart {
+                position:relative;
+                width: 100%;
+                height: 45%;
+            }
+
+            .supply-structure .supply-bottom-chart {
+                position:relative;
+                width: 100%;
+                height: 55%;
+            }
+
+            .supply-structure .supply-structure-right {
+                position:relative;
+                float: left;
+                width: 40%;
+                height: 100%;
+                border-left: 5px solid #3b5866;
+            }
+              .supply-structure .supply-structure-left .title,
+                .supply-structure .supply-structure-right .title {
+                    position: absolute;
+                    color: #32ffff;
+                    top: 10px;
+                    left: 20px;
+                }
+
+                .supply-structure .supply-structure-left .supply-structure-chart,
+                .supply-structure .supply-structure-right .supply-structure-chart {
+                    width: 100%;
+                    height: 100%;
+                }
+    </style>
+</head>
+
+<body>
+    <div class="supply-structure">
+        <div class="supply-structure-left">
+            <div class="supply-top-chart">
+                <span class="title">各供应结构总量及变化</span>
+                <div id="supply-total-chart" class="supply-structure-chart"></div>
+            </div>
+            <div class="supply-bottom-chart">
+                <span class="title">各供应结构占比及变化</span>
+                <div id="proportion-chart" class="supply-structure-chart"></div>
+            </div>
+        </div>
+        <div class="supply-structure-right">
+            <div class="supply-top-chart">
+                <span class="title">重点关注</span>
+                <div id="focus-house-chart" class="supply-structure-chart"></div>
+            </div>
+            <div class="supply-bottom-chart">
+                <span class="title">重点关注</span>
+                <div id="focus-land-chart" class="supply-structure-chart"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

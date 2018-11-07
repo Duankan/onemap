@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/authorization.css" />
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script src="../../js/data.util.js"></script>
+    <script src="../../js/ktw.onemap.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script>
+        var serviceUrl;
+        var select = false;
+        var current = 0;
+        var now = 0;
+        var data;
+        var array1 = [], array2 = [], array3 = [];
+        var guid;
+        var type;
+        $(function () {
+            ktw.cookie.init("../../config/app.xml");
+            ktw.cookie.validateUser();
+            serviceUrl = ktw.cookie.ServerUrl;
+            guid = ktw.UrlPara("guid");
+            type = ktw.UrlPara("type");
+            getBaseInfo(guid, type);
+        });
+        function getBaseInfo(guid, type) {
+            var business;
+            switch (type) {
+                case "p":
+                    {
+                        $("#base").attr("src", "BasicInfo/p.html?guid=" + guid);
+                        break;
+                    }
+                case "z":
+                    {
+                        $("#base").attr("src", "BasicInfo/z.html?guid=" + guid);
+                        break;
+                    }
+                case "c":
+                    {
+                        $("#base").attr("src", "BasicInfo/c.html?guid=" + guid);
+                        break;
+                    }
+                case "g":
+                    {
+                        $("#base").attr("src", "BasicInfo/g.html?guid=" + guid);
+                        break;
+                    }
+                case "y":
+                    {
+                        $("#base").attr("src", "BasicInfo/y.html?guid=" + guid);
+                        break;
+                    }
+                case "b":
+                    {
+                        $("#base").attr("src", "BasicInfo/b.html?guid=" + guid);
+                        break;
+                    }
+                case "w":
+                    {
+                        $("#base").attr("src", "BasicInfo/w.html?guid=" + guid);
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+        function baseInfo() {
+            $("#pdf").hide();
+            $("#base").show();
+        }
+        function flod() {
+            $("#pdf").show();
+            $("#base").hide();
+            if (!$("#pdf").attr("src")) {
+                var data;
+                switch (type) {
+                    case "p":
+                        {
+                            $.ajax({
+                                async:false,
+                                type: "get",
+                                url: ktw.cookie.ServerUrl + "jsydsp/getbyid/"+guid,
+                                success: function (res) {
+                                    if (res.success) {
+                                        data = res.data;
+                                    }
+                                },
+                                error: function () {
+                                    cosnole.error("获取表单信息失败:");
+                                    console.error(arguments);
+                                    ktw.Error("获取表单信息失败");
+                                }
+                            });
+                            break;
+                        }
+                    case "z":
+                        {
+                            $.ajax({
+                                async: false,
+                                type: "get",
+                                url: ktw.cookie.ServerUrl + "zdxx/getbyid/" + guid,
+                                success: function (res) {
+                                    if (res.success) {
+                                        data = res.data;
+                                    }
+                                },
+                                error: function () {
+                                    cosnole.error("获取表单信息失败:");
+                                    console.error(arguments);
+                                    ktw.Error("获取表单信息失败");
+                                }
+                            });
+                            break;
+                        }
+                    case "c":
+                        {
+                            $.ajax({
+                                async: false,
+                                type: "get",
+                                url: ktw.cookie.ServerUrl + "cbyd/getbyid/" + guid,
+                                success: function (res) {
+                                    if (res.success) {
+                                        data = res.data;
+                                    }
+                                },
+                                error: function () {
+                                    cosnole.error("获取表单信息失败:");
+                                    console.error(arguments);
+                                    ktw.Error("获取表单信息失败");
+                                }
+                            });
+                            break;
+                        }
+                    case "g":
+                        {
+                            $.ajax({
+                                async: false,
+                                type: "get",
+                                url: ktw.cookie.ServerUrl + "tdgy/getbyid/" + guid,
+                                success: function (res) {
+                                    if (res.success) {
+                                        data = res.data;
+                                    }
+                                },
+                                error: function () {
+                                    cosnole.error("获取表单信息失败:");
+                                    console.error(arguments);
+                                    ktw.Error("获取表单信息失败");
+                                }
+                            });
+                            break;
+                        }
+                    case "y":
+                        {
+                            $.ajax({
+                                async: false,
+                                type: "get",
+                                url: ktw.cookie.ServerUrl + "djfz/getbyid/" + guid,
+                                success: function (res) {
+                                    if (res.success) {
+                                        data = res.data;
+                                    }
+                                },
+                                error: function () {
+                                    cosnole.error("获取表单信息失败:");
+                                    console.error(arguments);
+                                    ktw.Error("获取表单信息失败");
+                                }
+                            });
+                            break;
+                        }
+                    case "b":
+                        {
+                            $.ajax({
+                                async: false,
+                                type: "get",
+                                url: ktw.cookie.ServerUrl + "bcgd/getbyid/" + guid,
+                                success: function (res) {
+                                    if (res.success) {
+                                        data = res.data;
+                                    }
+                                },
+                                error: function () {
+                                    cosnole.error("获取表单信息失败:");
+                                    console.error(arguments);
+                                    ktw.Error("获取表单信息失败");
+                                }
+                            });
+                            break;
+                        }
+                    case "w":
+                        {
+                            $.ajax({
+                                async: false,
+                                type: "get",
+                                url: ktw.cookie.ServerUrl + "ajdj/getbyid/" + guid,
+                                success: function (res) {
+                                    if (res.success) {
+                                        data = res.data;
+                                    }
+                                },
+                                error: function () {
+                                    cosnole.error("获取表单信息失败:");
+                                    console.error(arguments);
+                                    ktw.Error("获取表单信息失败");
+                                }
+                            });
+                            break;
+                        }
+                    default:
+                        break;
+                }
+                if (ktw.App.Config.Extend.Archive) {
+                    //如果配置了档案就显示档案的超链接
+                    var url_t = ktw.App.Config.Extend.Archive.Url;
+                    if (ktw.App.Config.Extend.Archive.Parameters && ktw.App.Config.Extend.Archive.Parameters.Parameter) {
+                        if (ktw.App.Config.Extend.Archive.Parameters.Parameter.length == undefined) {
+                            ktw.App.Config.Extend.Archive.Parameters.Parameter = [ktw.App.Config.Extend.Archive.Parameters.Parameter];
+                        }
+                        for (var u_i = 0; u_i < ktw.App.Config.Extend.Archive.Parameters.Parameter.length; u_i++) {
+                            if (url_t.indexOf("?") > 0) {
+                                url_t += "&" + ktw.App.Config.Extend.Archive.Parameters.Parameter[u_i].Name + "=" + data[ktw.App.Config.Extend.Archive.Parameters.Parameter[u_i].Attr];
+                            } else {
+                                url_t += "?" + ktw.App.Config.Extend.Archive.Parameters.Parameter[u_i].Name + "=" + data[ktw.App.Config.Extend.Archive.Parameters.Parameter[u_i].Attr];
+                            }
+                        }
+                    }
+                    $("#pdf").attr("src", url_t);
+                }
+            }
+        }
+    </script>
+    <style type="text/css">
+        .Content {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-size: 12px;
+        }
+
+        #nav {
+            width: 100%;
+            line-height: 24px;
+            list-style-type: none;
+            text-align: left;
+        }
+
+            #nav a {
+                width: 250px;
+                display: block;
+                padding-left: 36px;
+                color: black;
+                /*Width(一定要)，否则下面的Li会变形*/
+            }
+
+            #nav li {
+                float: left;
+                /*font-weight: bold;*/
+                font-size: 14px;
+                padding-bottom: 2px;
+                color: black;
+            }
+
+            #nav a:hover {
+                color: white;
+                color: #CA498C;
+                background-color: #E5F1FB;
+                /*background-color:#AAAAAA;*/
+                /*border:1px solid #D2E4F5;*/
+                text-decoration: none;
+            }
+            /*二级目录*/
+            #nav li ul {
+                list-style: none;
+                text-align: left;
+            }
+
+                #nav li ul li {
+                    border-right: #cccccc 1px solid;
+                    font-size: 11px;
+                    padding-bottom: 2px;
+                    padding-top: 2px;
+                }
+
+                #nav li ul a {
+                    padding-left: 50px;
+                    width: 260px;
+                }
+
+        #mrc {
+            clear: left;
+        }
+
+        #nav ul.collapsed {
+            display: none;
+        }
+
+        #PARENT {
+            width: calc(100%-10px);
+            padding-top: 5px;
+        }
+
+        .Content .rightpart {
+            position: absolute;
+            right: 0px;
+            top: 40px;
+            left: 260px;
+            bottom: 0px;
+            text-align: center;
+            overflow: auto;
+            background-color: #F5F5F5;
+            overflow:hidden;
+        }
+
+        #PARENT #nav li .icon {
+            width: 16px;
+            height: 16px;
+            float: left;
+            margin: 4px;
+        }
+
+        #PARENT #nav li .iconc {
+            width: 16px;
+            height: 16px;
+            float: left;
+            margin: 4px;
+        }
+
+        .mark {
+            width: 16px;
+            height: 16px;
+        }
+
+        .cbox {
+            vertical-align: middle;
+            float: left;
+            margin-top: 7px;
+        }
+
+        .cboxc {
+            vertical-align: middle;
+            float: left;
+            margin-top: 7px;
+        }
+        .leftpart {
+            width: 259px;
+            border-right: solid 1px #bbb;
+            background-color: #F5F5F5;
+            overflow: hidden;
+            position: absolute;
+            left: 0;
+            top: 40px;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="Content">
+        <div style="width: 100%; height: 40px; background-color: #E8E7E3; line-height: 40px;">
+            <div class="title" style="width: 70%; height: 40px; text-align: left; padding-left: 60px; font-size: 14px; float: left; color: #777777">
+                <span style="display: inline-block; top: 2px; width: 16px; height: 16px; background-image: url(../../image/home.png);"></span>
+                <span>一张图 >> 附件及详细信息 >><span id="type"></span><span id="xmmc"></span></span>
+            </div>
+        </div>
+        <div class="leftpart">
+            <div id="divtree" style="width: 100%; height: calc(100%-30px); overflow: hidden">
+                <div id="PARENT">
+                    <ul id="nav">
+                        <li style="padding-left: 0px">
+                            <a style="font-size: 16px; padding-left: 20px" href="#Menu=ChildMenu1" onclick="baseInfo()">
+                                <div class="icon">
+                                    <img class="mark" src="../../image/table.jpg" />
+                                </div>
+                                基本信息
+                            </a>
+                        </li>
+                        <li style="padding-left: 0px">
+                            <a style="font-size: 16px; padding-left: 20px" href="#Menu=ChildMenu1" onclick="flod()">
+                                <div class="icon">
+                                    <img class="mark" src="../../image/fj.jpg" />
+                                </div>
+                                附件
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="rightpart" style="">
+            <img id="info" style="max-width: 500px; margin-left: 0; cursor: zoom-in;" />
+            <iframe id="pdf" style="position: absolute; width: 100%; height: 100%; left: 0; display: none"></iframe>
+            <!--基本信息-->
+            <iframe id="base" src="" style="position: absolute; width: 100%; height: 100%; left: 0; overflow: hidden;"></iframe>
+        </div>
+    </div>
+</body>
+</html>

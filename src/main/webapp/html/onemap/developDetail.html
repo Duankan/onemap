@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>业务详细信息</title>
+<link rel="stylesheet" type="text/css"
+	href="../../theme/default/easyui.css" />
+
+<link rel="stylesheet" type="text/css" href="../../css/app.css" />
+<link rel="stylesheet" type="text/css" href="../../css/main.css" />
+<link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+<link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+
+<style type="text/css">
+.Content {
+	width: 100%;
+	height: 100%
+}
+
+.Content .RowDiv {
+	border: 1px solid #E4E9EF;
+	width: 100%;
+	height: 30px;
+	line-height: 30px;
+}
+
+.Content .left, .Content .right {
+	width: 50%;
+	float: left;
+}
+
+.Content .RowDiv div {
+	float: left;
+}
+
+.Content .RowDiv .ToolDiv {
+	width: 224px;
+	height: 100%;
+}
+
+.Content .RowDiv .Field {
+	width: 120px;
+	height: 100%;
+	display: inline-block;
+	text-align: center;
+	background-color: #EAF0FB
+}
+
+.Content .RowDiv .Value {
+	height: 100%;
+	background-color: White;
+}
+
+.radioSpan {
+	position: relative;
+	border-right: 1px solid #95B8E7;
+	border-left: 1px solid #95B8E7;
+	background-color: #fff;
+	vertical-align: middle;
+	display: inline-block;
+	overflow: hidden;
+	white-space: nowrap;
+	margin: 0;
+	padding: 0;
+	height: 30px;
+	display: block;
+}
+
+.radioSpan input {
+	margin-left: 10px;
+}
+
+.RowDiv {
+	min-width: 300px;
+}
+
+.Value {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 60%;
+}
+
+.ktw-textbox {
+	white-space: normal;
+	overflow: visible;
+	text-overflow: inherit;
+	width: 100%
+}
+</style>
+</head>
+<body>
+	<div class="Content" style="overflow-y: scroll; overflow-x: hidden">
+		<div class="basicInfo">
+			<div class="RowDiv"
+				style="text-align: center; font-size: 20px; background-color: #EAF0FB">
+				<strong>项目基本信息</strong>
+			</div>
+			<div class="left">
+				<div class="RowDiv">
+					<div class="Field">项目名称</div>
+					<div class="Value" field="建设项目名"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">可用占补平衡面积:</div>
+					<div class="Value" field="可用占补平衡面积">
+						<div style="position: relative; left: 150px">公顷</div>
+					</div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">申请验收单位:</div>
+					<div class="Value" field="申请验收单位"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">验收单位:</div>
+					<div class="Value" field="验收单位"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">项目所在地:</div>
+					<div class="Value" field="项目所在地"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">项目建设期:</div>
+					<div class="Value" field="项目建设期"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">新增耕地面积:</div>
+					<div class="Value" field="新增耕地面积">
+						<div style="position: relative; left: 150px">公顷</div>
+					</div>
+				</div>
+			</div>
+			<div class="right">
+				<div class="RowDiv">
+					<div class="Field">验收文号:</div>
+					<div class="Value" field="验收文号"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">项目类型:</div>
+					<div class="Value" field="项目类型"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">实际建设总规模:</div>
+					<div class="Value" field="实际建设总规模"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">总资金:</div>
+					<div class="Value" field="总资金"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">验收时间:</div>
+					<div class="Value" field="验收时间"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">行政区:</div>
+					<div class="Value" field="行政区"></div>
+				</div>
+				<div class="RowDiv">
+					<div class="Field">联系电话:</div>
+					<div class="Value" field="联系电话"></div>
+				</div>
+			</div>
+			<div style="clear: both; height: 0"></div>
+			<div class="otherInfo" style="position: relative">
+				<div id="tab" class="easyui-tabs" data-options="border:false"
+					style="width: 100%; height: auto; border: 1px solid #E4E9EF;">
+					<div id="land" title="相关图件信息" tabindex="0" style="overflow: hidden">
+						<div
+							style="font-size: 14px; line-height: 30px; background-color: rgb(234, 240, 251)">
+							<strong>导入相关图件信息</strong>
+						</div>
+						<div class="RowDiv">
+							<div class="Field">导入图件资料：</div>
+						</div>
+						<table id="table-maps"></table>
+						<div
+							style="font-size: 14px; line-height: 30px; background-color: rgb(234, 240, 251)">
+							<strong>界址点文件列表</strong>
+						</div>
+						<div class="RowDiv">
+							<div class="Field">导入界址点文件：</div>
+						</div>
+						<table id="table-coordinates"></table>
+					</div>
+					<div title="占补平衡信息" style="overflow: hidden">
+						<div
+							style="font-size: 14px; line-height: 30px; background-color: rgb(234, 240, 251); padding-left: 3px">
+							<strong>农转征项目</strong>
+						</div>
+						<table id="table-nongzhuanzheng"></table>
+						<div style="float: right">
+							<span>剩余可补充面积：</span>
+							<div class="Value" style="display: inline; margin-left: 2px"
+								field="剩余可登记面积">
+								<span style="margin-left: 3px">公顷</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div style="width: 100%; text-align: center; margin-top: 15px;">
+					<input type="button"
+						style="width: 90px; height: 20px; background-color: #EAF0FB; text-align: center"
+						value="返回" onclick="javascript: history.go(-1);">
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+		<script type="text/javascript" src="../../js/linq.min.js"></script>
+		<script type="text/javascript" src="../../js/guid.js"></script>
+		<script src="../../js/ktw.ui.js"></script>
+		<script src="../../js/loader.js"></script>
+		<script type="text/javascript">
+			var Ktw = window.top.window.ktw;
+			var feature;
+			
+			function WidgetCommunication(s) {//部件通讯
+				//parent = s.parent;
+				feature = s.param.feature;
+				init();
+			}
+			function init() {
+				var fields = $(".Value").attr("field");
+				$.each($(".Value"), function(o, s) {
+					var name = $(s).attr("field");
+					var value = feature.getProperties()[name];
+					$(s).html(value);
+					$(s).attr("title", value);
+				});
+				var data;
+				$('#table-maps').datagrid({
+					columns : [ [ {
+						field : '文件名称',
+						title : '文件名称',
+						width : 300,
+						align : "center"
+					}, {
+						field : '下载',
+						title : '下载',
+						width : 40,
+						align : "center"
+					}, ] ],
+					rownumbers : true,
+					data : data
+				});
+				$('#table-coordinates').datagrid({
+					columns : [ [ {
+						field : '文件名称',
+						title : '文件名称',
+						width : 300,
+						align : "center"
+					}, {
+						field : '下载',
+						title : '下载',
+						width : 40,
+						align : "center"
+					}, ] ],
+					rownumbers : true,
+					data : data
+				});
+				$('#table-nongzhuanzheng').datagrid({
+					columns : [ [ {
+						field : '项目名称',
+						title : '项目名称',
+						width : 70,
+						align : "center"
+					}, {
+						field : '审批文号',
+						title : '总面积',
+						width : 70,
+						align : "center"
+					}, {
+						field : '占用耕地面积',
+						title : '入储状态',
+						width : 130,
+						align : "center"
+					}, {
+						field : '本次补充面积',
+						title : '可供地面积',
+						width : 130,
+						align : "center"
+					} ] ],
+					rownumbers : true,
+					data : data
+				});
+				//初始化tab
+				$('#tab').tabs({
+					border : false,
+					onSelect : function(title, index) {
+						switch (index) {
+						case 0:
+							$("#land").append($(".landTab"));
+							break;
+						case 1:
+							$("#water").append($(".landTab"));
+							break;
+						case 2:
+							$("#relic").append($(".landTab"));
+							break;
+						default:
+							return;
+						}
+					}
+				});
+			}
+	</script>
+</body>
+</html>

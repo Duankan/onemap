@@ -1,0 +1,359 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+      <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+   <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+     <script type="text/javascript" src="../../js/highcharts.js"></script>
+    <script type="text/javascript" src="../../js/highcharts-3d.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var dataGrid;
+        $(window).ready(function () {
+            initTarget();
+            initDataGrid();
+        })
+        $(function () {
+            chartOption = {
+                chart: {
+                    type: 'column'
+                },
+
+                title: {
+                    text: '市本级建设用地审批情况统计     (单位:公顷)'
+                },
+                xAxis: {
+                    categories: ['审批合计', '新增建设用地', '农用地转用', '耕地面积', '未利用地面积', '原有建设用地'],
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: ''
+                    },
+                    tickPositions: [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                       '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle',
+                    borderWidth: 0
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: '市政府审批',
+                    color: 'green',
+                    data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0]
+                }, {
+                    name: '国务院审批',
+                    data: [83.6, 78.8, 98.5, 93.4, 106.0, 84.5]
+                }, {
+                    name: '省政府审批',
+                    color: 'yellow',
+                    data: [48.9, 38.8, 39.3, 41.4, 47.0, 48.3]
+                }]
+            };
+            chartOption1 = {
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    text: '市本级建设用地审批情况统计     (单位:公顷)'
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                       '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}%</b>: {point.percentage:.1f} %',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Browser share',
+                    data: [
+                       ['市政府审批', 50.0],
+                       ['国务院审批', 30],
+                       {
+                           name: '省政府审批',
+                           y: 20,
+                           color: 'red',
+                           sliced: true,
+                           selected: true
+                       },
+                    ]
+                }]
+            };
+            chartOption2 = {
+                title: {
+                    text: '市本级建设用地审批情况统计     (单位:公顷)'
+                },
+                xAxis: {
+                    categories: ['审批合计', '新增建设用地', '农用地转用', '耕地面积', '未利用地面积', '原有建设用地'],
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: ''
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }],
+                    tickPositions: [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                       '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle',
+                    borderWidth: 0
+                },
+                series: [{
+                    name: '市政府审批',
+                    color: 'green',
+                    data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0]
+                }, {
+                    name: '国务院审批',
+                    data: [83.6, 78.8, 98.5, 93.4, 106.0, 84.5]
+                }, {
+                    name: '省政府审批',
+                    color: 'yellow',
+                    data: [48.9, 38.8, 39.3, 41.4, 47.0, 48.3]
+                }]
+            };
+            $(".Button[statisticstype]").click(function (evt) {
+                var type = $(this).attr("statisticstype");
+                if (type == "Brokenline") $('#chart').highcharts(chartOption2);
+                if (type == "Pie") $('#chart').highcharts(chartOption1);
+                if (type == "Columnar") $('#chart').highcharts(chartOption);
+            });
+            $('#chart').highcharts(chartOption);
+        });
+        function initDataGrid() {
+            var data1 = [1, 1, 1, 1, 1]
+            $('#dataModule').datagrid({
+                pagination: true,
+                total: 2000,
+                pageSize: 10,
+                pageList: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                rownumbers: true,
+                fit: true,        //自动大小
+                fitColumns: false, //自适应列宽
+                singleSelect: true,  //是否单选
+                idField: 'Project_id',
+                data: data1,
+                columns: [[
+                    { field: 'opt', title: '统计时间', width: 80, align: 'center', rowspan: 5, },
+                    { field: 'opt', title: '县市区', width: 80, align: 'center', rowspan: 5 },
+                    { title: '审批合计', colspan: 10 }
+
+                ], [
+                    { field: 'sum', title: '总面积', width: 80, align: 'center', rowspan: 4 },
+                    { field: 'add', title: '新增建设用地', width: 80, align: 'center', colspan: 8, rowspan: 1 },
+                    { field: 'original', title: '原有集体建设用地', width: 80, align: 'center', rowspan: 4 },
+                   
+                ],
+                [
+                    { field: 'name', title: '总面积', width: 80, align: 'center', rowspan: 3 },
+                    { field: 'addr', title: '农用地转用', width: 80, align: 'center', colspan: 6, rowspan: 1 },
+                    { field: 'name', title: '未利用地面积', width: 80, align: 'center', rowspan: 3 },
+                    
+                ],
+                [
+                    { field: 'name', title: '总面积', width: 80, align: 'center', rowspan: 2 },
+                    { field: 'addr', title: '耕地', width: 80, align: 'center', colspan: 2, rowspan: 1 },
+                     { field: 'name', title: '林地', width: 80, align: 'center', rowspan: 2 },
+                    { field: 'addr', title: '园地', width: 80, align: 'center', rowspan: 2 },
+                    { field: 'addr', title: '其他农用地', width: 80, align: 'center', rowspan: 2 },
+                    
+                ],
+                 [
+                    { field: 'name', title: '总面积', width: 80, align: 'center', rowspan: 1 },
+                    { field: 'addr', title: '基本农田', width: 80, align: 'center', rowspan: 1 }
+                 ]
+                ]
+            });
+        }
+        function initTarget() {
+            var target = [{ ID: "SUM", Text: "派发量", Value: "" }, { ID: "WC", Text: "落实量", Value: "" }, { ID: "YQWWC", Text: "逾期未落实", Value: "" }];
+            targetComBox = $("#targetComBox").prop('$this');
+            targetComBox.SetData(target);
+        }
+    </script>
+     <style>
+        .Content {
+            width: 100%;
+            height: 100%;
+        }
+
+            .Content .ToolDiv {
+                width: 100%;
+                height: 40px;
+                border-bottom: 1px solid #E4E9EF;
+            }
+
+                .Content .ToolDiv .Title {
+                    width: 85px;
+                    text-align: right;
+                    line-height: 40px;
+                    height: 40px;
+                    display: inline-block;
+                    float: left;
+                }
+
+                    .Content .ToolDiv .Title .Icon {
+                        width: 16px;
+                        height: 16px;
+                        display: inline-block;
+                        margin-top: 11px;
+                    }
+
+                    .Content .ToolDiv .Title .Text {
+                        display: inline-block;
+                        float: right;
+                        width: 49px;
+                    }
+
+                .Content .ToolDiv .Button {
+                    position: relative;
+                    width: 55px;
+                    height: 26px;
+                    top: -6px;
+                    border: 1px solid #95B8E7;
+                    background-color: #f1f1f1;
+                    display: inline-block;
+                }
+
+                    .Content .ToolDiv .Button .Icon {
+                        height: 16px;
+                        width: 16px;
+                        margin-top: 5px;
+                        margin-left: 5px;
+                    }
+
+                    .Content .ToolDiv .Button .Text {
+                        position: absolute;
+                        left: 25px;
+                        top: 6px;
+                    }
+
+                    .Content .ToolDiv .Button:hover {
+                        background-color: #EAF2FF;
+                        cursor: pointer;
+                    }
+
+            .Content .HiddenBtn {
+                filter: alpha(Opacity=80);
+                -moz-opacity: 0.8;
+                opacity: 0.8;
+            }
+
+               .Content .HiddenBtn .ArrowBtn {
+                    cursor: pointer;
+                }
+
+        .panel-body-noborder {
+            border-bottom-width: 1px;
+            border-bottom-color: #dddddd;
+            border-top-width: 1px;
+            border-top-color: #dddddd;
+        }
+    </style>
+</head>
+<body>   
+    <div class="Content">
+        <div style="width: 100%; height: 220px;">
+            <div id="searchModule" class="ToolDiv" style="border-bottom:0px;">
+                 <div style="float:left;margin-top:10px">统计时间:
+                 <input id="jszzrqid" name="JSZZRQ" class="easyui-datebox" data-options="width:80,editable:false" />至：<input id="Text1" name="JSZZRQ" class="easyui-datebox" data-options="width:80,editable:false" />
+                </div>
+                <div style="display: inline-block;">
+                    <div id="areanameid" class="ktw-combobox" style="z-index: 2; width: 174px; height: 40px;" opt='{"TipInfo":"县市区","MultiSelect":true,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"0px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\"><div class=\"Icon icon-calendar\"></div><span class=\"Text\">行政区</span></div>"}'></div>
+                </div>
+                <div class="Button" operatetype="Reset">
+                    <div class="Icon icon-reload"></div>
+                    <div class="Text">统计</div>
+                </div>
+                <div class="Button" operatetype="Export">
+                    <div class="Icon icon-export"></div>
+                    <div class="Text">导出</div>
+                </div>
+                <div style="float:right;margin-right:10px;margin-top:15px">计算单位:公顷</div>
+            </div>
+            <div id="dataModule" style="width: 100%; height: 300px;"></div>
+        </div>
+        <div id="chartModule" style="width: 100%; position: absolute; top: 220px;">
+            <div class="ToolDiv">
+                <div style="display: inline-block;">
+                    <div id="targetComBox" class="ktw-combobox" style="z-index: 2; width: 174px; height: 40px;" opt='{"HeaderCSS":{"padding":"0px","width":"80px"},"TextField": "Text","ValueField":"ID","IsOverShow":true,"Border":"0px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><span class=\"Text\">市县区</span></div>"}'></div>
+                </div>
+                 <div style="display: inline-block;">
+                    <div id="Div1" class="ktw-combobox" style="z-index: 2; width: 174px; height: 40px;" opt='{"HeaderCSS":{"padding":"0px","width":"80px"},"TextField": "Text","ValueField":"ID","IsOverShow":true,"Border":"0px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><span class=\"Text\">统计字段</span></div>"}'></div>
+                </div>
+                    <div class="Button" statisticstype="Brokenline" style="float:right;top:5px;margin-right:10px">
+                    <div class="Text">折线</div>
+                </div>
+                <div class="Button" statisticstype="Pie"   style="float:right;top:5px;margin-right:10px">
+                    <div class="Text">饼状</div>
+                </div>
+                 <div class="Button" statisticstype="Columnar" style="float:right;top:5px;margin-right:10px">
+                    <div class="Text">柱状</div>
+                </div>
+            </div>
+            <div id="chart" style="width: 100%; height: 325px;"></div>
+        </div>
+    </div>
+</body>
+</html>

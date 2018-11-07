@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>查看审批详细信息</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">   
+        .Content .RowDiv {
+                border: 1px solid #E4E9EF;
+                width:100%;
+                height: 30px;
+                line-height: 30px;   
+            }
+         .Content .left, .Content .right {
+                width: 50%;
+                float: left;
+            }
+                .Content .RowDiv div {
+                    float: left;
+                }
+                .Content .RowDiv .ToolDiv {
+                    width: 224px;
+                    height: 100%;
+                }
+                  .Content .RowDiv .Field {
+                    width: 120px;
+                    height: 100%;
+                    display: inline-block;     
+                    text-align: center;
+                    background-color:#EAF0FB   
+                }
+
+                .Content .RowDiv .Value {
+                  height: 100%;
+                  background-color:White;
+                 
+                }
+             
+    </style>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var feature;
+
+        function WidgetCommunication(s) {//部件通讯
+            var parent = s.parent;
+            feature = s.param.feature;
+            init();
+        }
+        function init() {
+            var fields = $(".Value").attr("field");
+            $.each($(".Value"), function (o, s) {
+                var name = $(s).attr("field");
+                var value = feature.getProperties()[name];
+                $(s).prepend(value);   
+            });
+            var data;
+            $('#Table1').datagrid({
+                columns: [[
+                    { field: '农转征项目名称', title: '农转征项目名称', width: 100, align: "center" },
+                    { field: '批准文号', title: '批准文号', width: 100, align: "center" },
+                     { field: '总面积', title: '总面积', width: 100, align: "center" },
+                    { field: '可入储面积', title: '可入储面积', width: 100, align: "center" },
+                     { field: '入储面积', title: '入储面积', width: 100, align: "center" }
+                ]],
+                rownumbers: true,
+                data: data
+            });
+            $('#Table2').datagrid({
+                columns: [[
+                    { field: '土地使用证号', title: '土地使用证号', width: 100, align: "center" },
+                    { field: '宗地号', title: '宗地号', width: 100, align: "center" },
+                    { field: '可回收面积', title: '可回收面积', width: 100, align: "center" },
+                    { field: '收回面积', title: '收回面积', width: 100, align: "center" }
+                ]],
+                rownumbers: true,
+                data: data
+            });
+            $("#tab").tabs({
+                border: false,
+                onSelect: function (title, index) {
+                    var tab = $('#tab').tabs('getSelected');
+                    if (tab.attr("bind") == "true") return;
+                    switch (index) {
+                        case 1:
+                            tab.attr("bind", true);
+                            $('#Table3').datagrid({
+                                columns: [[
+                                    { field: '文件名称', title: '文件名称', width: 300, align: "center" },
+                                    { field: '下载', title: '下载', width: 40, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            });
+                            $('#Table4').datagrid({
+                                columns: [[
+                                    { field: '文件名称', title: '文件名称', width: 300, align: "center" },
+                                    { field: '下载', title: '下载', width: 40, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            }); break;
+                        case 2:
+                            tab.attr("bind", true);
+                            $('#Table5').datagrid({
+                                columns: [[
+                                    { field: '供地项目名称', title: '供地项目名称', width: 200, align: "center" },
+                                    { field: '用地单位', title: '用地单位', width: 100, align: "center" },
+                                     { field: '供地面积', title: '供地面积', width: 100, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            }); break;
+                        default: return;
+                    }
+                }
+            });          
+        }
+
+    </script>
+</head>
+<body>
+    <div class="Content" >
+        <div class="basicInfo" >
+            <div class="RowDiv" style="text-align: left;font-size:20px; background-color:#EAF0FB"><strong>储备土地基本信息</strong></div>
+            <div class="left">
+            <div class="RowDiv">
+                <div class="Field">储备地块名称:</div>
+                <div class="Value" field="储备地块名称"></div>
+            </div>
+             <div class="RowDiv">
+                <div class="Field">纳入准备类型:</div>
+                <div class="Value" field="纳入准备类型"></div>
+            </div>
+           <div class="RowDiv">
+                <div class="Field">宗地坐标:</div>
+                <div class="Value" field="宗地坐标"></div>
+            </div>
+            <div class="RowDiv">
+                <div class="Field">土地获得成本:</div>
+                <div class="Value" field="土地获得成本"><div style="position:relative;left:150px">万元</div></div>
+            </div>
+             <div class="RowDiv">
+                <div class="Field">储备时间:</div>
+                <div class="Value" field="储备时间"></div>
+            </div>           
+            </div>
+             <div class="right">
+            <div class="RowDiv">
+                <div class="Field">纳入储备编号:</div>
+                <div class="Value" field="纳入储备编号"></div>
+            </div>
+               <div class="RowDiv">
+                <div class="Field">宗地号:</div>
+                <div class="Value" field="宗地号"></div>
+            </div>
+            <div class="RowDiv">
+                <div class="Field">宗地面积:</div>
+                <div class="Value" field="宗地面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>
+            <div class="RowDiv">
+                <div class="Field">联系电话:</div>
+                <div class="Value" field="联系电话"></div>
+            </div>
+              <div class="RowDiv">
+                <div class="Field">联系人:</div>
+                <div class="Value" field="联系人"></div>
+            </div>         
+      </div>
+            </div>
+        <div class="otherInfo" style="position:relative"> 
+              <div id="tab" class="easyui-tabs" data-options="border:false" style="width:100%;border:1px solid #E4E9EF; ">
+                   <div title="纳入储备土地来源" tabindex="0"  style="overflow: hidden">
+                       <div style="font-size:14px;line-height: 30px;background-color:#5B73AB;color:white">办理农转征审批完毕(面积):</div>
+                       <table id="Table1"></table>
+                        <div style="font-size:14px;line-height: 30px;background-color:#5B73AB;color:white">登记发证来源(面积):</div>
+                        <table id="Table2"></table>
+                        <div class="RowDiv">
+                             <div class="Field">其他来源面积:</div>
+                             <div class="Value" field="其他来源面积"><div style="position:relative;left:150px">公顷</div></div>
+                         </div>   
+                       <div style="width:100%;height:70px">
+                            <div style="width:120px;line-height: 70px;background-color:#EAF0FB;text-align:center;float:left;vertical-align:middle">备注:</div>
+                            <div class="Value ktw-textbox" field="备注" opt='{"Height":70,"Type":"multi-text","LineHeight":70}' style="position:relative;left:120px;right:0px"></div>
+                       </div>        
+                   </div>
+                   <div title="相关图件信息" tabindex="1" style="overflow: hidden">
+                        <div style="font-size:14px;line-height: 30px;background-color:#EAF0FB">导入相关图件信息:</div>
+                         <div class="RowDiv">
+                             <div class="Field">导入图件资料:</div>
+                             <div class="Value" field="导入图件资料"></div>
+                         </div>   
+                       <table id="Table3"></table>
+                        <div style="font-size:14px;line-height: 30px;background-color:#EAF0FB">界址点文件列表</div>
+                        <div class="RowDiv">
+                             <div class="Field">导入界址点文件:</div>
+                             <div class="Value" field="导入界址点文件"></div>
+                         </div>   
+                        <table id="Table4"></table>
+                   </div>
+                   <div id="landSupply" title="土地供应情况"  tabindex="2"  style="overflow: hidden">
+                        <div style="font-size:14px;line-height: 30px;background-color:#EAF0FB">土地供应情况:</div>
+                        <table id="Table5"></table>
+                       <div style="width:100%;line-height: 30px;text-align:right;">剩余供地面积:1公顷</div>
+                   </div>          
+              </div>
+              <div style="width:100%;text-align:center"><input type="button" style="width:90px;height:20px;background-color:#EAF0FB;text-align:center" value="返回" onclick="javascript: history.go(-1);"></div>
+        </div>  
+   </div>
+</body>
+</html>

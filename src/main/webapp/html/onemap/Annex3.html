@@ -1,0 +1,372 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/authorization.css" />
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script src="../../js/data.util.js"></script>
+    <script src="../../js/ktw.onemap.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script>
+        var serviceUrl;
+        var select = false;
+        var current = 0;
+        var now = 0;
+        var data;
+        var array1 = [], array2 = [], array3 = [];
+        //var beforeurl, afterurl;
+        var guid;
+        var type;
+        $(function () {
+            ktw.cookie.init("../../config/app.xml");
+            ktw.cookie.validateUser();
+            serviceUrl = ktw.cookie.ServerUrl;
+            guid = ktw.UrlPara("guid");
+            type = ktw.UrlPara("type");
+            getBaseInfo(guid, type);
+           // initleft();
+
+            $(".rightbutton").hide();
+   
+
+            $("input[type=checkbox]").click(function () {
+                select = true;
+            });
+            $(".button[operatetype]").click(function (evt) {
+                var type = $(this).attr("operatetype");
+                var oImg = document.getElementById("info");
+                if (type == "forward") { Forward(oImg); return; }
+                if (type == "direct") { Direct(oImg); return; }
+            });
+            //图片放大或缩小
+            var oDiv = document.getElementById("info");
+            $(oDiv).click(function () {
+                if ($(this).css("cursor") == "zoom-in") {
+                    $(this).css("cursor", "zoom-out");
+                    $(this).css("max-width", "");
+                } else {
+                    $(this).css("cursor", "zoom-in");
+                    $(this).css("max-width", "500px");
+                }
+            });
+            //前翻
+            $("#turnabove").on("click", function () {
+                if (now <= 0) { ktw.Alert("当前页为第一页!"); return; }
+                load(data[now - 1].path);
+                now = now - 1;
+            })
+
+            //后翻
+            $("#turnfollow").on("click", function () {
+                if (now < data.length - 1) {
+                    load(data[parseInt(now + 1)].path);
+                    now = now + 1;
+                }
+                else {
+                    ktw.Alert("已经到达最后一页");
+                }
+            })          
+        });
+        function getBaseInfo(guid, type) {
+            var business;
+            switch (type) {
+                case "y":
+                {
+                    $("#base").attr("src", "BasicInfo/y.html?guid=" + guid);
+                    break;
+                }
+                
+                default:
+                    break;
+            }
+        }
+        //数组去重
+        function unique1(array) {
+            var n = []; //一个新的临时数组
+            for (var i = 0; i < array.length; i++) {
+                if (n.indexOf(array[i]) == -1) n.push(array[i]);
+            }
+            return n;
+        }
+
+        function chlidTC(parm) {
+            $("#base,#pdf,#info").hide();
+            if (select == true) { select = false; return; }
+            now = parm;
+            var path = data[now].path;
+        }
+
+        function initTree() {
+            var a = $(".fjc");
+            for (var i = 0; i < a.length; i++) {
+                var count = a[i].childNodes.length - 2;
+                $(".fjc")[i].childNodes[0].innerText += "(" + count + ")";
+            }
+        }
+
+
+        //var LastLeftID = "";
+        function selectAll(emid, value, i, e) {
+            var isCheck = $("#" + i + "o").is(':checked');
+            if (data.length == 0) return;
+            for (var i = 0; i < data.length; i++) {
+                if (value == data[i].kindname) {
+                    data[i].remark = isCheck;
+                }
+
+            }
+
+            select = true;
+            var obj = document.getElementById(emid);
+            var itemss = obj.getElementsByTagName("input");
+            var a;
+            (e["checked"] == true ? a = true : a = false);
+            for (var i = 0; i < itemss.length; i++) {
+                itemss[i]["checked"] = a;
+                obj.className = "expanded";
+            }
+        }
+        function DoMenu(emid) {
+            if (select == true) {
+                select = false;
+                return;
+            }
+            var obj = document.getElementById(emid);
+            obj.className = (obj.className.toLowerCase() == "collapsed" ? "expanded" : "collapsed");
+        }
+        function Forward(oImg) {
+            current = (current + 90) % 360;
+            oImg.style.transform = 'rotate(' + current + 'deg)';
+        }
+        function Direct(oImg) {
+            current = (current - 90) % 360;
+            oImg.style.transform = 'rotate(' + current + 'deg)';
+        }
+
+        function baseInfo() {
+            //$("#before").hide();
+            //$("#after").hide();
+            $("#info").hide();
+            $("#pdf").hide();
+            $(".rightbutton").hide();
+            //参数  在app.xml中配key
+            $("#base").attr("src", "BasicInfo/y.html?guid=" + guid);
+            $("#base").show();
+        }
+        function flod(checkNum) {
+            var ularr = $("#nav").children();
+            var zddm=null;
+            var zrzh=null;
+            $.ajax({
+                async: false,
+                url: ktw.cookie.ServerUrl  + "zrz/getbyfilter/id=" +guid ,
+                type: "get",
+                success: function (res) {
+                    if (res.success) {
+                        console.log(res.data);
+                        $(res.data).each(function (i, item) {
+                            zddm=item.zddm;
+                            zrzh=item.zrzh;
+                        });
+
+                    } else {
+                        ktw.Error(res.message);
+                    }
+                },
+                error: function (res) {
+                    ktw.Error("请求数据出错!");
+                    console.error(res);
+                }
+            });
+
+            if(checkNum==1) {
+                //参数 为宗地代码
+                $("#base").attr("src", "BasicInfo/zlk.html?zddm=" + zddm);
+                $("#base").show();
+            }
+            else if(checkNum==2){
+                //参数 为自然幢号
+                $("#base").attr("src", "BasicInfo/lpb.html?guid=" + zrzh);
+                $("#base").show();
+            }
+
+        }
+    </script>
+    <style type="text/css">
+        .Content {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-size: 12px;
+        }
+
+        #nav {
+            width: 100%;
+            line-height: 24px;
+            list-style-type: none;
+            text-align: left;
+        }
+
+        #nav a {
+            width: 250px;
+            display: block;
+            padding-left: 36px;
+            color: black;
+            /*Width(一定要)，否则下面的Li会变形*/
+        }
+
+        #nav li {
+            float: left;
+            /*font-weight: bold;*/
+            font-size: 14px;
+            padding-bottom: 2px;
+            color: black;
+        }
+
+        #nav a:hover {
+            color: white;
+            color: #CA498C;
+            background-color: #E5F1FB;
+            /*background-color:#AAAAAA;*/
+            /*border:1px solid #D2E4F5;*/
+            text-decoration: none;
+        }
+        /*二级目录*/
+        #nav li ul {
+            list-style: none;
+            text-align: left;
+        }
+
+        #nav li ul li {
+            border-right: #cccccc 1px solid;
+            font-size: 11px;
+            padding-bottom: 2px;
+            padding-top: 2px;
+        }
+
+        #nav li ul a {
+            padding-left: 50px;
+            width: 260px;
+        }
+
+        #mrc {
+            clear: left;
+        }
+
+        #nav ul.collapsed {
+            display: none;
+        }
+
+        #PARENT {
+            width: calc(100%-10px);
+            padding-top: 5px;
+        }
+
+        .Content .rightpart {
+            position: absolute;
+            right: 0px;
+            top: 40px;
+            left: 260px;
+            bottom: 0px;
+            text-align: center;
+            overflow: auto;
+            background-color: #F5F5F5;
+        }
+
+        #PARENT #nav li .icon {
+            width: 16px;
+            height: 16px;
+            float: left;
+            margin: 4px;
+        }
+
+        #PARENT #nav li .iconc {
+            width: 16px;
+            height: 16px;
+            float: left;
+            margin: 4px;
+        }
+
+        .mark {
+            width: 16px;
+            height: 16px;
+        }
+
+        .cbox {
+            vertical-align: middle;
+            float: left;
+            margin-top: 7px;
+        }
+
+        .cboxc {
+            vertical-align: middle;
+            float: left;
+            margin-top: 7px;
+        }
+    </style>
+</head>
+<body>
+<div class="Content">
+    <div style="width: 100%; height: 40px; background-color: #E8E7E3; line-height: 40px;">
+        <div class="title" style="width: 70%; height: 40px; text-align: left; padding-left: 60px; font-size: 14px; float: left; color: #777777">
+            <span style="display: inline-block; top: 2px; width: 16px; height: 16px; background-image: url(../../image/home.png);"></span>
+            <span>一张图 >> 附件及详细信息 >><span id="type"></span><span id="xmmc"></span></span>
+
+        </div>
+        <div class="rightbutton" style="width: 20%; height: 20px; float: right; margin-right: 20px">
+            <div class="button" style="float: right" operatetype="forward">正向旋转</div>
+            <div class="button" style="float: right" operatetype="direct">反向旋转</div>
+        </div>
+    </div>
+    <div class="leftpart" style="width: 259px; border-right: solid 1px #bbb; background-color: #F5F5F5; overflow: hidden; position: absolute; left: 0; top: 40px; bottom: 0;">
+        <div id="divtree" style="width: 100%; height: calc(100%-30px); overflow: hidden">
+            <div id="PARENT">
+                <ul id="nav">
+                    <li style="padding-left: 0px">
+                        <a style="font-size: 16px; padding-left: 20px" href="#Menu=ChildMenu1" onclick="baseInfo()">
+                            <div class="icon">
+                                <img class="mark" src="../../image/table.jpg" />
+                            </div>
+                            基本信息</a></li>
+                    <li style="padding-left: 0px"><a style="font-size: 16px; padding-left: 20px" href="#Menu=ChildMenu1" onclick="flod(1)">
+                        <div class="icon">
+                            <img class="mark" src="../../image/fj.jpg" />
+                        </div>
+                        宗地信息</a></li>
+                    <li style="padding-left: 0px"><a style="font-size: 16px; padding-left: 20px" href="#Menu=ChildMenu1" onclick="flod(2)">
+                        <div class="icon">
+                            <img class="mark" src="../../image/fj.jpg" />
+                        </div>
+                        楼盘表</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="rightpart" style="">
+        <img id="info" style="max-width: 500px; margin-left: 0; cursor: zoom-in;" />
+        <iframe id="pdf" style="position: absolute; width: 100%; height: 100%; left: 0; display: none"></iframe>
+        <!--基本信息-->
+        <iframe id="base" src="BasicInfo/p.html" style="position: absolute; width: 100%; height: 100%; left: 0; overflow: hidden;"></iframe>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>图层中所有要素</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" href="../../css/icon.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script type="text/javascript">
+        var L = window.top.window.L;
+        var Ktw = window.top.window.ktw;
+        var waitBox;
+        var layerinfo;
+        var dataGrid;
+        var pageIndex = 1;
+        var pageSize = 5;
+        var totalFeatures = null;//返回总记录数
+
+        var currentId = [];
+
+        //记录查询的url地址,导出excel使用
+        var wfsrquesturl;
+        function WidgetCommunication(s) {//部件通讯
+            var parent = s.parent;
+            layerinfo = s.param.layerinfo;
+            initDataGrid();
+            Ktw.App.BottomPanel.bind("onResize", function () {
+                if (!Ktw.IsNull(dataGrid)) dataGrid.DataGrid.datagrid("resize", {
+                    width: Ktw.App.BottomPanel.Content.width(),
+                    height: Ktw.App.BottomPanel.Content.height()
+                });
+            });
+
+            Ktw.App.LifeCtr.Hide();
+
+
+            var maplayer = Ktw.App.Config.SystemMap.ArrayOfMapLayer.MapLayer;
+            var maplayerlength = maplayer.length;
+            if (maplayerlength > 0) {
+                for (var i = 0; i < maplayerlength; i++) {
+                    var layertext = maplayer[i].Text;
+                    if ('业务数据' == layertext) {
+                        var ylayer = maplayer[i].Children;
+                        var ylayerl = ylayer.MapLayer.length;
+                        if (ylayerl > 0) {
+                            for (var j = 0; j < ylayerl; j++) {
+                                currentId.push(ylayer.MapLayer[j].ID);
+                            }
+                        }
+
+                    }
+                }
+            }
+        };
+        $(function () {
+            if (Ktw.IsNull(waitBox)) waitBox = new Ktw.UCWaitBox({ Parent: $(window.top.window.document.body) });
+        });
+        function search() {
+            initDataGrid();
+        }
+        function initDataGrid() {
+            Ktw.App.BottomPanel.SetVisible(true);
+            Ktw.App.BottomPanel.SetTitle(layerinfo.Text);
+
+            if (Ktw.IsNull(dataGrid)) {
+                var columns = [];
+                if (!layerinfo.DetailFields || !layerinfo.DetailFields.Field) {
+                    columns.push({
+                        field: "Name",
+                        width: 500,
+                        align: 'center',
+                        title: "提示",
+                        sortable: false,
+                        formatter: function (value, row, index) {
+                            return "无可显示字段";
+                        }
+                    });
+                } else {
+                    if (!layerinfo.DetailFields.Field.length) {
+                        layerinfo.DetailFields.Field = [layerinfo.DetailFields.Field];
+                    }
+                    for (var i = 0; i < layerinfo.DetailFields.Field.length; i++) {
+                        var filedname = layerinfo.DetailFields.Field[i].Name;
+                        columns.push({
+                            field: layerinfo.DetailFields.Field[i]["Name"],
+                            width: 150,
+                            align: 'center',
+                            title: layerinfo.DetailFields.Field[i]["ByName"],
+                            sortable: false,
+                            formatter: (function (filedname) {
+                                return function (value, row, index) {
+                                    return row.properties[filedname];
+                                }
+                            })(filedname)
+                        });
+                    }
+                }
+                Ktw.App.BottomPanel.unbind("onResize");
+                Ktw.App.BottomPanel.bind("onResize", function (evt) {
+                    if (!Ktw.IsNull(dataGrid)) dataGrid.Resize(Ktw.App.BottomPanel.Width, Ktw.App.BottomPanel.Height - 25);
+                });
+                Ktw.App.BottomPanel.unbind("onExpand");
+                Ktw.App.BottomPanel.bind("onExpand", function (evt) {
+                    if (!Ktw.IsNull(dataGrid)) dataGrid.Resize(Ktw.App.BottomPanel.Width, Ktw.App.BottomPanel.Height - 25);
+                });
+                Ktw.App.BottomPanel.unbind("onCollapse");
+                Ktw.App.BottomPanel.bind("onCollapse", function (evt) {
+                    Ktw.App.BottomPanel.SetVisible(false);
+                    Ktw.App.LifeCtr.Hide();
+                });
+
+                dataGrid = new Ktw.UCDataGrid({
+                    PageIndex: pageIndex,
+                    PageSize: pageSize,
+                    ID: "querydataGrid",
+                    pagequery: false,
+                    TextPrompt: undefined,
+                    buttons: [{
+                        iconCls: 'icon-export',
+                        handler: function () {
+                            var baseUri = Ktw.App.Root;
+                            var url = baseUri + "layer/export"
+                            var fileds = [];
+                            if (!layerinfo.DetailFields || !layerinfo.DetailFields.Field) {
+                                alert("无导出属性!");
+                                return;
+                            }
+                            for (var i = 0; i < layerinfo.DetailFields.Field.length; i++) {
+                                fileds.push({ "Name": layerinfo.DetailFields.Field[i].Name, "ByName": layerinfo.DetailFields.Field[i].ByName });
+                            }
+
+
+                            var url = layerinfo.Url + "?typename=" + layerinfo.TypeName + "&service=WFS&request=GetFeature&outputFormat=excel&srsName=" + layerinfo.EPSG;
+                            window.open(url);
+                        }
+                    }]
+                });
+
+                $(document.body).append(dataGrid.Target);
+                dataGrid.Layout(columns);
+                dataGrid.Target.bind("onSelectPage", function (s, e) {
+                    pageIndex = e.index;
+                    pageSize = e.size;
+                    QueryData(pageIndex, pageSize);
+                });
+                dataGrid.Target.bind("onClickRow", function (s, e) {
+                    console.log(e);
+                    if (currentId.length > 0) {
+                        var result = $.inArray(layerinfo.ID, currentId);
+                        if (result > -1) {
+                            if (currentId[result].length > 6) {
+                                getLifeCycle(e.Row, currentId[result]);
+                            }
+                            else {
+                                Ktw.App.HighLight.hightLightFit(e.Row);
+                            }
+
+                        }
+                        else {
+                            Ktw.App.HighLight.hightLightFit(e.Row);
+                        }
+                    }
+                    else {
+                        Ktw.App.HighLight.hightLightFit(e.Row);
+                    }
+
+
+                });
+                QueryData();
+            }
+            function QueryData(PageIndex, PageSize) {
+                waitBox.Show();
+                PageIndex = PageIndex || 1;
+                PageSize = PageSize || 5;
+                Ktw.App.HighLight.clearHighLight();
+                Ktw.App.BottomPanel.SetVisible(true);
+                var tmp = Ktw.GetSystemUrlByRelID(layerinfo.Url);
+                if (tmp != "") layerinfo.Url = tmp;
+                var startIndex = (PageIndex - 1) * PageSize;
+                var queryPram = new L.QueryParameter.WfsQueryParameter({
+                    url: layerinfo.Url, //wfs服务地址
+                    typename: layerinfo.TypeName, //查询图层名称
+                    startIndex: startIndex,
+                    count: PageSize
+                });
+                var queryTack = new L.QueryTask(queryPram);
+                queryTack.execute(function (res) {
+                    Ktw.App.BottomPanel.SetVisible(true);
+                    if (totalFeatures == null) {
+                        totalFeatures = res.totalFeatures;
+                    }
+                    var pageInfo = {
+                        pageIndex: pageIndex,
+                        pageSize: pageSize,
+                        totalCount: totalFeatures,
+                        msg: "当前页显示记录" + (((pageIndex - 1) * pageSize) + 1) + "-" + ((pageIndex - 1) * pageSize + res.features.length) + "条记录,共{total}条数据"
+                        //msg: "当前页显示记录" + (((pageIndex - 1) * pageSize) + 1) + "-" + (pageIndex * pageSize) + "条记录,共{total}条数据"
+                    };
+                    dataGrid.Load(res.features, pageInfo);
+                    waitBox.Close();
+                }, function () {
+                    console.log(arguments);
+                    waitBox.Close();
+                    Ktw.Alert("查询出错");
+                });
+            }
+
+
+            //生命周期数据获取
+            function getLifeCycle(row, idrow) {
+                var type = idrow.substring(5, 6);
+                console.log("type=", type);
+                var url = Ktw.App.ServerUrl + "layer/lifecycel/" + type + "/" + row.id.split(".")[1];
+
+                $.ajax({
+                    type: "get",
+                    async: true,
+                    url: url,
+                    success: function (res) {
+                        if (res.success) {
+                            Ktw.App.LifeCtr.Load(res.data, type);
+                            Ktw.App.LifeCtr.Show();
+                            Ktw.App.LifeCtr.ShowType();
+                        } else {
+                            Ktw.Alert(res.message);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <iframe id="formcon" style="width: 0; height: 0; display: none;" />
+</body>
+</html>

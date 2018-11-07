@@ -1,0 +1,468 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link href="../../../js/ktop/ktop.css" rel="stylesheet" />
+    <script src="../../../js/ktop/ktop.js"></script>
+    <!--<link href="../../../js/timeline/css/timeline.css" rel="stylesheet" />-->
+    <!-- JS框架 jQuery -->
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <!-- 第三方UI框架 easyUI -->
+    <link href="../../../theme/default/easyui.css" rel="stylesheet" />
+    <link href="../../../theme/icon.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../../js/easyui-lang-zh_CN.js"></script>
+    <script src="../../../js/md5.js"></script>
+    <!--ktw控件UI-->
+    <link href="../../../css/icon.css" rel="stylesheet" />
+    <link href="../../../css/app.css" rel="stylesheet" />
+    <link href="../../../css/main.css" rel="stylesheet" />
+    <script src="../../../js/ktw.ui.js"></script>
+    <script src="../../../js/ktw.onemap.js"></script>
+    <script src="../../../js/ktw.gis.js"></script>
+    <!-- json、xml类型数据格式的操作 -->
+    <script type="text/javascript" src="../../../js/data.util.js"></script>
+    <!-- JS实现的LINQ -->
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ajaxfileupload.js"></script>
+    <!--<script src="../../../js/timeline/js/timeline.js"></script>-->
+    <script>
+        var Map1;
+        var ServerUrl;
+        var year = [];
+        var _interval;
+        var _turnon = true;
+        var data = [];
+        var layer = [];
+        function getconfig() {
+            if (ktw.IsNull(ktw.App.Config)) {
+                var config = null;
+                $.ajax({
+                    url: "../../../config/app.xml",
+                    dataType: 'xml',
+                    type: 'GET',
+                    cache: false,
+                    timeout: 2000,
+                    async: false,
+                    error: function (xml) {
+                        ktw.Error("加载系统配置文件出错！");
+                    },
+                    success: function (xml) {
+                        config = $.xml2json(xml);
+                    }
+                });
+                ktw.App.Config = config;
+            }
+        }
+        $(function () {
+            getconfig();
+            ktw.App.Root = GetRootPath();
+            ktw.App.ServerUrl = GetServerPath();
+            ServerUrl = ktw.App.ServerUrl;
+            getyear();
+            var bounds = ktw.App.Config.SystemMap.Bounds;
+            if (bounds && bounds.XMin && bounds.XMax && bounds.YMin && bounds.YMax) {
+                bounds = [[bounds.YMin, bounds.XMin], [bounds.YMax, bounds.XMax]];
+            }
+            var minZoom = parseInt(ktw.App.Config.SystemMap.MinZoom);
+            var maxZoom = parseInt(ktw.App.Config.SystemMap.MaxZoom);
+            var zoom = parseInt(ktw.App.Config.SystemMap.Zoom);
+            var center = { lon: ktw.App.Config.SystemMap.Center.split(",")[0], lat: ktw.App.Config.SystemMap.Center.split(",")[1] };
+            ktw.Project.InitProjectParam("../../../config/coordinateSystem.json");
+            var config = ktw.App.Config.SystemMap;
+            Map1 = L.map('map1', {
+                center: center,
+                zoom: zoom,
+                minZoom: minZoom,//地图最小级数
+                maxZoom: maxZoom,//地图最大级数
+                attributionControl: false,
+                zoomControl: false,
+                crs: ktw.Project.GetCRSByCode(ktw.EPSG.split(":")[1])
+            });
+            if (bounds && bounds.length) {
+                Map1.setMaxBounds(bounds);
+            }
+            ktw.MapLoad.InitMap($.extend({ Map: Map1 }, config));
+
+            //loadLayer(Map1, ktw.App.Config.SystemMap.ArrayOfMapLayer.MapLayer[0].Children.MapLayer[0]);
+            loadSwitch($("#switch1"), Map1);
+            Timeline();
+        })
+        //加载影像开关及图例
+        function loadSwitch($dom, map) {
+            if (ktw.IsNull(ktw.App.Config.SystemMap.MapSwitchInfo) || ktw.App.Config.SystemMap.MapSwitchInfo.length == 0) return;
+            var conf = ktw.ObjClone(ktw.App.Config.SystemMap.MapSwitchInfo);
+            for (var i = 0; i < conf.SwitchMaps.length; i++) {
+                conf.SwitchMaps[i].ID = conf.SwitchMaps[i].ID + new Date().getTime();
+            }
+            var param = $.extend({
+                Parent: $dom,
+                map: map,
+            }, conf);
+            this.MapSwitch = new ktw.UCMapSwitch(param);
+            ktw.InitLegend({ conf: ktw.App.Config.SystemMap.Legend, map: Map1, mapSwitch: this.MapSwitch });//初始化图例容器
+        }
+        var layers = {};
+        //加载地图
+        function loadLayer(maparr, currdata, CQLFilter, item) {
+            var layerurl = ktw.GetSystemUrlByRelID(currdata.Url);
+            if (!ktw.IsNull(layerurl)) currdata.Url = layerurl;
+            //大的图层全部隐藏
+            Map1.__legend.ClearData();
+            var flag=false;
+            for (var k = 0; k < data.length; k++) {
+                if (flag) {
+                    if (layers[data[k].text]) {
+                        layers[data[k].text].setVisible(false);
+                    }
+                    continue;
+                } else {
+                    var le = ktw.App.Config.Extend.TimeLine.P.Legends["Legend"+ data[k].text];
+                    if (le) {
+                        Map1.__legend.AddData(le);
+                    }                    
+                }
+                if (item.text == data[k].text) {
+                    flag = true;
+                    continue;
+                }
+            }          
+            if (layers[item.text]) {
+                layers[item.text].setVisible(true);
+            } else {
+                switch (currdata.Type) {
+                    case ktw.LayerType.Mapping:
+                        {
+                            var param = {
+                                Map: maparr,
+                                ID: currdata.ID
+                            };
+                            layer = ktw.MapLoad.AddArcGISLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                    case ktw.LayerType.Tile:
+                        {
+                            var param = { Map: maparr, ID: currdata.ID };
+                            layer = ktw.MapLoad.AddTileLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                    case ktw.LayerType.WMS:
+                        {
+                            var param = {
+                                ID: currdata.ID,
+                                Url: currdata.Url,
+                                Layers: currdata.TypeName,
+                                ServerType: currdata.ServerType ? currdata.ServerType : "hgis",
+                                Map: maparr,
+                                ZIndex: parseInt(currdata.Order),
+                                Styles: currdata.Style,
+                                CQLFilter: CQLFilter
+                            }
+                            if (!ktw.IsNull(currdata.Sld)) {
+                                var sldbody = ktw.MapUtils.LoadSLD("../../../" + currdata.Sld);
+                                sldbody = sldbody.replace("%LayerName%", currdata.TypeName);
+                                param.Sldbody = sldbody;
+                                //使用sldbody时不能指定layers参数
+                                param.Layers = undefined;
+                            }
+                            //处理Filter参数
+                            if (!ktw.IsNull(currdata.Filter)) {
+                                param.CQLFilter = currdata.Filter;
+                            }
+                            if (!ktw.IsNull(currdata.Bounds) &&
+                                !ktw.IsNull(currdata.Bounds.XMin) &&
+                                !ktw.IsNull(currdata.Bounds.XMax) &&
+                                !ktw.IsNull(currdata.Bounds.YMin) &&
+                                !ktw.IsNull(currdata.Bounds.YMax)) {
+                                var ext = currdata.Bounds;
+                                var southWest = L.latLng(parseFloat(ext.YMin), parseFloat(ext.XMin)),
+                                        northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax));
+                                param.bounds = L.latLngBounds(southWest, northEast);
+                            }
+                            layer = ktw.MapLoad.AddWMSLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                    case ktw.LayerType.WMTS:
+                        {
+                            var param = {
+                                Map: maparr,
+                                ID: currdata.ID,
+                                Layers: currdata.TypeName
+                            };
+                            if (!ktw.IsNull(currdata.Bounds) &&
+                                !ktw.IsNull(currdata.Bounds.XMin) &&
+                                !ktw.IsNull(currdata.Bounds.XMax) &&
+                                !ktw.IsNull(currdata.Bounds.YMin) &&
+                                !ktw.IsNull(currdata.Bounds.YMax)) {
+                                var ext = currdata.Bounds;
+                                var southWest = L.latLng(parseFloat(ext.YMin), parseFloat(ext.XMin)),
+                                        northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax));
+                                param.bounds = L.latLngBounds(southWest, northEast);
+                            }
+                            layer = ktw.MapLoad.AddWMTSLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                }
+                layers[item.text] = layer;
+            }
+        }
+        //加载时间轴
+        function Timeline() {
+            for (var i = 0; i < year.length; i++) {
+                data.push({
+                    text: year[i],
+                    title: year[i] + "年批地数据",
+                    tag: {index:i}
+                })
+            }
+            var wid = $(".timeline").width();
+            wid = wid - 35;
+            if (data.length == 1) {
+
+            } else {
+                var diff = (wid / (data.length - 1));
+                for (var i = 0; i < data.length; i++) {
+                    var left = i * diff;
+                    var str = "<div class='timeline-node'  style='left:" + (left + 35) + "px' title='" + data[i].title + "'></div>";
+                    var dom = $(str);
+                    dom.append("<div class='node-text'>" + data[i].text + "</div>")
+                    $(".timeline").append(dom);
+                }
+            }
+            _interval = setInterval(cycle, 2000);
+        }
+        
+        function cycle() {
+            if (!_turnon) return;
+            var nodes = $(".timeline-node");
+            var index = 0;
+            for (var i = 0; i < nodes.length; i++) {
+                if (nodes.eq(i).hasClass("active")) {
+                    index = (i == nodes.length - 1) ? 0 : (i + 1);
+                    break;
+                }
+            }
+            nodes.removeClass("active").eq(index).addClass("active");
+            doSelect(data[index]);
+        }
+        function turn(item) {
+            var img = $(item).find("div").eq(0);
+            if (img.hasClass("turn-on")) {
+                turnoff();
+
+            } else {
+                turnon();
+            }
+        }
+
+        function turnoff() {
+            var img = $(".timeline-turn>div").eq(0);
+            img.removeClass("turn-on").addClass("turn-off");
+            _turnon = false;
+        }
+        function turnon() {
+            var img = $(".timeline-turn>div").eq(0);
+            img.removeClass("turn-off").addClass("turn-on");
+            _turnon = true;
+        }
+
+        /*function selectNode(item) {
+            if ($(item).attr("fix") == "fix") {
+                turnon();
+            } else {
+                turnoff();
+                $(".timeline-node").removeClass("active");
+                $(item).addClass("active").attr("fix", "fix");
+            }
+        }*/
+
+        //根据引用的id值从图层树的配置中查找图层的配置
+        function searchLayerTree(layers, refid) {
+            if (layers && !layers.length) layers = [layers];
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i].ID == refid) {
+                    return layers[i];
+                } else if (layers[i].Children && layers[i].Children.MapLayer) {
+                    var tmp = searchLayerTree(layers[i].Children.MapLayer, refid);
+                    if (tmp) { return tmp; }
+                }
+            }
+            return null;
+        }
+        var _layer;
+        function doSelect(item) {
+            if (!_layer) {
+                _layer = $.extend(true, {}, searchLayerTree(ktw.App.Config.SystemMap.ArrayOfMapLayer.MapLayer, ktw.App.Config.Extend.TimeLine.P.Layer.Ref), ktw.App.Config.SystemMap.ArrayOfMapLayer.MapLayer, ktw.App.Config.Extend.TimeLine.P.Layer);
+            }
+            var CQLFilter = "pzrq DURING " + ktw.DateToUtc(item.text + "-01-01") + "/" + ktw.DateToUtc(item.text + "-12-31 23:59:59");
+            _layer.Legend = ktw.App.Config.Extend.TimeLine.P.Legends["Legend" + item.text];
+            _layer.Styles = ktw.App.Config.Extend.TimeLine.P.Styles["Style" + item.text];
+            loadLayer(Map1, _layer, CQLFilter, item);
+        }
+        //获取年份
+        function getyear() {
+            $.ajax({
+                url: ServerUrl + "jsydsp/alldatayear",
+                type: "get",
+                async: false,
+                success: function (res) {
+                    year = res.data.split(",");
+                },
+                error: function () {
+                    var k = "";
+                }
+            });
+        }
+        function GetServerPath() {
+            if (ktw.App.Config.SystemTheme.IsDebug !== "false") {
+                return ktw.GetSystemUrlByRelID("SysService");
+            } else {
+                return ktw.App.Root;
+            }
+        };
+        function GetRootPath() {
+            var pathName = window.document.location.pathname;
+            var localhost = window.location.host;
+            var projectName = pathName.substring(0, pathName.substr(1).indexOf('/') + 1);
+            return ("http://" + localhost + projectName + "/");
+        }
+        /*根据ID获取基础地址*/
+        ktw.GetSystemUrlByBasicID = function (basicid) {
+            var basicurls = ktw.App.Config.SystemUri.BasicUris;
+            if (ktw.IsNull(basicurls) || basicurls.length === 0) return "";
+            var basicInfo = Enumerable.From(basicurls).Where('s=>s.ID==="' + basicid + '"').ToArray();
+            if (basicInfo.length === 0) return "";
+            else return basicInfo[0].Uri;
+        };
+        /*根据ID获取相对地址*/
+        ktw.GetSystemUrlByRelID = function (relativeid) {
+            if (!ktw.IsNull(relativeid) && relativeid.indexOf("http") == 0) return relativeid;
+            var relurls = ktw.App.Config.SystemUri.RelativeUris;
+            if (ktw.IsNull(relurls) || relurls.length === 0) return "";
+            var relativeInfo = Enumerable.From(relurls).Where('s=>s.ID==="' + relativeid + '"').ToArray();
+            if (relativeInfo.length === 0) return "";
+            var relativuri = relativeInfo[0].Uri;
+            var basicid = relativeInfo[0].BasicID;
+            if (ktw.IsNull(basicid)) return relativuri;
+            var basicuri = ktw.GetSystemUrlByBasicID(basicid);
+            return basicuri + relativuri;
+        };
+
+    </script>
+    <style>
+        .container {
+            width: 100%;
+            height: 100%;
+            min-width: 640px;
+            min-height: 150px;
+            position: relative;
+        }
+
+        .switch {
+            top: 0px;
+            right: 0px;
+            position: absolute;
+            width: 50px;
+            height: 50px;
+        }
+
+        .MapSwitch{
+            top:15px !important;
+        } 
+		.node-text{
+			line-height:28px;
+		}
+        .timeline {
+            bottom: 50px;
+            left: 5%;
+            right: 20%;
+            height: 100px;
+            /*background-color:white;*/
+            position: absolute;
+            opacity: 0.8;
+        }
+
+            .timeline:hover {
+                opacity: 1;
+            }
+
+        .timeline-line {
+            top: 50%;
+            position: absolute;
+            height: 4px;
+            margin-top: -2px;
+            right: 0;
+            left: 35px;
+            background-color: #D6D7D7;
+            z-index: 0;
+        }
+
+        .timeline-node {
+            position: absolute;
+            z-index: 1;
+            top: 30px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #fff;
+            transition: box-shadow 1s;
+            cursor: pointer;
+            border: 5px solid #D6D7D7;
+			text-align:center;
+        }
+
+            .timeline-node:hover {
+                border: 5px solid #A6DB6E;
+            }
+
+            .timeline-node.active {
+                border: 5px solid #A6DB6E;
+                box-shadow: rgba(0,0,0,1) 0 0 20px;
+            }
+
+        .timeline-turn {
+            width: 32px;
+            height: 32px;
+            text-align: center;
+            line-height: 32px;
+            position: absolute;
+            top: 33px;
+        }
+
+            .timeline-turn:hover {
+                background-color: #0099cc;
+            }
+
+
+        .turn-on {
+            background-position: -16px -113px;
+            background-image: url(../../../image/l1.png);
+            margin-left: 8px;
+            margin-top: 8px;
+            width: 15px;
+            height: 16px;
+        }
+
+        .turn-off {
+            background-position: -32px -113px;
+            background-image: url(../../../image/l1.png);
+            margin-left: 8px;
+            margin-top: 8px;
+            width: 16px;
+            height: 16px;
+        }
+    </style> 
+
+</head>
+<body>
+    <div class="container">
+        <div id="map1" style="width: 100%; height: 100%;"></div>
+        <div id="switch1" class="switch"></div>
+        <div class="timeline">
+            <div class="timeline-turn" onclick="turn(this)"><div class="turn-on"></div></div>
+            <div class="timeline-line"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+﻿/*tablegrid*/
+table {
+    border-collapse: collapse;
+}
+
+.grid {
+    width: 95%;
+    margin: 0 auto;
+    font-size: 12px;
+    width: 99%;
+}
+
+    .grid td, .grid th {
+        border-collapse: collapse;
+        border: 1px solid #DDDDDD;
+        height: 25px;
+        vertical-align: middle;
+        line-height: 25px;
+        text-align: center;
+        font-weight: normal;
+    }
+.grid-head {
+    background-color: #FFFFFF;
+    height: 40px;
+}
+
+input {
+    height: 28px;
+    line-height: 28px;
+}
+
+.select-row {
+    background-color: #ffe48d !important;
+}
+
+.grid td {
+    border-collapse: collapse;
+}
+
+.grid-row {
+    background-color: #FFFFFF;
+}
+
+.grid-row-alternate {
+    background-color: #F9F9F9;
+}
+
+.btna {
+    font-size: 14px;
+    vertical-align: bottom;
+    cursor: pointer;
+}
+
+.grid-cell {
+    height: 25px;
+    line-height: 28px;
+}
+
+    .grid-cell a:link, .btna:link {
+        color: #4646a3;
+        text-decoration: none;
+    }
+
+    .grid-cell a:visited, .btna:visited {
+        color: #9353d4; /*偏紫色*/
+        text-decoration: none;
+    }
+
+    .grid-cell a:hover, .btna:hover {
+        color: #47b930; /*绿色*/
+        text-decoration: none;
+        text-decoration: underline;
+    }
+
+    .grid-cell a:active, .btna:active {
+        color: #4646a3; /*偏紫蓝色*/
+        text-decoration: none;
+    }
+
+.table-row-mouseover {
+    background-color: #F7E5A7;
+}
+.txt-grid-form{
+    width:95%;
+    padding-left:5px;
+    outline:none;
+    border:1px solid #dddddd;
+}
+.txt-grid-form:focus{
+    outline:none;
+    border:1px solid #99ddf5;
+    box-shadow: #bae3f1 0px 2px 20px
+}

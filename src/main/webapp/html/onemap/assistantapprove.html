@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>一张图辅助审批</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/index.css" />
+    <link href="../../js/ktop/ktop.css" rel="stylesheet" />
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+
+    <script src="../../js/ktop/ktop.debug.js"></script>
+    <!--<script src="../../js/ktop/ktop.js"></script>-->
+    <script src="../../js/ktop/proj4-compressed.js"></script>
+    <script src="../../js/ktop/proj4leaflet.js"></script>
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+
+    <!-- JS框架 jQuery -->
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <!-- 第三方UI框架 easyUI -->
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <!-- JS实现的LINQ -->
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
+
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+    </style>
+    <!-- JS框架 jQuery -->
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <!-- 第三方UI框架 easyUI -->
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <!-- JS实现的LINQ -->
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
+
+    <!-- json、xml类型数据格式的操作 -->
+    <script type="text/javascript" src="../../js/data.util.js"></script>
+
+    <!-- 提供对旧浏览器一些特性的兼容 -->
+    <script type="text/javascript" src="../../js/polyfill.min.js"></script>
+
+
+    <!-- 框架界面布局 -->
+    <!--<script type="text/javascript" src="../../js/ktw.ui.js"></script>-->
+    <script src="../../js/AuxiliaryCtrl.js"></script>
+    <script type="text/javascript" src="../../js/ktw.onemap.js"></script>
+
+    <!-- jQuery.form.js是一个form插件，支持ajax表单提交和ajax文件上传 -->
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+
+    <!-- 基于openlayers3封装，在涉及到地图相关操作时可引入 -->
+    <script type="text/javascript" src="../../js/ktw.gis.js"></script>
+    <script type="text/javascript" src="../../js/jsts.min.js"></script>
+
+    <script type="text/javascript" src="../../js/json2.js"></script>
+    <script src="../../js/echarts.js"></script>
+    <script src="../../js/echarts.min.js"></script>
+    <script src="../../js/jquery.cookie.js"></script>
+
+    <style type="text/css">
+        body {
+            font-size: 14px;
+        }
+
+        .content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 60%;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            position: absolute;
+        }
+
+        #contentau {
+            width: 40%;
+            height: 100%;
+            position: absolute;
+            right: 0px;
+            top: 0;
+            bottom: 0;
+            background-color: #EFEFF2;
+            overflow: auto;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .module {
+            margin-left: 10px;
+            margin-bottom: 20px;
+            padding-right: 20px;
+            line-height: 30px;
+            font-size: 14px;
+        }
+
+        .module-header {
+            font-size: 16px;
+            font-weight: bold;
+            height: 30px;
+            line-height: 30px;
+            background-image: url(../../image/header.png);
+            background-repeat: no-repeat;
+            color: #fff;
+            padding-left: 5px;
+        }
+
+        .module-bar {
+            height: 2px;
+            background: linear-gradient(to right, #c9cee1, #efeff2 100%);
+            width: 50%;
+            margin-left: 277px;
+            margin-top: -2px;
+        }
+
+        .module-content {
+            margin-top: 2px;
+        }
+		.button{
+		width:30px;
+		height:18px;
+		float:right;
+		background-color:#01B6EF;
+		color:#fff;
+		text-align:center;
+		border-radius:4px;
+		margin-top:-1px;
+		}
+    </style>
+
+    <script type="text/javascript">
+        var parameters = null;
+        function WidgetCommunication(s) {//部件通讯
+            var parent = s.parent;
+            parameters = s.param;
+            console.log(parameters);
+            //防止页面后退
+            history.pushState(null, null, document.URL);
+            window.addEventListener('popstate', function () {
+                history.pushState(null, null, document.URL);
+            });
+            ktw.assistant.init(parameters);
+            ktw.BrowserMatch.checkTip();
+        }
+		function dosomething() {
+            var serviceUrl = ktw.App.ServerUrl;
+            var downlaod = serviceUrl + "upload/辅助审批报告.doc";
+            window.open(downlaod);
+        }
+    </script>
+</head>
+<body>
+    <div class="content">
+        <div id="map"></div>
+        <div id='contentau'>
+		<div class="button" onclick="dosomething()">导出</div></div>
+    </div>
+</body>
+</html>

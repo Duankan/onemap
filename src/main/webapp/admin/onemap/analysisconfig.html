@@ -1,0 +1,612 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/authorization.css" />
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script type="text/javascript" src="../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../js/appmana.js"></script>
+	<script type="text/javascript" src="../../js/appmana2.js"></script>
+    <title></title>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var Config = null;
+        var curMenu;
+        var isdelete = false;
+        reloadconfig();//加载配置文件
+        var ServerUrl = null;
+        ServerUrl = Ktw.cookie.ServerUrl;
+        var curnode = null;
+        var state;
+        var msg, dialog;
+        var editIndex = undefined;
+        var isblank = true;
+        $(function () {
+            initTree();
+            var node = $('#organizeTree').tree('find', 1001);
+            $('#organizeTree').tree('select', node.target);
+            //initdataGrid([])
+            $("#canel").bind('click', function () {
+                $('#dlg').dialog('close');
+            });
+            $("body").bind('click', function () {
+                if (isblank == false || state == "add") { isblank = true; state = "other" }
+                else {
+                    endEditing();
+                }
+            })
+            
+            function saveBtnAnalysis() {
+                var arg = {};
+                arg.BtnName = $("#BtnName").val();
+                arg.Tag = $("#Tag").val();
+                arg.EPSG = $("#EPSG").val();
+                arg.GeometryName = $("#GeometryName").val();
+                arg.OWS = $("#OWS").val();
+                arg.AnalysisLayer = $("#AnalysisLayer").val();
+                arg.Ref = $("#Ref").val();
+                arg.Key = $("#Key").val();
+                arg.ByName = $("#ByName").val();
+                arg.Name = $("#Name").val();
+                if (ktw.appmana.updateBtnAnalysis.validate(curMenu.BtnName, arg)) {
+                    ktw.appmana.updateBtnAnalysis(curMenu.BtnName, arg, function () {
+                        curMenu = arg;
+                        ktw.appmana.tip("保存成功!");
+                    }, function () {
+                        ktw.appmana.alert("保存失败!");
+                    });
+                }
+            }
+            
+            $("#saveadd").bind('click', function () {
+                var adddata = $("#addnodeform").serializeObject();
+                adddata.AnalysisLayer = null;
+                adddata.OWS = null;
+                adddata.EPSG = null;
+                adddata.GeometryName = null;
+                adddata.ID = null;
+                adddata.Tag = null;
+                adddata.Key = null;
+                adddata.DetailFields = null;
+                adddata.Statistics = null;
+                adddata.Ref = null;
+                var data = { path: "/App/Extend/Analysis/" + curnode.path, name: "BtnAnalysis", value: $.json2xml(adddata), onlyone: true };
+                $.ajax({
+                    type: "POST",
+                    data: data,
+                    url: ServerUrl + "confmana/add",
+                    success: function (data) {
+                        if (data.success == true) {
+                            reloadconfig();//重新加载配置文件
+                            initTree();
+                            msg.Alert('新增成功！', 'info');
+                            curnode = { "text": adddata["BtnName"], "path": curnode.path + "/BtnAnalysis[BtnName='" + adddata["BtnName"] + "']" }
+                            $("#organizeTree").tree('select', curnode);
+                        } else msg.Alert('新增失败！', 'warn');
+                    },
+                    error: function (data) {
+                        msg.Alert('服务请求失败！', 'error');
+                    }
+                });
+                $('#dlg').dialog('close');
+            });
+            //分析按钮信息修改
+            $("#detailinfosave .button").bind('click', function () {
+                if (endEditing()) {
+                    //匹配坐标系
+                    var reg3 = /^$|^(EPSG:)(\d){1,6}$/;
+                    var adddata = $("#detailinfoform").serializeObject();
+                    var Rows = $('#dataGrid').datagrid('getRows');
+                    var Statistics = [];
+                    var ByName = adddata["ByName"].split(",");
+                    var Name = adddata["Name"].split(",");
+                    if (ByName.length != Name.length) {
+                        $("#basehint").html("叠加字段名称个数应保持一致");
+                    }
+                    if (reg3.test(adddata["EPSG"]) == false) {
+                        $("#basehint").html("坐标参考系以EPSG:+1-6位数字");
+                        return;
+                    }
+                    var Field = [];
+                    for (var i = 0; i < ByName.length; i++) {
+                        Field.push({ "Field": { "ByName": ByName[i], "Name": Name[i] } });
+                    }
+                    if (Field.length > 0) {
+                        adddata.DetailFields = Field;
+                    }
+                    delete adddata.ByName;
+                    delete adddata.Name;
+                    for (var i = 0; i < Rows.length; i++) {
+                        Statistics.push({ "ByName": Rows[i]["ByName"], "Name": Rows[i]["Name"], "GroupBy": Rows[i]["GroupBy"] })
+                    }
+                    if (Statistics.length > 0) {
+                        adddata.Statistics = Statistics;
+                    }
+                    var data = { path: "/App/Extend/Analysis/" + curnode.path, value: $.json2xml(adddata), onlyone: true };
+                    $.ajax({
+                        type: "POST",
+                        data: data,
+                        url: ServerUrl + "confmana/update",
+                        success: function (data) {
+                            if (data.success == true) {
+                                reloadconfig();//重新加载配置文件
+                                msg.Alert('修改成功！', 'info');
+                                initTree();
+                            } else msg.Alert('修改失败！', 'warn');
+                        },
+                        error: function (data) {
+                            msg.Alert('服务请求失败！', 'error');
+                        }
+                    });
+                }
+            })
+            //往列表添加一行
+            $("#basadd").bind('click', function () {
+                window.event ? window.event.cancelBubble = true : e.stopPropagation();
+                append();
+            })
+            //列表移除一行
+            $("#remove").bind('click', function () {
+                window.event ? window.event.cancelBubble = true : e.stopPropagation();
+                removeit();
+            })
+        });
+        $(window).ready(function () {
+            dialog = new ktw.Messager({ AutoShow: false, Type: "question" });
+            msg = new ktw.Messager({ AutoShow: false });
+            //$(".detailinfo").hide();
+        })
+        //读取配置文件
+        function reloadconfig() {
+            var config = null;
+            $.ajax({
+                url: "../../config/app.xml",
+                dataType: 'xml',
+                type: 'GET',
+                cache: false,
+                timeout: 2000,
+                async: false,
+                error: function (xml) {
+                    ktw.Alert("加载系统配置文件出错！");
+                    console.error(arguments);
+                },
+                success: function (xml) {
+                    config = $.xml2json(xml);
+                }
+            });
+            Config = config;
+        }
+        function initTree() {
+            var Analysis = Config.Extend.Analysis;
+            var data = [{
+                text: '一键式分析',
+                children: [{
+                    text: '批',
+                    path: "P",
+                    children: []
+                }, {
+                    text: '征',
+                    path: "Z",
+                    children: []
+                }, {
+                    text: '储',
+                    path: "C",
+                    children: []
+                }, {
+                    text: '供',
+                    path: "G",
+                    children: []
+                }, {
+                    text: '用',
+                    path: "Y",
+                    children: []
+                }, {
+                    text: '补',
+                    path: "B",
+                    children: []
+                }, {
+                    text: '查',
+                    path: "W",
+                    children: []
+                }]
+            }];
+            for (var i = 0; i < data[0].children.length; i++) {
+                var BtnAnalysis = Analysis[data[0].children[i].path]["BtnAnalysis"];
+                if ((BtnAnalysis instanceof Array) == false && BtnAnalysis != null) {
+                    data[0].children[i].children.push({ "text": BtnAnalysis["BtnName"], "path": data[0].children[i].path + "/BtnAnalysis[BtnName='" + BtnAnalysis["BtnName"] + "']" });
+                }
+                else if (BtnAnalysis != null && BtnAnalysis.length > 1) {
+                    for (var j = 0; j < BtnAnalysis.length; j++) {
+                        data[0].children[i].children.push({ "text": BtnAnalysis[j]["BtnName"], "path": data[0].children[i].path + "/BtnAnalysis[BtnName='" + BtnAnalysis[j]["BtnName"] + "']" });
+                    }
+                }
+                data[0].children[0].children[0].id = 1001;
+            }
+            $('#organizeTree').tree({
+                dnd: true,
+                data: data,
+                onSelect: function (node) {
+                    if (node == null) node = curnode;
+                    curnode = node;
+                    if (!("children" in node) && (node.text != "一键式分析")) {
+                        $(".detailinfo").show();
+                        var curBtnAnalysis = null;
+                        var BtnAnalysis = Config.Extend.Analysis[node.path.split("/")[0]]["BtnAnalysis"];
+                        if ((BtnAnalysis instanceof Array) == false && BtnAnalysis != null) {
+                            curBtnAnalysis = BtnAnalysis
+                        }
+                        else if (BtnAnalysis != null && BtnAnalysis.length > 1) {
+                            for (var i = 0; i < BtnAnalysis.length; i++) {
+                                if (BtnAnalysis[i]["BtnName"] == node.path.match(/'(\S*)'/)[1]) {
+                                    curBtnAnalysis = BtnAnalysis[i];
+                                    break;
+                                }
+                            }
+                        }
+                        //BtnName Tag EPSG GeometryName OWS AnalysisLayer Ref Key
+                        $("#BtnName").val(curBtnAnalysis.BtnName);
+                        $("#Tag").val(curBtnAnalysis.Tag);
+                        $("#EPSG").val(curBtnAnalysis.EPSG);
+                        $("#GeometryName").val(curBtnAnalysis.GeometryName);
+                        $("#OWS").val(curBtnAnalysis.OWS);
+                        $("#AnalysisLayer").val(curBtnAnalysis.AnalysisLayer);
+                        $("#Ref").val(curBtnAnalysis.Ref);
+                        $("#Key").val(curBtnAnalysis.Key);
+                        if (curBtnAnalysis.DetailFields != null) {
+                            var Fields = curBtnAnalysis.DetailFields.Field;
+                            if ((Fields instanceof Array) == false && Fields != null) {
+                                $("#ByName").val(Fields.ByName);
+                                $("#Name").val(Fields.Name);
+                            } else if (Fields != null && Fields.length > 1) {
+                                var ByName = [];
+                                var Name = [];
+                                for (var i = 0; i < Fields.length; i++) {
+                                    ByName.push(Fields[i]["ByName"]);
+                                    Name.push(Fields[i]["Name"])
+                                }
+                                $("#ByName").val(ByName.join(","));
+                                $("#Name").val(Name.join(","));
+                            }
+                        }
+                        //获取列表数据
+                        var data = [];
+                        var Statistics = curBtnAnalysis.Statistics;
+                        if ((Statistics instanceof Array) == false && Statistics != null) {
+                            data.push({ "ByName": Statistics["ByName"], "Name": Statistics["Name"], "GroupBy": Statistics["GroupBy"] })
+                        }
+                        else if (Statistics != null && Statistics.length > 1) {
+                            for (var i = 0; i < Statistics.length; i++) {
+                                data.push({ "ByName": Statistics[i]["ByName"], "Name": Statistics[i]["Name"], "GroupBy": Statistics[i]["GroupBy"] })
+                            }
+                        }
+                        initdataGrid(data);
+                    }
+                    else {
+                        $(".detailinfo").hide();
+                    }
+                },
+                onContextMenu: function (e, node) {
+                    curnode = node;
+                    if (("children" in node) && (node.text != "一键式分析")) {
+                        $('#addnodetree').menu('show', { left: e.pageX, top: e.pageY });
+                    }
+                    if (!("children" in node) && (node.text != "一键式分析")) {
+                        $('#delnodetree').menu('show', { left: e.pageX, top: e.pageY });
+                    }
+                    $("div[name=delnode]").click(function () {
+                        dialog.Confirm('确认要删除选中记录吗？', function (r) {
+                            if (!r) return;
+                            // var parent = $('#organizeTree').tree('getParent', node);
+                            var XPath = "/App/Extend/Analysis/" + node.path;
+                            var data = { path: XPath, onlyone: true }
+                            $.ajax({
+                                type: "POST",
+                                data: data,
+                                url: ServerUrl + "confmana/delete",
+                                success: function (data) {
+                                    if (data.success == true) {
+                                        msg.Alert('删除成功！', 'info');
+                                        reloadconfig();
+                                        initTree();
+                                    } else msg.Alert('删除失败！', 'warn');
+                                },
+                                error: function (data) {
+                                    msg.Alert('服务请求失败！', 'error');
+                                }
+                            });
+                        });
+                    })
+                    $("div[name=addnode]").click(function () {
+                        $("#dlg").dialog("open").dialog("center");
+                    })
+                },
+                onDrop: function (target, source, point) {
+                    if (point == 'append') { initTree(); return }
+                    else {
+                        var items = [];
+                        var parent = $('#organizeTree').tree('getParent', target);
+                        var childrens = parent.children;;
+                        for (var i = 0; i < childrens.length; i++) {
+                            items.push("/App/Extend/Analysis/" + childrens[i].path);
+                        }
+                        var data = { path: "/App/Extend/Analysis/" + parent.path, items: JSON.stringify(items) }
+                        $.ajax({
+                            type: "POST",
+                            data: data,
+                            url: ServerUrl + "confmana/order",
+                            success: function (data) {
+                                if (data.success == true) {
+                                msg.Alert('拖动成功！', 'info');
+                                reloadconfig();
+                                initTree();
+                                } else msg.Alert('拖动失败！', 'warn');
+                            },
+                            error: function (data) {
+                                msg.Alert('服务请求失败！', 'error');
+                            }
+                        });
+                    }
+                },
+            });
+        }
+      
+        function initdataGrid(data) {
+            var dataGrid = $("#dataGrid");
+            dataGrid.datagrid({
+                border: 0,
+                pagination: false,
+                singleSelect: true,
+                checkOnSelect: false,
+                selectOnCheck: false,
+                fit: false,
+                onClickRow: onClickRow,
+                fitColumns: true,
+                animate: true,
+                collapsible: false,
+                toolbar: '#toolbar',
+                columns: [[
+                    { field: 'ByName', title: '按钮名称', editor: 'textbox', width: '30%', align: 'center', sortable: 'true' },
+                    { field: 'Name', title: '分类字段(列表表头:中文)', editor: 'textbox', width: '40%', align: 'center', sortable: 'true' },
+                     { field: 'GroupBy', title: '类字段(图层字段名)', editor: 'textbox', width: '30%', align: 'center', sortable: 'true' },
+                ]],
+                data: data
+            });
+        }
+        //判断列表是否处于编辑状态
+        function endEditing() {
+            if (editIndex == undefined) { return true }
+            if ($("#dataGrid").datagrid('validateRow', editIndex)) {
+                var ed = $("#dataGrid").datagrid('getEditor', { index: editIndex, field: 'ByName' });
+                var id = $(ed.target).combobox('getText');
+                if (id == "" ) { msg.Alert("请填写字段内容", 'warn'); return false }
+                $("#dataGrid").datagrid('getRows')[editIndex]['ByName'] = id;
+                $("#dataGrid").datagrid('endEdit', editIndex);
+                editIndex = undefined;
+                return true;
+            } else {
+                return false;
+            }
+        }
+        //往列表中添加一行
+        function append() {
+            if (endEditing()) {
+                state = "add";
+                $("#dataGrid").datagrid('appendRow', { });
+                editIndex = $("#dataGrid").datagrid('getRows').length - 1;
+                $("#dataGrid").datagrid('selectRow', editIndex)
+						.datagrid('beginEdit', editIndex);
+            }
+        }
+        //单击列表行
+        function onClickRow(index) {
+            isblank = false;
+            //editIndex = index;
+            if (isdelete == true) {
+                isdelete = false;
+                return;
+            }
+            //if (editIndex != index) {
+            if (endEditing()) {
+                    $("#dataGrid").datagrid('selectRow', index)
+							.datagrid('beginEdit', index);
+                    editIndex = index;
+                } else {
+                    $("#dataGrid").datagrid('selectRow', editIndex);
+                }
+            //}
+        }
+        //删除列表数据
+        function removeit(i) {
+            var row = $('#dataGrid').datagrid('getSelected');
+            var rowIndex = $('#dataGrid').datagrid('getRowIndex', row);
+            if (row == null) { return }
+            dialog.Confirm('确认要删除选中记录吗？', function (r) {
+                if (!r) return;
+                $('#dataGrid').datagrid('cancelEdit', rowIndex)
+                        .datagrid('deleteRow', rowIndex);
+                editIndex = undefined;
+            });
+        }
+    </script>
+    <style>
+        .from-title {
+            background-color: #E0ECFF;
+        }
+
+        .edit {
+            border: 1px solid #CCCCCC;
+            height: 25px;
+            width: calc(100% - 6px);
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; height: 100%; background: #FFFFFF">
+        <div style="width: 30%; height: 100%; border-right: solid 1px #DDDDDD;">
+            <div class="header">一键式分析</div>
+            <div id="divtree" style="width: 100%; height: 90%; overflow-x: hidden">
+                <ul id="organizeTree" style="width: 100%; height: 100%;">
+                </u>
+            </div>
+        </div>
+        <!--基本信息-->
+        <div id="rightdiv" style="position: absolute; right: 0px; top: 0px; height: 100%; width: calc(70% - 1px)">
+            <div class="detailinfo">
+                <div style="margin-top: 5px; margin-left: 10px; margin-bottom: 5px; position: relative">
+                    <div style="width: 6px; height: 20px; position: absolute; top: 50%; margin-top: -10px; background-color: #01B6EF; display: inline-block"></div>
+                    <span id="title" style="font-size: 16px; margin-left: 10px">叠加配置</span>
+                </div>
+                <form id="detailinfoform" method="post">
+                    <table class="form-tbl" style="margin-top: 10px">
+                        <colgroup>
+                            <col style="width: 30%" />
+                            <col style="width: 28%" />
+                            <col style="width: 18%" />
+                            <col style="width: 30%" />
+                        </colgroup>
+                        <tr>
+                            <td class="from-title">按钮名称</td>
+                            <td class="form-text">
+                                <div>
+                                    <input class="edit" id="BtnName" name="BtnName" />
+                                </div>
+                            </td>
+                            <td class="from-title">Tag</td>
+                            <td class="form-text">
+                                <div>
+                                    <input class="edit" id="Tag" name="Tag" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="from-title">坐标参考系</td>
+                            <td class="form-text">
+                                <div>
+                                    <input class="edit" id="EPSG" name="EPSG" />
+                                </div>
+                            </td>
+                            <td class="from-title">几何字段</td>
+                            <td class="form-text">
+                                <div>
+                                    <input class="edit" id="GeometryName" name="GeometryName" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="from-title">OWS</td>
+                            <td class="form-text">
+                                <div>
+                                    <input class="edit" id="OWS" name="OWS" />
+                                </div>
+                            </td>
+                            <td class="from-title">图层名称</td>
+                            <td class="form-text">
+                                <div>
+                                    <input class="edit" id="AnalysisLayer" name="AnalysisLayer" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="from-title">引用图层树ID</td>
+                            <td class="form-text">
+                                <div>
+                                    <input class="edit" id="Ref" name="Ref" />
+                                </div>
+                            </td>
+                            <td class="from-title">查询主键</td>
+                            <td class="form-text">
+                                <div>
+                                    <input class="edit" id="Key" name="Key" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="from-title">叠加字段名称(列表表头:中文,以逗号分隔)</td>
+                            <td class="form-text" colspan="3">
+                                <div>
+                                    <input class="edit" id="ByName" name="ByName" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="from-title">叠加字段名称(图层字段名,以逗号分隔)</td>
+                            <td class="form-text" colspan="3">
+                                <div>
+                                    <input class="edit" id="Name" name="Name" />
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                 
+                    <div class="basemapinfo">
+                        <div style="margin-top: 20px; margin-left: 10px; margin-bottom: 10px; position: relative">
+                            <div style="width: 6px; height: 20px; position: absolute; top: 50%; margin-top: -10px; background-color: #01B6EF; display: inline-block"></div>
+                            <span style="font-size: 16px; margin-left: 10px">叠加后分类汇总:</span>
+                              </div>
+                             <div id="DetailFields" style="width:100%;height:100%;margin-top:10px;display:inline-block;">
+                    <div class="toolbar" style="padding: 3px">
+                        <a href="#" id="basadd" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">新增</a>
+                          <a  id="remove" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">移除</a>
+                    </div>
+                  <table id="dataGrid" class="easyui-datagrid" style="width: calc(100% - 10px); margin-left: 10px;""></table>
+                </div>
+                      
+                    </div>
+                       <div class="Button" id="detailinfosave" style="margin-top: 4px; margin-left: calc(50% - 30px);height:30px">
+                    <span class="button">保存</span>
+                </div>
+                    <div style="clear:both;height:0"></div>   
+                     <div id="basehint" style="width:100%; text-align:center;color:red">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="addnodetree" class="easyui-menu" style="width: 120px; border: 0px">
+        <div name="addnode" data-options="iconCls:'icon-remove'">新增分析按钮</div>
+    </div>
+    <div id="delnodetree" class="easyui-menu" style="width: 120px; border: 0px">
+        <div name="delnode" data-options="iconCls:'icon-remove'">删除</div>
+    </div>
+    <div id="dlg" class="easyui-dialog" data-options="title:'新增',width: 500,height: 130,closed: true,modal:true,buttons:'#dlg-buttons'">
+        <form id="addnodeform" method="post">
+            <table class="form-tbl" style="margin-top: 10px">
+                <colgroup>
+                    <col style="width: 40%" />
+                    <col style="width: 60%" />
+                </colgroup>
+                <tr>
+                    <td class="from-title">按钮名称:</td>
+                    <td class="form-text">
+                        <div>
+                            <input class="edit" name="BtnName" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <div class="Button" id="saveadd" style="margin-top: 4px; margin-left: calc(50% - 80px)">
+            <span class="button" onclick="saveMenu2()">保存</span>
+        </div>
+        <div class="Button" id="canel" style="margin-top: 4px; margin-left: calc(50% - 20px)">
+            <span class="button">取消</span>
+        </div>
+    </div>
+</body>
+</html>

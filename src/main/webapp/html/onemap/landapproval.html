@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <title>批地辅助审批</title>
+    <script>
+        var result;
+        var flowlx = [], flowname=[];
+        $(window).ready(function () {
+            getFlowLx();
+            var FlowTypeComBox = $("#FlowType").prop('$this');
+            FlowTypeComBox.bind("onSelectChanged", function (e, s) {
+                var FlowNameComBox = $("#FlowName").prop('$this');
+                FlowNameComBox.SetValue();
+                flowname = [];
+                var i;
+                //var obj = JSON.stringify(s).replace(/\"/g, "'");
+                //var a = Enumerable.From(result).Where("s=>s.ktext == obj").ToString();
+           
+                //for (var j = 0; j < result.length; j++) {
+                //    if (result[j].pid == a[0].id) {
+                //        flowname.push(result[j].ktext);
+                //    }
+                //}
+                for (i = 0; i < result.length; i++) {
+                    if (s == result[i].ktext) break;
+                }
+                
+                for (var j = 0; j < result.length; j++) {
+                    if (result[j].pid == result[i].id) {
+                        flowname.push(result[j].ktext);
+                    }
+                }  
+                FlowNameComBox.SetData(flowname);
+            })
+        })
+        function getFlowLx() {
+            $.ajax({
+                type: "GET",
+                url: "http://192.168.1.245:8081/onemap/flow/getflow/0",
+                success: function (data) {
+                    var k = "";
+                    result = data;
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].ktype == "FlowType") flowlx.push(data[i].ktext);
+                    }
+                    var FlowTypeComBox = $("#FlowType").prop('$this');
+                    FlowTypeComBox.SetData(flowlx);
+                },
+                error: function (data) {
+                    var k = "";
+                }
+            });
+        }
+    </script>
+    <style>
+        .Content {
+            width: 100%;
+            height: 100%;
+        }
+
+        iframe {
+            margin-left: calc(5%);
+        }
+        button {
+            height: 30px;
+            width: 60px;
+            border:2px solid black;
+            /*Border Radius*/
+            -moz-border-radius: 4px;
+            -webkit-border-radius: 4px;
+            border-radius: 4px;
+        }
+     
+    </style>
+</head>
+<body>
+    <div class="Content" style="min-width:620px;overflow-x:hidden">
+        <div style="display: inline-block;margin-top:10px">
+            <div id="FlowType" class="ktw-combobox" style="z-index: 2; width: 174px; height: 30px; left: 40px;" opt='{"TipInfo":"请选择流程类型","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"2px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" }}'></div>
+        </div>
+        <div style="display: inline-block;">
+            <div id="FlowName" class="ktw-combobox" style="z-index: 2; width: 174px; height: 30px; left: 40px" opt='{"TipInfo":"请选择流程名称","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"2px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" }}'></div>
+        </div>
+        <iframe style="width: 90%; height: 80%; border: 2px solid black" src="iframeland.html"></iframe>
+        <div style="width: 100%; height: 40px; text-align: center">
+            <button type="button">确定</button>
+            <button type="button">取消</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,546 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link href="../../../js/ktop/ktop.css" rel="stylesheet" />
+    <script src="../../../js/ktop/ktop.js"></script>
+    <!-- JS框架 jQuery -->
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <!-- 第三方UI框架 easyUI -->
+    <link href="../../../theme/default/easyui.css" rel="stylesheet" />
+    <link href="../../../theme/icon.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../../js/easyui-lang-zh_CN.js"></script>
+    <script src="../../../js/md5.js"></script>
+    <!--ktw控件UI-->
+    <link href="../../../css/icon.css" rel="stylesheet" />
+    <link href="../../../css/app.css" rel="stylesheet" />
+    <link href="../../../css/main.css" rel="stylesheet" />
+    <script src="../../../js/ktw.ui.js"></script>
+    <script src="../../../js/ktw.onemap.js"></script>
+    <script src="../../../js/ktw.gis.js"></script>
+    <!-- json、xml类型数据格式的操作 -->
+    <script type="text/javascript" src="../../../js/data.util.js"></script>
+    <!-- JS实现的LINQ -->
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ajaxfileupload.js"></script>
+
+    <script>
+        var maps = new Array();
+        var tree1, tree2;
+        var Map1, Map2;
+        var layerdata = [];
+        var vislayer1 = [];
+        var vislayer2 = [];
+        function GetRootPath() {
+            var pathName = window.document.location.pathname;
+            var localhost = window.location.host;
+            var projectName = pathName.substring(0, pathName.substr(1).indexOf('/') + 1);
+            return ("http://" + localhost + projectName + "/");
+        }
+        function GetServerPath() {
+            if (ktw.App.Config.SystemTheme.IsDebug !== "false") {
+                return ktw.GetSystemUrlByRelID("SysService");
+            } else {
+                return ktw.App.Root;
+            }
+        };
+        function getconfig() {
+            if (ktw.IsNull(ktw.App.Config)) {
+                var config = null;
+                $.ajax({
+                    url: "../../../config/app.xml",
+                    dataType: 'xml',
+                    type: 'GET',
+                    cache: false,
+                    timeout: 2000,
+                    async: false,
+                    error: function (xml) {
+                        ktw.Error("加载系统配置文件出错！");
+                    },
+                    success: function (xml) {
+                        config = $.xml2json(xml);
+                    }
+                });
+                ktw.App.Config = config;
+            }
+        }
+        // 获取后台配置图层树的数据,以及默认显示的图层
+        function getlayerdata(layerdata, MapLayer, vislayer1) {
+            // 获取后台配置图层树的数据,以及默认显示的图层
+            if (!ktw.IsArray(MapLayer))
+                MapLayer = [MapLayer];
+            var curarr = Enumerable.From(MapLayer).Where(
+                    "s=>s.Visible!='false'").OrderBy(
+                    "x=>x.Order").ToArray();
+            for (var i = 0; i < curarr.length; i++) {
+                var layer = {};
+                layer.Tag = curarr[i];
+                $.extend(layer, {
+                    "Value": curarr[i].ID,
+                    "Text": curarr[i].Text,
+                    "State": curarr[i].Open === "true" ? "open"
+                            : "close",
+                    "Checked": curarr[i].Checked === "true" ? true
+                            : false,
+                    "iconCls": curarr[i].IconCls
+                });
+                layerdata.push(layer);
+                min = 500;
+                if (curarr[i].Url && curarr[i].Url != ""
+                        && curarr[i].Checked == "true") {
+                    curarr[i].Order = min--;
+                    vislayer1.push(curarr[i]);
+                }
+                if (curarr[i].Children
+                        && curarr[i].Children.MapLayer) {
+                    layer.Child = [];
+                    this.getlayerdata(layer.Child, curarr[i].Children.MapLayer, vislayer1);
+                }
+            }
+        }
+        $(window).ready(function () {
+            ktw.NoDrag();
+            resizeMap();
+            bindResize();
+            //获得图层树数据
+            getconfig();
+            ktw.App.Root = GetRootPath();
+            ktw.App.ServerUrl = GetServerPath();
+            //解析基础配置图层的服务地址
+            if (ktw.App.Config.SystemMap.LayerInfo == "") {
+                ktw.App.Config.SystemMap.LayerInfo = {};
+                ktw.App.Config.SystemMap.LayerInfo.BaseLayers = [];
+            }
+            if (!ktw.App.Config.SystemMap.LayerInfo.BaseLayers || !ktw.App.Config.SystemMap.LayerInfo.BaseLayers.length) {
+                ktw.App.Config.SystemMap.LayerInfo.BaseLayers = [ktw.App.Config.SystemMap.LayerInfo.BaseLayers];
+            }
+            for (var i = 0; i < ktw.App.Config.SystemMap.LayerInfo.BaseLayers.length; i++) {
+                if (ktw.IsNull(ktw.App.Config.SystemMap.LayerInfo.BaseLayers[i].Url)) {
+                    continue;
+                }
+                var tmp = ktw.GetSystemUrlByRelID(ktw.App.Config.SystemMap.LayerInfo.BaseLayers[i].Url);
+                ktw.App.Config.SystemMap.LayerInfo.BaseLayers[i].Url = tmp == "" ? ktw.App.Config.SystemMap.LayerInfo.BaseLayers[i].Url : tmp;
+            }
+            var bounds = ktw.App.Config.SystemMap.Bounds;
+            if (bounds && bounds.XMin && bounds.XMax && bounds.YMin && bounds.YMax) {
+                bounds = [[bounds.YMin, bounds.XMin], [bounds.YMax, bounds.XMax]];
+            }
+
+            var config = ktw.App.Config.SystemMap;
+            getlayerdata(layerdata, ktw.App.Config.SystemMap.ArrayOfMapLayer.MapLayer, vislayer1);
+            //下拉选择树绑定数据           
+            tree1 = $("#Select1").prop("$this");
+            tree2 = $("#Select2").prop("$this");
+            tree1.SetData(layerdata);
+            tree2.SetData(layerdata);
+            var minZoom = parseInt(ktw.App.Config.SystemMap.MinZoom);
+            var maxZoom = parseInt(ktw.App.Config.SystemMap.MaxZoom);
+            var zoom = parseInt(ktw.App.Config.SystemMap.Zoom);
+            var center = { lon: ktw.App.Config.SystemMap.Center.split(",")[0], lat: ktw.App.Config.SystemMap.Center.split(",")[1] };
+            ktw.Project.InitProjectParam("../../../config/coordinateSystem.json");
+            Map1 = L.map('map1', {
+                center: center,
+                zoom: zoom,
+                minZoom: minZoom,//地图最小级数
+                maxZoom: maxZoom,//地图最大级数
+                attributionControl: false,
+                zoomControl: false,
+                crs: ktw.Project.GetCRSByCode(ktw.EPSG.split(":")[1])
+            });
+            if (bounds && bounds.length) {
+                Map1.setMaxBounds(bounds);
+            }
+            ktw.MapLoad.InitMap($.extend({ Map: Map1 }, config));
+            loadSwitch($("#switch1"), Map1);
+            Map2 = L.map('map2', {
+                center: center,
+                zoom: zoom,
+                minZoom: minZoom,//地图最小级数
+                maxZoom: maxZoom,//地图最大级数
+                attributionControl: false,
+                zoomControl: false,
+                crs: ktw.Project.GetCRSByCode(ktw.EPSG.split(":")[1])
+            });
+            if (bounds && bounds.length) {
+                Map2.setMaxBounds(bounds);
+            }
+            ktw.MapLoad.InitMap($.extend({ Map: Map2 }, config));
+            loadSwitch($("#switch2"), Map2);
+            //加载初始数据
+            for (var i = 0; i < vislayer1.length; i++) {
+                var currdata = vislayer1[i];
+                loadLayer([Map1, Map2], currdata);
+            }
+            vislayer2 = vislayer1;
+            //绑定下拉树选择事件
+            tree1.tree.bind("onChecked", function () {
+                changelayer(this.$this, Map1, vislayer1);
+                vislayer1 = $(this.$this.GetChecked(true)).map(function (i, item) {
+                    var lay = $(item).prop("$this")["Tag"];
+                    if (lay.Url && lay.Url != "") {
+                        return lay;
+                    }
+                });
+            });
+            tree2.tree.bind("onChecked", function () {
+                changelayer(this.$this, Map2, vislayer2);
+                vislayer2 = $(this.$this.GetChecked(true)).map(function (i, item) {
+                    var lay = $(item).prop("$this")["Tag"];
+                    if (lay.Url && lay.Url != "") {
+                        return lay;
+                    }
+                });
+            });
+            //地图联动实现
+            function maplink(e) {
+                var _this = this;
+                maps.map(function (t) {
+                    t.setView(_this.getCenter(), _this.getZoom())
+                })
+            }
+            //给数组增加两个函数-删除和判断是否存在
+            Array.prototype.remove = function (val) {
+                for (var i = 0; i < this.length; i++) {
+                    if (this[i] == val) {
+                        this.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+
+            Array.prototype.contains = function (obj) {
+                var i = this.length;
+                while (i--) {
+                    if (this[i] === obj) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            $('#Check1').switchbutton({
+                onChange: function (checked) {
+                    //取消绑定
+                    maps.map(function (t) {
+                        t.off({ drag: maplink, zoomend: maplink })
+                    })
+                    if (checked && !maps.contains(Map1)) {
+                        maps.push(Map1);
+                    }
+                    if (!checked) {
+                        maps.remove(Map1);
+                    }
+                    //绑定
+                    maps.map(function (t) {
+                        t.on({ drag: maplink, zoomend: maplink })
+                    })
+                }
+            })
+            $('#Check2').switchbutton({
+                onChange: function (checked) {
+                    //取消绑定
+                    maps.map(function (t) {
+                        t.off({ drag: maplink, zoomend: maplink })
+                    })
+                    if (checked && !maps.contains(Map2)) {
+                        maps.push(Map2);
+                    }
+                    if (!checked) {
+                        maps.remove(Map2);
+                    }
+                    //绑定
+                    maps.map(function (t) {
+                        t.on({ drag: maplink, zoomend: maplink })
+                    })
+                }
+            })
+        });
+
+        function loadSwitch($dom, map) {
+            if (ktw.IsNull(ktw.App.Config.SystemMap.MapSwitchInfo) || ktw.App.Config.SystemMap.MapSwitchInfo.length == 0) return;
+            var conf = ktw.ObjClone(ktw.App.Config.SystemMap.MapSwitchInfo);
+            for (var i = 0; i < conf.SwitchMaps.length; i++) {
+                conf.SwitchMaps[i].ID = conf.SwitchMaps[i].ID + new Date().getTime();
+            }
+            var param = $.extend({
+                Parent: $dom,
+                map: map
+            }, conf);
+            this.MapSwitch = new ktw.UCMapSwitch(param);
+        }
+
+        function changelayer(tree, map, vislayer) {
+            // 首先获取所有选中的图层列表
+            var nodes = tree.GetChecked(true);
+            // 只获取哪些具有url属性的节点
+            var tmp = [];
+            var layerdata_deleted = [];
+            var layerdata_add = [];
+            //tmp 当前选中的所有具有url属性的节点,vislayer ：历史选中的所有具有url属性的节点
+            tmp = $(nodes).map(function (i, item) {
+                var lay = $(item).prop("$this")["Tag"];
+                if (lay.Url && lay.Url != "") {
+                    return lay;
+                }
+            });
+            for (var x = 0; x < tmp.length; x++) {
+                var flag = false;
+                for (var y = 0; y < vislayer.length; y++) {
+                    if (tmp[x].ID == vislayer[y].ID) flag = true;
+                }
+                if (!flag) {
+                    layerdata_add.push(tmp[x]);
+                }
+            }
+            for (var x = 0; x < vislayer.length; x++) {
+                var flag = false;
+                for (var y = 0; y < tmp.length; y++) {
+                    if (vislayer[x].ID == tmp[y].ID) flag = true;
+                }
+                if (!flag) {
+                    layerdata_deleted.push(vislayer[x]);
+                }
+            }
+            //添加新增图层
+            for (var i = 0; i < layerdata_add.length; i++) {
+                loadLayer(map, layerdata_add[i]);
+            }
+            //删除未选中图层
+            for (var i = 0; i < layerdata_deleted.length; i++) {
+                ktw.MapUtils.RemoveLayer(layerdata_deleted[i].ID, map);
+            }
+        }
+        //加载地图
+        function loadLayer(maparr, currdata) {
+            var layerurl = ktw.GetSystemUrlByRelID(currdata.Url);
+            if (!ktw.IsNull(layerurl)) currdata.Url = layerurl;
+            if (!maparr.length) maparr = [maparr];
+            var layer;
+            for (var i = 0; i < maparr.length; i++) {
+                switch (currdata.Type) {
+                    case ktw.LayerType.Mapping:
+                        {
+                            var param = {
+                                Map: maparr[i],
+                                ID: currdata.ID
+                            };
+                            layer = ktw.MapLoad.AddArcGISLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                    case ktw.LayerType.Tile:
+                        {
+                            var param = { Map: maparr[0], ID: currdata.ID };
+                            layer = ktw.MapLoad.AddTileLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                    case ktw.LayerType.WMS:
+                        {
+                            var param = {
+                                ID: currdata.ID,
+                                Url: currdata.Url,
+                                Layers: currdata.TypeName,
+                                ServerType: currdata.ServerType ? currdata.ServerType : "hgis",
+                                Map: maparr[i],
+                                ZIndex: parseInt(currdata.Order),
+                                Styles: currdata.Style
+                            }
+                            if (!ktw.IsNull(currdata.Sld)) {
+                                var sldbody = ktw.MapUtils.LoadSLD("../../../" + currdata.Sld);
+                                sldbody = sldbody.replace("%LayerName%", currdata.TypeName);
+                                param.Sldbody = sldbody;
+                                //使用sldbody时不能指定layers参数
+                                param.Layers = undefined;
+                            }
+                            //处理Filter参数
+                            if (!ktw.IsNull(currdata.Filter)) {
+                                param.CQLFilter = currdata.Filter;
+                            }
+                            if (!ktw.IsNull(currdata.Bounds) &&
+                                !ktw.IsNull(currdata.Bounds.XMin) &&
+                                !ktw.IsNull(currdata.Bounds.XMax) &&
+                                !ktw.IsNull(currdata.Bounds.YMin) &&
+                                !ktw.IsNull(currdata.Bounds.YMax)) {
+                                var ext = currdata.Bounds;
+                                var southWest = L.latLng(parseFloat(ext.YMin), parseFloat(ext.XMin)),
+                                        northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax));
+                                param.bounds = L.latLngBounds(southWest, northEast);
+                            }
+                            layer = ktw.MapLoad.AddWMSLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                    case ktw.LayerType.WMTS:
+                        {
+                            var param = {
+                                Map: maparr[i],
+                                ID: currdata.ID,
+                                Layers: currdata.TypeName
+                            };
+                            if (!ktw.IsNull(currdata.Bounds) &&
+                                !ktw.IsNull(currdata.Bounds.XMin) &&
+                                !ktw.IsNull(currdata.Bounds.XMax) &&
+                                !ktw.IsNull(currdata.Bounds.YMin) &&
+                                !ktw.IsNull(currdata.Bounds.YMax)) {
+                                var ext = currdata.Bounds;
+                                var southWest = L.latLng(parseFloat(ext.YMin), parseFloat(ext.XMin)),
+                                        northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax));
+                                param.bounds = L.latLngBounds(southWest, northEast);
+                            }
+                            layer = ktw.MapLoad.AddWMTSLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                }
+            }
+        }
+
+        function bindResize() {
+            if (window.top === window) {
+                //独立页面
+                $(window).resize(resizeMap);
+            } else {
+                //嵌入式页面
+                window.top.ktw.App.CommonWin.bind("onResize", resizeMap);
+            }
+            $(".split").mousedown(function () {
+                var ox = window.event.pageX;
+                var oy = window.event.pageY;
+                $(document.body).unbind("mousemove").mousemove(function () {
+                    var dx = window.event.pageX - ox;
+                    var dy = window.event.pageY - oy;
+                    ox = window.event.pageX;
+                    oy = window.event.pageY;
+                    $(".map-left").width($(".map-left").width() + dx);
+                    $(".map-right").width($(".map-right").width() - dx);
+                    Map1.invalidateSize();
+                    Map2.invalidateSize();
+                }).mouseup(function () {
+                    $(document.body).unbind("mousemove");
+                });
+            });
+        }
+        function resizeMap() {
+            var wid = $(document.body).width();
+            var hei = $(document.body).height();
+            $(".map-left,.map-right").width(wid / 2);
+        }
+    </script>
+    <style type="text/css">
+        .container {
+            width: 100%;
+            height: 100%;
+            min-width: 640px;
+            min-height: 150px;
+            position: relative;
+        }
+
+        .map-container {
+            position: absolute;
+            overflow: hidden;
+            top: 0;
+            bottom: 0;
+        }
+
+        .map-left {
+            left: 0;
+        }
+
+        .map-right {
+            right: 0;
+        }
+
+        .switch {
+            bottom: 70px;
+            right: 0px;
+            position: absolute;
+            width: 50px;
+            height: 50px;
+        }
+
+        .link-switch {
+            width: 65px;
+            float: right;
+            margin-left: 5px;
+            margin-top: 10px;
+            position: absolute;
+            z-index: 9999;
+        }
+
+        .layer-sel {
+            width: 215px;
+            margin-top: 10px;
+            position: absolute;
+            z-index: 9998;
+            right: 5px;
+        }
+
+        .split {
+            position: absolute;
+            background-color: #0099CC;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        .split-l {
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 4px;
+            cursor: e-resize;
+        }
+
+        .split-r {
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 4px;
+            cursor: e-resize;
+        }
+
+        .split-t {
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 4px;
+            cursor: s-resize;
+        }
+
+        .split-b {
+            right: 0;
+            left: 0;
+            bottom: 0;
+            height: 4px;
+            cursor: s-resize;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="map-container map-left">
+            <div class="split split-r"></div>
+            <div class="link-switch">
+                <input id="Check1" class="easyui-switchbutton" data-options="onText:'联动',offText:'不联动',checked:'true'" style="width: 65px; position: absolute;" />
+            </div>
+            <div class="layer-sel">
+                <div id="Select1" style="width: 200px; height: 30px; margin-right: 10px; float: right;" class="ktw-combotree" opt='{"TipInfo":"请选择","IsOverShow":true,"MultiSelect":true,"PopupHeight":160,"treeOpt":{"ValueField":"ID","TextField":"Text","ChildrenField":"Child",
+                    "StateField": "State","TagField": "Tag","CheckedField": "Checked"}}'>
+                </div>
+            </div>
+            <div id="map1" style="width: 100%; height: 100%;"></div>
+            <div id="switch1" class="switch"></div>
+        </div>
+        <div class="map-container map-right">
+            <div class="split split-l"></div>
+            <div class="link-switch">
+                <input id="Check2" class="easyui-switchbutton" data-options="onText:'联动',offText:'不联动',checked:'true'" style="width: 65px; position: absolute;" />
+            </div>
+            <div class="layer-sel">
+                <div id="Select2" style="width: 200px; height: 30px; margin-right: 10px; float: right;" class="ktw-combotree" opt='{"TipInfo":"请选择","IsOverShow":true,"MultiSelect":true,"PopupHeight":160,"treeOpt":{"ValueField":"ID","TextField":"Text","ChildrenField":"Child",
+                    "StateField": "State","TagField": "Tag","CheckedField": "Checked"}}'>
+                </div>
+            </div>
+            <div id="map2" style="width: 100%; height: 100%;"></div>
+            <div id="switch2" style="bottom: 70px; right: 0px; position: absolute; width: 50px; height: 50px;"></div>
+        </div>
+    </div>
+</body>
+</html>

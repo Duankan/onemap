@@ -1,0 +1,463 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>已受理地块</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+    </style>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var currlayer;//当前图层对象
+        var PiDiLayer;//业务图层配置信息对象357
+        var searchText;//普通搜索框的文本
+        var queryWin;//查询框
+        var query;//查询对象
+        var requesturl;//纪录最后一次查询使用的url
+        var dataGrid;//表格对象
+        var parent;//
+        var pageIndex = 1, pageSize = 5;
+        var gridfields;//表格的列
+        var polygonKey;//高亮句柄
+        var mapclick;//地图的点击句柄
+        var currpagestyle = new Ktw.style.Style({
+            stroke: new Ktw.style.Stroke({ width: 2, color: 'rgba(0, 0, 255, 1)' }),
+            fill: new Ktw.style.Fill({ color: [0, 0, 255, 0.5] })
+        });
+        function WidgetCommunication(s) {//部件通讯
+            parent = s.parent;
+            ktw.InitControl();
+            //注册全局搜索清除事件
+            Ktw.App.GlobalQuery.bind("onClear", { child: window }, function (evt) {
+                if (!ktw.IsNull(evt.data.child.polygonKey)) {
+                    Ktw.App.Map.unByKey(evt.data.child.polygonKey);
+                    evt.data.child.polygonKey = null;
+                }
+            });
+            Ktw.App.GlobalQuery.Clear();
+            //加载当前业务图层
+            loadLayer();
+            //注册页面关闭事件
+            parent.one("onClosing", function () {
+                Ktw.App.BottomPanel.ClearTool();
+                Ktw.App.BottomPanel.unbind("onToolClick");
+                Ktw.App.BottomPanel.Clear();
+                Ktw.App.BottomPanel.SetVisible(false);
+                Ktw.App.Map.un("singleclick", mapclick);
+
+                if (!Ktw.IsNull(queryWin)) {
+                    queryWin.Target.unbind("onClosing");
+                    queryWin.Close();
+                    queryWin.Destroy();
+                    queryWin = undefined;
+                }
+                if (!Ktw.IsNull(currlayer)) Ktw.App.Map.removeLayer(currlayer);
+                Ktw.App.GlobalQuery.Clear();
+                if (!Ktw.IsNull(dataGrid)) {
+                    Ktw.App.BottomPanel.unbind("onResize");
+                    Ktw.App.BottomPanel.unbind("onExpand");
+                    dataGrid.Target.unbind("onSelectPage");
+                    dataGrid.Target.unbind("onClickRow");
+                    dataGrid.Target.unbind("onSearchClick");
+                }
+                Ktw.ClearMapTip();
+                Ktw.App.RightPanel.SetVisible(false);
+                if (!Ktw.IsNull(polygonKey)) {
+                    Ktw.App.Map.unByKey(polygonKey);
+                    polygonKey = null
+                }
+
+            });
+            //注册查询按钮、导出按钮事件
+            Ktw.App.BottomPanel.bind("onToolClick", function (o, e) {
+                if (e.ToolItem.ID == "btnQuery") searchWin();
+                if (e.ToolItem.ID == "btnExport") outData();
+            });
+            //初始化查询表格
+            initDataGrid();
+            //地图绑定点击事件
+            mapclick = Ktw.App.Map.on("singleclick", function (evt) {
+                var fromLonLat = Ktw.proj.getTransform(Ktw.EPSG, PiDiLayer.EPSG)
+                var coordinate = fromLonLat(evt.coordinate);
+                Ktw.App.Map.forEachLayerAtPixel(evt.pixel, function () {
+                    var feature = new Ktw.Feature({
+                        geometry: new Ktw.geom.Point(coordinate)
+                    });
+                    var wkt_wfs = Ktw.GetWKTByFeature(feature, true);
+                    var spatial_wfs = Ktw.MapUtils
+						.GetCql_DWITHIN(wkt_wfs, 0).replace("the_geom",
+					PiDiLayer.GeometryName);
+                    query.Query({
+                        TypeName: PiDiLayer.TypeName,
+                        CqlFilter: spatial_wfs,
+                        Url: Ktw.GetSystemUrlByRelID(PiDiLayer.WFS),
+                        PageIndex: 1,
+                        PageSize: pageSize
+                    });
+                }, this, function (layer) {
+                    if (layer.get("id") == "businessLayer" + PiDiLayer.ID) {
+                        return true;
+                    }
+                    return false;
+                }, this);
+            });
+        }
+
+        //高级搜索
+        function searchWin() {
+            if (!queryWin) {
+                queryWin = new Ktw.Window({
+                    ID: "editWin",
+                    Content: $("#queryWin"),
+                    Width: 500,
+                    Height: 240,
+                    Draggable: true,
+                    Title: "高级查询",
+                    Parent: Ktw.App.MapPanel.Target,
+                    Left: (top.document.body.clientWidth - 500) / 2,
+                    Top: (top.document.body.clientHeight - 350) / 2,
+                    InitVisible: false,
+                    Modal: false,
+                    IsMaximize: false,
+                    IsMinimize: false,
+                    Maximizable: false,
+                    Minimizable: true
+                });
+                queryWin.Target.find("#tdpzrq").html(
+                    '<input id="pzrq1" name="ZZRQ" class="easyui-datebox" data-options="width:166,height:24" />&nbsp;至&nbsp;'
+                + '<input id="pzrq2" name="ZZRQ" class="easyui-datebox" data-options="width:166,height:24" />');
+                queryWin.Target.find("#tdslrq").html(
+                     '<input id="slrq1" name="ZZRQ" class="easyui-datebox" data-options="width:166,height:24" />&nbsp;至&nbsp;'
+                + '<input id="slrq12" name="ZZRQ" class="easyui-datebox" data-options="width:166,height:24" />');
+                queryWin.Target.find("#btnresetSearch").click(function () {
+                    top.$("#queryWin").find("#jsxmmc,#pdwh").each(function (i, item) {
+                        var textValue = item.$this.GetValue();
+                        if (!Ktw.IsNull(textValue)) $(item).prop("$this").Clear();
+                    });
+                    top.$("#queryWin").find("#pzrq1,#pzrq2,#slrq1,#slrq12").datebox("clear");
+                });
+                queryWin.Target.find("#btnadvanceSearch").click(function () {
+                    var filter = getAdvanceFilter();
+                    query.Query({
+                        CqlFilter: filter,
+                        PageIndex: 1,
+                        PageSize: pageSize
+                    });
+
+                });
+                top.$.parser.parse(top.$("#queryWin"));
+            }
+            queryWin.Open();
+        }
+
+        //获取高级搜索条件
+        function getAdvanceFilter() {
+            var filter = "";
+            top.$("#queryWin").find("#jsxmmc,#pdwh").each(function (i, item) {
+                var textValue = item.$this.GetValue();
+                if (!ktw.IsNull(textValue)) {
+                    if (i == 0) {
+                        filter += " and \"建设项目名\" like '%" + textValue + "%'";
+                    } else {
+                        filter += " and \"批准文号\" like '%" + textValue + "%'";
+                    }
+                }
+            });
+            top.$("#queryWin").find("#pzrq1,#pzrq2,#slrq1,#slrq12").each(function (i, item) {
+                var textValue = top.$(this).datebox("getValue");
+                if (!ktw.IsNull(textValue)) {
+                    if (i == 0) {
+                        filter += " and \"受理日期\">='" + textValue + "'";
+                    } else if (i == 1) {
+                        filter += " and \"受理日期\"<='" + textValue + "'";
+                    } else if (i == 2) {
+                        filter += " and \"批准日期\">='" + textValue + "'";
+                    } else if (i == 3) {
+                        filter += " and \"批准日期\"<='" + textValue + "'";
+                    }
+                }
+            });
+            if (filter.length > 0) {
+                filter = filter.substring(4);
+            }
+            return filter;
+        }
+
+        //导出数据
+        function outData() {
+            //alert("outData");
+            var para = { fileds: JSON.stringify(gridfields), wfsurl: requesturl, tablename: "已受理地块查询结果" };
+            //进行导出操作
+            //查询地址（url），列名和属性名，图层名称
+            $("#formcon").empty();
+            var form = $("<form></form>").appendTo($("#formcon"));
+            form.attr("method", "post");
+            form.attr("action", Ktw.App.ServerUrl + "layer/export");
+            var input_wfsurl = $("<input />").appendTo(form);
+            input_wfsurl.attr("name", "wfsurl");
+            input_wfsurl.val(para.wfsurl);
+            var input_fileds = $("<input />").appendTo(form);
+            input_fileds.attr("name", "fileds");
+            input_fileds.val(para.fileds);
+            var tablename = $("<input />").appendTo(form);
+            tablename.attr("name", "tablename");
+            tablename.val("已受理地块查询结果");
+            form.submit();
+        }
+
+        //加载批地业务图层
+        function loadLayer() {
+            if (!(Ktw.App.Config.Extend && Ktw.App.Config.Extend.Layers && Ktw.App.Config.Extend.Layers.Layer)) { alert("缺少业务图层,请检查配置!"); return false; }
+            var layers = Ktw.App.Config.Extend.Layers.Layer;
+            if (Ktw.IsNull(layers.length)) { layers = [layers]; }
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i].Value == "PiDiLayer") { PiDiLayer = layers[i]; break; }
+            }
+            if (!PiDiLayer) { alert("未找到已受理图层,请检查配置!"); return false; }
+            currlayer = Ktw.MapUtils.GetLayer("businessLayer" + PiDiLayer.ID, Ktw.App.Map);
+            if (Ktw.IsNull(currlayer)) {
+                // 初始化图层
+                var param = {
+                    ID: "businessLayer" + PiDiLayer.ID,
+                    Url: Ktw.GetSystemUrlByRelID(PiDiLayer.Url),
+                    Layers: PiDiLayer.TypeName,
+                    ServerType: "geoserver",
+                    Map: Ktw.App.Map,
+                    ZIndex: parseInt(PiDiLayer.Order)
+                }
+                if (!Ktw.IsNull(PiDiLayer.Envelop)) {
+                    var arr = PiDiLayer.Envelop.split(",");
+                    param.Extent = [parseFloat(arr[0]), parseFloat(arr[1]), parseFloat(arr[2]), parseFloat(arr[3])];
+                }
+                if (!Ktw.IsNull(PiDiLayer.Sld)) {
+                    var sldbody = Ktw.MapUtils.LoadSLD(PiDiLayer.Sld);
+                    sldbody = sldbody.replace("%NAME%", PiDiLayer.TypeName);
+                    param.Sldbody = sldbody;
+                }
+                if (!Ktw.IsNull(PiDiLayer.SldLegend)) {
+                    if (Ktw.IsNull(PiDiLayer.SldLegend.length))
+                        PiDiLayer.SldLegend = [PiDiLayer.SldLegend];
+                    param.Sldbody = Ktw.GetSLDString(PiDiLayer.TypeName, Ktw.LegendToRule(PiDiLayer.SldLegend))
+                    if (Ktw.App.Legend) {
+                        Ktw.App.Legend.SetData(PiDiLayer.SldLegend);
+                        Ktw.App.Legend.SetVisible(true);
+                    }
+                }
+                if (!Ktw.IsNull(PiDiLayer.EPSG)) {
+                    param.EPSG = PiDiLayer.EPSG;
+                }
+                Ktw.MapLoad.AddWMSLayer(param);
+                currlayer = Ktw.MapUtils.GetLayer("businessLayer" + PiDiLayer.ID, Ktw.App.Map);
+            } else {
+                // 已经存在了该图层
+                if (!Ktw.IsNull(PiDiLayer.SldLegend)
+                        && PiDiLayer.SldLegend.length > 0) {
+                    if (Ktw.App.Legend)
+                        Ktw.App.Legend.SetVisible(true);
+                }
+                currlayer.setVisible(true);
+            }
+        }
+        function initDataGrid() {
+            //获取对应的column;
+            if (Ktw.IsNull(dataGrid)) {
+                var columns = [];
+                gridfields = [
+                    { "Name": "建设项目名", "ByName": "建设项目名称" },
+                    { "Name": "批准文号", "ByName": "批准文号" },
+                    { "Name": "受理日期", "ByName": "受理日期" },
+                    { "Name": "批准日期", "ByName": "批准日期" },
+                    { "Name": "报批地块面积", "ByName": "报批地块面积" },
+                    { "Name": "行政区名称", "ByName": "行政区名称" },
+                    { "Name": "地块总数", "ByName": "地块总数" },
+                ];
+                for (var i = 0; i < gridfields.length; i++) {
+                    columns.push({ field: gridfields[i].Name, title: gridfields[i].ByName, width: 80, align: 'center', sortable: false, formatter: function (value, row, index) { return row.getProperties()[this.field]; } });
+                }
+                columns.push({ field: '_operate1', title: '详情', width: 50, align: 'center', sortable: false, formatter: function (value, row, index) { return '<div class="gridoperate"><a class="icon-plotte" style="width:16px; height:16px;margin:auto;  background-color:transparent" onclick="rowDetail(this)">详情</a></div>'; } });
+                Ktw.App.BottomPanel.SetVisible(true);
+                Ktw.App.BottomPanel.SetTitle("已受理地块");
+                Ktw.App.BottomPanel.unbind("onResize");
+                Ktw.App.BottomPanel.bind("onResize", function (evt) {
+                    if (!Ktw.IsNull(dataGrid)) dataGrid.Resize(Ktw.App.BottomPanel.Width, Ktw.App.BottomPanel.Height - 25);
+                });
+                Ktw.App.BottomPanel.unbind("onExpand");
+                Ktw.App.BottomPanel.bind("onExpand", function (evt) {
+                    if (!Ktw.IsNull(dataGrid)) dataGrid.Resize(Ktw.App.BottomPanel.Width, Ktw.App.BottomPanel.Height - 25);
+                });
+                dataGrid = new Ktw.UCDataGrid({
+                    PageIndex: pageIndex,
+                    PageSize: pageSize,
+                    RowNumbers: true,
+                    ID: "taxSourceGrid",
+                    TextPrompt: "输入项目名称...",
+                    buttons: []
+                });
+                $("#content").append(dataGrid.Target);
+                var onceflag = false;
+                dataGrid.Layout(columns);
+                dataGrid.Target.bind("onSelectPage", function (s, e) {
+                    pageIndex = e.index;
+                    pageSize = e.size;
+                    queryData(pageIndex, pageSize, onceflag ? 0 : 1);
+                    onceflag = false;
+                });
+                dataGrid.Target.bind("onClickRow", function (s, e) {
+                    if (isDetail) {
+                        detail(e.Row);
+                        isDetail = false;
+                    } else {
+                        polyganKey = highLight(e.Row);
+                    }
+                });
+                dataGrid.Target.bind("onSearchClick", function (s, e) {
+                    searchText = e.value.trim();
+                    onceflag = true;
+                    dataGrid.DataGrid.datagrid('getPager').pagination('select', 1);
+                });
+                //添加工具
+                Ktw.App.BottomPanel.ClearTool();
+                tools = [
+                  {
+                      IconCls: 'icon-import',
+                      TipTitle: '导出受理地块',
+                      ID: 'btnExport'
+                  }, {
+                      IconCls: 'icon-query',
+                      TipTitle: '高级查询',
+                      ID: 'btnQuery'
+                  }];
+                Ktw.App.BottomPanel.AddTool(tools);
+            }
+            queryData(pageIndex, pageSize, 0);
+        }
+        function queryData(index, size, flag) {
+            index = index || 1;
+            size = size || 5;
+            if (ktw.IsNull(query)) {
+                query = new Ktw.WFS_H({
+                    Url: Ktw.GetSystemUrlByRelID(PiDiLayer.WFS),
+                    TypeName: PiDiLayer.TypeName,
+                    PageIndex: pageIndex,
+                    PageSize: pageSize,
+                    CqlFilter: getCondition(),
+                    //SrsName: PiDiLayer.EPSG,
+                    OrderBy: PiDiLayer.OrderBy
+                });
+                query.Target.bind("onQueryBegin", function (evt, data) {
+                    requesturl = data.requestParam.url.replace(/startIndex=\d+&count=\d+/, "")
+                });
+                query.Target.bind("onQueryCompleted", function (s, result) {
+                    if (result.statusCode != 200) {
+                        result.data = [];
+                        result.pageInfo = { pageCount: 0, pageIndex: 1, pageSize: pageSize, totalCount: 0 };
+                    }
+                    dataGrid.Load(result.data, result.pageInfo);
+                    //高亮当前页
+                    Ktw.MapUtils.ClearAndAddFeatures(result.data, "tempGraphicLayer", currpagestyle);
+                    var gridrows = dataGrid.DataGrid.datagrid("getData").rows;
+                    if (Ktw.IsNull(gridrows) || gridrows.length == 0) return;
+                    var selectR = Enumerable.From(gridrows).FirstOrDefault();
+                    if (!Ktw.IsNull(selectR)) {
+                        var index = Enumerable.From(gridrows).IndexOf(selectR);
+                        dataGrid.DataGrid.datagrid("selectRow", index);
+                    }
+                    highLight(selectR);
+                });
+            }
+            if (flag == 0) {
+                query.Query({
+                    PageIndex: index,
+                    PageSize: size,
+                    CqlFilter: getCondition()
+                    //CqlFilter:" group by \"行政区名称\""
+                });
+            } else {
+                query.Query({
+                    PageIndex: index,
+                    PageSize: size,
+                });
+            }
+
+        }
+        function getCondition() {
+            var val = searchText || $("#searchFilter .datagrid-pager .textbox-value").val();
+            var fields = PiDiLayer.SearchFields;
+            var con = "";
+            if (fields && val) {
+                var arr = fields.split(",");
+                $(arr).each(function (i, item) {
+                    con += " and \"" + item + "\" like '%" + val + "%'";
+                });
+            }
+            if (con.length > 0) {
+                con = con.substring(4);
+                con = "(" + con + ")";
+            }
+            return con;
+        }
+        function highLight(feature) {
+            if (!Ktw.IsNull(polygonKey)) {
+                Ktw.App.Map.unByKey(polygonKey);
+                polygonKey = null;
+            }
+            if (Ktw.IsNull(feature) || Ktw.IsNull(feature.getGeometry())) return;
+            polygonKey = Ktw.MapUtils.LineSymbolStyle(feature);
+            var extent = feature.getGeometry().getExtent();
+            var center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+            Ktw.App.Map.getView().fit(extent, Ktw.App.Map.getSize(), { duration: 1000 });
+        }
+        var isDetail = false;
+        function rowDetail(item) {
+            isDetail = true;
+        }
+        function detail(row) {
+            Ktw.App.RightPanel.Clear();
+            Ktw.App.RightPanel.SetTitle("地块信息");
+            Ktw.App.RightPanel.SetVisible(true);
+            Ktw.App.RightPanel.Add(Ktw.App.Root + "html/onemap/acceptDetail.html", { feature: row, PiDiLayer: PiDiLayer });
+        }
+    </script>
+</head>
+<body>
+    <div id="content" style="width: 100%; height: 100%;"></div>
+    <div id="queryWin" style="width:500px;height:200px;">
+        <table style="width:500px;">
+            <tr style="height:30px;">
+                <td style="width:20%;text-align:center;vertical-align:central;">按建设项目名称</td>
+                <td style="width:80%;padding-left:5px"><div id="jsxmmc" name="NSRMC" class="ktw-textbox" opt='{"Width":367,"Required":"true"}' maxlength="32" byname="建设项目名称"></div></td>
+            </tr>
+            <tr style="height:30px;">
+                <td style="text-align:center;vertical-align:central;">按批准文号</td>
+                <td style="padding-left:5px"><div id="pdwh" name="PZWH" class="ktw-textbox" opt='{"Width":367,"Required":"true"}' maxlength="32" byname="批准文号"></div></td>
+            </tr>
+            <tr style="height:30px;">
+                <td style="text-align:center;vertical-align:central;">按受理日期</td>
+                <td id="tdslrq" style="padding-left:5px"></td>
+            </tr>
+            <tr style="height:30px;">
+                <td style="text-align:center;vertical-align:central;">按批准日期</td>
+                <td id="tdpzrq" style="padding-left:5px"></td>
+            </tr>
+        </table>
+        <div style="height: 41px;border-top: 1px solid #B6C7DB;">
+            <div id="btnresetSearch" style="margin-top: 6px; position:relative;margin-left: 10px;margin-right:23px; width: 55px; height: 26px; float: right; border: 1px solid #95B8E7; background-color: #f1f1f1; cursor: pointer; ">
+                <div style=" position: absolute; left: 18px;top:6px;">重置</div>
+            </div>
+            <div id="btnadvanceSearch" style="margin-top: 6px; position:relative; float:right;width: 55px; height: 26px; border: 1px solid #95B8E7; background-color: #f1f1f1;cursor:pointer">
+                <div style=" position: absolute; left: 18px;top:6px;">查询</div>
+            </div>
+        </div>
+    </div>
+    <iframe id="formcon" style="width:0;height:0;" />
+</body>
+</html>

@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tab </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/linq.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+        .ktw-tab .normalTabCls {
+            background-color: #dcdfe2;
+            color: #928c8c;
+            font-weight: bold;
+        }
+
+        .ktw-tab .selectTabCls {
+            background-color: #0099cc;
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
+    <script type="text/javascript">
+        var items = [{
+            ID: 'tab1',
+            Name: '选项卡名称1',
+            Url: '../listbox/basic.html',
+            IsScrolling: false,
+            IsDeleted: false,
+            IsSelected: true
+        }, {
+            ID: 'tab2',
+            Name: '选项卡名称2',
+            Url: '../radio/basic.html',
+            IsScrolling: false,
+            IsDeleted: true,
+            IsSelected: false
+        }
+        ];
+
+        $(window).ready(function () {
+
+            var tab = new ktw.Tab({
+                Visible: true,
+                Width: 500,
+                Height: 600,
+                Items: items,
+                TabNormalCls: 'normalTabCls',
+                TabSelectedCls: 'selectTabCls',
+                IsDeletedLastTab: false,
+                Position: "top"
+            });
+            $("#tabDiv").append(tab.Target);
+            tab.Layout();
+        });
+
+    </script>
+</head>
+<body>
+    <h2>Tab</h2>
+    <p>选项卡的用法</p>
+    <div id="tabDiv" style="margin-left: 20px;">
+    </div>
+</body>
+</html>

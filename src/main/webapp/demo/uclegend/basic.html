@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>UCLegend </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+
+    <script type="text/javascript">
+        var legend;
+        var paRules = [{
+            Text: "可达标区", Fill: { Color: "#40bf40", Opacity: 1 },
+            Border: { Width: 0.5, Color: "#CCCC29", Opacity: 1 }
+        }, {
+            Text: "管控区", Fill: { Color: "#CCCC29", Opacity: 1 },
+            Border: { Width: 0.5, Color: "#ffffff", Opacity: 1 }
+        }, {
+            Text: "替代种植区", Fill: { Color: "#D36e4C", Opacity: 1 },
+            Border: { Width: 0.5, Color: "#ffffff", Opacity: 1 }
+        }, {
+            Text: "扩面区", Fill: { Color: "#CAC5AA", Opacity: 1 },
+            Border: { Width: 0.5, Color: "#ffffff", Opacity: 1 }
+        }];
+
+
+        $(window).ready(function () {
+            legend = new ktw.UCLegend({
+                Title: "种植区样式",
+                Parent: $("#panel"),
+                Data: paRules
+            });
+
+            legend.Layout();
+
+            $("#btnSwitch").click(function () {
+                legend.SetPointStyle(!legend.IsPointStyle);
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <h2>UCLegend</h2>
+    <p>地图图例控件基础用法</p>
+    <div style="margin-left: 20px;">
+        <button id="btnSwitch" style="background-color: #0099cc; color: white; width: 80px; height: 30px; cursor: pointer;">样式切换</button>
+    </div>
+    <div id="panel" style="margin-left: 20px; width: 40%; height: 300px; border: 1px solid #0099cc; position: relative;"></div>
+</body>
+</html>

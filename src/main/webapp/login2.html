@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>一张图</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="css/app.css" />
+    <link rel="stylesheet" type="text/css" href="css/login2.css" />
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/linq.min.js"></script>
+    <script type="text/javascript" src="js/data.util.js"></script>
+    <script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="js/md5.js"></script>
+    <script type="text/javascript" src="js/ktw.ui.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+</head>
+<body class="login_background">
+    <div class="login" style="position: relative;">
+    <div class="login_title"></div>
+    <!--<div id="content" class="login_content">-->
+        <div class="loginContent">
+            <div class="loginBG"></div>
+            <div class="loginHeader"></div>
+            <div class="inputDiv userNameDiv">
+                <div class="userNamelogo"></div>
+                <input type="text" id="txtUserName" class="txtInput" value="admin" />
+            </div>
+            <div class="inputDiv userPwdDiv">
+                <div class="userPwdlogo"></div>
+                <input type="password" class="txtInput txtUserPwd" style="background-color:pink;" value="123456"/>
+                <!--<input type="password" id="txtUserPwd" class="txtInput" style="background-color:red" value="123456" />-->
+            </div>
+            <!--<div class="saveInfoDiv">
+                 <div id="CheckBox" class="offselected"></div>-->
+               <!--<input type="checkbox" name="txtSaveInfo" id="txtSaveInfo" style="position: absolute;" />-->
+               <!-- <label for="txtSaveInfo" style="position: absolute; left: 19px">记住账号</label>-->
+           <!-- </div>-->
+            <!--<a id="forgot" href="javascript:void(0);">忘记密码？</a>-->
+            <input type="button" class="inputButton btnLogin" id="btnLogin" value="登    录" />
+            <!--<input type="button" class="inputButton btnRegister" id="btnRegister" value="注    册" />-->
+        </div>
+    <!--</div>-->
+   <!-- <div class="login_foot">CopyRight2017 &nbsp;&nbsp; 湖北金拓维信息技术有限公司&nbsp;&nbsp; 版权所有</div>-->
+    </div>
+    <script type="text/javascript">
+        var dialog;
+        var screenWidth
+        function resize() {
+            $("#content").css({ "height": ($(window).height() - 200) + "px" ,"margin_bottom":0+"px"});
+            
+            //$("body").css("width", $(window).width());
+            //$(".login").css("margin-left", ($(window).width() - screenWidth) / 2);
+            /*var hei = document.body.clientHeight;
+            if (hei < 1000) {
+                $(".login").css("top", 0);
+            } else if (hei > 1000 && hei < 1500) {
+                $(".login").css("top", 100);
+            } else {
+
+            }*/
+            //$(".login").css("margin-top", ($(window).height() - $(".login").height()) / 2);
+            //$(".login_title").css("margin-left", ($(window).width() - initwidth)/2);
+        }
+        $(function () {
+            //screenWidth = screen.width;
+            //screenWidth = 1600;
+            screenWidth = $(window).width();
+            $(".login").css("width", screenWidth);
+            var initheight = $(window).height();
+            $("#CheckBox").click(function () {
+                $("#CheckBox").toggleClass("selected");
+                $("#CheckBox").toggleClass("offselected");
+            });
+            $(window).resize(function () { resize(); });
+            resize();
+            ktw.cookie.init();
+            msg = {
+                title: "系统提示",
+                userName: "请输入用户名！",
+                userPwd: "请输入密码！",
+                validate: "用户名或密码错误，请重试!",
+                timeout: "用户名失效，请与管理员联系！",
+                netout: "网络超时，请稍后再试！"
+            };
+            dialog = $.messager;
+            dialog.defaults.ok = "确定";
+            dialog.defaults.cancel = "取消";
+            dialog.defaults.height = 150;
+            dialog.defaults.width = 250;
+            $("#btnLogin").click(function () {
+                var name = $("#txtUserName").val();
+                var pwd = $(".txtUserPwd").val();
+                if (ktw.IsNull(name)) {
+                    dialog.alert(msg.title, msg.userName, "info");
+                    return;
+                }
+                if (ktw.IsNull(pwd)) {
+                    dialog.alert(msg.title, msg.userPwd, "info");
+                    return;
+                }
+                var user = { name: name, password: hex_md5(pwd) };
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify(user),
+                    contentType: "application/json",
+                    url: ktw.cookie.ServerUrl + "user/login",
+                    success: function (res) {
+                        if (!res.success) {
+                            $.messager.alert(msg.title, res.message, "error");
+                            return;
+                        }
+                        if (ktw.IsNull(res.data.photouri)) {
+                            res.data.photouri = "image/authorization/default.jpg";
+                        }
+                        $.cookie("usertoken", JSON.stringify(res.data), { expires: 1 });
+                        location.href = ktw.cookie.Root + "onemap.html";
+                    },
+                    error: function () {
+                        $.messager.alert(msg.title, msg.netout, "error");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

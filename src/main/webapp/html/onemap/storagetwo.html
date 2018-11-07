@@ -1,0 +1,395 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+      <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+   <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/echarts.js"></script>
+    <script src="../../js/echarts.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var xarray = [];
+        var dataGrid;
+        var ctr;//等待条
+        var winWidth;
+        var result = [];
+        var titles;
+        var curdata;
+        $(window).ready(function () {
+            ctr = new ktw.UCWaitBox({
+                Parent: $(".Content")
+            });
+            winWidth = $(window).width();
+            Statistics();
+            $(".Button[operatetype]").click(function (evt) {
+                var type = $(this).attr("operatetype");
+                if (type == "Statistics") Statistics();
+                if (type == "Export") exportData(evt);
+            });
+            var year = [];
+            var yearComBox = $("#year").prop('$this');
+            for (var i = 2008; i <= new Date().getFullYear(); i++) {
+                year.push(i);
+                $("#startyear").prop("$this").SetData(year);
+                $("#endyear").prop("$this").SetData(year)
+            }
+            $("#startyear").prop("$this").SetValue(new Date().getFullYear());
+            $("#endyear").prop("$this").SetValue(new Date().getFullYear());
+        });
+
+        function initCharts(type) {
+            var myChart = echarts.init(document.getElementById('chart'));
+            var yeararray = [];
+            for (var i = 0; i < result.length; i++) {
+                yeararray.push((result[i].time).toString());
+            }
+            var dataMap = {};   
+            var count = {}, ZDMJ = {}, TDQDCB = {};
+            var series = [];
+            for (var i = 0; i < yeararray.length; i++) {   
+                count[yeararray[i]] = [];
+                ZDMJ[yeararray[i]] = [];
+                TDQDCB[yeararray[i]] = [];
+                for (var j = 0; j < titles.length; j++) {
+                    var c = "count" + j;
+                    var Z = "ZDMJ" + j;
+                    var T = "TDQDCB" + j;
+                    count[yeararray[i]].push(result[i][c]);
+                    ZDMJ[yeararray[i]].push(result[i][Z]);
+                    TDQDCB[yeararray[i]].push(result[i][T]);
+                }
+                series.push({
+                    title: {
+                        x:"center",
+                        text: yeararray[i] + "年储备土地指标",
+                         },
+                    type: 'bar',
+                    series: [
+                       {
+                           'name': '面积',
+                           'data': ZDMJ[yeararray[i]]
+                       },
+                       {
+                           'name': '取得成本',
+                           'type': 'bar',
+                           'yAxisIndex': 1,
+                           'data': TDQDCB[yeararray[i]]
+                       },
+                        {
+                            'name': '宗数',
+                            'type': 'bar',
+                            'yAxisIndex': 1,
+                            'data': count[yeararray[i]]
+                        },
+                      
+                    ]
+                })
+            }
+            dataMap.count = count;  
+            dataMap.ZDMJ = ZDMJ;
+            dataMap.TDQDCB = TDQDCB;
+            option = {
+                baseOption: {
+                    timeline: {
+                        axisType: 'category',
+                        autoPlay: true,
+                        playInterval: 1000,
+                        data: yeararray,
+                        label: {
+                            formatter: function (s) {
+                                return (new Date(s)).getFullYear();
+                            }
+                        }
+                    },
+         
+                tooltip: {
+                    trigger: 'axis', 
+                },
+                legend: {
+                    x: 'center',
+                    top:30,
+                    data: ['面积', '取得成本', '宗数'],
+                    selected: {
+                        '宗数': false,
+                    }
+                },
+                calculable: true,
+                grid: { 'y': 80, 'y2': 100 },
+                xAxis: [{
+                    type: 'category',
+                    axisLabel: { 'interval': 0 },
+                    data: titles,
+                }],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '面积/公顷',
+                        splitLine: { show: false }
+                    },
+                    {
+                        'type': 'value',
+                        'name': '取得成本/万元',
+                    },
+                            
+                ],
+                color:['yellow','green','blue'],
+                series: [
+                    { name: '面积', type: 'bar' },
+                    { name: '取得成本', type: 'bar' },
+                    { name: '宗数', type: 'bar' },
+                            ]
+                },
+                options:[],
+
+            };
+            var options2 = [];
+            if (option.options.length <= 1) {
+                for (var i = 0; i < series.length; i++) {
+                    option.options.push(series[i]);
+                }
+            }
+            myChart.setOption(option);
+            option.options.splice(1, option.options.length - 1);
+            window.onresize = function () {
+                winWidth = window.innerWidth;
+                initDataGrid(curdata);
+                //$('#dataModule').datagrid('resize', { width: winWidth });
+                myChart.resize();
+            }
+        }
+        function Statistics(type) {
+            result = [];
+            var startyear = $("#startyear").prop("$this").GetText();
+            var endyear = $("#endyear").prop("$this").GetText();
+            if (startyear == "" && endyear == "") {
+                startyear = new Date().getFullYear();
+                endyear = new Date().getFullYear();
+            }
+            if (startyear > endyear) { Ktw.Alert("请选择正确统计时间!"); return; }
+            var map = { "starttime": startyear, "endtime": endyear }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(map),
+                contentType: "application/json",
+                url: Ktw.App.ServerUrl + "cbyd/getinfobyxkwd",
+                beforeSend: function () {
+                    ctr.Show();
+                },
+                complete: function () {
+                    ctr.Close();
+                },
+                success: function (data) {
+                    var k = "";
+                    //保留4位小数
+                    var RegStr = '^[\\+\\-]?\\d+\\.?\\d{0,4}';
+                    if (data.success == false) {
+                        Ktw.Alert(data.message);
+                        return;
+                    }
+                    curdata = data.data;
+                    if (data.data != null) initDataGrid(curdata);
+                    for (var i = 0; i < data.data.length; i++) {
+                        result.push(
+                                   {
+                                       time: data.data[i].NF,    
+                                   })
+                        for (var j = 0; j < data.data[i].mCbydFull.length; j++) {
+                            for (var t = 0; t < titles.length; t++) {
+                                var count = "count" + t; ZDMJ = "ZDMJ" + t; TDQDCB = "TDQDCB" + t;
+                                if (data.data[i].mCbydFull[j].XZQMC == null) data.data[i].mCbydFull[j].XZQMC = "合计";
+                                if (data.data[i].mCbydFull[j].XZQMC == titles[t]) {
+                                    result[i][count] = parseFloat(data.data[i].mCbydFull[j].count.toString().match(RegStr));
+                                    result[i][ZDMJ] = parseFloat(data.data[i].mCbydFull[j].ZDMJ.toString().match(RegStr));
+                                    result[i][TDQDCB] = parseFloat(data.data[i].mCbydFull[j].TDQDCB.toString().match(RegStr));
+                                }
+                            }
+                        }
+                        for (var t = 0; t < titles.length; t++) {
+                            var count = "count" + t; ZDMJ = "ZDMJ" + t; TDQDCB = "TDQDCB" + t;
+                            if (result[i][count] == null) result[i][count] = 0;
+                            if (result[i][ZDMJ] == null) result[i][ZDMJ] = 0;
+                            if (result[i][TDQDCB] == null) result[i][TDQDCB] = 0;
+                        }
+                    }
+                    initCharts();
+                    $('#dataModule').datagrid({
+                        data: result
+                    });
+
+                },
+                error: function (e) {
+                    var k = "";
+                }
+            });
+        }
+        function exportData(e) {
+            if (result.length <1) {
+                Ktw.Alert("当前无数据,不支持导出");
+                return;
+            }
+            var map = { "result": result, "titles": titles }
+            var test = JSON.stringify(map);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(map),
+                contentType: "application/json",
+                url: Ktw.App.ServerUrl + "cbyd/exporttwo",
+                success: function (e) {
+                    if (e.success) {
+                        var path = e.data;
+                        if (!ktw.IsNull(path)) {
+                            var downlaod = Ktw.App.ServerUrl + path;
+                            window.open(downlaod);
+                        }
+
+                    }
+                },
+                error: function (e) {
+                    var k = "";
+                    Ktw.Alert("服务请求失败!");
+                }
+            });
+        }
+        Array.prototype.unique2 = function () {
+            this.sort(); //先排序
+            var res = [this[0]];
+            for (var i = 1; i < this.length; i++) {
+                if (this[i] !== res[res.length - 1]) {
+                    res.push(this[i]);
+                }
+            }
+            return res;
+        }
+        function initDataGrid(e) {
+            var areas = [];
+            for (var i = 0; i < e.length; i++) {
+                for (var j = 0; j < e[i].mCbydFull.length; j++) {
+                    if (e[i].mCbydFull[j].XZQMC == null)
+                        e[i].mCbydFull[j].XZQMC = "合计";
+                    areas.push(e[i].mCbydFull[j].XZQMC);
+                }   
+            }
+            titles = areas.unique2();
+            var width = (winWidth * 0.98 - 30) / (titles.length * 3 + 1);
+            //var width = 100 / (titles.length * 3 ) + "%";
+            var columns = [[{ field: 'time', title: '年份', width: width, align: 'center', rowspan: 2, }], []];
+            for (var i = 0; i < titles.length; i++) {
+                columns[0].push({ title: titles[i], colspan: 3, align: 'center', rowspan: 1 });
+                columns[1].push({ field: 'count' + i, title: '宗数(个)', align: 'center', width: width, rowspan: 1 },
+                    { field: 'ZDMJ' + i, title: '面积(公顷)', align: 'center', width: width, rowspan: 1 },
+                    { field: 'TDQDCB' + i, title: '取得成本(万元)', align: 'center', width: width, rowspan: 1 })
+            }
+           
+            $('#dataModule').datagrid({
+              //  pagination: true,
+                total: 2000,
+                pageSize: 10,
+                pageList: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                rownumbers: true,
+                fit: true,        //自动大小
+                fitColumns: false, //自适应列宽
+                singleSelect: true,  //是否单选
+                idField: 'Project_id', 
+                columns: columns
+            });
+        }
+       
+    </script>
+     <style>
+        .Content {
+            width: 100%;
+            height: 100%;
+        }
+
+            .Content .ToolDiv {
+                width: 100%;
+                height: 40px;
+                border-bottom: 1px solid #E4E9EF;
+            }
+
+                .Content .ToolDiv .Title {
+                    width: 85px;
+                    text-align: right;
+                    line-height: 20px;
+                    height: 20px;
+                    display: inline-block;
+                    float: left;
+                }
+
+                    .Content .ToolDiv .Title .Icon {
+                        width: 16px;
+                        height: 16px;
+                        display: inline-block;
+                        margin-top: 11px;
+                    }
+
+                    .Content .ToolDiv .Title .Text {
+                        display: inline-block;
+                        float: right;
+                        width: 49px;
+                    }
+
+            .Content .HiddenBtn {
+                filter: alpha(Opacity=80);
+                -moz-opacity: 0.8;
+                opacity: 0.8;
+            }
+
+               .Content .HiddenBtn .ArrowBtn {
+                    cursor: pointer;
+                }
+
+        .panel-body-noborder {
+            border-bottom-width: 1px;
+            border-bottom-color: #dddddd;
+            border-top-width: 1px;
+            border-top-color: #dddddd;
+        }
+          div#statictable .panel-body-noheader {
+            border: 0;
+        }
+         .Content .ToolDiv .Title .Icon {
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>   
+    <div class="Content">
+        <div style="width: 100%; height: 45%;">
+            <div id="searchModule" class="ToolDiv" style="position: relative; width: 98%; margin-left: 1%; margin-top: 5px; border-bottom: 0px; border: 1px solid #CACACA; border-radius: 10px;">     
+                   <div style="display: inline-block;">
+                    <div id="startyear" class="ktw-combobox" style="z-index: 2; width: 174px; height: 20px;margin-top:10px;margin-left:10px" opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\"><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px\">起始年份</span></div>"}'></div>
+                </div>
+                    <div style="display: inline-block;">
+                    <div id="endyear" class="ktw-combobox" style="z-index: 2; width: 174px; height: 20px;margin-top:10px;margin-left:10px" opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\"><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px\">终止年份</span></div>"}'></div>
+                </div>
+                 <div class="Button" id="export" operatetype="Export" style="float: right; padding-top: 4px; padding-right: 10px; position: absolute; right: 5px; top: -5px">
+                    <span class="button">导出</span>
+                </div>
+                <div class="Button" id="static" operatetype="Statistics" style="float: right; padding-top: 4px; padding-right: 10px; position: absolute; right: 75px; top: -5px">
+                    <span class="button">统计</span>
+                </div>
+                 <!--<div style="float:right;margin-right:10px;margin-top:15px">计算单位:公顷,万元</div>-->
+            </div>
+            <div id="statictable" style="width: 98%; height: calc(100% - 50px); margin: 0 auto; margin-top: 5px; border: 1px solid #CACACA; border-radius: 10px;">
+                <div id="dataModule" style="width: 100%;"></div>
+            </div>
+        </div>
+        <div id="chartModule" style="width: 98%; height: calc(55% - 20px); min-height: 80px; bottom: 0px; margin: 0 auto; margin-top: 5px; margin-bottom: 5px; margin-left: 1%; border: 1px solid #CACACA; border-radius: 10px;">
+           <div id="chart" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+</body>
+</html>

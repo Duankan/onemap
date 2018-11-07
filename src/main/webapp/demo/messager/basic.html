@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Messager Alert</title>
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/jquery.easyui.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+     
+    </style>
+    <script type="text/javascript">
+
+        var ctr;
+        var opt;
+        var Message = {
+            Info: "登录成功!",
+            Question: "是否关闭?",
+            Warn: "登录失败，请检查后重新登录！",
+            Error: "服务请求失败！"
+        };
+
+        $(window).ready(function () {
+            opt = {
+                Parent: $(document.body),
+                Effect: "up",
+                ButtonVisible: false,
+                AutoVisible: true,
+                AutoShow: false,
+                Timeout: 1000,
+                HAlign: "center",
+                VAlign: "center",
+                Modal: false
+            };
+
+        });
+
+        function show() {
+            opt.Type = "info";
+            ctr = new ktw.Messager(opt);
+            var type = $('b').text();
+            if (type == "Alert")
+                ctr.Alert(Message.Info);
+            else {
+                ctr.SetButtonVisible(true);
+                ctr.Confirm(Message.Info);
+            }
+        }
+
+        function question() {
+            opt.Type = "question";
+            ctr = new ktw.Messager(opt);
+            var type = $('b').text();
+            if (type == "Alert")
+                ctr.Alert(Message.Question);
+            else {
+                ctr.SetButtonVisible(true);
+                ctr.Confirm(Message.Info);
+            }
+        }
+
+        function warn() {
+            opt.Type = "warn";
+            ctr = new ktw.Messager(opt);
+
+            var type = $('b').text();
+            if (type == "Alert")
+                ctr.Alert(Message.Warn);
+            else {
+                ctr.SetButtonVisible(true);
+                ctr.Confirm(Message.Info);
+            }
+        }
+
+        function error() {
+            opt.Type = "error";
+            ctr = new ktw.Messager(opt);
+
+            var type = $('b').text();
+            if (type == "Alert")
+                ctr.Alert(Message.Error);
+            else {
+                ctr.SetButtonVisible(true);
+                ctr.Confirm(Message.Info);
+            }
+        }
+
+    </script>
+</head>
+<body>
+    <h2>Messager</h2>
+    <p>消息提示框的用法</p>
+    <div style="margin-left: 20px;">
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="$('b').text('Alert')">Alert</button>
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="$('b').text('Confirm')">Confirm</button>
+        <span>当前弹出方式：<b style="color: red; font-size: 14px;">Alert</b></span>
+    </div>
+    <div style="margin-left: 20px;">
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="show();">显示</button>
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="question();">question</button>
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="warn();">warn</button>
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="error();">error</button>
+
+
+    </div>
+    <div>
+        <button onclick="ktw.Alert('这是一个alert框',true,callc)">Alert,带蒙板</button>
+        <button onclick="ktw.Alert('这是一个alert框',false,callc)">Alert,不带蒙板</button>
+        <button onclick="ktw.Alert_Short('瞬时弹框')">Alert_Short，不能带蒙板</button>
+        <br />
+        <button onclick="ktw.Info('info',true,callc)">Info,带蒙板</button>
+        <button onclick="ktw.Info('info',false,callc)">Info,不带蒙板</button>
+        <button onclick="ktw.Info_Short('瞬时弹框')">Info_Short，不能带蒙板</button>
+        <br />
+
+        <button onclick="ktw.Error('这是一个Error框',true,callc)">Error,带蒙板</button>
+        <button onclick="ktw.Error('这是一个Error框',false,callc)">Error,不带蒙板</button>
+        <button onclick="ktw.Error_Short('瞬时弹框')">Error_Short，不能带蒙板</button>
+        <br />
+        <button onclick="ktw.Confirm('Confirm',callc,callc)">Confirm</button>
+    </div>
+
+    <script type="text/javascript">
+        (function ($) {
+            var opt = {
+                Parent: $(document.body),
+                Effect: "up",
+                ButtonVisible: true,
+                AutoVisible: false,
+                AutoShow: false,
+                HAlign: "center",
+                VAlign: "center",
+                HideCancle: true
+            };
+            window.ktw = ktw || {};
+            ktw.Alert = function (msg, isModal, callback) {
+                var ctr = new ktw.Messager($.extend({}, opt, { Modal: !!isModal ? true : false, Type: "warn" }));
+                ctr.Alert(msg, null, callback);
+            }
+            ktw.Alert_Short = function (msg) {
+                var ctr = new ktw.Messager($.extend({}, opt, { Modal: false, Type: "warn", ButtonVisible: false, AutoVisible: true, Timeout: 1100 }));
+                ctr.Alert(msg);
+            }
+            ktw.Info = function (msg, isModal, callback) {
+                var ctr = new ktw.Messager($.extend({}, opt, { Modal: !!isModal ? true : false, Type: "info" }));
+                ctr.Alert(msg, null, callback);
+            }
+            ktw.Info_Short = function (msg) {
+                var ctr = new ktw.Messager($.extend({}, opt, { Modal: false, Type: "info", ButtonVisible: false, AutoVisible: true, Timeout: 1100 }));
+                ctr.Alert(msg);
+            }
+            ktw.Error = function (msg, isModal, callback) {
+                var ctr = new ktw.Messager($.extend({}, opt, { Modal: !!isModal ? true : false, Type: "error" }));
+                ctr.Alert(msg, null, callback);
+            }
+            ktw.Error_Short = function (msg) {
+                var ctr = new ktw.Messager($.extend({}, opt, { Modal: false, Type: "error", ButtonVisible: false, AutoVisible: true, Timeout: 1100 }));
+                ctr.Alert(msg);
+            }
+            ktw.Confirm = function (msg, okBack, cancelBack) {
+                var ctr = new ktw.Messager($.extend({}, opt, { Modal: true, Type: "question", HideCancle: false }));
+                ctr.Confirm(msg, function (res) {
+                    if (res && typeof (okBack) == "function") okBack();
+                    if (!res && typeof (cancelBack) == "function") cancelBack();
+                }, null);
+            }
+        })(jQuery);
+        function callc(res) {
+            alert(res);
+        }
+
+    </script>
+</body>
+</html>

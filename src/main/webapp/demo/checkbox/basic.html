@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>CheckBox </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/guid.js"></script>
+    <script src="../../js/linq.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+
+    <script type="text/javascript">
+
+        $(window).ready(function () {
+            var items = $("#chkpanel").children();
+           
+            //全选checkbox的选择变化事件
+            $("#chkall").prop("$this").bind("onChange", function (s, e) {
+                for (var i = 0; i < items.length; i++) {
+                    items[i].$this.SetChecked(e, false);
+                }
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <h2>CheckBox </h2>
+    <p>CheckBox 复选框用法示例</p>
+
+    <div id="chkall" style="margin: 8px 35px;" class="ktw-checkbox" opt='{"Value":"point","Text":"全选","ThreeState":true}'></div>
+    <div id="chkpanel" style="width: 205px; height: 30px; border: 1px solid #c3cacc; margin-left: 20px; position: relative;">
+        <div id="chkitem1" style="margin-top: 8px; margin-left: 15px;" class="ktw-checkbox" opt='{"Value":"point","Text":"点","Checked":true}'></div>
+        <div id="chkitem2" style="margin-top: 8px; margin-left: 5px;" class="ktw-checkbox" opt='{"Value":"line","Text":"线"}'></div>
+        <div id="chkitem3" style="margin-top: 8px; margin-left: 5px;" class="ktw-checkbox" opt='{"Value":"recentangle","Text":"矩形"}'></div>
+        <div id="chkitem4" style="margin-top: 8px; margin-left: 5px;" class="ktw-checkbox" opt='{"Value":"polygon","Text":"多边形"}'></div>
+    </div>
+
+</body>
+</html>

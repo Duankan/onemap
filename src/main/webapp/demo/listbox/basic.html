@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ListBox </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/linq.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+     
+    </style>
+    <script type="text/javascript">
+
+        function getCity() {
+            return [{
+                id: '0', text: "北京"
+            }, {
+                id: '1', text: "上海"
+            }, {
+                id: '2', text: "广州"
+            }, {
+                id: '3', text: "深圳"
+            }, {
+                id: '4', text: "杭州"
+            }, {
+                id: '5', text: "武汉"
+            }, {
+                id: '6', text: "成都"
+            }, {
+                id: '7', text: "南京"
+            }, {
+                id: '8', text: "长沙"
+            }, {
+                id: '9', text: "西安"
+            }, {
+                id: '10', text: "重庆"
+            }, {
+                id: '11', text: "..."
+            }];
+        }
+
+        $(window).ready(function () {
+            $("#cmbJob").prop("$this").Layout();//使用页面布局时需要调用此方法
+        });
+    </script>
+</head>
+<body>
+    <h2>ListBox</h2>
+    <p>数据列表用法示例</p>
+    <h4 style="color: blue; margin-left: 20px;">部分城市列表</h4>
+    <div id="cmbJob" style="margin-top: 10px; margin-left: 20px;" class="ktw-listbox" opt='{"Width":200,"Height":100,"TextField":"text","ValueField":"id","Data":"<$fun:getCity$>","SelectedIndex":2}'></div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>UCScreenPanel </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+     
+    </style>
+    <script type="text/javascript">
+        var scpanel;
+        $(window).ready(function () {
+
+            scpanel = new ktw.UCScreenPanel({
+                SplitBorderWidth: 2,
+                SplitBorderColor: '#ca26e0'
+            });
+
+            $("#panel").append(scpanel.Target);
+            scpanel.Layout();
+            scpanel.AddContent("http://map.baidu.com", true);
+            scpanel.AddContent("http://map.baidu.com", false);
+            $("#clear").click(function () {
+                scpanel.ClearContent(true);
+            });
+        });
+
+        $(window).resize(function () {
+            scpanel.Layout();
+        });
+    </script>
+</head>
+<body>
+    <h2>UCScreenPanel</h2>
+    <p>双屏控件基础用法</p>
+    <button id="clear" style="background-color: #0099cc; color: white; width: 120px; height: 30px; cursor: pointer;">清除左边容器内容</button>
+    <div id="panel" style="width: 100%; height: 600px; border: 1px solid #0099cc; position: relative;"></div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Combotree </title>
+
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+
+    <script type="text/javascript">
+        var data1 = [{
+            id: '0',
+            text: '水果',
+            icon: "image/mapmenu/AddStop.png",
+            checked: true,
+            state: 'open',
+            noCheckbox: false,
+            Tag: { a: "b" },
+            children: [{
+                id: '01',
+                text: '苹果',
+                icon: "image/mapmenu/AroundFind.png",
+                iconCls: "icon-mapmenu-endpoint",
+                children: [{
+                    id: '010',
+                    iconCls: "icon-mapmenu-endpoint",
+                    text: '陕西苹果'
+                }, {
+                    id: '011',
+                    icon: "image/mapmenu/AroundFind.png",
+                    text: '烟台苹果'
+                }]
+            }]
+        }];
+
+        function getJob() {
+            return [{
+                id: "0",
+                text: "VIP技术",
+                name: "VIP",
+                children: [
+                    { id: "00", text: "低镉产品(V)", name: "ISCD" },
+                    { id: "01", text: "水分管理(I)", name: "ISOW" },
+                    { id: "02", text: "撒生石灰(P)", name: "ISCA" }]
+            },
+            {
+                id: "1",
+                text: "种植绿肥",
+                name: "ISCD",
+                children: []
+            }
+            ];
+        }
+
+        $(window).ready(function () {
+            var tree = $("#fruit").prop("$this");
+            tree.SetData(data1);
+            $("#btnData").click(function () {
+                tree.Clear();
+                tree.SetData(getJob());
+            });
+        });
+    </script>
+</head>
+<body>
+    <h2>Combotree</h2>
+    <p>树形下拉框的用法</p>
+
+    <div style="margin-left: 20px;">
+        <button id="btnData" style="background-color: #0099cc; color: white; width: 90px; height: 30px; cursor: pointer;">更换数据源</button>
+    </div>
+    <div id="fruit" style="margin-top: 10px; margin-left: 20px; width: 200px; height: 30px;" class="ktw-combotree" opt='{"TipInfo":"请选择","IsOverShow":true,"MultiSelect":true,"PopupHeight":160,"treeOpt":{"ValueField":"id","TextField":"text"}}'></div>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Content Window</title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+     
+    </style>
+    <script type="text/javascript">
+
+        var ctr;
+
+        $(window).ready(function () {
+            ctr = new ktw.Window({
+                ID: "videoplay",
+                Title: "视频播放",
+                Height: 280,
+                Width: 470,
+                Left: 20,
+                Top: 130,
+                Parent: $(document.body),
+                Draggable: false,
+                Content: $('<video controls="controls" style="width: 100%; height: 100%;"><source src="../../image/f.mp4" /></video>')
+            });
+
+            ctr.Layout();
+        });
+
+        //常规显示
+        function show() {
+            ctr.Normal();
+        }
+
+        //最大化
+        function full() {
+            ctr.Maximize();
+        }
+
+        //最小化
+        function preview() {
+            ctr.Minimize();
+        }
+
+    </script>
+</head>
+<body>
+    <h2>Content of Window</h2>
+    <p>在window窗体内使用js动态添加填充内容</p>
+    <div style="margin-left:20px;">
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="show();">显示</button>
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="full();">最大化</button>
+        <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="preview();">最小化</button>
+    </div>
+</body>
+</html>

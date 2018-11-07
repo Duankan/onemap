@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>TextBox </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+
+    <script type="text/javascript">
+
+        var ctr;
+
+        $(window).ready(function () {
+            ctr = new ktw.TextBox({
+                Width: 200, Height: 24,
+                CSS: { marginTop: "25px" },
+                Type: "password",
+                Title: "密码",
+                TipInfo: '请输入密码'
+            });
+
+            $("#panel").append(ctr.Target);
+
+            //绑定事件
+            ctr.Target.bind("onChange", function (s, e) {
+                alert("改变前的值为：" + e.oldValue + "  ----  " + "改变后的值为：" + e.newValue);
+            });
+
+            //绑定事件
+            $("#txtName").prop("$this").bind('onChange', function (s, e) {
+                alert("输入的名称为：" + e.newValue);
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <h2>TextBox</h2>
+    <p>TextBox文本框用法示例</p>
+    <div id="panel" style="width: 300px; height: 200px; border: 1px solid #c3cacc; margin-left: 20px; position: relative;">
+        <p><b>1.直接使用页面标签初始化控件</b></p>
+        <div id="txtName" style="margin-top: 30px;" class="ktw-textbox" opt='{"Width":200,"Type":"text","TipInfo":"请输入关键字","Title":"名称"}'></div>
+        <p style="margin-top: 20px;"><b>2.使用JS动态添加控件</b></p>
+    </div>
+
+    <p style="margin-top: 30px;"><b>3.只读文本框</b></p>
+    <div style="margin-bottom: 30px; margin-left: 20px;" class="ktw-textbox" opt='{"Width":200,"Readonly":true,"Type":"text","TipInfo":"不能修改","Title":"只读"}'></div>
+
+    <p><b>4.必填文本框</b></p>
+    <div style="margin-left: 20px;" class="ktw-textbox" opt='{"Width":200,"Required":true,"Type":"text","TipInfo":"必填项","Title":"必填"}'></div>
+</body>
+</html>

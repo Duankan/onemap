@@ -1,0 +1,915 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>耕地利用</title>
+    <link rel="stylesheet" href="../../../css/icon.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/echarts.min.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var integrateOption, rateOption, mapOption, landAreaOption, foodAmountOption;  //统计图表的配置项和数据
+        var integrateChart, rateChart, mapChart, landAreaChart, foodAmountChart; //echarts实例
+        //var dialog = new Ktw.Messager({ AutoShow: false, Height: "124", Type: "question", Modal: false });  //提示框对象
+        var mapOptions = {};
+        /*案例数据描述
+        * name(string):行政区
+        * year(string):年份(年)
+        * value(number):土地整治规模(亩)
+        * rate(number):开垦率(三位小数例如：0.546)
+        * paddyfield(number):水田(亩)
+        * irrigableland(number):水浇地(亩)
+        * dryland(number):旱地(亩)
+        * foodamount(number):粮食产量
+        */
+        var integrateData = [
+            { name: '雨湖区', year: '2013年', value: 120, rate: 0.54, paddyfield: 452, irrigableland: 354, dryland: 674, foodamount: 123 },
+            { name: '雨湖区', year: '2014年', value: 220, rate: 0.45, paddyfield: 452, irrigableland: 354, dryland: 564, foodamount: 231 },
+            { name: '雨湖区', year: '2015年', value: 120, rate: 0.54, paddyfield: 546, irrigableland: 453, dryland: 456, foodamount: 132 },
+            { name: '雨湖区', year: '2016年', value: 220, rate: 0.35, paddyfield: 854, irrigableland: 123, dryland: 654, foodamount: 321 },
+            { name: '雨湖区', year: '2017年', value: 120, rate: 0.65, paddyfield: 545, irrigableland: 327, dryland: 465, foodamount: 312 },
+
+            { name: '岳塘区', year: '2013年', value: 120, rate: 0.46, paddyfield: 874, irrigableland: 234, dryland: 654, foodamount: 213 },
+            { name: '岳塘区', year: '2014年', value: 220, rate: 0.54, paddyfield: 455, irrigableland: 231, dryland: 555, foodamount: 134 },
+            { name: '岳塘区', year: '2015年', value: 120, rate: 0.56, paddyfield: 775, irrigableland: 321, dryland: 444, foodamount: 143 },
+            { name: '岳塘区', year: '2016年', value: 182, rate: 0.84, paddyfield: 456, irrigableland: 132, dryland: 666, foodamount: 314 },
+            { name: '岳塘区', year: '2017年', value: 132, rate: 0.42, paddyfield: 854, irrigableland: 123, dryland: 756, foodamount: 341 },
+
+            { name: '湘乡市', year: '2013年', value: 120, rate: 0.46, paddyfield: 875, irrigableland: 432, dryland: 574, foodamount: 413 },
+            { name: '湘乡市', year: '2014年', value: 220, rate: 0.78, paddyfield: 453, irrigableland: 324, dryland: 464, foodamount: 431 },
+            { name: '湘乡市', year: '2015年', value: 120, rate: 0.32, paddyfield: 755, irrigableland: 234, dryland: 534, foodamount: 234 },
+            { name: '湘乡市', year: '2016年', value: 190, rate: 0.21, paddyfield: 454, irrigableland: 242, dryland: 634, foodamount: 243 },
+            { name: '湘乡市', year: '2017年', value: 101, rate: 0.86, paddyfield: 677, irrigableland: 432, dryland: 534, foodamount: 324 },
+
+            { name: '韶山市', year: '2013年', value: 120, rate: 0.78, paddyfield: 934, irrigableland: 423, dryland: 735, foodamount: 342 },
+            { name: '韶山市', year: '2014年', value: 220, rate: 0.56, paddyfield: 153, irrigableland: 234, dryland: 564, foodamount: 432 },
+            { name: '韶山市', year: '2015年', value: 120, rate: 0.23, paddyfield: 786, irrigableland: 342, dryland: 646, foodamount: 423 },
+            { name: '韶山市', year: '2016年', value: 234, rate: 0.62, paddyfield: 456, irrigableland: 222, dryland: 453, foodamount: 235 },
+            { name: '韶山市', year: '2017年', value: 123, rate: 0.22, paddyfield: 824, irrigableland: 332, dryland: 534, foodamount: 253 },
+
+            { name: '湘潭县', year: '2013年', value: 120, rate: 0.78, paddyfield: 489, irrigableland: 354, dryland: 537, foodamount: 532 },
+            { name: '湘潭县', year: '2014年', value: 220, rate: 0.21, paddyfield: 637, irrigableland: 452, dryland: 634, foodamount: 523 },
+            { name: '湘潭县', year: '2015年', value: 120, rate: 0.32, paddyfield: 785, irrigableland: 324, dryland: 674, foodamount: 324 },
+            { name: '湘潭县', year: '2016年', value: 290, rate: 0.55, paddyfield: 365, irrigableland: 123, dryland: 534, foodamount: 352 },
+            { name: '湘潭县', year: '2017年', value: 90, rate: 0.21, paddyfield: 786, irrigableland: 223, dryland: 666, foodamount: 325 }
+        ];
+        $(function () {
+            initChart();
+            initChartData();
+            getMapData();
+            initEvent();
+        });
+        /*初始化统计图*/
+        function initChart() {
+            integrateChart = echarts.init($("#land-integration")[0]);
+            rateChart = echarts.init($("#reclamation-rate")[0]);
+            mapChart = echarts.init($("#map")[0]);
+            landAreaChart = echarts.init($("#land-area")[0]);
+            foodAmountChart = echarts.init($("#food-production")[0]);
+            //土地整治规模
+            integrateOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                grid: {
+                    left: '4%',
+                    top: '20%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '亩',
+                    nameGap: 10,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                series: {
+                    name: '土地整治总情况',
+                    type: 'line',
+                    data: [],
+                    itemStyle: {
+                        normal: {
+                            color: "#4dced4"
+                        }
+                    }
+                }
+            };
+
+            //土地垦殖率
+            rateOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                grid: {
+                    left: '4%',
+                    top: '20%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '垦殖率',
+                    nameGap: 10,
+                    max: '100',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    axisLabel: {
+                        formatter: '{value} %'
+                    }
+                },
+                series: {
+                    name: '垦殖率',
+                    type: 'line',
+                    data: [],
+                    itemStyle: {
+                        normal: {
+                            color: "#4dced4"
+                        }
+                    }
+                }
+            };
+
+            mapOption = {
+                visualMap: {
+                    left: 20,
+                    bottom: 10,
+                    text: ['最大值', '最小值'],           // 文本，默认为数值文本
+                    calculable: true,
+                    show: false,
+                    inRange: {
+                        color: ['#4ce3e7', '#3aabb4', '#3497a3'],
+                        symbolSize: [0, 100]
+                    },
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                tooltip: {
+                    trigger: ''
+                },
+                roam: true,
+                geo: {
+                    name: '',
+                    type: 'map',
+                    map: '湘潭',
+                    label: {
+                        normal: {
+                            show: true,
+                            color: '#fff'
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    itemStyle: {
+                        emphasis: {
+                            color: '#32ffff'
+                        }
+                    }
+                },
+                series: [{
+                    name: '',
+                    type: 'map',
+                    map: '湘潭',
+                    geoIndex: 0,
+                    label: {
+                        normal: {
+                            show: true,
+                            color: '#fff'
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    data: [
+                        { name: '雨湖区', value: 0 },
+                        { name: '岳塘区', value: 50 },
+                        { name: '湘乡市', value: 100 },
+                        { name: '韶山市', value: 150 },
+                        { name: '湘潭县', value: 200 }
+                    ]
+                }, {
+                    name: "行政区",
+                    type: "effectScatter",
+                    coordinateSystem: "geo",
+                    data: [{ name: '雨湖区', value: [112.907162, 27.856325] },
+                            { name: '岳塘区', value: [112.969479, 27.872028] },
+                            { name: '湘乡市', value: [112.550205, 27.718549] },
+                            { name: '韶山市', value: [112.52667, 27.915008] },
+                            { name: '湘潭县', value: [112.950831, 27.778958] }],
+                    rippleEffect: {
+                        period: 4,
+                        scale: 6,
+                        brushType: "stroke",
+
+                    },
+                    label: {
+                        normal: {
+                            formatter: "{b}",
+                            position: "right",
+                            show: false
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    itemStyle: {
+                        normal: {
+                            color: "#4DFFFF"
+                        }
+                    }
+                }]
+            }
+
+            landAreaOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    data: ['水田面积', '水浇地面积', '旱地面积'],
+                    x: 'center',
+                    top: 20,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    left: '5%',
+                    top: '20%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    max: 100,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    axisLabel: {
+                        formatter: '{value} %'
+                    }
+                },
+                series: [
+                    {
+                        name: '水田面积',
+                        type: 'bar',
+                        stack: '总量',
+                        barWidth: '60%',
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        data: [],
+                        itemStyle: {
+                            normal: {
+                                color: "#7bf9fe",
+                                label: {
+                                    show: true,
+                                    positiong: 'top',
+                                    formatter: '{c}%',
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        name: '水浇地面积',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        data: [],
+                        itemStyle: {
+                            normal: {
+                                color: "#51d5da",
+                                label: {
+                                    show: true,
+                                    positiong: 'top',
+                                    formatter: '{c}%',
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        name: '旱地面积',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        data: [],
+                        itemStyle: {
+                            normal: {
+                                color: "#3497a3",
+                                label: {
+                                    show: true,
+                                    positiong: 'top',
+                                    formatter: '{c}%',
+                                    color: "#fff"
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+
+            foodAmountOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                grid: {
+                    left: '5%',
+                    top: '20%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '亩',
+                    nameGap: 10,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                series: {
+                    name: '湘潭市粮食产量',
+                    type: 'line',
+                    data: [],
+                    itemStyle: {
+                        normal: {
+                            color: "#28777a"
+                        }
+                    }
+                }
+            };
+        }
+        /*页面自适应*/
+        $(window).resize(function () {
+            integrateChart.resize();
+            rateChart.resize();
+            mapChart.resize();
+            foodAmountChart.resize();
+            landAreaChart.resize();
+        });
+        /*初始化统计图数据*/
+        function initChartData() {
+            var sum = [], years = [], rates = [];
+            var landAreaRates = [];  //水田，水浇地，旱田面积占比
+            var byYear = Enumerable.From(integrateData).GroupBy("s=>s.year").ToArray();//根据年份进行分组
+            for (var i = 0, len = byYear.length; i < len; i++) {
+                sum.push(Enumerable.From(byYear[i].source).Sum("s=>s.value"));
+                //水田，水浇地，旱田面积占比
+                var paddyfieldSum = Enumerable.From(byYear[i].source).Sum("s=>s.paddyfield");
+                var irrigablelandSum = Enumerable.From(byYear[i].source).Sum("s=>s.irrigableland");
+                var drylandSum = Enumerable.From(byYear[i].source).Sum("s=>s.dryland");
+                var total = paddyfieldSum + irrigablelandSum + drylandSum;
+                landAreaOption.series[0].data.push(Math.round(paddyfieldSum * 100 / total));
+                landAreaOption.series[1].data.push(Math.round(irrigablelandSum * 100 / total));
+                landAreaOption.series[2].data.push(Math.round(drylandSum * 100 / total));
+                //开垦率
+                rates.push((Enumerable.From(byYear[i].source).Sum("s=>s.rate") * 100 / len).toFixed(1));
+                //横轴年份
+                years.push(byYear[i].source[0].year);
+                //湘潭市历年粮食产量
+                var foodamount = Enumerable.From(byYear[i].source).Sum("s=>s.foodamount")
+                foodAmountOption.series.data.push(foodamount);
+            }
+            integrateOption.xAxis.data = rateOption.xAxis.data = landAreaOption.xAxis.data = foodAmountOption.xAxis.data = years;
+            integrateOption.series.data = sum;
+            rateOption.series.data = rates;
+            integrateChart.setOption(integrateOption, true);
+            rateChart.setOption(rateOption, true);
+            foodAmountChart.setOption(foodAmountOption, true);
+            landAreaChart.setOption(landAreaOption, true);
+        }
+
+        /*读取json地图数据*/
+        function getMapData() {
+            $.ajax({
+                url: '../data/湘潭市.json',
+                type: 'get',
+                datatype: 'json',
+                success: function (res) {
+                    echarts.registerMap('湘潭', res);
+                    mapChart.setOption(mapOption, true);
+                },
+                error: function (e) {
+                    dialog.Alert("加载地图失败！", "error");
+                }
+            });
+        }
+        /*初始化事件*/
+        function initEvent() {
+            //土地整治下钻
+            integrateChart.on('click', function (params) {
+                var backBtn = $(".land-integration .back-btn");
+                drillDown(backBtn, params, 'integrate');
+            });
+            //垦殖率下钻
+            rateChart.on('click', function (params) {
+                var backBtn = $(".reclamation-rate .back-btn");
+                drillDown(backBtn, params, 'rate');
+            });
+            //水田，水浇地，旱田面积占比下钻
+            landAreaClick();
+            //退出下钻返回初始化统计
+            $(".back-btn").click(function (e, s) {
+                $(this).addClass("hide-button");
+                var id = $(this).parent().find('.chart').attr("id");
+                switch (id) {
+                    case 'land-integration':
+                        mapOptions["integrate"] = null;
+                        integrateChart.clear();
+                        integrateChart.setOption(integrateOption, true);
+                        switchMap();
+                        break;
+                    case 'reclamation-rate':
+                        mapOptions["rate"] = null;
+                        rateChart.clear();
+                        rateChart.setOption(rateOption, true);
+                        switchMap();
+                        break;
+                    case 'land-area':
+                        landAreaChart.clear();
+                        landAreaChart.setOption(landAreaOption);
+                        landAreaClick();
+                        break;
+                }
+            });
+        }
+        /*水田，水浇地，旱田面积占比下钻*/
+        function landAreaClick() {
+            landAreaChart.on('click', function (params) {
+                var backBtn = $(".land-area .back-btn");
+                if (!backBtn.hasClass("hide-button")) return; //判断返回按钮状态
+                else backBtn.removeClass("hide-button");
+                var option = {
+                    title: {
+                        subtext: '',
+                        subtextStyle: { color: "#fff" },
+                        x: 'left',
+                        left: '5%',
+                        top: '5%'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        right: 10,
+                        top: 30,
+                        data: [],
+                        textStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    series: {
+                        name: '湘潭市',
+                        type: 'pie',
+                        radius: '50%',
+                        center: ['50%', '60%'],
+                        data: [],
+                        itemStyle: {
+                            emphasis: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    },
+                    color: ['#7bf9fe', '#51d5da', '#3497a3']
+                };
+                var data = Enumerable.From(integrateData).Where("s=>s.year == '" + params.name + "'").ToArray()
+                option.series.data = [
+                    { value: Enumerable.From(data).Sum("s=>s.paddyfield"), name: '水田面积' },
+                    { value: Enumerable.From(data).Sum("s=>s.irrigableland"), name: '水浇地面积' },
+                    { value: Enumerable.From(data).Sum("s=>s.dryland"), name: '旱地面积' }
+                ];
+                option.legend.data = ['水田面积', '水浇地面积', '旱地面积'];
+                option.title.subtext = params.name + '湘潭市水田、水浇地、面积占比';
+                landAreaChart.dispose();
+                landAreaChart = echarts.init(document.getElementById('land-area'))
+                landAreaChart.setOption(option);
+            });
+        }
+        /*统计图下钻*/
+        function drillDown(backBtn, params, type) {
+            if (!backBtn.hasClass("hide-button")) return; //判断返回按钮状态
+            else backBtn.removeClass("hide-button");
+            var state = type == 'rate';  //判断公用方法下钻的类型
+            var chart = state ? rateChart : integrateChart;
+            var option = $.extend(true, {}, state ? rateOption : integrateOption);
+            var tempMapOption = $.extend(true, {}, mapOption);
+            tempMapOption.series[0].data = [];
+            var seriesData = [], regions = [];
+            var data = Enumerable.From(integrateData).Where("s=>s.year == '" + params.name + "'").ToArray()
+            for (var i = 0, len = data.length; i < len; i++) {
+                regions.push(data[i].name);
+                seriesData.push(state ? data[i].rate * 100 : data[i].value);
+                tempMapOption.series[0].data.push({ name: data[i].name, value: state ? data[i].rate * 100 : data[i].value });
+            }
+            option.xAxis.data = regions;
+            option.series.data = seriesData;
+            option.series.type = 'bar';  //下钻时切换类型
+            option.series.barWidth = '60%';
+            option.xAxis.boundaryGap = true;
+            option.tooltip.axisPointer = { type: 'shadow' };
+            chart.setOption(option, true);
+            //地图交互
+            var mapTitle = params.name + '湘潭市' + params.seriesName;
+            $("#map-title").html('&nbsp;' + mapTitle + '&nbsp;');
+            tempMapOption.series[0].name = mapOptions[type + 'title'] = mapTitle;
+            tempMapOption.visualMap.show = true;
+            tempMapOption.visualMap.min = Math.min.apply(null, seriesData);
+            tempMapOption.visualMap.max = Math.max.apply(null, seriesData);
+            tempMapOption.tooltip.trigger = 'item';
+            mapOptions[type] = tempMapOption;
+            mapChart.clear();
+            mapChart.setOption(tempMapOption, true);
+        }
+        /*下钻返回时的地图切换*/
+        function switchMap() {
+            mapChart.clear();
+            if (null != mapOptions["integrate"]) {
+                $("#map-title").html('&nbsp;' + mapOptions["integratetitle"] + '&nbsp;');
+                mapChart.setOption(mapOptions["integrate"], true);
+            } else if (null != mapOptions["rate"]) {
+                $("#map-title").html('&nbsp;' + mapOptions["ratetitle"] + '&nbsp;');
+                mapChart.setOption(mapOptions["rate"], true);
+            } else {
+                $("#map-title").html('&nbsp;湘潭市行政区划&nbsp;');
+                mapChart.setOption(mapOption, true);
+            }
+        }
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .plough-use {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-image: url(image/use-bg.png);
+            background-size: 100% 100%;
+        }
+            /*标题logo*/
+            .plough-use > .plough-use-title {
+                position: relative;
+                width: 70%;
+                height: 85px;
+                margin: auto;
+                background-image: url(image/use-top-logo.png);
+                background-size: 100% 100%;
+            }
+            /*详细内容*/
+            .plough-use > .plough-use-main {
+                position: relative;
+                width: 100%;
+                height: calc(100% - 85px);
+                overflow: hidden;
+            }
+
+                .plough-use > .plough-use-main > .plough-use-left {
+                    width: 22%;
+                    left: 2%;
+                }
+
+                    .plough-use > .plough-use-main > .plough-use-left > div {
+                        position: relative;
+                        width: 100%;
+                        height: 29%;
+                    }
+
+                        .plough-use > .plough-use-main > .plough-use-left > div > .back-btn,
+                        .plough-use > .plough-use-main > .plough-use-right > div > .back-btn {
+                            position: absolute;
+                            right: 10px;
+                            color: #32ffff;
+                            font-size: 20px;
+                            cursor: pointer;
+                            z-index: 1;
+                        }
+
+                    .plough-use > .plough-use-main > .plough-use-left > .annual-situation > .base-info {
+                        position: relative;
+                        background-color: #a1dfe3;
+                        width: 85%;
+                        height: 40px;
+                        line-height: 40px;
+                        text-indent: 8%;
+                        margin: auto;
+                        margin-top: 10px;
+                        top: 40px;
+                        overflow: hidden;
+                    }
+
+                .plough-use > .plough-use-main > .plough-use-center {
+                    width: 50%;
+                    left: 25%;
+                }
+
+                    .plough-use > .plough-use-main > .plough-use-center > .map {
+                        position: relative;
+                        margin: auto;
+                        height: 92%;
+                        top: 4%;
+                        overflow: hidden;
+                    }
+
+                        .plough-use > .plough-use-main > .plough-use-center > .map > .map-top {
+                            position: absolute;
+                            width: 100%;
+                            height: 100px;
+                            top: 0;
+                            background-image: url(image/use-map-bg-top.png);
+                            background-size: 100% 100%;
+                        }
+
+                        .plough-use > .plough-use-main > .plough-use-center > .map > .map-body {
+                            position: absolute;
+                            width: 100%;
+                            height: calc(100% - 240px);
+                            top: 100px;
+                            background-image: url(image/use-map-bg-rp.png);
+                            background-size: 100%;
+                        }
+
+                        .plough-use > .plough-use-main > .plough-use-center > .map > .map-foot {
+                            position: absolute;
+                            width: 100%;
+                            height: 140px;
+                            bottom: 0;
+                            background-image: url(image/use-map-bg-foot.png);
+                            background-size: 100% 100%;
+                        }
+
+                        .plough-use > .plough-use-main > .plough-use-center > .map > .map-title {
+                            position: absolute;
+                            height: 28px;
+                            left: 8%;
+                            white-space: nowrap;
+                        }
+
+                            .plough-use > .plough-use-main > .plough-use-center > .map > .map-title > div {
+                                position: relative;
+                                width: 15px;
+                                height: 28px;
+                                line-height: 28px;
+                                color: #1e436c;
+                                text-align: center;
+                                float: left;
+                            }
+
+                .plough-use > .plough-use-main > .plough-use-right {
+                    width: 22%;
+                    right: 2%;
+                }
+
+                    .plough-use > .plough-use-main > .plough-use-right > div {
+                        position: relative;
+                        width: 100%;
+                        height: 43%;
+                    }
+
+                .plough-use > .plough-use-main .bg-img-top {
+                    position: absolute;
+                    top: 0;
+                    width: 100%;
+                    height: 16px;
+                    background-image: url(image/use-box-top.png);
+                    background-size: 100% 100%;
+                }
+
+                .plough-use > .plough-use-main .bg-img-body {
+                    position: absolute;
+                    top: 16px;
+                    width: 100%;
+                    height: calc(100% - 35px);
+                    background-image: url(image/use-box-rp.png);
+                    background-size: 100%;
+                }
+
+                .plough-use > .plough-use-main .bg-img-foot {
+                    position: absolute;
+                    bottom: 0;
+                    width: 100%;
+                    height: 19px;
+                    background-image: url(image/use-box-foot.png);
+                    background-size: 100% 100%;
+                }
+
+                .plough-use > .plough-use-main > div {
+                    position: absolute;
+                    display: inline-block;
+                    height: 100%;
+                }
+
+                .plough-use > .plough-use-main div > .title {
+                    position: absolute;
+                    top: -13px;
+                    left: 10%;
+                    color: #fff;
+                    font-size: 14px;
+                    background-image: url(image/box-topbanner-s.png);
+                    background-size: 100% 100%;
+                    width: 30%;
+                    height: 28px;
+                    line-height: 28px;
+                    text-align: center;
+                    z-index: 1;
+                }
+
+                .plough-use > .plough-use-main div > .describe-btn {
+                    cursor: pointer;
+                    position: absolute;
+                    z-index: 1;
+                    left: 46%;
+                    top: -12px;
+                    height: 26px;
+                    width: 26px;
+                    background-image: url(image/prompt1.png);
+                    background-size: 100% 100%;
+                }
+
+                    .plough-use > .plough-use-main div > .describe-btn:hover {
+                        background-image: url(image/prompt2.png);
+                    }
+
+                        .plough-use > .plough-use-main div > .describe-btn:hover:before {
+                            width: 160px;
+                            content: attr(describe-info);
+                            background-color: #2085c5;
+                            border-radius: 8px;
+                            color: #fff;
+                            padding: 10px;
+                            position: absolute;
+                            left: 0;
+                            top: 100%;
+                            margin-top: 8px;
+                            text-indent: 2em;
+                            color: #fff;
+                            font-size: 12px;
+                            z-index: 1;
+                        }
+
+                        .plough-use > .plough-use-main div > .describe-btn:hover:after {
+                            content: "";
+                            position: absolute;
+                            top: 100%;
+                            left: 50%;
+                            width: 0;
+                            height: 0;
+                            border-right: 8px solid transparent;
+                            border-left: 8px solid transparent;
+                            border-bottom: 8px solid #2085c5;
+                        }
+
+        .hide-button {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="plough-use">
+        <div class="plough-use-title"></div>
+        <div class="plough-use-main">
+            <div class="plough-use-left">
+                <div class="annual-situation" style="top: 5px">
+                    <div class="bg-img-top"></div>
+                    <div class="bg-img-body"></div>
+                    <div class="bg-img-foot"></div>
+                    <div class="title">年度概况</div>
+                    <div class="describe-btn" describe-info="本年度湘潭市耕地年度概况"></div>
+                    <div class="base-info">
+                        耕地保有量：<span style="color: #1542ec;">121432亩</span>
+                    </div>
+                    <div class="base-info">
+                        新增耕地：<span style="color: #1542ec;">432亩</span>
+                    </div>
+                    <div class="base-info">
+                        耕地保有率：<span style="color: #1542ec;">12%</span>
+                    </div>
+                </div>
+                <div class="land-integration" style="top: calc(4% + 5px);">
+                    <div class="title">土地整治</div>
+                    <div class="describe-btn" describe-info="反映湘潭市土地整治总体情况，以及近几年各行政区土地整合情况"></div>
+                    <span class="back-btn hide-button">&#171;</span>
+                    <div class="bg-img-top"></div>
+                    <div class="bg-img-body"></div>
+                    <div class="bg-img-foot"></div>
+                    <div id="land-integration" class="chart" style="width: 100%; height: 100%;"></div>
+                </div>
+                <div class="reclamation-rate" style="top: calc(8% + 5px);">
+                    <div class="title">垦殖率</div>
+                    <div class="describe-btn" describe-info="反映了湘潭市土地资源利用的程度和结构，结合历年数据做对比分析当下耕地利用的处境及未来工作的重点"></div>
+                    <span class="back-btn hide-button">&#171;</span>
+                    <div class="bg-img-top"></div>
+                    <div class="bg-img-body"></div>
+                    <div class="bg-img-foot"></div>
+                    <div id="reclamation-rate" class="chart" style="width: 100%; height: 100%;"></div>
+                </div>
+            </div>
+            <div class="plough-use-center">
+                <div class="map">
+                    <div class="map-top"></div>
+                    <div class="map-body"></div>
+                    <div class="map-foot"></div>
+                    <div class="map-title">
+                        <div style="background-image: url(image/use-map-bg-title-l.png);"></div>
+                        <div id="map-title" style="width: auto; background-image: url(image/use-map-bg-title-c.png);">&nbsp;湘潭市行政区划&nbsp;</div>
+                        <div style="background-image: url(image/use-map-bg-title-r.png);"></div>
+                    </div>
+                    <div id="map" style="width: 96%; height: 96%; margin: auto; top: 2%;"></div>
+                </div>
+            </div>
+            <div class="plough-use-right">
+                <div class="land-area" style="top: 15px;">
+                    <div class="title" style="width: 47%;">水田、水浇地、旱地</div>
+                    <div class="describe-btn" style="left: 63%;" describe-info="展示湘潭市历年耕地各类别结构的占比，利于分析历年各个耕地各类别结构的比重变化情况"></div>
+                    <span class="back-btn hide-button">&#171;</span>
+                    <div class="bg-img-top"></div>
+                    <div class="bg-img-body"></div>
+                    <div class="bg-img-foot"></div>
+                    <div id="land-area" class="chart" style="width: 100%; height: 100%;"></div>
+                </div>
+                <div class="food-production" style="top: 8%;">
+                    <div class="title" style="width: 38%;">历年粮食产量</div>
+                    <div class="describe-btn" style="left: 54%;" describe-info="展示湘潭市历年粮食产量数据，反映了同期增速变化趋势，便于分析湘潭市的粮食产况"></div>
+                    <div class="bg-img-top"></div>
+                    <div class="bg-img-body"></div>
+                    <div class="bg-img-foot"></div>
+                    <div id="food-production" class="chart" style="width: 100%; height: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

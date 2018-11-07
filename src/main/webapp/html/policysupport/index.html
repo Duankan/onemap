@@ -1,0 +1,371 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="../../css/animations.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var $currPage, $nextPage;
+        var outClass = '', inClass = '';
+        $(function () {
+            initHomePage();
+            initEvent();
+        });
+        /*初始化主页*/
+        function initHomePage() {
+            $("#home").attr('src', 'homePage.html');
+            $("#home").one('load', function () {
+                Ktw.CallWidgetCommunication($("#home")[0], $("#home"));
+            });
+        }
+        /*初始化事件*/
+        function initEvent() {
+            //接收专题界面切换抛出的事件
+            $("#home").bind('pageChange', function (e, s) {
+                $currPage = $("#home").removeClass();
+                $nextPage = $("#subject").removeClass();
+                $(this).addClass('pt-page-current');
+                $("#back-btn").fadeIn(1500);
+                $("#subject").attr('src', s);
+                $("#subject").one('load', function () {
+                    nextPage();
+                });
+            });
+            //返回主页
+            $("#back-btn").click(function () {
+                $(this).fadeOut();
+                $currPage = $("#subject").removeClass();
+                $nextPage = $("#home").removeClass();
+                nextPage();
+            });
+        }
+        /*页面切换方法，在事件内调用*/
+        function nextPage() {
+            $nextPage.addClass('pt-page-current');
+            var i = parseInt(Math.random() * 67 + 1);//生成[1,67]随机数对应页面切换样式
+            switch (i) {
+                case 1:
+                    outClass = 'pt-page-moveToLeft';
+                    inClass = 'pt-page-moveFromRight';
+                    break;
+                case 2:
+                    outClass = 'pt-page-moveToRight';
+                    inClass = 'pt-page-moveFromLeft';
+                    break;
+                case 3:
+                    outClass = 'pt-page-moveToTop';
+                    inClass = 'pt-page-moveFromBottom';
+                    break;
+                case 4:
+                    outClass = 'pt-page-moveToBottom';
+                    inClass = 'pt-page-moveFromTop';
+                    break;
+                case 5:
+                    outClass = 'pt-page-fade';
+                    inClass = 'pt-page-moveFromRight pt-page-ontop';
+                    break;
+                case 6:
+                    outClass = 'pt-page-fade';
+                    inClass = 'pt-page-moveFromLeft pt-page-ontop';
+                    break;
+                case 7:
+                    outClass = 'pt-page-fade';
+                    inClass = 'pt-page-moveFromBottom pt-page-ontop';
+                    break;
+                case 8:
+                    outClass = 'pt-page-fade';
+                    inClass = 'pt-page-moveFromTop pt-page-ontop';
+                    break;
+                case 9:
+                    outClass = 'pt-page-moveToLeftFade';
+                    inClass = 'pt-page-moveFromRightFade';
+                    break;
+                case 10:
+                    outClass = 'pt-page-moveToRightFade';
+                    inClass = 'pt-page-moveFromLeftFade';
+                    break;
+                case 11:
+                    outClass = 'pt-page-moveToTopFade';
+                    inClass = 'pt-page-moveFromBottomFade';
+                    break;
+                case 12:
+                    outClass = 'pt-page-moveToBottomFade';
+                    inClass = 'pt-page-moveFromTopFade';
+                    break;
+                case 13:
+                    outClass = 'pt-page-moveToLeftEasing pt-page-ontop';
+                    inClass = 'pt-page-moveFromRight';
+                    break;
+                case 14:
+                    outClass = 'pt-page-moveToRightEasing pt-page-ontop';
+                    inClass = 'pt-page-moveFromLeft';
+                    break;
+                case 15:
+                    outClass = 'pt-page-moveToTopEasing pt-page-ontop';
+                    inClass = 'pt-page-moveFromBottom';
+                    break;
+                case 16:
+                    outClass = 'pt-page-moveToBottomEasing pt-page-ontop';
+                    inClass = 'pt-page-moveFromTop';
+                    break;
+                case 17:
+                    outClass = 'pt-page-scaleDown';
+                    inClass = 'pt-page-moveFromRight pt-page-ontop';
+                    break;
+                case 18:
+                    outClass = 'pt-page-scaleDown';
+                    inClass = 'pt-page-moveFromLeft pt-page-ontop';
+                    break;
+                case 19:
+                    outClass = 'pt-page-scaleDown';
+                    inClass = 'pt-page-moveFromBottom pt-page-ontop';
+                    break;
+                case 20:
+                    outClass = 'pt-page-scaleDown';
+                    inClass = 'pt-page-moveFromTop pt-page-ontop';
+                    break;
+                case 21:
+                    outClass = 'pt-page-scaleDown';
+                    inClass = 'pt-page-scaleUpDown pt-page-delay300';
+                    break;
+                case 22:
+                    outClass = 'pt-page-scaleDownUp';
+                    inClass = 'pt-page-scaleUp pt-page-delay300';
+                    break;
+                case 23:
+                    outClass = 'pt-page-moveToLeft pt-page-ontop';
+                    inClass = 'pt-page-scaleUp';
+                    break;
+                case 24:
+                    outClass = 'pt-page-moveToRight pt-page-ontop';
+                    inClass = 'pt-page-scaleUp';
+                    break;
+                case 25:
+                    outClass = 'pt-page-moveToTop pt-page-ontop';
+                    inClass = 'pt-page-scaleUp';
+                    break;
+                case 26:
+                    outClass = 'pt-page-moveToBottom pt-page-ontop';
+                    inClass = 'pt-page-scaleUp';
+                    break;
+                case 27:
+                    outClass = 'pt-page-scaleDownCenter';
+                    inClass = 'pt-page-scaleUpCenter pt-page-delay400';
+                    break;
+                case 28:
+                    outClass = 'pt-page-rotateRightSideFirst';
+                    inClass = 'pt-page-moveFromRight pt-page-delay200 pt-page-ontop';
+                    break;
+                case 29:
+                    outClass = 'pt-page-rotateLeftSideFirst';
+                    inClass = 'pt-page-moveFromLeft pt-page-delay200 pt-page-ontop';
+                    break;
+                case 30:
+                    outClass = 'pt-page-rotateTopSideFirst';
+                    inClass = 'pt-page-moveFromTop pt-page-delay200 pt-page-ontop';
+                    break;
+                case 31:
+                    outClass = 'pt-page-rotateBottomSideFirst';
+                    inClass = 'pt-page-moveFromBottom pt-page-delay200 pt-page-ontop';
+                    break;
+                case 32:
+                    outClass = 'pt-page-flipOutRight';
+                    inClass = 'pt-page-flipInLeft pt-page-delay500';
+                    break;
+                case 33:
+                    outClass = 'pt-page-flipOutLeft';
+                    inClass = 'pt-page-flipInRight pt-page-delay500';
+                    break;
+                case 34:
+                    outClass = 'pt-page-flipOutTop';
+                    inClass = 'pt-page-flipInBottom pt-page-delay500';
+                    break;
+                case 35:
+                    outClass = 'pt-page-flipOutBottom';
+                    inClass = 'pt-page-flipInTop pt-page-delay500';
+                    break;
+                case 36:
+                    outClass = 'pt-page-rotateFall pt-page-ontop';
+                    inClass = 'pt-page-scaleUp';
+                    break;
+                case 37:
+                    outClass = 'pt-page-rotateOutNewspaper';
+                    inClass = 'pt-page-rotateInNewspaper pt-page-delay500';
+                    break;
+                case 38:
+                    outClass = 'pt-page-rotatePushLeft';
+                    inClass = 'pt-page-moveFromRight';
+                    break;
+                case 39:
+                    outClass = 'pt-page-rotatePushRight';
+                    inClass = 'pt-page-moveFromLeft';
+                    break;
+                case 40:
+                    outClass = 'pt-page-rotatePushTop';
+                    inClass = 'pt-page-moveFromBottom';
+                    break;
+                case 41:
+                    outClass = 'pt-page-rotatePushBottom';
+                    inClass = 'pt-page-moveFromTop';
+                    break;
+                case 42:
+                    outClass = 'pt-page-rotatePushLeft';
+                    inClass = 'pt-page-rotatePullRight pt-page-delay180';
+                    break;
+                case 43:
+                    outClass = 'pt-page-rotatePushRight';
+                    inClass = 'pt-page-rotatePullLeft pt-page-delay180';
+                    break;
+                case 44:
+                    outClass = 'pt-page-rotatePushTop';
+                    inClass = 'pt-page-rotatePullBottom pt-page-delay180';
+                    break;
+                case 45:
+                    outClass = 'pt-page-rotatePushBottom';
+                    inClass = 'pt-page-rotatePullTop pt-page-delay180';
+                    break;
+                case 46:
+                    outClass = 'pt-page-rotateFoldLeft';
+                    inClass = 'pt-page-moveFromRightFade';
+                    break;
+                case 47:
+                    outClass = 'pt-page-rotateFoldRight';
+                    inClass = 'pt-page-moveFromLeftFade';
+                    break;
+                case 48:
+                    outClass = 'pt-page-rotateFoldTop';
+                    inClass = 'pt-page-moveFromBottomFade';
+                    break;
+                case 49:
+                    outClass = 'pt-page-rotateFoldBottom';
+                    inClass = 'pt-page-moveFromTopFade';
+                    break;
+                case 50:
+                    outClass = 'pt-page-moveToRightFade';
+                    inClass = 'pt-page-rotateUnfoldLeft';
+                    break;
+                case 51:
+                    outClass = 'pt-page-moveToLeftFade';
+                    inClass = 'pt-page-rotateUnfoldRight';
+                    break;
+                case 52:
+                    outClass = 'pt-page-moveToBottomFade';
+                    inClass = 'pt-page-rotateUnfoldTop';
+                    break;
+                case 53:
+                    outClass = 'pt-page-moveToTopFade';
+                    inClass = 'pt-page-rotateUnfoldBottom';
+                    break;
+                case 54:
+                    outClass = 'pt-page-rotateRoomLeftOut pt-page-ontop';
+                    inClass = 'pt-page-rotateRoomLeftIn';
+                    break;
+                case 55:
+                    outClass = 'pt-page-rotateRoomRightOut pt-page-ontop';
+                    inClass = 'pt-page-rotateRoomRightIn';
+                    break;
+                case 56:
+                    outClass = 'pt-page-rotateRoomTopOut pt-page-ontop';
+                    inClass = 'pt-page-rotateRoomTopIn';
+                    break;
+                case 57:
+                    outClass = 'pt-page-rotateRoomBottomOut pt-page-ontop';
+                    inClass = 'pt-page-rotateRoomBottomIn';
+                    break;
+                case 58:
+                    outClass = 'pt-page-rotateCubeLeftOut pt-page-ontop';
+                    inClass = 'pt-page-rotateCubeLeftIn';
+                    break;
+                case 59:
+                    outClass = 'pt-page-rotateCubeRightOut pt-page-ontop';
+                    inClass = 'pt-page-rotateCubeRightIn';
+                    break;
+                case 60:
+                    outClass = 'pt-page-rotateCubeTopOut pt-page-ontop';
+                    inClass = 'pt-page-rotateCubeTopIn';
+                    break;
+                case 61:
+                    outClass = 'pt-page-rotateCubeBottomOut pt-page-ontop';
+                    inClass = 'pt-page-rotateCubeBottomIn';
+                    break;
+                case 62:
+                    outClass = 'pt-page-rotateCarouselLeftOut pt-page-ontop';
+                    inClass = 'pt-page-rotateCarouselLeftIn';
+                    break;
+                case 63:
+                    outClass = 'pt-page-rotateCarouselRightOut pt-page-ontop';
+                    inClass = 'pt-page-rotateCarouselRightIn';
+                    break;
+                case 64:
+                    outClass = 'pt-page-rotateCarouselTopOut pt-page-ontop';
+                    inClass = 'pt-page-rotateCarouselTopIn';
+                    break;
+                case 65:
+                    outClass = 'pt-page-rotateCarouselBottomOut pt-page-ontop';
+                    inClass = 'pt-page-rotateCarouselBottomIn';
+                    break;
+                case 66:
+                    outClass = 'pt-page-rotateSidesOut';
+                    inClass = 'pt-page-rotateSidesIn pt-page-delay200';
+                    break;
+                case 67:
+                    outClass = 'pt-page-rotateSlideOut';
+                    inClass = 'pt-page-rotateSlideIn';
+                    break;
+            }
+            $currPage.addClass(outClass);
+            $nextPage.addClass(inClass);
+        }
+    </script>
+    <style>
+        html, body {
+            position: relative;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: #333;
+            overflow: hidden;
+        }
+
+        #back-btn {
+            position: absolute;
+            width:49px;
+            height: 26px;
+            left:10px;
+            top:10px;
+            background-image:url(image/back-btn1.png);
+            background-size:100% 100%;
+            z-index: 2;
+            cursor: pointer;
+        }
+            #back-btn:hover {
+                background-image:url(image/back-btn2.png);
+            }
+
+        iframe {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .pt-page-current {
+            visibility: visible;
+            z-index: 1;
+        }
+
+        .hide-class {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="back-btn" title="返回" class="hide-class"></div>
+    <iframe id="home"></iframe>
+    <iframe id="subject" class="hide-class"></iframe>
+</body>
+</html>

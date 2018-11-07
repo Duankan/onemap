@@ -1,0 +1,593 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>基础设施专题分析</title>
+    <link rel="stylesheet" href="../../../js/ktop/ktop.css" />
+    <link rel="stylesheet" href="../../../css/icon.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/echarts.min.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktop/ktop.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+
+    <style type="text/css">
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            min-width: 600px;
+            overflow: hidden;
+            background: url(images/bg.jpg) repeat;
+        }
+
+        .top-title {
+            height: 80px;
+            width: 100%;
+            color: white;
+            font-size: 34px;
+            line-height: 65px;
+            text-align: center;
+            background: url(images/lv_top.png) no-repeat;
+            background-position: center;
+        }
+
+        .fixedSizePanel {
+            width: 25%;
+            height: calc(100% - 80px);
+            float: left;
+        }
+
+        .lt-content {
+            width: 100%;
+            height: 50%;
+        }
+
+        .lb-content {
+            width: 100%;
+            height: 50%;
+        }
+
+        .centermap {
+            width: 50%;
+            height: calc(100% - 80px);
+            background-color: rgba(255,255,255,0);
+            float: left;
+            z-index: 2;
+        }
+
+        .timeaxis {
+            height: 30px;
+            width: 260px;
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            right: 0;
+            margin: auto;
+            background-color: #0a7bb9;
+            z-index: 3;
+        }
+
+            .timeaxis .axis-line {
+                width: 256px;
+                height: 7px;
+                border: 2px solid #1c2427;
+                background-color: #fff;
+                border-radius: 5px;
+                position: absolute;
+                bottom: 10px;
+                z-index: 4;
+            }
+
+            .timeaxis .axis-dot {
+                height: 12px;
+                width: 12px;
+                border: 2px solid #e42db3;
+                border-radius: 10px;
+                background-color: #e42db3;
+                position: absolute;
+                top: -60%;
+                z-index: 6;
+            }
+
+        .rt-content {
+            width: 100%;
+            height: 50%;
+        }
+
+        .rb-content {
+            width: 100%;
+            height: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-title">基础设施专题</div>
+    <div class="fixedSizePanel">
+        <div id="supplyAmount" class="lt-content"></div>
+        <div id="supplyStruct" class="lb-content"></div>
+    </div>
+    <div id="railwayMap" class="centermap"></div>
+    <div class="timeaxis">
+        <div class="axis-line">
+            <div class="axis-dot"></div>
+        </div>
+
+    </div>
+    <div class="fixedSizePanel">
+        <div id="investAmount" class="rt-content"></div>
+        <div id="investStruct" class="rb-content"></div>
+    </div>
+    <script type="text/javascript">
+        var opt_supplyAmount, chart_supplyAmount;
+        var opt_supplyStruct, chart_supplyStruct;
+        var opt_railwayMap, chart_railwayMap;
+        var opt_investAmount, chart_investAmount;
+        var opt_investStruct, chart_investStruct;
+
+        $(window).resize(function () {
+            chart_supplyAmount.resize();
+            chart_supplyStruct.resize();
+            chart_investAmount.resize();
+            chart_investStruct.resize();
+        });
+
+        $(document.body).ready(function () {
+            initchart_supplyAmount();
+            initchart_supplyStruct();
+            initchart_investAmount();
+            initchart_investStruct();
+            initMap();
+            replay()
+
+
+
+        });
+
+        /*基础设施用地供应总量统计图*/
+        function initchart_supplyAmount() {
+            chart_supplyAmount = echarts.init($('#supplyAmount')[0]);
+            opt_supplyAmount = {
+                title: {
+                    text: '基础设施用地供应总量',
+                    left: '10',
+                    textStyle: {
+                        color: '#00ffff',
+                        fontSize: 18,
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: '#9a9896',
+                    axisPointer: {
+                        type: 'cross',
+                        crossStyle: {
+                            color: '#ff5d7d'
+                        },
+                        label: {
+                            backgroundColor: '#ff5d7d'
+                        }
+                    }
+                },
+                legend: {
+                    top: '35',
+                    data: ['供应量', '增幅'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '30',
+                    top: '80',
+                    bottom: '20',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        data: ['2011', '2012', '2013', '2014', '2015', '2016'],
+                        axisPointer: { type: 'shadow' }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } },
+                        name: '公顷',
+                        min: 0,
+                        max: 150,
+                        interval: 30
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } },
+                        name: '增幅/ %',
+                        min: 0,
+                        max: 25,
+                        interval: 5
+                    }
+                ],
+                series: [
+                    {
+                        name: '供应量',
+                        type: 'bar',
+                        itemStyle: {
+                            normal: {
+                                color: '#405ffc'
+                            }
+                        },
+                        data: [2.0, 4.9, 7.0, 23.2, 25.6, 76.7]
+                    },
+                    {
+                        name: '增幅',
+                        type: 'line',
+                        symbol: 'triangle',
+                        symbolSize: 10,
+                        itemStyle: {
+                            normal: {
+                                color: '#28dafa'
+                            }
+                        },
+                        yAxisIndex: 1,
+                        data: [2.0, 2.2, 3.3, 4.5, 6.3, 10.2]
+                    }
+                ]
+            };
+
+            chart_supplyAmount.setOption(opt_supplyAmount);
+        }
+        /*基础设施供应用途结构*/
+        function initchart_supplyStruct() {
+            chart_supplyStruct = echarts.init($('#supplyStruct')[0]);
+            opt_supplyStruct = {
+                title: {
+                    text: '基础设施供应用途结构',
+                    left: '10',
+                    textStyle: {
+                        color: '#00ffff',
+                        fontSize: 18,
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: '#9a9896',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    bottom: '15',
+                    left: '5',
+                    textStyle: {
+                        color: '#fff'
+                    },
+                    data: ['公共管理与公共服务用地', '交通运输用地', '水域及水利设施用地', '特殊用地']
+                },
+                grid: {
+                    left: '40',
+                    right: '30',
+                    top: '70',
+                    bottom: '100',
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        data: ['2010年', '2011年', '2012年', '2013年', '2014年', '2015年', '2016年']
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } },
+                        name: '百分比（%）',
+                        min: 0,
+                        max: 105,
+                        interval: 15
+                    }
+                ],
+                series: [
+
+                    {
+                        name: '公共管理与公共服务用地',
+                        type: 'bar',
+                        barWidth: 20,
+                        stack: 'mineral',
+                        itemStyle: {
+                            normal: {
+                                color: '#917eff '
+                            }
+                        },
+                        data: [32, 22, 40, 14, 9, 10, 6]
+                    },
+                    {
+                        name: '交通运输用地',
+                        type: 'bar',
+                        stack: 'mineral', itemStyle: {
+                            normal: {
+                                color: '#405ffc'
+                            }
+                        },
+                        data: [20, 32, 11, 14, 29, 23, 22]
+                    },
+                    {
+                        name: '水域及水利设施用地',
+                        type: 'bar',
+                        stack: 'mineral', itemStyle: {
+                            normal: {
+                                color: '#28dafa'
+                            }
+                        },
+                        data: [18, 36, 19, 52, 52, 47, 66]
+                    },
+                    {
+                        name: '特殊用地',
+                        type: 'bar',
+                        stack: 'mineral', itemStyle: {
+                            normal: {
+                                color: '#be4d1d'
+                            }
+                        },
+                        data: [30, 10, 30, 20, 10, 20, 6]
+                    }
+                ]
+            };
+
+            chart_supplyStruct.setOption(opt_supplyStruct);
+        }
+
+        /*基础设施投资规模*/
+        function initchart_investAmount() {
+            chart_investAmount = echarts.init($('#investAmount')[0]);
+            opt_investAmount = {
+                title: {
+                    text: '基础设施投资规模',
+                    left: '10',
+                    textStyle: {
+                        color: '#00ffff',
+                        fontSize: 18,
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: '#9a9896',
+                    axisPointer: {
+                        type: 'cross',
+                        crossStyle: {
+                            color: '#ff5d7d'
+                        },
+                        label: {
+                            backgroundColor: '#ff5d7d'
+                        }
+                    }
+                },
+                legend: {
+                    top: '35',
+                    data: ['投资额', '增幅'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '30',
+                    top: '80',
+                    bottom: '20',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        data: ['2011', '2012', '2013', '2014', '2015', '2016'],
+                        axisPointer: { type: 'shadow' }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } },
+                        name: '万元',
+                        min: 0,
+                        max: 150,
+                        interval: 30
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } },
+                        name: '增幅/ %',
+                        min: 0,
+                        max: 25,
+                        interval: 5
+                    }
+                ],
+                series: [
+                    {
+                        name: '投资额',
+                        type: 'bar',
+                        itemStyle: {
+                            normal: {
+                                color: '#405ffc'
+                            }
+                        },
+                        data: [2.0, 4.9, 7.0, 23.2, 25.6, 76.7]
+                    },
+                    {
+                        name: '增幅',
+                        type: 'line',
+                        symbol: 'triangle',
+                        symbolSize: 10,
+                        itemStyle: {
+                            normal: {
+                                color: '#28dafa'
+                            }
+                        },
+                        yAxisIndex: 1,
+                        data: [2.0, 2.2, 3.3, 4.5, 6.3, 10.2]
+                    }
+                ]
+            };
+
+            chart_investAmount.setOption(opt_investAmount);
+        }
+        /*基础设施建设融资方式结构*/
+        function initchart_investStruct() {
+            chart_investStruct = echarts.init($('#investStruct')[0]);
+            opt_investStruct = {
+                title: {
+                    text: '基础设施建设融资方式结构',
+                    left: '10',
+                    textStyle: {
+                        color: '#00ffff',
+                        fontSize: 18,
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: '#9a9896',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    bottom: '15',
+                    left: '5',
+                    textStyle: {
+                        color: '#fff'
+                    },
+                    data: ['政府财政投资', '国内贷款', '市政债券', '利用外资', '其他来源']
+                },
+                grid: {
+                    left: '40',
+                    right: '30',
+                    top: '70',
+                    bottom: '100',
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        data: ['2010年', '2011年', '2012年', '2013年', '2014年', '2015年', '2016年']
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        axisLine: { lineStyle: { color: '#c3c5c8' } },
+                        axisLabel: { color: '#fff' },
+                        splitLine: { lineStyle: { color: '#c3c5c8', type: 'dotted' } },
+                        name: '百分比（%）',
+                        min: 0,
+                        max: 105,
+                        interval: 15
+                    }
+                ],
+                series: [
+
+                    {
+                        name: '政府财政投资',
+                        type: 'bar',
+                        barWidth: 20,
+                        stack: 'mineral',
+                        itemStyle: {
+                            normal: {
+                                color: '#917eff '
+                            }
+                        },
+                        data: [32, 22, 40, 14, 9, 10, 6]
+                    },
+                    {
+                        name: '国内贷款',
+                        type: 'bar',
+                        stack: 'mineral', itemStyle: {
+                            normal: {
+                                color: '#405ffc'
+                            }
+                        },
+                        data: [20, 32, 11, 14, 29, 23, 22]
+                    },
+                    {
+                        name: '市政债券',
+                        type: 'bar',
+                        stack: 'mineral', itemStyle: {
+                            normal: {
+                                color: '#28dafa'
+                            }
+                        },
+                        data: [18, 36, 19, 52, 52, 47, 66]
+                    },
+                    {
+                        name: '利用外资',
+                        type: 'bar',
+                        stack: 'mineral', itemStyle: {
+                            normal: {
+                                color: '#be4d1d'
+                            }
+                        },
+                        data: [20, 7, 20, 12, 8, 16, 5]
+                    }
+                    ,
+                    {
+                        name: '其他来源',
+                        type: 'bar',
+                        stack: 'mineral', itemStyle: {
+                            normal: {
+                                color: '#c6bcf1'
+                            }
+                        },
+                        data: [10, 3, 10, 8, 2, 4, 1]
+                    }
+                ]
+            };
+
+            chart_investStruct.setOption(opt_investStruct);
+        }
+
+        /*地图*/
+        function initMap() {
+            var map = L.map('railwayMap', {
+                center: { lon: 114.31, lat: 30.52 },
+                zoom: 8,
+                minZoom: 2,//地图最小级数
+                maxZoom: 18,//地图最大级数
+                attributionControl: false,
+                zoomControl:false
+            });
+            var layer = L.imageOverlay.wms('http://192.168.1.226:8080/geoserver/wms', { layers: 'test:武汉road', transparent: true, format: 'image/png' });
+            map.addLayer(layer);
+            $(map.getContainer()).css("backgroundColor", "transparent");
+        }
+
+        function replay() {
+            var left = $('.axis-dot').position().left;
+            var timeer = setTimeout(function () {
+                if ($('.axis-dot').position().left <= 200) {
+                    $('.axis-dot').css('left', (left + 40) + 'px');
+                }
+                else {
+                    $('.axis-dot').css('left', 0);
+                }
+                replay();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

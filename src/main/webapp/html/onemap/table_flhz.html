@@ -1,0 +1,1027 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="Shortcut Icon" href="../../image/site.jpg" />
+    <link href="../../js/ktop/ktop.css" rel="stylesheet" />
+    <link href="../../css/admin.css" rel="stylesheet" />
+    <script src="../../js/ktop/ktop.js"></script>
+    <script src="../../js/ktop/proj4-compressed.js"></script>
+    <script src="../../js/ktop/proj4leaflet.js"></script>
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <!--<link rel="stylesheet" type="text/css" href="../../css/app.css" />-->
+    <link rel="stylesheet" type="text/css" href="../../css/index.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <!-- JS框架 jQuery -->
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <!--提示框插件-->
+    <link href="../../js/tooltip/tooltip.css" rel="stylesheet" />
+    <script src="../../js/tooltip/tooltip.js"></script>
+    <!-- 第三方UI框架 easyUI -->
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <!-- JS实现的LINQ -->
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/ajaxfileupload.js"></script>
+    <!-- json、xml类型数据格式的操作 -->
+    <script type="text/javascript" src="../../js/data.util.js"></script>
+    <!--表单序列化-->
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+
+    <!-- 提供对旧浏览器一些特性的兼容 -->
+    <script type="text/javascript" src="../../js/polyfill.min.js"></script>
+
+    <!-- loading动画加载效果，框架中UCWaitBox控件就是借助它实现的 -->
+    <script type="text/javascript" src="../../js/spin.js"></script>
+
+    <!-- 框架界面布局 -->
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/ktw.gis.js"></script>
+    <script type="text/javascript" src="../../js/ktw.onemap.js"></script>
+
+    <!-- jQuery.form.js是一个form插件，支持ajax表单提交和ajax文件上传 -->
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript">
+        var result;
+        var srcconf;
+        var srcdata;
+        var areacode;
+        var areaname;
+        var fldata;
+        var Ktw = window.top.ktw;
+        //部件通讯
+        function WidgetCommunication(s) {
+            result = s.param.result;
+            srcconf = s.param.conf;
+            srcdata = s.param.data;
+            areacode = s.param.areacode;
+            areaname = s.param.areaname;
+            if (result == null) {
+                var waitbox = new ktw.UCWaitBox($(document.body));
+                var config = Ktw.App.Config;
+                var layer = null;
+                var btnanalysis = null;
+                for (var i = 0; i < config.Extend.Analysis.P.BtnAnalysis.length; i++) {
+                    if (config.Extend.Analysis.P.BtnAnalysis[i].BtnName == "土地利用现状") {
+                        btnanalysis = config.Extend.Analysis.P.BtnAnalysis[i];
+                        layer = searchLayerTree(config.SystemMap.ArrayOfMapLayer.MapLayer, btnanalysis.Ref);
+                        break;
+                    }
+                }
+                if (layer == null) return;
+				var layerurl=Ktw.GetSystemUrlByRelID(layer.Url);
+				waitbox.Show();
+				var url=Ktw.App.Root+"cache/statistic_tdlyxz/"+encodeURIComponent(areacode+"-"+replaceChars(layerurl)+"-"+replaceChars(layer.TypeName))+".json?"+new Date();					
+				$.ajax({
+					type:"get",
+					async:false,
+					url:url,
+					dataType:"json",
+					success:function(res){
+						result=res;
+					},
+					error:function(){
+						console.log("访问缓存文件失败:"+url);
+					}
+				})
+				if(result&&result.length>0){
+					srcdata = { xm_mc: areaname+"土地利用现状统计" };
+					loaddatagrid();
+                    waitbox.Close();
+					return;
+				}
+                var option = {
+                    typename: layer.TypeName,
+                    url: layerurl,
+                    propertyName: "地类名称,权属性质,图斑地类面,mpArea",
+                    where: "",
+                    successFunc: function (res) {
+                        var tt = $.map(res.features, function (item, i) {
+                            return item.properties;
+                        });
+                        result = Enumerable.From(tt).GroupBy("{" + "地类名称" + ":" + "$." + "地类名称" + ",权属性质:" + "$.权属性质" + "}", null,
+						  function (key, g) {
+						      var result = {
+						          dlmc: key.地类名称,
+						          qsxz: key.权属性质,
+						          glandtotal: (parseFloat(g.Sum("$.图斑地类面")) / 10000).toFixed(4),
+						          alltotal: (parseFloat(g.Sum("$.mpArea")) / 10000).toFixed(4),
+						          count: g.Count()
+						      }
+						      return result;
+						  }, "$.地类名称 + '-'+ $.权属性质").ToArray();
+						$.ajax({
+							type:"post",
+							url:Ktw.App.ServerUrl+"jsonop/write",
+							data:{jsonstr:JSON.stringify(result),path:"cache/statistic_tdlyxz/"+encodeURIComponent(areacode+"-"+replaceChars(layerurl)+"-"+replaceChars(layer.TypeName))+".json"}
+						});
+                        loaddatagrid();
+                        waitbox.Close();
+                    },
+                    failFunc: function (res) {
+                        waitbox.Close();
+                    }
+                }
+                if (areaname) {
+                    srcdata = { xm_mc: areaname + "土地利用现状统计" };
+                } else {
+                    srcdata = { xm_mc: "全区域土地利用现状统计" };
+                }
+                if (areacode) {
+					var t="";
+					if(areacode.substr(4,2)=="00"){
+						//市级行政区划
+						t=areacode.substr(0,4);
+					}else{
+						t=areacode.substr(0,6);
+					}
+                    option.where = " 座落单位代 like '%" + t + "%'";
+                }
+                ktw.WFSQ(option);
+            } else {
+                loaddatagrid();
+            }
+        }
+		
+		function replaceChars(str){
+			str=str||"";
+			str=str.replace(/[\\|\/\:\*\?\"\<\>\|]+/g,"")
+			return str;
+		}
+        //根据引用的id值从图层树的配置中查找图层的配置
+        function searchLayerTree(layers, refid) {
+            if (layers && !layers.length) layers = [layers];
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i].ID == refid) {
+                    return layers[i];
+                } else if (layers[i].Children && layers[i].Children.MapLayer) {
+                    var tmp = searchLayerTree(layers[i].Children.MapLayer, refid);
+                    if (tmp) { return tmp; }
+                }
+            }
+            return null;
+        }
+        function loaddata() {
+            result = [
+               {
+                   "dlmc": "公路用地",
+                   "qsxz": "10",
+                   "glandtotal": "1.5617",
+                   "alltotal": "8.1193",
+                   "count": 1
+               },
+               {
+                   "dlmc": "城市",
+                   "qsxz": "10",
+                   "glandtotal": "0.1396",
+                   "alltotal": "12.0819",
+                   "count": 11
+               },
+               {
+                   "dlmc": "旱地",
+                   "qsxz": "30",
+                   "glandtotal": "1.3002",
+                   "alltotal": "1.6539",
+                   "count": 7
+               },
+               {
+                   "dlmc": "村庄",
+                   "qsxz": "30",
+                   "glandtotal": "0.1863",
+                   "alltotal": "0.1863",
+                   "count": 4
+               },
+               {
+                   "dlmc": "有林地",
+                   "qsxz": "30",
+                   "glandtotal": "0.6511",
+                   "alltotal": "0.6562",
+                   "count": 5
+               },
+               {
+                   "dlmc": "水田",
+                   "qsxz": "30",
+                   "glandtotal": "0.4921",
+                   "alltotal": "1.7964",
+                   "count": 3
+               },
+               {
+                   "dlmc": "其他林地",
+                   "qsxz": "30",
+                   "glandtotal": "2.5914",
+                   "alltotal": "2.6183",
+                   "count": 3
+               },
+               {
+                   "dlmc": "果园",
+                   "qsxz": "30",
+                   "glandtotal": "0.0692",
+                   "alltotal": "0.3464",
+                   "count": 1
+               }];
+        }
+
+        $(window).ready(function () {
+            fldata = [
+               {
+                   "key": "水田",
+                   "value": "nydst"
+               },
+               {
+                   "key": "水浇地",
+                   "value": "nydsjd"
+               },
+               {
+                   "key": "旱地",
+                   "value": "nydhd"
+               },
+               {
+                   "key": "果园",
+                   "value": "nydyd"
+               },
+               {
+                   "key": "茶园",
+                   "value": "nydyd"
+               },
+               {
+                   "key": "其他园地",
+                   "value": "nydyd"
+               },
+               {
+                   "key": "有林地",
+                   "value": "nydld"
+               },
+               {
+                   "key": "灌木林地",
+                   "value": "nydld"
+               },
+               {
+                   "key": "其他林地",
+                   "value": "nydld"
+               },
+               {
+                   "key": "天然牧草地",
+                   "value": "nydcd"
+               },
+               {
+                   "key": "人工牧草地",
+                   "value": "nydcd"
+               },
+               {
+                   "key": "农村道路",
+                   "value": "nydjtyd"
+               },
+               {
+                   "key": "坑塘水面",
+                   "value": "nydsyjslssyd"
+               },
+               {
+                   "key": "沟渠",
+                   "value": "nydsyjslssyd"
+               },
+               {
+                   "key": "设施农用地",
+                   "value": "nydqttd"
+               },
+               {
+                   "key": "田坎",
+                   "value": "nydqttd"
+               },
+               {
+                   "key": "批发零售用地",
+                   "value": "jsydsfyd"
+               },
+               {
+                   "key": "住宿餐饮用地",
+                   "value": "jsydsfyd"
+               },
+               {
+                   "key": "商务金融用地",
+                   "value": "jsydsfyd"
+               },
+               {
+                   "key": "其他商服用地",
+                   "value": "jsydsfyd"
+               },
+               {
+                   "key": "工业用地",
+                   "value": "jsydgkccyd"
+               },
+               {
+                   "key": "采矿用地",
+                   "value": "jsydgkccyd"
+               },
+               {
+                   "key": "仓储用地",
+                   "value": "jsydgkccyd"
+               },
+               {
+                   "key": "城镇住宅用地",
+                   "value": "jsydzzyd"
+               },
+               {
+                   "key": "农村宅基地",
+                   "value": "jsydzzyd"
+               },
+               {
+                   "key": "机关团体用地",
+                   "value": "jsydggglyggfwyd"
+               },
+               {
+                   "key": "新闻出版用地",
+                   "value": "jsydggglyggfwyd"
+               },
+               {
+                   "key": "科教用地",
+                   "value": "jsydggglyggfwyd"
+               },
+               {
+                   "key": "医卫慈善用地",
+                   "value": "jsydggglyggfwyd"
+               },
+               {
+                   "key": "文体娱乐用地",
+                   "value": "jsydggglyggfwyd"
+               },
+               {
+                   "key": "公共设施用地",
+                   "value": "jsydggglyggfwyd"
+               },
+               {
+                   "key": "公园与绿地",
+                   "value": "jsydggglyggfwyd"
+               },
+               {
+                   "key": "风景名胜设施用地",
+                   "value": "jsydggglyggfwyd"
+               },
+               {
+                   "key": "军事设施用地",
+                   "value": "jsydtsyd"
+               },
+               {
+                   "key": "使领馆用地",
+                   "value": "jsydtsyd"
+               },
+               {
+                   "key": "监教场所用地",
+                   "value": "jsydtsyd"
+               },
+               {
+                   "key": "宗教用地",
+                   "value": "jsydtsyd"
+               },
+               {
+                   "key": "殡葬用地",
+                   "value": "jsydtsyd"
+               },
+               {
+                   "key": "铁路用地",
+                   "value": "jsydjtysyd"
+               },
+               {
+                   "key": "公路用地",
+                   "value": "jsydjtysyd"
+               },
+               {
+                   "key": "街巷用地",
+                   "value": "jsydjtysyd"
+               },
+               {
+                   "key": "机场用地",
+                   "value": "jsydjtysyd"
+               },
+               {
+                   "key": "港口码头用地",
+                   "value": "jsydjtysyd"
+               },
+               {
+                   "key": "管道运输用地",
+                   "value": "jsydjtysyd"
+               },
+               {
+                   "key": "水库水面",
+                   "value": "jsydsyjslssyd"
+               },
+               {
+                   "key": "水工建筑物用地",
+                   "value": "jsydsyjslssyd"
+               },
+               {
+                   "key": "空闲地",
+                   "value": "jsydqttd"
+               },
+               {
+                   "key": "河流水面",
+                   "value": "wlydsyjslssyd"
+               },
+               {
+                   "key": "湖泊水面",
+                   "value": "wlydsyjslssyd"
+               },
+               {
+                   "key": "沿海滩涂",
+                   "value": "wlydsyjslssyd"
+               },
+               {
+                   "key": "内陆滩涂",
+                   "value": "wlydsyjslssyd"
+               },
+               {
+                   "key": "冰川及永久积雪",
+                   "value": "wlydsyjslssyd"
+               },
+               {
+                   "key": "其他草地",
+                   "value": "wlydcd"
+               },
+               {
+                   "key": "盐碱地",
+                   "value": "wlydqttd"
+               },
+               {
+                   "key": "沼泽地",
+                   "value": "wlydqttd"
+               },
+               {
+                   "key": "沙地",
+                   "value": "wlydqttd"
+               },
+               {
+                   "key": "裸地",
+                   "value": "wlydqttd"
+               }];
+        });
+
+        function loaddatagrid() {
+            //loaddata();
+            var data = {
+                "nydxj_jt": 0, "nydst_jt": 0, "nydsjd_jt": 0, "nydhd_jt": 0, "nydyd_jt": 0,
+                "nydld_jt": 0, "nydcd_jt": 0, "nydjtyd_jt": 0, "nydsyjslssyd_jt": 0, "nydqttd_jt": 0,
+                "nydxj_gy": 0, "nydst_gy": 0, "nydsjd_gy": 0, "nydhd_gy": 0, "nydyd_gy": 0, "nydld_gy": 0,
+                "nydcd_gy": 0, "nydjtyd_gy": 0, "nydsyjslssyd_gy": 0, "nydqttd_gy": 0, "nydhjxj": 0, "nydhjst": 0,
+                "nydhjsjd": 0, "nydhjhd": 0, "nydhjyd": 0, "nydhjld": 0, "nydhjcd": 0, "nydhjjtyd": 0, "nydhjsyjslssyd": 0,
+                "nydhjqttd": 0, "jsydxj_jt": 0, "jsydsfyd_jt": 0, "jsydgkccyd_jt": 0, "jsydzzyd_jt": 0,
+                "jsydggglyggfwyd_jt": 0, "jsydtsyd_jt": 0, "jsydjtysyd_jt": 0, "jsydsyjslssyd_jt": 0, "jsydqttd_jt": 0,
+                "jsydxj_gy": 0, "jsydsfyd_gy": 0, "jsydgkccyd_gy": 0, "jsydzzyd_gy": 0, "jsydggglyggfwyd_gy": 0,
+                "jsydtsyd_gy": 0, "jsydjtysyd_gy": 0, "jsydsyjslssyd_gy": 0, "jsydqttd_gy": 0, "jsydhjxj": 0, "jsydhjsfyd": 0,
+                "jsydhjgkccyd": 0, "jsydhjzzyd": 0, "jsydhjggglyggfwyd": 0, "jsydhjtsyd": 0, "jsydhjjtysyd": 0, "jsydhjsyjslssyd": 0,
+                "jsydhjqttd": 0, "wlydxj_jt": 0, "wlydcd_jt": 0, "wlydsyjslssyd_jt": 0, "wlydqttd_jt": 0, "wlydxj_gy": 0,
+                "wlydcd_gy": 0, "wlydsyjslssyd_gy": 0, "wlydqttd_gy": 0, "wlydhjxj": 0, "wlydhjcd": 0, "wlydhjsyjslssyd": 0,
+                "wlydhjqttd": 0, "czjgkyd_jt": 0, "czjgkyd_gy": 0, "czjgkyd_hj": 0, "zj_jt": 0, "zj_gy": 0, "zj_hj": 0
+            };
+
+            for (var i = 0; i < result.length; i++) {
+                if (result[i].qsxz == "30" || result[i].qsxz == "40") {
+                    //01
+                    for (var j = 0; j < fldata.length; j++) {
+                        if (result[i].dlmc == fldata[j].key) {
+                            data[fldata[j].value + "_jt"] = parseFloat(result[i].glandtotal);
+                            break;
+                        }
+                    }
+                }
+                else if (result[i].qsxz == "10" || result[i].qsxz == "20") {
+                    for (var j = 0; j < fldata.length; j++) {
+                        if (result[i].dlmc == fldata[j].key) {
+                            data[fldata[j].value + "_gy"] = parseFloat(result[i].glandtotal);
+                            break;
+                        }
+                    }
+                }
+            }
+            //农用地集体小计面积
+            data["nydxj_jt"] += data["nydst_jt"];
+            data["nydxj_jt"] += data["nydsjd_jt"];
+            data["nydxj_jt"] += data["nydhd_jt"];
+            data["nydxj_jt"] += data["nydyd_jt"];
+            data["nydxj_jt"] += data["nydld_jt"];
+            data["nydxj_jt"] += data["nydcd_jt"];
+            data["nydxj_jt"] += data["nydjtyd_jt"];
+            data["nydxj_jt"] += data["nydsyjslssyd_jt"];
+            data["nydxj_jt"] += data["nydqttd_jt"];
+            //农用地国有小计面积
+            data["nydxj_gy"] += data["nydst_gy"];
+            data["nydxj_gy"] += data["nydsjd_gy"];
+            data["nydxj_gy"] += data["nydhd_gy"];
+            data["nydxj_gy"] += data["nydyd_gy"];
+            data["nydxj_gy"] += data["nydld_gy"];
+            data["nydxj_gy"] += data["nydcd_gy"];
+            data["nydxj_gy"] += data["nydjtyd_gy"];
+            data["nydxj_gy"] += data["nydsyjslssyd_gy"];
+            data["nydxj_gy"] += data["nydqttd_gy"];
+            //农用地合计面积
+            data["nydhjxj"] += data["nydxj_jt"];
+            data["nydhjxj"] += data["nydxj_gy"];
+            data["nydhjst"] += data["nydst_jt"];
+            data["nydhjst"] += data["nydst_gy"];
+            data["nydhjsjd"] += data["nydsjd_jt"];
+            data["nydhjsjd"] += data["nydsjd_gy"];
+            data["nydhjhd"] += data["nydhd_jt"];
+            data["nydhjhd"] += data["nydhd_gy"];
+            data["nydhjyd"] += data["nydyd_jt"];
+            data["nydhjyd"] += data["nydyd_gy"];
+            data["nydhjld"] += data["nydld_jt"];
+            data["nydhjld"] += data["nydld_gy"];
+            data["nydhjcd"] += data["nydcd_jt"];
+            data["nydhjcd"] += data["nydcd_gy"];
+            data["nydhjjtyd"] += data["nydjtyd_jt"];
+            data["nydhjjtyd"] += data["nydjtyd_gy"];
+            data["nydhjsyjslssyd"] += data["nydsyjslssyd_jt"];
+            data["nydhjsyjslssyd"] += data["nydsyjslssyd_gy"];
+            data["nydhjqttd"] += data["nydqttd_jt"];
+            data["nydhjqttd"] += data["nydqttd_gy"];
+            //建设用地集体小计
+            data["jsydxj_jt"] += data["jsydsfyd_jt"];
+            data["jsydxj_jt"] += data["jsydgkccyd_jt"];
+            data["jsydxj_jt"] += data["jsydzzyd_jt"];
+            data["jsydxj_jt"] += data["jsydggglyggfwyd_jt"];
+            data["jsydxj_jt"] += data["jsydtsyd_jt"];
+            data["jsydxj_jt"] += data["jsydjtysyd_jt"];
+            data["jsydxj_jt"] += data["jsydsyjslssyd_jt"];
+            data["jsydxj_jt"] += data["jsydqttd_jt"];
+            //建设用地国有小计
+            data["jsydxj_gy"] += data["jsydsfyd_gy"];
+            data["jsydxj_gy"] += data["jsydgkccyd_gy"];
+            data["jsydxj_gy"] += data["jsydzzyd_gy"];
+            data["jsydxj_gy"] += data["jsydggglyggfwyd_gy"];
+            data["jsydxj_gy"] += data["jsydtsyd_gy"];
+            data["jsydxj_gy"] += data["jsydjtysyd_gy"];
+            data["jsydxj_gy"] += data["jsydsyjslssyd_gy"];
+            data["jsydxj_gy"] += data["jsydqttd_gy"];
+            //建设用地合计面积
+            data["jsydhjxj"] += data["jsydxj_jt"];
+            data["jsydhjxj"] += data["jsydxj_gy"];
+
+            data["jsydhjsfyd"] += data["jsydsfyd_jt"];
+            data["jsydhjgkccyd"] += data["jsydgkccyd_jt"];
+            data["jsydhjzzyd"] += data["jsydzzyd_jt"];
+            data["jsydhjggglyggfwyd"] += data["jsydggglyggfwyd_jt"];
+            data["jsydhjtsyd"] += data["jsydtsyd_jt"];
+            data["jsydhjjtysyd"] += data["jsydjtysyd_jt"];
+            data["jsydhjsyjslssyd"] += data["jsydsyjslssyd_jt"];
+            data["jsydhjqttd"] += data["jsydqttd_jt"];
+
+            data["jsydhjsfyd"] += data["jsydsfyd_gy"];
+            data["jsydhjgkccyd"] += data["jsydgkccyd_gy"];
+            data["jsydhjzzyd"] += data["jsydzzyd_gy"];
+            data["jsydhjggglyggfwyd"] += data["jsydggglyggfwyd_gy"];
+            data["jsydhjtsyd"] += data["jsydtsyd_gy"];
+            data["jsydhjjtysyd"] += data["jsydjtysyd_gy"];
+            data["jsydhjsyjslssyd"] += data["jsydsyjslssyd_gy"];
+            data["jsydhjqttd"] += data["jsydqttd_gy"];
+            //未利用地集体小计
+            data["wlydxj_jt"] += data["wlydcd_jt"];
+            data["wlydxj_jt"] += data["wlydsyjslssyd_jt"];
+            data["wlydxj_jt"] += data["wlydqttd_jt"];
+            //未利用地国有小计
+            data["wlydxj_gy"] += data["wlydcd_gy"];
+            data["wlydxj_gy"] += data["wlydsyjslssyd_gy"];
+            data["wlydxj_gy"] += data["wlydqttd_gy"];
+            //未利用地合计
+            data["wlydhjxj"] += data["wlydxj_jt"];
+            data["wlydhjxj"] += data["wlydxj_gy"];
+
+            data["wlydhjcd"] += data["wlydcd_jt"];
+            data["wlydhjsyjslssyd"] += data["wlydsyjslssyd_jt"];
+            data["wlydhjqttd"] += data["wlydqttd_jt"];
+
+            data["wlydhjcd"] += data["wlydcd_gy"];
+            data["wlydhjsyjslssyd"] += data["wlydsyjslssyd_gy"];
+            data["wlydhjqttd"] += data["wlydqttd_gy"];
+            //城镇村及工矿用地
+            data["czjgkyd_hj"] += data["czjgkyd_jt"];
+            data["czjgkyd_hj"] += data["czjgkyd_gy"];
+            //总计
+            data["zj_jt"] += data["nydxj_jt"];
+            data["zj_jt"] += data["jsydxj_jt"];
+            data["zj_jt"] += data["wlydxj_jt"];
+            data["zj_jt"] += data["czjgkyd_jt"];
+
+            data["zj_gy"] += data["nydxj_gy"];
+            data["zj_gy"] += data["jsydxj_gy"];
+            data["zj_gy"] += data["wlydxj_gy"];
+            data["zj_gy"] += data["czjgkyd_gy"];
+
+            data["zj_hj"] += data["zj_jt"];
+            data["zj_hj"] += data["zj_gy"];
+			for(var o in data){
+				data[o]=data[o].toFixed(2);
+			}
+            $("#form").form('load', data);
+            $("#header").html(srcdata.xm_mc);
+        }
+    </script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        html, body {
+            overflow: auto;
+        }
+
+        body {
+            font-size: 13px;
+        }
+
+        .total-form {
+            width: 100%;
+        }
+
+        .table-header {
+            height: 60px;
+            background: #398ded;
+            color: #ffffff;
+            font-size: 30px;
+            font-weight: bolder;
+            line-height: 60px;
+        }
+
+        .back, .title {
+            float: left;
+            display: block;
+        }
+
+        .back {
+            width: 10%;
+            margin-left: 15px;
+            text-decoration: none;
+            color: #FFFFFF;
+        }
+
+        .title {
+            width: 80%;
+            text-align: center;
+        }
+
+        .table-content {
+            border-collapse: collapse;
+            width: 100%;
+            text-align: center;
+        }
+
+            .table-content tr {
+                height: 30px;
+            }
+
+            .table-content td {
+                background: #ffffff;
+            }
+
+            .table-content input {
+                display: block;
+                width: 100%;
+                height: 30px;
+                text-align: center;
+                border: 0;
+            }
+
+        th {
+            font-weight: normal;
+            font-size: 14px;
+            background-color: #F8F8FF;
+        }
+    </style>
+</head>
+<body>
+    <div class="total-form">
+        <form id="form" method='post'>
+            <table id="table" border="1" bordercolor="#ddd" class="table-content" cellspacing="0">
+                <tr>
+                    <th colspan="11" style="border:0">
+                        <span id="header" style="border: 0;font-size: 16px;line-height: 35px;font-weight: bold;color: #333;"></span>
+                    </th>
+                    <th style="border:0">单位：公顷</th>
+                </tr>
+                <tr>
+                    <th rowspan="6" style="width: 5%; min-width: 50px">农用地</th>
+                    <th rowspan="3" style="width: 5%; min-width: 50px"></th>
+                    <th rowspan="3" style="width: 9%; min-width: 50px">小计</th>
+                    <th colspan="3" style="width: 27%; min-width: 150px">
+                        <span>耕地</span>
+                    </th>
+                    <th rowspan="3" style="max-width: 9%; min-width: 50px">园地</th>
+                    <th rowspan="3" style="width: 9%; min-width: 50px">林地</th>
+                    <th rowspan="3" style="width: 9%; min-width: 50px">草地</th>
+                    <th rowspan="3" style="width: 9%; min-width: 50px">交通用地</th>
+                    <th rowspan="3" style="width: 9%; min-width: 50px">水域及水利设施</th>
+                    <th rowspan="3" style="width: 9%; min-width: 50px">其他土地</th>
+                </tr>
+                <tr>
+                    <th rowspan="2" style="width: 9%; min-width: 50px">水田</th>
+                    <th rowspan="2" style="width: 9%; min-width: 50px">水浇地</th>
+                    <th rowspan="2" style="width: 9%; min-width: 50px">旱地</th>
+                </tr>
+                <tr></tr>
+                <tr>
+                    <th>集体</th>
+                    <td>
+                        <input readonly="readonly" name="nydxj_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydst_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydsjd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydld_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydcd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydjtyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydsyjslssyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydqttd_jt" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>国有</th>
+                    <td>
+                        <input readonly="readonly" name="nydxj_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydst_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydsjd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydld_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydcd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydjtyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydsyjslssyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydqttd_gy" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>合计</th>
+                    <td>
+                        <input readonly="readonly" name="nydhjxj" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhjst" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhjsjd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhjhd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhjyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhjld" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhjcd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhjjtyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhjsyjslssyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="nydhjqttd" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th rowspan="6">建设用地</th>
+                    <th rowspan="3"></th>
+                    <th rowspan="3">小计</th>
+                    <th rowspan="3">商服用地</th>
+                    <th rowspan="3">工矿仓储用地</th>
+                    <th rowspan="3">住宅用地</th>
+                    <th rowspan="3">公共管理与公共服务用地</th>
+                    <th rowspan="3">特殊用地</th>
+                    <th rowspan="3">交通运输用地</th>
+                    <th rowspan="3">水域及水利设施用地（水库，水工建筑）</th>
+                    <th rowspan="3">其他（空闲地）</th>
+                </tr>
+                <tr></tr>
+                <tr></tr>
+                <tr>
+                    <th>集体</th>
+                    <td>
+                        <input readonly="readonly" name="jsydxj_jt" type="text" value="22.08" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydsfyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydgkccyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydzzyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydggglyggfwyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydtsyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydjtysyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydsyjslssyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydqttd_jt" type="text" value="" />
+                    </td>
+                    <!--<td><input type="text" value=""/></td>-->
+                </tr>
+                <tr>
+                    <th>国有</th>
+                    <td>
+                        <input readonly="readonly" name="jsydxj_gy" type="text" value="22.08" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydsfyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydgkccyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydzzyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydggglyggfwyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydtsyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydjtysyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydsyjslssyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydqttd_gy" type="text" value="" />
+                    </td>
+                    <!--<td><input type="text" value=""/></td>-->
+                </tr>
+                <tr>
+                    <th>合计</th>
+                    <td>
+                        <input readonly="readonly" name="jsydhjxj" type="text" value="22.08" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydhjsfyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydhjgkccyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydhjzzyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydhjggglyggfwyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydhjtsyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydhjjtysyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydhjsyjslssyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="jsydhjqttd" type="text" value="" />
+                    </td>
+                    <!--<td><input type="text" value=""/></td>-->
+                </tr>
+                <tr>
+                    <th rowspan="6">未利用地</th>
+                    <th rowspan="3"></th>
+                    <th rowspan="3">
+                        小计</td>
+                    <th rowspan="3">草地（其他草地）</th>
+                    <th rowspan="3">水域及水利设施用地（河流水面，湖泊水面，内陆滩涂）</th>
+                    <th rowspan="3">其他土地</th>
+                </tr>
+                <tr></tr>
+                <tr></tr>
+                <tr>
+                    <th>集体</th>
+                    <td>
+                        <input readonly="readonly" name="wlydxj_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="wlydcd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="wlydsyjslssyd_jt" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="wlydqttd_jt" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>国有</th>
+                    <td>
+                        <input readonly="readonly" name="wlydxj_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="wlydcd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="wlydsyjslssyd_gy" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="wlydqttd_gy" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>合计</th>
+                    <td>
+                        <input readonly="readonly" name="wlydhjxj" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="wlydhjcd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="wlydhjsyjslssyd" type="text" value="" />
+                    </td>
+                    <td>
+                        <input readonly="readonly" name="wlydhjqttd" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th rowspan="3">城镇及工矿用地</th>
+                    <th>集体</th>
+                    <td>
+                        <input readonly="readonly" name="czjgkyd_jt" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>国有</th>
+                    <td>
+                        <input readonly="readonly" name="czjgkyd_gy" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>合计</th>
+                    <td>
+                        <input readonly="readonly" name="czjgkyd_hj" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th rowspan="3">总计</th>
+                    <th>集体</th>
+                    <td>
+                        <input readonly="readonly" name="zj_jt" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>国有</th>
+                    <td>
+                        <input readonly="readonly" name="zj_gy" type="text" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>合计</th>
+                    <td>
+                        <input readonly="readonly" name="zj_hj" type="text" value="" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</body>
+</html>

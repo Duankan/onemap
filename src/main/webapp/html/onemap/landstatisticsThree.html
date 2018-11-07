@@ -1,0 +1,754 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/echarts.js"></script>
+    <script src="../../js/echarts.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var xarray = [];
+        var dataGrid;
+        var winWidth;
+        var result = [];
+        var datamodules = [];
+        var way;
+        var myChart, PieChart;
+        var datas;
+        var ctr;
+        $(window).ready(function () {
+            ctr = new ktw.UCWaitBox({
+                Parent: $(".Content")
+            });
+            way = $(".active", ".stc-nav")[0].innerText;
+            //清除屏幕
+            Ktw.ClearFinal();
+            winWidth = $(window).width() >= 1000 ? $(window).width() : 1000;//初始化获取窗体宽度
+            var stype = "area";
+            initTarget();
+            initDataGrid();
+            var myDate = new Date();
+            var starttime = myDate.getFullYear() + "-01-01", endtime = myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate();
+            $('#starttime').datebox('setValue', starttime);
+            $('#endtime').datebox('setValue', endtime);
+            Statistics(stype);
+            var county = "";
+            $(".Button[operatetype]").click(function (evt) {
+                var type = $(this).attr("operatetype");
+                if (type == "Statistics") Statistics(stype);
+                if (type == "Export") exportData(evt);
+            });
+            var syearComBox = $("#startyear").prop('$this');
+            var eyearComBox = $("#endyear").prop('$this');
+            var countyarea = $("#area").prop("$this");
+            var quarterComBox = $("#quarter").prop("$this");
+            syearComBox.SetVisible(false);
+            eyearComBox.SetVisible(false);
+            quarterComBox.SetVisible(false);
+            var date = [], date1 = [];
+            for (var i = 2008; i <= myDate.getFullYear(); i++) {
+                date.push(i);
+            }
+            for (var i = 1; i <= 12; i++) {
+                date1.push(i + "月");
+            }
+            var byarea = [datas, starttime, endtime];
+            var byyear = [datas[0], date[0], date[date.length - 1]];
+            var byquarter = [datas[0], date[date.length - 1], date[date.length - 1], ["第一季度", "第二季度", "第三季度", "第四季度"]];
+            $("#byarea").bind("click", function (e) {
+                $("#byarea").addClass("active");
+                $("#time").show();
+                syearComBox.SetVisible(false);
+                eyearComBox.SetVisible(false);
+                quarterComBox.SetVisible(false);
+                countyarea.listBox.MultiSelect = true;
+                if ($("#byyear").hasClass("active")) {
+                    byyear = [$("#area").prop("$this").GetText(), $("#startyear").prop("$this").GetText(), $("#endyear").prop("$this").GetText()];
+                    $("#byyear").removeClass("active");
+                }
+                if ($("#byquarter").hasClass("active")) {
+                    byquarter = [$("#area").prop("$this").GetText(), $("#startyear").prop("$this").GetText(), $("#endyear").prop("$this").GetText(), $("#quarter").prop("$this").GetText().split("，")];
+                    $("#byquarter").removeClass("active");
+                }
+                $("#area").prop("$this").SetSelectedItem(byarea[0]);
+                $('#starttime').datebox('setValue', byarea[1]);
+                $('#endtime').datebox('setValue', byarea[2]);
+                stype = "area";
+                Statistics(stype);
+                way = "按行政区";
+               // clearsearch();
+            })
+            $("#byyear").bind("click", function (e) {
+                $("#byyear").addClass("active");
+                syearComBox.SetVisible(true);
+                syearComBox.SetData(date);
+                eyearComBox.SetVisible(true);
+                eyearComBox.SetData(date);
+                quarterComBox.SetVisible(false);
+                $("#time").hide();
+                if ($("#byarea").hasClass("active")) {
+                    byarea = [$("#area").prop("$this").GetText().split("，"), $("#starttime").data().combo.previousText, $("#endtime").data().combo.previousText];
+                    $("#byarea").removeClass("active");
+                }
+                if ($("#byquarter").hasClass("active")) {
+                    byquarter = [$("#area").prop("$this").GetText(), $("#startyear").prop("$this").GetText(), $("#endyear").prop("$this").GetText(), $("#quarter").prop("$this").GetText().split("，")];
+                    $("#byquarter").removeClass("active");
+                }
+                $("#area").prop("$this").SetSelectedItem(byyear[0]);
+                $("#startyear").prop("$this").SetValue(byyear[1]);
+                $("#endyear").prop("$this").SetValue(byyear[2]);
+                countyarea.listBox.MultiSelect = false;
+                stype = "year";
+                Statistics(stype);
+                way = "按年份";
+            });
+            $("#byquarter").bind("click", function (e) {
+                $("#byquarter").addClass("active");
+                syearComBox.SetVisible(true);
+                syearComBox.SetData(date);
+                eyearComBox.SetVisible(true);
+                eyearComBox.SetData(date);
+                quarterComBox.SetVisible(true);
+                quarterComBox.SetData(["第一季度", "第二季度", "第三季度", "第四季度"]);
+                if ($("#byarea").hasClass("active")) {
+                    byarea = [$("#area").prop("$this").GetText().split("，"), $("#starttime").data().combo.previousText, $("#endtime").data().combo.previousText];
+                    $("#byarea").removeClass("active");
+                }
+                if ($("#byyear").hasClass("active")) {
+                    byyear = [$("#area").prop("$this").GetText(), $("#startyear").prop("$this").GetText(), $("#endyear").prop("$this").GetText()];
+                    $("#byyear").removeClass("active");
+                }
+                $("#area").prop("$this").SetSelectedItem(byquarter[0]);
+                $("#startyear").prop("$this").SetValue(byquarter[1]);
+                $("#endyear").prop("$this").SetValue(byquarter[2]);
+                $("#quarter").prop("$this").SetSelectedItem(byquarter[3]);
+                $("#time").hide();
+                countyarea.listBox.MultiSelect = false;
+                stype = "quarter";
+                Statistics(stype);
+                way = "按季度";
+            });
+            $("#tab").bind("click", function (e) {
+                if ($("#tab").hasClass("active")) {
+                    $("#tab").removeClass("active");
+                    $("#statictable").hide();
+                }
+                else {
+                    $("#tab").addClass("active");
+                    $("#statictable").show();
+                }
+                windowresize();
+            });
+            $("#map").bind("click", function (e) {
+                if ($("#map").hasClass("active")) {
+                    $("#map").removeClass("active");
+                    $("#chartModule").hide();
+                }
+                else {
+                    $("#map").addClass("active");
+                    $("#chartModule").show();
+                }
+                windowresize();
+            });
+
+            Array.prototype.unique = function () {
+                var res = [];
+                var json = {};
+                for (var i = 0; i < this.length; i++) {
+                    if (!json[this[i]]) {
+                        res.push(this[i]);
+                        json[this[i]] = 1;
+                    }
+                }
+                return res;
+            }
+            initCharts("Columnar");
+            $("#statictable").hide();
+            windowresize();
+        })
+        function windowresize(t) {
+            if ($("#searchModule").find("br").length > 0) {
+                $("#newline").remove();
+            }
+            if (t != null) Ktw.App.MenuInit.currentParent.Layout();
+            if ($("#map").hasClass("active")) {
+                if ($("#tab").hasClass("active")) {
+                    if (t == null) Ktw.App.MenuInit.currentParent.SetSize(1200, 600);
+                    document.getElementById("topport").style.height = (Ktw.App.MenuInit.currentParent.Height - 70) * 0.49 + "px";
+                    document.getElementById("searchModule").style.height = 40 + "px";
+                    document.getElementById("statictable").style.height = ((Ktw.App.MenuInit.currentParent.Height - 70) * 0.49 - 47) + "px";
+                    document.getElementById("chartModule").style.height = (Ktw.App.MenuInit.currentParent.Height - 70) * 0.49 + "px";
+                    $("#static").css({ "top": -5, "right": 90 });
+                    $("#export").css({ "top": -5, "right": 10 });
+                    $("#topport").css("min-width", 1000);
+                    $("#chartModule").css("min-width", 1000);
+                    $(".stc-nav").css("min-width", 1000);
+                    myChart.resize();
+                    initDataGrid();
+                    return;
+                }
+                else {
+                    if (t == null) { Ktw.App.MenuInit.currentParent.SetSize(550, 450);}
+                    document.getElementById("topport").style.height = 75 + "px";
+                    document.getElementById("searchModule").style.height = 75 + "px";
+                    document.getElementById("chartModule").style.height = (Ktw.App.MenuInit.currentParent.Height - 175) + "px";
+                    $("#topport").css("min-width", 500);
+                    $(".stc-nav").css("min-width", 500);
+                    $("#chartModule").css("min-width", 500);
+                    var brs = $("#searchModule").find("br");
+                    if (brs.length <= 0) {
+                        $("<br id='newline'/>").insertBefore("#newline1");
+                    }
+                    $("#static").css({ "top": -5, "right": 10 });
+                    $("#export").css({ "top": 30, "right": 10 });
+                    myChart.resize();
+                    initDataGrid();
+                    return;
+                }
+            }
+            else if ($("#tab").hasClass("active")) {
+                document.getElementById("topport").style.height = 40 + "px";
+                document.getElementById("searchModule").style.height = 40 + "px";
+                if (t == null){ Ktw.App.MenuInit.currentParent.SetSize(1200, 350); }
+                document.getElementById("statictable").style.height = (Ktw.App.MenuInit.currentParent.Height - 125) + "px";
+                document.getElementById("chartModule").style.height = 0 + "px";
+                $("#static").css({ "top": -5, "right": 90 });
+                $("#export").css({ "top": -5, "right": 10 });
+                $("#topport").css("min-width", 1000);
+                $("#chartModule").css("min-width", 1000);
+                $(".stc-nav").css("min-width", 1000);
+                myChart.resize();
+                initDataGrid();
+                return;
+            }
+            else {
+                $("#map").addClass("active");
+                $("#chartModule").show();
+                windowresize();
+            }
+        }
+        function initCharts(type) {
+            myChart = echarts.init(document.getElementById('chart'));
+            var legendarray = ['国务院审批', '省政府审批', '审批合计'];
+            myChart.clear();
+            var field = "审批合计";
+            var data3 = [], data2 = [], data1 = [], data4 = [];
+            for (var i = 0; i < result.length; i++) {
+                if (field == "审批合计") {
+                    data1.push(result[i].PZ_XM_MJ);
+                    data2.push(result[i].G_PZ_XM_MJ);
+                    data3.push(result[i].S_PZ_XM_MJ);
+                }
+            }
+            var series = [{
+                name: '国务院审批',
+                type: "bar",
+                data: data2
+            }, {
+                name: '省政府审批',
+                type: "bar",
+                data: data3
+            }, {
+                name: '审批合计',
+                type: "bar",
+                data: data1
+            }];
+            var yAxis = [
+                         {
+                             name: '单位/公顷',
+                             type: 'value',
+                         },
+            ];
+            if (way == "按年份" || way == "按季度") {
+                legendarray.push("增长率");
+                data4 = [0];
+                for (var i = 1; i < result.length; i++) {
+                    switch (field) {
+                        case "审批合计":
+                            data4.push((result[i].PZ_XM_MJ - result[i - 1].PZ_XM_MJ) / result[i - 1].PZ_XM_MJ * 100); break;
+                    }
+                }
+            }
+
+            var d = [{ value: data2[0], name: '国务院审批' },
+                       { value: data3[0], name: '省政府审批' }]
+
+            chartOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                toolbox: { left: 20, feature: { saveAsImage: { type: 'png' } } },
+                legend: {
+                    x: 'center',
+                    top: 30,
+                    'data': legendarray,
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: 20,
+                    top:70,
+                    containLabel: true
+                },
+                xAxis: [
+                   {
+                       type: 'category',
+                       data: xarray,
+                       axisLabel:{  
+                           interval: 0,//横轴信息全部显示  
+                           rotate: 30,
+                       }
+                   }
+                ],
+                yAxis: yAxis,
+                series: series,
+            };
+            myChart.setOption(chartOption);
+            myChart.off('click');
+            myChart.on('click', function (param) {
+                if (way == "按年份" || way == "按季度") {
+                    chartOption.series.splice(3, 1);
+                }
+                d = [];
+                var pielegend = [];
+                for (var i = 0; i < result.length; i++) {
+                    if (result[i].XZQMC == param.name || result[i].time == param.name) {
+                        currentresult = result[i];
+                        for (var j = 0; j < chartOption.series.length - 1; j++) {
+                            d.push({
+                                name: chartOption.series[j].name,
+                                value: chartOption.series[j].data[i]
+                            });
+                            pielegend.push(chartOption.series[j].name);
+                            //}
+                        } break;
+                    }
+                }
+                chartOption1.legend.data = pielegend;
+                chartOption1.series[0].data = d;
+                
+            });
+            window.onresize = function () {
+                Ktw.App.MenuInit.currentParent.Layout();
+                windowresize("a");
+                winWidth = $(window).width();
+                var height = $(window).height();
+                if (winWidth >= 1000) {
+                    winWidth = window.innerWidth;
+                    initDataGrid();
+                    $(".Content").css({
+                        "width": winWidth,
+                        "overflow": "hidden",
+                    });
+                    //PieChart.resize();
+                    myChart.resize();
+                }
+                else {
+                    $(".Content").css({
+                        "width": winWidth,
+                        "overflow-x": "auto",
+                    });
+                    winWidth = 1000;
+                    initDataGrid();
+                    //PieChart.resize();
+                    myChart.resize();
+                }
+            }
+        }
+        //验证统计必填条件
+        function validation() {
+            var startyear = $("#startyear").prop("$this").GetText();
+            if ($("#startyear").prop("$this").Visible == true && startyear == "") {
+                Ktw.Alert("请选择起始年份!");
+                return false;
+            }
+            var endyear = $("#endyear").prop("$this").GetText();
+            if ($("#endyear").prop("$this").Visible == true && endyear == "") {
+                Ktw.Alert("请选择终止年份!");
+                return false;
+            }
+            var quarter = $("#quarter").prop("$this").GetText();
+            if ($("#quarter").prop("$this").Visible == true && quarter == "") {
+                Ktw.Alert("请选择季度!");
+                return false;
+            }
+            return true;
+        }
+        function Statistics(type) {
+            var flag = "area";
+            var myDate = new Date();
+            var starttime, endtime;
+            var county = "";
+            var y = [{ starttime: starttime, endtime: endtime }];
+            if (type == "year") {
+                y = [];
+                flag = "byyear"
+                county = $("#area").prop("$this").GetText();
+                var startyear = $("#startyear").prop("$this").GetText();
+                var endyear = $("#endyear").prop("$this").GetText();
+                if (startyear > endyear) { Ktw.Alert("请选择正确统计时间!"); return; }
+                y.push({ starttime: startyear, endtime: endyear });
+            }
+            else if (type == "area") {
+                var countyarea = $("#area").prop("$this").GetText();
+                var deadline = countyarea.split("，");
+                if (countyarea != "" || $("#starttime").data().combo.previousText != "" || $("#endtime").data().combo.previousText != "") {
+                    y = [];
+                    starttime = $("#starttime").data().combo.previousText;
+                    endtime = $("#endtime").data().combo.previousText;
+                    if (starttime > endtime) { Ktw.Alert("请选择正确统计时间!"); return; }
+                    county = deadline.toString();
+                    y.push({ starttime: starttime, endtime: endtime });
+                }
+                else {
+                    Ktw.Alert("请选择统计时间!");
+                    return;
+                }
+
+            }
+            else if (type == "quarter") {
+                y = [];
+                var year = [];
+                flag = "byquarter"
+                county = $("#area").prop("$this").GetText();
+                var startyear = $("#startyear").prop("$this").GetText();
+                var endyear = $("#endyear").prop("$this").GetText();
+                if (startyear > endyear) { Ktw.Alert("请选择正确统计时间!"); return; }
+                var quarter = $("#quarter").prop("$this").GetText();
+                if (validation() == false) return;
+                var quarterline = quarter.split("，");
+                for (var i = 0; i < quarterline.length; i++) {
+                    switch (quarterline[i]) {
+                        case "第一季度":
+                            quarterline[i] = { start: "-01-01", end: "-03-31" }
+                            break;
+                        case "第二季度":
+                            quarterline[i] = { start: "-04-01", end: "-06-30" }
+                            break;
+                        case "第三季度":
+                            quarterline[i] = { start: "-07-01", end: "-09-30" }
+                            break;
+                        case "第四季度":
+                            quarterline[i] = { start: "-10-01", end: "-12-31" }
+                            break;
+                        default:
+                            //return;
+                    }
+                }
+                for (var i = startyear; i <= endyear; i++) {
+                    for (var j = 0; j < quarterline.length; j++) {
+                        y.push({ starttime: i + quarterline[j].start, endtime: i + quarterline[j].end });
+                    }
+                }
+            }
+            var map = { dt: y, countyarea: county, flag: flag };
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(map),
+                contentType: "application/json",
+                url: Ktw.App.ServerUrl + "jsydsp/getinfobyyd",
+                beforeSend: function () {
+                    ctr.Show();
+                },
+                success: function (data) {
+                    result = [];
+                    var k = "";
+                    //var RegStr = '^[\\+\\-]?\\d+\\.?\\d{0,4}';
+                    if (data.success == false) {
+                        //alert(data.message);
+                        Ktw.Alert(data.message);
+                        return;
+                    }
+                    var opts = $('#dataModule').datagrid('getColumnFields');
+                    //t数组用来装合计数据
+                    var t = [];
+                    for (var i = 0; i < opts.length; i++) {
+                        t[i] = 0;
+                    }
+                    for (var i = 0; i < data.data.length; i++) {
+                        var time = data.data[i].START_TIME + "至" + data.data[i].END_TIME;
+                        if (data.data[i].START_TIME == "") time = data.data[i].END_TIME + "之前";
+                        if (data.data[i].END_TIME == "") {
+                            time = data.data[i].START_TIME + "至" + myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate();
+                        }
+                        if (type == "year") {
+                            time = data.data[i].START_TIME + "年"
+                        }
+                        else if (type == "quarter") {
+                            var year = data.data[i].END_TIME.slice(0, 4);
+                            var month = data.data[i].END_TIME.slice(5, 7);
+                            switch (month) {
+                                case "03":
+                                    month = "第一季度";
+                                    break;
+                                case "06":
+                                    month = "第二季度";
+                                    break;
+                                case "09":
+                                    month = "第三季度";
+                                    break;
+                                case "12":
+                                    month = "第四季度";
+                                    break;
+                            }
+                            time = year + month;
+                        }
+                        var a = { time: time, XZQMC: data.data[i].XZQMC };
+                        for (var j = 2; j < opts.length; j++) {
+                            var temp = data.data[i][opts[j]];
+                            if (parseInt(temp) != temp && temp.toString().split(".")[1].length > 4) temp = parseFloat(temp.toFixed(4));
+                            a[opts[j]] = temp;
+                            t[j] = t[j] + a[opts[j]];
+                        }
+                        result.push(a);
+                    }
+                    var a = { time: "", XZQMC: "合计" };
+                    for (var j = 2; j < opts.length; j++) {
+                        if (parseInt(t[j]) != t[j] && t[j].toString().split(".")[1].length > 4) t[j] = parseFloat(t[j].toFixed(4));
+                        a[opts[j]] = t[j];
+                    }
+                    datamodules = [];
+                    for (var i = 0; i < result.length; i++) datamodules.push(result[i]);
+                    datamodules.push(a);
+                    $('#dataModule').datagrid({
+                        data: datamodules
+                    });
+                    result.unshift(a);
+                    xarray = [];
+                    if (type == "year" || type == "quarter") {
+                        for (var i = 1; i < result.length; i++) xarray.push(result[i].time);
+                        xarray.unshift("合计");
+                    }
+                    else {
+                        for (var i = 0; i < result.length; i++) xarray.push(result[i].XZQMC);
+                    }
+                    xarray.unique();
+                    if (type == null) initCharts();
+                    initCharts();
+
+                },
+                complete: function () {
+                    ctr.Close();
+                },
+                error: function (e) {
+                    var k = "";
+                    Ktw.Alert("服务请求失败！");
+                }
+            });
+        }
+        function exportData(e) {
+            if (result.length <= 1) {
+                Ktw.Alert("当前无数据,不支持导出");
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(datamodules),
+                contentType: "application/json",
+                url: Ktw.App.ServerUrl + "jsydsp/export",
+                success: function (e) {
+                    if (e.success) {
+                        var path = e.data;
+                        if (!ktw.IsNull(path)) {
+                            var downlaod = Ktw.App.Root + path;
+                            window.open(downlaod);
+                        }
+
+                    }
+                },
+                error: function (e) {
+                    var k = "";
+                    Ktw.Alert("服务请求失败!");
+                }
+            });
+        }
+        function initDataGrid() {
+            var width = (winWidth * 0.98 - 50) / 20;
+            $('#dataModule').datagrid({
+                rownumbers: true,
+                fit: true,        //自动大小
+                fitColumns: false, //自适应列宽
+                singleSelect: true,  //是否单选
+                pagination: false,
+                idField: 'Project_id',
+                columns: [[
+                     { field: 'time', title: '统计时间', width: width, align: 'center', rowspan: 4, },
+                     { field: 'XZQMC', title: '县市区', width: width, align: 'center', rowspan: 4 },
+                     { title: '审批合计(公顷)', colspan: 6 },
+                     { title: '国务院审批合计(公顷)', colspan: 6 },
+                     { title: '省政府审批合计(公顷)', colspan: 6 }
+
+                ], [
+                     { field: 'PZ_XM_MJ', title: '总面积', width: width, align: 'center', rowspan: 3 },
+                     { field: 'spadd', title: '新增建设用地', align: 'center', colspan: 4, rowspan: 1 },
+                     { field: 'CL_JSYD_MJ', title: '原有集体<br/>建设用地', width: width, align: 'center', rowspan: 3 },
+                     { field: 'G_PZ_XM_MJ', title: '总面积', width: width, align: 'center', rowspan: 3 },
+                     { field: 'G_wyadd', title: '新增建设用地', align: 'center', colspan: 4, rowspan: 1 },
+                     { field: 'G_CL_JSYD_MJ', title: '原有集体<br/>建设用地', width: width, align: 'center', rowspan: 3 },
+                     { field: 'S_PZ_XM_MJ', title: '总面积', width: width, align: 'center', rowspan: 3 },
+                     { field: 'szfadd', title: '新增建设用地', align: 'center', colspan: 4, rowspan: 1 },
+                     { field: 'S_CL_JSYD_MJ', title: '原有集体<br/>建设用地', width: width, align: 'center', rowspan: 3 },
+                ],
+                 [
+                     { field: 'XZ_JSYD_MJ', title: '总面积', width: width, align: 'center', rowspan: 2 },
+                     { field: 'addr', title: '农用地转用', align: 'center', colspan: 2, rowspan: 1 },
+                     { field: 'PZ_WLYD_MJ', title: '未利用<br/>地面积', width: width, align: 'center', rowspan: 2 },
+                      { field: 'G_XZ_JSYD_MJ', title: '总面积', width: width, align: 'center', rowspan: 2 },
+                     { field: 'addr', title: '农用地转用', align: 'center', colspan: 2, rowspan: 1 },
+                     { field: 'G_PZ_WLYD_MJ', title: '未利用<br/>地面积', width: width, align: 'center', rowspan: 2 },
+                      { field: 'S_XZ_JSYD_MJ', title: '总面积', width: width, align: 'center', rowspan: 2 },
+                     { field: 'addr', title: '农用地转用', align: 'center', colspan: 2, rowspan: 1 },
+                     { field: 'S_PZ_WLYD_MJ', title: '未利用<br/>地面积', width: width, align: 'center', rowspan: 2 }
+                 ],
+                 [
+                     { field: 'PZ_NYD_MJ', title: '总面积', width: width, align: 'center', rowspan: 1 },
+                     { field: 'PZ_GD_MJ', title: '耕地面积', width: width, align: 'center', rowspan: 1 },
+                      { field: 'G_PZ_NYD_MJ', title: '总面积', width: width, align: 'center', rowspan: 1 },
+                     { field: 'G_PZ_GD_MJ', title: '耕地面积', width: width, align: 'center', rowspan: 1 },
+                      { field: 'S_PZ_NYD_MJ', title: '总面积', width: width, align: 'center', rowspan: 1 },
+                     { field: 'S_PZ_GD_MJ', title: '耕地面积', width: width, align: 'center', rowspan: 1 }
+                 ]
+                ]
+            });
+        }
+        function initTarget() {
+            var areaComBox = $("#area").prop('$this');
+            var areadata = Ktw.cookie.AreaTree.Children;
+            datas = [];
+            $.each(areadata, function (i, value) {
+                datas.push(value.areaname);
+            });
+            areaComBox.SetData(datas);
+            $("#area").prop("$this").SetSelectedItem(datas);
+        }
+    </script>
+    <style>
+        .Content {
+            width: 100%;
+            height: 100%;
+        }
+
+            .Content .ToolDiv {
+                width: 100%;
+                height: 40px;
+                border-bottom: 1px solid #E4E9EF;
+            }
+
+                .Content .ToolDiv .Title {
+                    width: 85px;
+                    text-align: center;
+                    line-height: 20px;
+                    height: 20px;
+                    display: inline-block;
+                    float: left;
+                }
+
+                    .Content .ToolDiv .Title .Icon {
+                        width: 16px;
+                        height: 16px;
+                        display: inline-block;
+                        margin-top: 11px;
+                    }
+
+                    .Content .ToolDiv .Title .Text {
+                        display: inline-block;
+                        float: right;
+                        width: 49px;
+                    }
+
+        div#statictable .panel-body-noheader {
+            border: 0;
+        }
+
+        .Content .HiddenBtn {
+            filter: alpha(Opacity=80);
+            -moz-opacity: 0.8;
+            opacity: 0.8;
+        }
+
+            .Content .HiddenBtn .ArrowBtn {
+                cursor: pointer;
+            }
+
+        .panel-body-noborder {
+            border-bottom-width: 1px;
+            border-bottom-color: #dddddd;
+            border-top-width: 1px;
+            border-top-color: #dddddd;
+        }
+
+        .stc-nav {
+            height: 30px;
+            padding-top: 4px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .Content .ToolDiv .Title .Icon {
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="Content" >
+        <div class="stc-nav">
+            <span class="btng left btng-left active" id="byarea" style="margin-left: 0.5%">按行政区</span>
+            <span class="btng left" id="byyear">按年份</span>
+            <span class="btng left btng-right" id="byquarter">按季度</span>
+            <span class="btng right btng-right active" id="map" style="margin-right: 1%">图</span>
+            <span class="btng right btng-left" id="tab">表</span>
+        </div>
+        <div id="topport" style="width: 100%; height: 49%;">
+            <div id="searchModule" class="ToolDiv" style="position: relative; width: 98%; margin-left: 1%; margin-top: 5px; border-bottom: 0px; border: 1px solid #CACACA; border-radius: 10px;">
+                <div id="time" style="display: inline-block; vertical-align: top; margin-top: 10px; margin-left: 15px">
+                    统计时间：
+                 <input id="starttime" name="JSZZRQ" class="easyui-datebox" data-options="width:120,editable:false" />
+                    &nbsp;  至：<input id="endtime" name="JSZZRQ" class="easyui-datebox" data-options="width:120,editable:false" />
+                </div>
+                <div style="display: inline-block;">
+                    <div id="startyear" class="ktw-combobox" style="z-index: 3; position: relative; width: 180px; height: 20px; margin-left: 10px; margin-top: 10px" opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">起始年份</span></div>"}'></div>
+                </div>
+                <div style="display: inline-block;">
+                    <div id="endyear" class="ktw-combobox" style="z-index: 3; position: relative; width: 180px; height: 20px; margin-left: 5px; margin-top: 10px" opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">终止年份</span></div>"}'></div>
+                </div>
+                <!--<br/>-->
+                <div id="newline1" style="display: inline-block;">
+                    <div id="quarter" class="ktw-combobox" style="z-index: 2; width: 180px; height: 20px; margin-left: 10px; margin-top: 10px" opt='{"TipInfo":"请选择","MultiSelect":true,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">季度</span></div>"}'></div>
+                </div>
+                <div id="newline2" style="display: inline-block;">
+                    <div id="area" class="ktw-combobox" style="z-index: 2; width: 180px; height: 20px; margin-left: 5px; margin-top: 10px" opt='{"TipInfo":"请选择","MultiSelect":true,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">县市区</span></div>"}'></div>
+                </div>
+                <div class="Button" id="export" operatetype="Export" style="float: right; padding-top: 4px; padding-right: 10px; position: absolute">
+                    <span class="button">导出</span>
+                </div>
+                <div class="Button" id="static" operatetype="Statistics" style="float: right; padding-top: 4px; padding-right: 10px; position: absolute;">
+                    <span class="button">统计</span>
+                </div>
+                &nbsp;&nbsp;
+            </div>
+            <div id="statictable" style="width: 98%; height: calc(100% - 50px); margin: 0 auto; margin-top: 5px; border: 1px solid #CACACA; border-radius: 10px;">
+                <div id="dataModule" style="width: 100%;"></div>
+            </div>
+        </div>
+        <div id="chartModule" style="width: 98%; height: calc(49% - 40px);bottom: 0px; margin: 0 auto; margin-top: 5px; margin-bottom: 5px; margin-left: 1%; border: 1px solid #CACACA; border-radius: 10px;">
+            <div id="chart" style="width: 100%; height: 100%; float: left;"></div>
+        </div>
+    </div>
+</body>
+</html>

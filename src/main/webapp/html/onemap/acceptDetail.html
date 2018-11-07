@@ -1,0 +1,350 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>详细信息</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+        html, body {
+            height: 100%;
+        }
+
+        #infotbl .row {
+            height: 30px;
+        }
+
+        #infotbl .title {
+            width: 80px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            position: absolute;
+            left: 0;
+            border-bottom: 1px solid #E4E9EF;
+        }
+
+        #infotbl .content {
+            height: 30px;
+            line-height: 30px;
+            position: absolute;
+            left: 80px;
+            border-bottom: 1px solid #E4E9EF;
+            border-left: 1px solid #E4E9EF;
+            padding-left: 5px;
+            word-break: keep-all;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            right: 0px;
+        }
+
+        #filetbl {
+            border-bottom: 1px solid #666;
+        }
+
+            #filetbl .header {
+                font-weight: bold;
+                line-height: 30px;
+                height: 30px;
+                background-color: #F4F4F4;
+            }
+
+                #filetbl .header div {
+                    border-right: 1px solid #666;
+                    float: left;
+                    text-align: center;
+                }
+
+        .order {
+            width: 40px;
+        }
+
+        .name {
+            width: 64px;
+            overflow: hidden;
+            height: 30px;
+        }
+
+        .preview {
+            width: 45px;
+        }
+
+        .download {
+            width: 45px;
+        }
+
+        #filetbl .row {
+            font-weight: normal;
+            line-height: 30px;
+            height: 30px;
+        }
+
+            #filetbl .row:hover {
+                background-color: #FAE59B;
+            }
+
+            #filetbl .row div, #filetbl .row a {
+                border-right: 1px solid #666;
+                float: left;
+                text-align: center;
+            }
+
+        .even {
+            background-color: #EDF3EE;
+        }
+
+        .odd {
+            background-color: #FFF;
+        }
+
+        .btn {
+            padding: 5px;
+            padding-left: 15px;
+            padding-right: 15px;
+            border: 1px solid #95B8E7;
+            background-color: #f1f1f1;
+            margin-top: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+            .btn:hover {
+                background-color: #e0e0e0;
+            }
+
+        .line {
+            width: 100%;
+            height: 1px;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            background-color: #95B8E7;
+        }
+    </style>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var parent;
+        var feature;
+        var PiDiLayer;
+        function WidgetCommunication(s) {//部件通讯
+            parent = s.parent;
+            feature = s.param.feature;
+            PiDiLayer = s.param.PiDiLayer;
+            initTable();
+            initFile();
+            //注册页面关闭事件
+            parent.one("onClosing", function () {
+
+            });
+        }
+        var dataGrid;
+        function initTable() {
+            var props = feature.getProperties();
+            for (var i = 0; i < feature.getKeys().length; i++) {
+                if (!ktw.IsNull(feature.getKeys()[i]) && (feature.getKeys()[i]) != "geometry") {
+                    var row = $("<div class='row' />");
+                    var title = $("<div class='title'>" + feature.getKeys()[i] + "</div>");
+                    var content = $("<div class='content'>" + props[feature.getKeys()[i]] + "</div>").attr("title", props[feature.getKeys()[i]]);
+                    row.append(title).append(content);
+                    row.appendTo($("#infotbl"));
+                }
+            }
+        }
+        function initFile() {
+            var fid = feature.getProperties()["建设项目名"];
+            $.ajax({
+                type: "get",
+                url: Ktw.App.ServerUrl + "fjgl/getfiles?fid=" + encodeURI(fid),
+                async: true,
+                success: function (res) {
+                    if (!res.success) {
+                        alert(res.message);
+                        return;
+                    }
+                    $(res.data).each(function (i, item) {
+                        var row = $("<div class='row' />");
+                        row.addClass(i % 2 == 0 ? "odd" : "even");
+                        row.append("<div class='order'>" + (i + 1) + "</div>");
+                        row.append("<div class='name' title='" + item.name + "'>" + item.name + "</div>");
+                        row.append("<a class='preview' href='javascript:void(0)' fileid='" + item.id + "'>预览</a>");
+                        row.append("<a class='download' filename='" + item.name + "' href='javascript:void(0)' fileid='" + item.id + "'>下载</a>");
+                        row.appendTo($("#filetbl"));
+                    });
+                    bindEvent();
+                },
+                error: function (res) {
+                    alert("获取附件列表失败!");
+                }
+            });
+            function bindEvent() {
+                $("a.preview").click(function () {
+                    var id = $(this).attr("fileid");
+                    var waitbox = new ktw.UCWaitBox($(window.top.document.body));
+                    waitbox.Show();
+                    $.ajax({
+                        type: "GET",
+                        url: Ktw.App.ServerUrl + "fjgl/prefile?id=" + id,
+                        async: true,
+                        success: function (res) {
+                            if (res.success) {
+                                $.ajax({
+                                    type: "GET",
+                                    url: Ktw.App.ServerUrl + "file/view?reluri=" + res.data,
+                                    success: function (res) {
+                                        waitbox.Close();
+                                        if (res.success) {
+                                            var param = res.data;
+                                            previewWindow = new Ktw.Window({
+                                                ID: "filePreview",
+                                                Title: "附件信息",
+                                                Parent: window.top.document.body,
+                                                Maximizable: true,
+                                                Modal: true,
+                                                Draggable: true,
+                                                HAlign: 'center',
+                                                VAlign: 'center',
+                                                Resizable: true,
+                                                Height: 600,
+                                                Width: 1000,
+                                                Url: Ktw.App.Root + "html/preview.html?reluri=" + param
+                                            });
+                                        } else {
+                                            waitbox.Close();
+                                            alert("请求错误");
+                                        }
+                                    },
+                                    error: function (res) {
+                                        waitbox.Close();
+                                        alert("服务请求失败");
+                                    }
+                                });
+                            } else {
+                                waitbox.Close();
+                                alert(res.message);
+                            }
+                        },
+                        error: function (res) {
+                            waitbox.Close();
+                            alert("文件请求失败");
+                        }
+                    });
+                });
+                $("a.download").click(function () {
+                    var id = $(this).attr("fileid");
+                    var name = $(this).attr("filename");
+                    $.ajax({
+                        type: "GET",
+                        url: Ktw.App.ServerUrl + "fjgl/prefile?id=" + id,
+                        async: true,
+                        success: function (res) {
+                            if (res.success) {
+                                var url = Ktw.App.ServerUrl + "file/download?reluri=" + res.data.replace("\\", "/") + "&filename=" + encodeURI(name);
+                                window.open(url);
+                            } else {
+                                alert(res.message);
+                            }
+                        }
+                    });
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="details" class="easyui-accordion" data-options="fit:true,animate:false">
+        <div title="基本信息" style="overflow:hidden" data-options="selected:true">
+            <div style="width: 100%; height: 100%; overflow: auto;position:absolute">
+                <div id="infotbl"></div>
+            </div>
+        </div>
+        <div title="附件" style="">
+            <div id="filetbl">
+                <div class="header">
+                    <div class="order">序号</div>
+                    <div class="name">名称</div>
+                    <div class="preview">预览</div>
+                    <div class="download">下载</div>
+                </div>
+            </div>
+        </div>
+        <div title="分析">
+            <div id="analysistbl">
+                <button class="btn">历史回溯</button>
+                <button class="btn">供地情况</button>
+                <button class="btn">征地情况</button>
+                <button class="btn">查看业务</button>
+                <div class="line"></div>
+                <button class="btn">现状分析</button>
+                <button class="btn">规划分析</button>
+                <button class="btn">报批查重</button>
+                <button class="btn">基本农田</button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var businessWin;//查看业务对话框
+        var historyWin;//历史回溯对话框
+        $("#analysistbl .btn").click(function () {
+            var text = $(this).text();
+            if (text == "查看业务") {
+                var param = {};
+                closeWins();
+                businessWin = new Ktw.Window({
+                    ID: "businessWin",
+                    Title: "业务详细信息",
+                    Parent: window.top.document.body,
+                    Maximizable: true,
+                    Minimizable: true,
+                    Modal: true,
+                    Draggable: true,
+                    HAlign: 'center',
+                    VAlign: 'center',
+                    Resizable: true,
+                    Height: 600,
+                    Width: 1000,
+                    Url: Ktw.App.Root + "html/onemap/businessFlow.html",
+                    Parameters: {
+                        selectID: "farmTran",
+                        feature: feature,
+                    }
+                });
+            } else if (text == "历史回溯") {
+                var param = {};
+                if (historyWin) {
+                    historyWin.Close();
+                }
+                historyWin = new Ktw.Window({
+                    ID: "businessWin",
+                    Title: "历史回溯",
+                    Parent: window.top.document.body,
+                    Maximizable: true,
+                    Minimizable: true,
+                    Modal: true,
+                    Draggable: true,
+                    HAlign: 'center',
+                    VAlign: 'center',
+                    Resizable: true,
+                    Height: 600,
+                    Width: 1000,
+                    Url: Ktw.App.Root + "html/onemap/historyBack.html",
+                    Parameters: {
+                        feature: feature,
+                    }
+                });
+            }
+        });
+
+        function closeWins() {
+            if (businessWin) businessWin.Close();
+            if (historyWin) historyWin.Close();
+        }
+    </script>
+</body>
+</html>

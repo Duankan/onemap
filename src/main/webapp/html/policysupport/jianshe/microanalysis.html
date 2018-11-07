@@ -1,0 +1,1120 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>建设用地供应微观分析</title>
+    <link rel="stylesheet" href="../../../css/icon.css" />
+    <link rel="stylesheet" href="../../../js/ktop/ktop.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/echarts.min.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../../js/ktop/ktop.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var indexCompleteOpt, abodeSupplyOpt, industryInputOpt, mapOption, landPriceOpt, ratioStructureOpt, supplyTotalOpt, supplyRateOpt;  //统计图表的配置项和数据
+        var indexCompleteChart, abodeSupplyChart, industryInputChart, landPriceChart, ratioStructureChart, supplyTotalChart, supplyRateChart; //echarts实例
+        var timer; //定时器
+        //var dialog = new Ktw.Messager({ AutoShow: false, Height: "124", Type: "question", Modal: false });  //提示框对象
+        //供应结构总量数据
+        var supplyData = [
+            { year: '2011年', shangfu: 120, gongkuang: 220, zhuzhai: 150, gongguan: 320, jiaotong: 140 },
+            { year: '2012年', shangfu: 132, gongkuang: 182, zhuzhai: 232, gongguan: 332, jiaotong: 240 },
+            { year: '2013年', shangfu: 101, gongkuang: 191, zhuzhai: 201, gongguan: 301, jiaotong: 312 },
+            { year: '2014年', shangfu: 134, gongkuang: 234, zhuzhai: 154, gongguan: 334, jiaotong: 202 },
+            { year: '2015年', shangfu: 90, gongkuang: 290, zhuzhai: 190, gongguan: 390, jiaotong: 320 },
+            { year: '2016年', shangfu: 230, gongkuang: 330, zhuzhai: 330, gongguan: 330, jiaotong: 215 },
+            { year: '2017年', shangfu: 210, gongkuang: 310, zhuzhai: 410, gongguan: 320, jiaotong: 240 }
+        ];
+        /*重点关注 住宅供应数据*/
+        var dwellData = [
+            { month: '1月', putongfang: 120, jingji: 220, lianzu: 150 },
+            { month: '2月', putongfang: 132, jingji: 182, lianzu: 232 },
+            { month: '3月', putongfang: 101, jingji: 191, lianzu: 201 },
+            { month: '4月', putongfang: 134, jingji: 234, lianzu: 154 },
+            { month: '5月', putongfang: 90, jingji: 290, lianzu: 190 },
+            { month: '6月', putongfang: 230, jingji: 330, lianzu: 330 },
+            { month: '7月', putongfang: 210, jingji: 310, lianzu: 410 },
+            { month: '8月', putongfang: 210, jingji: 310, lianzu: 410 },
+            { month: '9月', putongfang: 210, jingji: 310, lianzu: 410 },
+            { month: '10月', putongfang: 210, jingji: 310, lianzu: 410 },
+            { month: '11月', putongfang: 210, jingji: 310, lianzu: 410 },
+            { month: '12月', putongfang: 210, jingji: 310, lianzu: 410 }
+        ];
+        /*重点关注 工业用地投入数据*/
+        var industryInputData = [
+            { year: '2011年', gaonenghao: 120, gaoxinjishu: 220 },
+            { year: '2012年', gaonenghao: 132, gaoxinjishu: 182 },
+            { year: '2013年', gaonenghao: 101, gaoxinjishu: 191 },
+            { year: '2014年', gaonenghao: 134, gaoxinjishu: 234 },
+            { year: '2015年', gaonenghao: 90, gaoxinjishu: 290 },
+            { year: '2016年', gaonenghao: 230, gaoxinjishu: 330 },
+            { year: '2017年', gaonenghao: 210, gaoxinjishu: 310 }
+        ];
+        /*近三年指标数据table*/
+        var tableData = [
+            { index: '批而未供率', year: '2014', value: '32%' },
+            { index: '批而未供率', year: '2015', value: '15%' },
+            { index: '批而未供率', year: '2016', value: '56%' },
+
+            { index: '已供土地闲置率', year: '2014', value: '28%' },
+            { index: '已供土地闲置率', year: '2015', value: '12%' },
+            { index: '已供土地闲置率', year: '2016', value: '60%' },
+
+            { index: '土地出让占财政收入比', year: '2014', value: '55%' },
+            { index: '土地出让占财政收入比', year: '2015', value: '15%' },
+            { index: '土地出让占财政收入比', year: '2016', value: '22%' }
+        ];
+        /*地价监测数据*/
+        //[220, 182, 191, 234, 290, 330, 310, 220],
+        //        [120, 132, 101, 134, 90, 230, 210, 120]
+        //        [80, 132, 150, 160, 200, 250, 270, 180]
+        var landPrice = [
+            { year: '2011年', shangye: 120, jumin: 220, gongye: 120 },
+            { year: '2012年', shangye: 132, jumin: 182, gongye: 132 },
+            { year: '2013年', shangye: 101, jumin: 191, gongye: 150 },
+            { year: '2014年', shangye: 134, jumin: 234, gongye: 160 },
+            { year: '2015年', shangye: 90, jumin: 290, gongye: 220 },
+            { year: '2016年', shangye: 230, jumin: 330, gongye: 250 },
+            { year: '2017年', shangye: 210, jumin: 310, gongye: 270 }
+        ];
+        var landPrice = [
+           { year: '2011年', shangye: 120, jumin: 220, gongye: 120, jidu: '第一季度' },
+           { year: '2011年', shangye: 200, jumin: 160, gongye: 45, jidu: '第二季度' },
+           { year: '2011年', shangye: 150, jumin: 250, gongye: 220, jidu: '第三季度' },
+           { year: '2011年', shangye: 120, jumin: 220, gongye: 120, jidu: '第四季度' },
+           { year: '2012年', shangye: 132, jumin: 182, gongye: 132, jidu: '第一季度' },
+           { year: '2012年', shangye: 132, jumin: 182, gongye: 132, jidu: '第二季度' },
+           { year: '2012年', shangye: 132, jumin: 182, gongye: 132, jidu: '第三季度' },
+           { year: '2012年', shangye: 132, jumin: 182, gongye: 132, jidu: '第四季度' },
+           { year: '2013年', shangye: 101, jumin: 191, gongye: 150, jidu: '第一季度' },
+           { year: '2013年', shangye: 101, jumin: 191, gongye: 150, jidu: '第二季度' },
+           { year: '2013年', shangye: 101, jumin: 191, gongye: 150, jidu: '第三季度' },
+           { year: '2013年', shangye: 101, jumin: 191, gongye: 150, jidu: '第四季度' },
+           { year: '2014年', shangye: 134, jumin: 234, gongye: 160, jidu: '第一季度' },
+           { year: '2014年', shangye: 134, jumin: 234, gongye: 160, jidu: '第二季度' },
+           { year: '2014年', shangye: 134, jumin: 234, gongye: 160, jidu: '第三季度' },
+           { year: '2014年', shangye: 134, jumin: 234, gongye: 160, jidu: '第四季度' },
+           { year: '2015年', shangye: 90, jumin: 290, gongye: 220, jidu: '第一季度' },
+           { year: '2015年', shangye: 90, jumin: 290, gongye: 220, jidu: '第二季度' },
+           { year: '2015年', shangye: 90, jumin: 290, gongye: 220, jidu: '第三季度' },
+           { year: '2015年', shangye: 90, jumin: 290, gongye: 220, jidu: '第四季度' },
+           { year: '2016年', shangye: 230, jumin: 330, gongye: 250, jidu: '第一季度' },
+           { year: '2016年', shangye: 230, jumin: 330, gongye: 250, jidu: '第二季度' },
+           { year: '2016年', shangye: 230, jumin: 330, gongye: 250, jidu: '第三季度' },
+           { year: '2016年', shangye: 230, jumin: 330, gongye: 250, jidu: '第四季度' },
+           { year: '2017年', shangye: 210, jumin: 310, gongye: 270, jidu: '第一季度' },
+           { year: '2017年', shangye: 210, jumin: 310, gongye: 270, jidu: '第二季度' },
+           { year: '2017年', shangye: 210, jumin: 310, gongye: 270, jidu: '第三季度' },
+           { year: '2017年', shangye: 210, jumin: 310, gongye: 270, jidu: '第四季度' }
+        ];
+        $(function () {
+            initChart();
+            initChartData();
+            bindLandPrice();
+            initMap();
+            resizeInit();
+            initEvent();
+            $(".land-transfer").timerScroll({
+                speed: 30, //数值越大，速度越慢
+                rowHeight: 26 //li的高度
+            });
+        });
+        /*初始化统计图配置项*/
+        function initChart() {
+            indexCompleteChart = echarts.init($("#index-complete")[0]);
+            abodeSupplyChart = echarts.init($("#abode-supply")[0]);
+            industryInputChart = echarts.init($("#industry-input")[0]);
+            landPriceChart = echarts.init($("#land-price")[0]);
+            ratioStructureChart = echarts.init($("#recruit-pat-hang")[0]);
+            supplyTotalChart = echarts.init($("#supply-total")[0]);
+            supplyRateChart = echarts.init($("#supply-rate")[0]);
+            supplyTotalChart.setTheme("macarons");
+            supplyRateChart.setTheme("macarons");
+            //指标完成情况
+            indexCompleteOpt = {
+                tooltip: {
+                    formatter: "{a} <br/>{b} : {c}%"
+                },
+                series:
+                    {
+                        name: '业务指标',
+                        type: 'gauge',
+                        startAngle: 180,
+                        endAngle: 0,
+                        center: ['40%', '82%'],    // 默认全局居中
+                        radius: "120%",  // 仪表盘大小
+                        splitLine: {
+                            show: false
+                        },
+                        axisLine: {            // 坐标轴线
+                            lineStyle: {       // 属性lineStyle控制线条样式
+                                width: 20,     //轴宽
+                                color: [[0.2, '#91c7ae'], [0.8, '#2888bf'], [1, '#00d2db']]  //轴分隔块颜色
+                            }
+                        },
+                        axisTick: {            // 坐标轴小标记
+                            show: false,
+                            splitNumber: 10,   // 每份split细分多少段
+                            length: 12,        // 属性length控制线长
+                        },
+                        axisLabel: {           // 坐标轴文本标签，详见axis.axisLabel
+                            formatter: function (v) {
+                                switch (v + '') {
+                                    case '10': return '低';
+                                    case '50': return '中';
+                                    case '90': return '高';
+                                    default: return '';
+                                }
+                            },
+                            color: "#32ffff",
+                            textStyle: {       // 其余属性默认使用全局文本样式，详见TEXTSTYLE
+                                color: '#fff',
+                                fontSize: 12,
+                                fontWeight: 'bolder'
+                            }
+                        },
+                        pointer: {    //仪表盘指针宽度长度
+                            width: "5%",
+                            length: '90%'
+                        },
+                        itemStyle: {   //仪表盘指针样式
+                            normal: {
+                                color: "#32ffff",
+                                opacity: 0.5
+                            }
+                        },
+                        detail: {
+                            offsetCenter: ['180%', '-50%'],       // x, y，单位px
+                            formatter: '{value}%',
+                            color: '#39fe4d',
+                            textStyle: {       // 其余属性默认使用全局文本样式，详见TEXTSTYLE
+                                fontSize: 30
+                            }
+                        },
+                        data: [{ value: 90 }]
+                    }
+
+            };
+            indexCompleteChart.setOption(indexCompleteOpt, true);
+
+            //重点关注 住宅供应
+            abodeSupplyOpt = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [],
+                    right: 10,
+                    top: 15,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    top: '25%',
+                    left: '4%',
+                    right: '5%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: ['#aaa', '#ddd'],
+                            type: 'dashed'
+                        }
+                    }
+                },
+                series: []
+            };
+
+            //重点关注 工业用地投入
+            industryInputOpt = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [],
+                    top: 15,
+                    right: 10,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    top: '25%',
+                    left: '4%',
+                    right: '5%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: ['#aaa', '#ddd'],
+                            type: 'dashed'
+                        }
+                    }
+                },
+                series: []
+            };
+
+            //地价监测
+            landPriceOpt = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [],
+                    top: 15,
+                    left: 10,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    top: '30%',
+                    left: '4%',
+                    right: '5%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: ['#aaa', '#ddd'],
+                            type: 'dashed'
+                        }
+                    }
+                },
+                series: []
+            };
+
+            //招标，拍卖，挂牌比例结构
+            ratioStructureOpt = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                color: ['#015557', '#30b2bd', '#6cacde'],
+                legend: {
+                    orient: 'vertical',
+                    left: 10,
+                    bottom: 10,
+                    data: ['招标', '拍卖', '挂牌'],
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                series: [
+                    {
+                        name: '访问来源',
+                        type: 'pie',
+                        radius: '60%',
+                        center: ['60%', '50%'],
+                        data: [
+                            { value: 335, name: '招标' },
+                            { value: 310, name: '拍卖' },
+                            { value: 234, name: '挂牌' }
+                        ],
+                        itemStyle: {
+                            emphasis: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+            ratioStructureChart.setOption(ratioStructureOpt, true);
+
+            //供应结构总量
+            supplyTotalOpt = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    orient: 'vertical',
+                    data: [],
+                    top: 'center',
+                    right: 10,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    top: '15%',
+                    left: '3%',
+                    right: '25%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: ['#aaa', '#ddd'],
+                            type: 'dashed'
+                        }
+                    }
+                },
+                series: []
+            };
+
+            //供应结构占比
+            supplyRateOpt = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    orient: 'vertical',
+                    data: [],
+                    top: 'center',
+                    right: 10,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    top: '15%',
+                    left: '3%',
+                    right: '25%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    axisLabel: {
+                        formatter: '{value} %'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: ['#aaa', '#ddd'],
+                            type: 'dashed'
+                        }
+                    }
+                },
+                series: []
+            };
+            echarts.connect([supplyTotalChart, supplyRateChart]);
+        }
+        /*初始化统计图数据*/
+        function initChartData() {
+            //供应结构总量以及占比
+            var type = { shangfu: '商服', gongkuang: '工矿仓储', zhuzhai: '住宅', gongguan: '公共管理与服务', jiaotong: '交通运输' };
+            var colors = ["#00d2db", "#015557", "#91c7ae", "#84bb4c", "#5793f3"];
+            var totalSeries = [], rateSeries = [], legend = [], years = [];
+            var dataTotal = { shangfu: [], gongkuang: [], zhuzhai: [], gongguan: [], jiaotong: [] };
+            var dataRate = { shangfu: [], gongkuang: [], zhuzhai: [], gongguan: [], jiaotong: [] };
+            for (var i = 0, len = supplyData.length; i < len; i++) {
+                var sum = supplyData[i].shangfu + supplyData[i].gongkuang + supplyData[i].zhuzhai + supplyData[i].gongguan + supplyData[i].jiaotong;
+                years.push(supplyData[i].year);
+                dataTotal.shangfu.push(supplyData[i].shangfu);
+                dataTotal.gongkuang.push(supplyData[i].gongkuang);
+                dataTotal.zhuzhai.push(supplyData[i].zhuzhai);
+                dataTotal.gongguan.push(supplyData[i].gongguan);
+                dataTotal.jiaotong.push(supplyData[i].jiaotong);
+                dataRate.shangfu.push(parseFloat((supplyData[i].shangfu * 100 / sum).toFixed()));
+                dataRate.gongkuang.push(parseFloat((supplyData[i].gongkuang * 100 / sum).toFixed()));
+                dataRate.zhuzhai.push(parseFloat((supplyData[i].zhuzhai * 100 / sum).toFixed()));
+                dataRate.gongguan.push(parseFloat((supplyData[i].gongguan * 100 / sum).toFixed()));
+                dataRate.jiaotong.push(parseFloat((supplyData[i].jiaotong * 100 / sum).toFixed()));
+            }
+            var i = 0, j = 0;
+            for (var k in dataTotal) {
+                legend.push(type[k]);
+                totalSeries.push({
+                    name: type[k],
+                    type: 'line',
+                    data: dataTotal[k],
+                    itemStyle: { normal: { color: colors[i++] } }
+                });
+            }
+            for (var k in dataRate) {
+                rateSeries.push({
+                    name: type[k],
+                    type: 'bar',
+                    stack: 'overlay',
+                    label: { normal: { show: true } },
+                    data: dataRate[k],
+                    itemStyle: { normal: { color: colors[j++] } }
+                });
+            }
+            supplyTotalOpt.legend.data = supplyRateOpt.legend.data = legend;
+            supplyTotalOpt.xAxis.data = supplyRateOpt.xAxis.data = years;
+            supplyTotalOpt.series = totalSeries;
+            supplyRateOpt.series = rateSeries;
+            supplyTotalChart.setOption(supplyTotalOpt, true);
+            supplyRateChart.setOption(supplyRateOpt, true);
+            //近三年指标基本情况
+            var byIndex = Enumerable.From(tableData).GroupBy("s=>s.index").ToArray();
+            var tableBody = $(".table-body table");
+            var tableHead = $("#table-head");
+            for (var i = 0, len = byIndex.length; i < len; i++) {
+                var tr = $('<tr><td>' + byIndex[i].source[0].index + '</td></tr>');
+                for (var j = 0, length = byIndex[i].source.length; j < length; j++) {
+                    if (i == 0) {
+                        tableHead.append('<td>' + byIndex[i].source[j].year + '</td>');
+                    }
+                    tr.append($('<td>' + byIndex[i].source[j].value + '</td>'));
+                }
+                tableBody.append(tr);
+            }
+            /*重点关注 住宅供应数据*/
+            var dwellType = { putongfang: '普通商品房', jingji: '经济适用房', lianzu: '廉租房' };
+            var dwellColors = ["#24babc", "#ef9037", "#5793f3"];
+            var dwellLegend = [], months = [], dwellSeries = [];
+            var dwellObj = { putongfang: [], jingji: [], lianzu: [] };
+            for (var i = 0, length = dwellData.length; i < length; i++) {
+                months.push(dwellData[i].month);
+                dwellObj.putongfang.push(dwellData[i].putongfang);
+                dwellObj.jingji.push(dwellData[i].jingji);
+                dwellObj.lianzu.push(dwellData[i].lianzu);
+            }
+            i = 0;
+            for (var k in dwellObj) {
+                dwellLegend.push(dwellType[k]);
+                dwellSeries.push({
+                    name: dwellType[k],
+                    type: 'line',
+                    data: dwellObj[k],
+                    itemStyle: { normal: { color: dwellColors[i++] } }
+                });
+            }
+            abodeSupplyOpt.legend.data = dwellLegend;
+            abodeSupplyOpt.xAxis.data = months;
+            abodeSupplyOpt.series = dwellSeries;
+            abodeSupplyChart.setOption(abodeSupplyOpt, true);
+            /*重点关注 工业用地投入数据*/
+            var industryType = { gaonenghao: '高能耗产业用地', gaoxinjishu: '高新技术产业用地' };
+            var industryColors = ["#6cd8cc", "#9400d3"];
+            var industryLegend = [], industryYears = [], industrySeries = [];
+            var industryObj = { gaonenghao: [], gaoxinjishu: [] };
+            for (var i = 0, length = industryInputData.length; i < length; i++) {
+                industryYears.push(industryInputData[i].year);
+                industryObj.gaonenghao.push(industryInputData[i].gaonenghao);
+                industryObj.gaoxinjishu.push(industryInputData[i].gaoxinjishu);
+            }
+            i = 0;
+            for (var k in industryObj) {
+                industryLegend.push(industryType[k]);
+                industrySeries.push({
+                    name: industryType[k],
+                    type: 'line',
+                    data: industryObj[k],
+                    itemStyle: { normal: { color: industryColors[i++] } }
+                });
+            }
+            industryInputOpt.legend.data = industryLegend;
+            industryInputOpt.xAxis.data = industryYears;
+            industryInputOpt.series = industrySeries;
+            industryInputChart.setOption(industryInputOpt, true);
+        }
+        /*初始化地图*/
+        function initMap() {
+            var map = L.map('map-panel', {
+                center: { lon: 110.16, lat: 27.53 },
+                zoomControl: false,
+                zoom: 8,
+                minZoom: 3,//地图最小级数
+                maxZoom: 18,//地图最大级数
+                attributionControl: false
+            });
+            var option = {
+                layers: 'higis-sdk:Export_Output',
+                format: 'image/png',
+                transparent: true
+            };
+            option.SLD_BODY = loadSLD('style.sld'); //TODO 嵌入项目后调用封装的公用函数
+            var baseLayer = new L.imageOverlay.wms('http://192.168.1.226:8080/geoserver/higis-sdk/wms', option);
+            map.addLayer(baseLayer);
+        }
+        /*获取图层样式xml文件*/
+        function loadSLD(url) {
+            var strXml = null;
+            $.ajax({
+                url: url,
+                dataType: 'text',
+                type: 'GET',
+                timeout: 2000,
+                async: false,
+                success: function (xml) {
+                    strXml = xml.replace(/\r\n\s*/g, "");
+                },
+                error: function (xml) {
+                    dialog.Alert("加载XML文件出错！");
+                }
+            });
+            return strXml;
+        }
+        /*地价监测统计图数据绑定*/
+        function bindLandPrice(state) {
+            var colors = ["#00d2db", "#015557", "#91c7ae"];
+            var type = { shangye: '商业用地', jumin: '居民用地', gongye: '工业用地' };
+            var series = [], legend = [], years = [];
+            var dataObj = { shangye: [], jumin: [], gongye: [] };
+            if (state == 'by-quarter') {  //按季度
+                landPriceOpt.dataZoom = [{
+                    type: 'inside',
+                    start: 0,
+                    end: 10
+                }, {
+                    start: 0,
+                    end: 10,
+                    handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                    handleSize: '80%',
+                    handleStyle: {
+                        color: '#fff',
+                        shadowBlur: 3,
+                        shadowColor: 'rgba(0, 0, 0, 0.6)',
+                        shadowOffsetX: 2,
+                        shadowOffsetY: 2
+                    }
+                }];
+                for (var i = 0, length = landPrice.length; i < length; i++) {
+                    years.push(landPrice[i].year + landPrice[i].jidu);
+                    dataObj.shangye.push(landPrice[i].shangye);
+                    dataObj.jumin.push(landPrice[i].jumin);
+                    dataObj.gongye.push(landPrice[i].gongye);
+                }
+            } else {
+                landPriceOpt.dataZoom = [];
+                var byYear = Enumerable.From(landPrice).GroupBy("s=>s.year").ToArray();
+                for (var i = 0, length = byYear.length; i < length; i++) {
+                    years.push(byYear[i].source[0].year);
+                    dataObj.shangye.push(Enumerable.From(byYear[i].source).Sum("s=>s.shangye"));
+                    dataObj.jumin.push(Enumerable.From(byYear[i].source).Sum("s=>s.jumin"));
+                    dataObj.gongye.push(Enumerable.From(byYear[i].source).Sum("s=>s.gongye"));
+                }
+            }
+            var i = 0;
+            for (var k in dataObj) {
+                legend.push(type[k]);
+                series.push({
+                    name: type[k],
+                    type: 'line',
+                    data: dataObj[k],
+                    itemStyle: { normal: { color: colors[i++] } }
+                });
+            }
+            landPriceOpt.legend.data = legend;
+            landPriceOpt.xAxis.data = years;
+            landPriceOpt.series = series;
+            landPriceChart.setOption(landPriceOpt, true);
+        }
+        /*窗体变化时页面自适应*/
+        $(window).resize(function () {
+            indexCompleteChart.resize();
+            abodeSupplyChart.resize();
+            industryInputChart.resize();
+            landPriceChart.resize();
+            ratioStructureChart.resize();
+            supplyTotalChart.resize();
+            supplyRateChart.resize();
+            resizeInit();
+        });
+        /*初始化各种事件*/
+        function initEvent() {
+            $(".toggle-btn .button").click(function () {
+                bindLandPrice($(this).attr('tag'));
+            });
+        }
+        /*界面自适应初始化*/
+        function resizeInit() {
+            $(".slash[tag='bottom']").css({ "border-width": $("#index-year").height() + 'px ' + $("#index-year").width() + 'px' });
+            $(".slash[tag='top']").css({ "border-width": ($("#index-year").height() - 1) + 'px ' + ($("#index-year").width() - 4) + 'px' });
+        }
+        /*本年度土地出让情况轮播方法*/
+        $.fn.timerScroll = function (opts) {
+            var _this = $(this);
+            isScroll(_this);
+            function marquee(obj, step) {
+                obj.find("ul").animate({
+                    marginTop: '-=1'
+                }, 0, function () {
+                    var s = Math.abs(parseInt($(this).css("margin-top")));
+                    if (s >= step) {
+                        $(this).find("li").slice(0, 1).appendTo($(this));
+                        $(this).css("margin-top", 0);
+                    }
+                });
+            }
+            function isScroll(_this) {
+                clearInterval(timer);
+                timer = setInterval(function () {
+                    if (_this.find("ul").height() <= _this.height()) {
+                        clearInterval(timer);
+                    } else {
+                        marquee(_this, opts.rowHeight);
+                    }
+                }, opts.speed);
+            }
+            _this.hover(
+                function () {
+                    clearInterval(timer);
+                },
+                function () {
+                    isScroll(_this);
+                }
+            );
+        }
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .microanalysis {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-image: url(image/bg.png);
+            background-size: 100% 100%;
+            overflow: hidden;
+        }
+
+            /*leftPanel布局*/
+            .microanalysis > .microanalysis-left {
+                position: absolute;
+                display: inline-block;
+                height: 72%;
+                width: 22%;
+                left: 2%;
+            }
+
+                .microanalysis > .microanalysis-left > div {
+                    position: relative;
+                    width: 100%;
+                    height: 30%;
+                    border-radius: 8px;
+                    border: 1px solid #026bae;
+                }
+
+            /*centerPanel布局*/
+            .microanalysis > .microanalysis-center {
+                position: absolute;
+                display: inline-block;
+                height: 68%;
+                width: 50%;
+                left: 25%;
+            }
+
+                .microanalysis > .microanalysis-center > .microanalysis-title {
+                    position: relative;
+                    margin: auto;
+                    margin-top: 15px;
+                    width: 96%;
+                    height: 40px;
+                    text-align: center;
+                    font-size: 24px;
+                    color: #3dcfff;
+                }
+
+                .microanalysis > .microanalysis-center > .map {
+                    position: relative;
+                    width: 100%;
+                    height: calc(100% - 60px);
+                    margin: auto;
+                    top: 2%;
+                }
+
+                    .microanalysis > .microanalysis-center > .map > div {
+                        width: 100%; 
+                        height: 100%;
+                        background-color:transparent;
+                    }
+                
+                    .microanalysis > .microanalysis-center > .map > .land-transfer {
+                        height: 70px;
+                        width: 30%;
+                        position: absolute;
+                        top: 10px;
+                        right: 5px;
+                        overflow: hidden;
+                    }
+
+                        .microanalysis > .microanalysis-center > .map > .land-transfer li {
+                            list-style: none;
+                            width: 100%;
+                            padding: 3px;
+                            height: 20px;
+                            margin-left: -40px;
+                        }
+
+                            .microanalysis > .microanalysis-center > .map > .land-transfer li p {
+                                width: 100%;
+                                height: 24px;
+                                line-height: 24px;
+                                margin-top: 8px;
+                                text-align: center;
+                            }
+
+            /*rightPanel布局*/
+            .microanalysis > .microanalysis-right {
+                position: absolute;
+                display: inline-block;
+                height: 72%;
+                width: 22%;
+                right: 2%;
+            }
+
+                .microanalysis > .microanalysis-right > div {
+                    position: relative;
+                    width: 100%;
+                    height: 28%;
+                    border-radius: 8px;
+                    border: 1px solid #026bae;
+                }
+
+                .microanalysis > .microanalysis-right .index-info {
+                    width: calc(100% + 1px);
+                    color: #fff;
+                    font-size: 12px;
+                    text-align: center;
+                    font-family: SimSun;
+                    background-color: #000;
+                }
+
+                    .microanalysis > .microanalysis-right .index-info table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                    }
+
+                    .microanalysis > .microanalysis-right .index-info tr td {
+                        border-right: 1px solid #071019;
+                        border-bottom: 1px solid #071019;
+                        border-collapse: collapse;
+                        text-align: center;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        word-break: keep-all;
+                    }
+
+                        .microanalysis > .microanalysis-right .index-info tr td:first-child {
+                            width: 40%;
+                        }
+
+                        .microanalysis > .microanalysis-right .index-info tr td:last-child {
+                            border-right: 0;
+                        }
+
+                    .microanalysis > .microanalysis-right .index-info thead tr td {
+                        height: 32px;
+                        background-color: #34373c;
+                    }
+
+                        .microanalysis > .microanalysis-right .index-info thead tr td .slash {
+                            position: absolute;
+                            border-style: solid;
+                            width: 0px;
+                            height: 0px;
+                        }
+
+                    .microanalysis > .microanalysis-right .index-info tbody tr {
+                        background-color: #4d5660;
+                    }
+
+                        .microanalysis > .microanalysis-right .index-info tbody tr td {
+                            height: 26px;
+                        }
+
+                        .microanalysis > .microanalysis-right .index-info tbody tr:hover {
+                            background-color: #638bb2;
+                        }
+
+                .microanalysis > .microanalysis-right > .land-price > .toggle-btn {
+                    position: absolute; width: 87px; height: 24px; top: 10px; right: 3px; color: #32ffff; font-size: 14px;
+                    border: 1px solid #0273bb;
+                    border-radius:3px;
+                }
+
+                .microanalysis > .microanalysis-right > .land-price > .toggle-btn > div {
+                    width: 43px;
+                    height: 100%;
+                    line-height: 24px;
+                    text-align: center;
+                    font-size: 12px;
+                    cursor: pointer;
+                }
+
+                    .microanalysis > .microanalysis-right > .land-price > .toggle-btn > div:hover {
+                        background-color: #044875;
+                    }
+
+            /*bottompanel布局*/
+            .microanalysis > .microanalysis-bottom {
+                position: absolute;
+                width: 100%;
+                height: 25%;
+                bottom: 1%;
+            }
+
+                .microanalysis > .microanalysis-bottom > div {
+                    position: absolute;
+                    display: inline-block;
+                    width: 47%;
+                    height: 100%;
+                    border-width:1px 0;
+                    border-style:solid;
+                    border-color:#026bae;
+                }
+
+            /*全局样式*/
+            .microanalysis div > .title {
+                position: absolute;
+                top: -12px;
+                left: 10%;
+                color: #32ffff;
+                background-color: #08122e;
+                border: 1px solid #026bae;
+                text-indent: 6px;
+                height: 22px;
+                line-height: 22px;
+                font-size: 14px;
+                transform: skew(-30deg);
+            }
+
+                .microanalysis div > .title > .describe-btn {
+                    cursor: pointer;
+                    width: 22px;
+                    display: inline-block;
+                    color: #f6d94d;
+                    transform: skew(30deg);
+                }
+
+
+                    .microanalysis div > .title > .describe-btn:hover:before {
+                        width: 160px;
+                        content: attr(describe-info);
+                        background-color: #2085c5;
+                        border-radius: 8px;
+                        color: #fff;
+                        padding: 10px;
+                        position: absolute;
+                        left: 130%;
+                        top: -15px;
+                        margin-top: 8px;
+                        text-indent: 2em;
+                        font-size: 12px;
+                    }
+
+                    .microanalysis div > .title > .describe-btn:hover:after {
+                        content: "";
+                        position: absolute;
+                        top: 10%;
+                        left: 80%;
+                        width: 0;
+                        height: 0;
+                        border-right: 12px solid #2085c5;
+                        border-top: 12px solid transparent;
+                        border-bottom: 12px solid transparent;
+                    }
+    </style>
+</head>
+<body>
+    <div class="microanalysis">
+        <div class="microanalysis-left">
+            <div class="index-complete" style="top: 4%; height: 23%;">
+                <div id="index-complete" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">指标完成情况</div>
+                    <div class="describe-btn" describe-info="展示湘潭市本年度建设用地指标完成率">?</div>
+                </div>
+            </div>
+            <div class="abode-supply" style="top: 9%;">
+                <div id="abode-supply" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">重点关注 住宅供应</div>
+                    <div class="describe-btn" describe-info="展示湘潭市本年度住宅供应情况，反映住宅类型随时间的变化趋势">?</div>
+                </div>
+            </div>
+            <div class="industry-input" style="top: 14%;">
+                <div id="industry-input" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">重点关注 工业用地投入</div>
+                    <div class="describe-btn" describe-info="展示湘潭市历年来对工业用地的投入情况">?</div>
+                </div>
+            </div>
+        </div>
+        <div class="microanalysis-center">
+            <div class="microanalysis-title">
+                 <div style="height:26px;width:100%;position:absolute;bottom:0;">
+                    <div style="height:100%;width:43%;background-image:url(image/title-l.png);background-size:100% 100%;float:left;"></div>
+                    <div style="height:100%;width:43%;background-image:url(image/title-r.png);background-size:100% 100%;float:right;"></div>
+                 </div>
+                <div style="height:30px;width:100%;line-height:30px;position:absolute;text-align:center;">建设用地供应微观分析</div>
+            </div>
+            <div class="map">
+                <div id="map-panel"></div>
+                <div class="land-transfer">
+                    <ul style="width: 100%; list-style: none; color: #dddf31;">
+                        <li>
+                            <p>7月份 土地出让300亩</p>
+                        </li>
+                        <li>
+                            <p>6月份 土地出让400亩</p>
+                        </li>
+                        <li>
+                            <p>5月份 土地出让300亩</p>
+                        </li>
+                        <li>
+                            <p>4月份 土地出让340亩</p>
+                        </li>
+                        <li>
+                            <p>3月份 土地出让510亩</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="microanalysis-right">
+            <div class="index-info" style="top: 4%; height: 27%;">
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">近三年指标基本信息</div>
+                    <div class="describe-btn" describe-info="展示湘潭市近三年各项指标的基本信息">?</div>
+                </div>
+                <div id="index-info" style="margin-top: 25px; width: 100%; height: calc(100% - 25px); overflow: hidden;">
+                    <table cellspacing="0" cellpadding="0">
+                        <thead>
+                            <tr id="table-head">
+                                <td id="index-year">
+                                    <div style="width: 100%; height: 100%; position: relative;">
+                                        <div class="slash" tag="bottom" style="border-color: transparent transparent #1a242f #1a242f;"></div>
+                                        <div class="slash" tag="top" style="border-color: transparent transparent #34373c #34373c; top: 1px;"></div>
+                                        <div style="width: 50%; height: 50%; position: absolute; left: 0; bottom: 0; line-height: 18px;">指标</div>
+                                        <div style="width: 50%; height: 50%; position: absolute; right: 0; top: 0; line-height: 18px;">年份</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </thead>
+                    </table>
+                    <div class="table-body">
+                        <table cellspacing="0" cellpadding="0"></table>
+                    </div>
+                </div>
+            </div>
+            <div class="land-price" style="top: 9%;">
+                <div id="land-price" style="width: 100%; height: 100%;"></div>
+                <!--TODO 临时按钮 需美工P图-->
+                <div class="toggle-btn">
+                    <div class="button" tag="by-year" style="float: left;border-right:1px solid #0273bb;">按年</div>
+                    <div class="button" tag="by-quarter" style="float: right;">按季度</div>
+                </div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">地价监测</div>
+                    <div class="describe-btn" describe-info="展示湘潭市历年各季度地价情况，结合历年地价数据反映出地价的变化趋势">?</div>
+                </div>
+            </div>
+            <div class="recruit-pat-hang" style="top: 14%;">
+                <div id="recruit-pat-hang" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">招、拍、挂比例结构</div>
+                    <div class="describe-btn" describe-info="展示湘潭市本年度招标、拍卖、挂牌出让土地面积以及占比">?</div>
+                </div>
+            </div>
+        </div>
+        <div class="microanalysis-bottom">
+            <div class="supply-total" style="left: 2%;">
+                <div id="supply-total" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">各供应结构总量及变化</div>
+                    <div class="describe-btn" describe-info="展示湘潭市建设用各供应结构总量，结合历年数据可反映各供应结构用地的变化趋势">?</div>
+                </div>
+            </div>
+            <div class="supply-rate" style="right: 2%;">
+                <div id="supply-rate" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">各供应结构占比及变化</div>
+                    <div class="describe-btn" describe-info="展示湘潭市建设用各供应结构用地占比，结合历年数据可反映各供应结构用地的占比趋势">?</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

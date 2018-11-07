@@ -1,0 +1,1678 @@
+﻿body {
+    background-color: #E0E9F5;
+}
+
+.Panel-Top {
+    /*background: #0099CC;*/
+    /*background: rgba(0,0,0,0.6);*/
+    height: 80px;
+    width: 100%;
+    position: absolute;
+    overflow: hidden;
+    z-index: 3;
+    background-color: #0099CC;
+    /*background-color: #2CB3A5;*/
+    opacity: 0.9;
+}
+
+    .Panel-Top .Panel-MainTank {
+        background-repeat: repeat-x;
+    }
+
+        .Panel-Top .Panel-MainTank .RightBackground {
+            right: 0px;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-repeat: no-repeat;
+            background-position: right top;
+        }
+
+        .Panel-Top .Panel-MainTank .LeftBackground {
+            left: 0px;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-repeat: no-repeat;
+        }
+
+        .Panel-Top .Panel-MainTank .ContentBox {
+            top: 0px;
+            left: 0px;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }
+
+        .Panel-Top .Panel-MainTank .LeftBox {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            height: 100%;
+        }
+
+        .Panel-Top .Panel-MainTank .CenterBox {
+            position: absolute;
+            top: 0px;
+            height: 100%;
+        }
+
+        .Panel-Top .Panel-MainTank .RightBox {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            height: 100%;
+        }
+
+.Panel-Nav {
+    background: #EFEFF2;
+    height: 30px;
+    width: 100%;
+    position: absolute;
+    top: 80px;
+    overflow: hidden;
+    z-index: 2;
+}
+
+.Panel-Main {
+    background: #EFEFF2;
+    width: 100%;
+    position: absolute;
+    overflow: hidden;
+}
+
+.Panel-Left {
+    left: 0px;
+    z-index: 2;
+    bottom: 0px;
+    /*height: 100%;*/
+    overflow: hidden;
+    position: absolute;
+    /*background-color: #293038;*/
+    /*background-color: #000000;*/
+}
+
+.Panel-Right {
+    background: #EFEFF2; /*#EFEFF2;*/
+    position: absolute;
+    right: 0px;
+    height: 100%;
+    overflow: hidden;
+    z-index: 3;
+}
+
+.Panel-Center {
+    background: #EFEFF2;
+    position: absolute;
+    height: 100%;
+    overflow: hidden;
+}
+
+.Panel-MapTool {
+    background: #EFEFF2;
+    position: absolute;
+    top: 0px;
+    height: 30px;
+    width: 100%;
+    overflow: hidden;
+    z-index: 2;
+}
+
+.Panel-Map {
+    background: #fff;
+    /*background: #EFEFF2;*/
+    /*background-image: url('image/map.png');*/
+    width: 100%;
+    position: absolute;
+    overflow: hidden;
+    z-index: 4;
+}
+
+.Panel-Bottom {
+    background: #EFEFF2;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    overflow: hidden;
+    z-index: 4;
+}
+
+.Panel-Foot {
+    background: #1e282e;
+    text-align: center;
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.Panel-DockContent {
+    top: 26px;
+    width: 100%;
+    position: absolute;
+    overflow: hidden;
+}
+
+.Panel-Split-H, .Panel-Split-V {
+    position: absolute;
+    font-size: 1px;
+    z-index: 5;
+}
+
+.Panel-Split-H {
+    width: 2px;
+    height: 100%;
+    cursor: e-resize;
+}
+
+.Panel-Split-V {
+    width: 100%;
+    height: 2px;
+    cursor: n-resize;
+}
+
+.Panel-Foot .Panel-Split-V,
+.Panel-Bottom .Panel-Split-V {
+    top: 0px;
+}
+
+.Panel-Top .Panel-Split-V,
+.Panel-MapTool .Panel-Split-V,
+.Panel-Nav .Panel-Split-V {
+    bottom: 0px;
+}
+
+.Panel-Left .Panel-Split-H {
+    right: 0px;
+}
+
+.Panel-Left .Panel-MainTank .Panel-DockContent {
+    background-color: #e0ecff; /*#283038;*/
+}
+
+.Panel-Right .Panel-Split-H {
+    left: 0px;
+}
+
+.Panel-Bottom .Panel-MainTank .Panel-DockContent {
+    background-color: white;
+}
+
+.Panel-Right .Panel-MainTank .Panel-DockContent {
+    background-color: #e0ecff; /*#f0f4f8;*/
+}
+
+.Panel-MainTank {
+    position: absolute;
+    overflow: hidden;
+    border: solid 1px #CCCCCC;
+}
+
+.Panel-Right .Panel-MainTank {
+    right: 0px;
+}
+
+.Panel-Left-MinimizeButton {
+    width: 10px;
+    height: 47px;
+    position: absolute;
+    display: none;
+    z-index: 9998;
+    cursor: pointer;
+    background-image: url('../image/l1.png');
+}
+
+.Panel-Left-MinimizeButton-Closed {
+    background-position: -10px 0px;
+}
+
+.Panel-Header {
+    height: 26px;
+    width: 100%;
+    background: #37424F;
+    border-bottom: 1px solid #37424F;
+    overflow: hidden;
+}
+
+    .Panel-Header .Icon {
+        height: 16px;
+        width: 16px;
+        position: absolute;
+        overflow: hidden;
+        left: 5px;
+        top: 7px;
+    }
+
+    .Panel-Header .Title {
+        left: 26px;
+        line-height: 26px;
+        position: absolute;
+    }
+
+.Panel-Bottom .Panel-Header .Title {
+    line-height: 30px;
+}
+
+
+.Panel-Left .Panel-MainTank .Panel-Header .Title,
+.Panel-Right .Panel-MainTank .Panel-Header .Title {
+    color: white;
+}
+
+.Panel-Header .ButtonPanel {
+    position: absolute;
+    height: 26px;
+    width: 100%;
+    overflow: hidden;
+    right: 0px;
+}
+
+    .Panel-Header .ButtonPanel .Button {
+        margin: 5px 5px 5px 0px;
+        height: 16px;
+        width: 16px;
+        float: right;
+    }
+
+.Panel-Bottom .Panel-Header .ButtonPanel .Button {
+    margin: 7px 5px 5px 0px;
+}
+
+/*左面板的伸缩图标去掉*/
+.Panel-Left-MinimizeButton {
+    display: none !important;
+}
+
+/*把左面板的头部去掉*/
+#leftPanel > .Panel-MainTank > .Panel-Header {
+    display: none !important;
+}
+
+/*左侧导航icon*/
+.side-fix {
+    position: absolute;
+    left: 0;
+    top: 60px;
+    height: 40px;
+    width: 50px;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+    cursor: pointer;
+    z-index: 99999;
+    display: none;
+    background-color: #323232;
+}
+
+.Panel-Left > .Panel-MainTank {
+    display: none;
+}
+
+/*左侧竖向侧边栏*/
+.nav-left-side {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 50px;
+    /*background-color: #323232;*/
+    background-color: #000000;
+    opacity: 0.9;
+    z-index: 5;
+    color: #FFFFFF;
+}
+
+    .nav-left-side > div {
+        width: 100%;
+        height: 50px;
+        line-height: 50px;
+        font-size: 30px;
+        padding-left: 5px;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+
+.side-item:hover {
+    background-color: #666666;
+    color: white;
+}
+
+.side-top {
+    height: 40px !important;
+}
+
+    .side-top > div {
+        position: absolute;
+        width: 30px;
+        top: 12px;
+        height: 30px;
+        left: 15px;
+        background-image: url(../image/sidenav.png);
+        background-repeat: no-repeat;
+    }
+
+/*二级菜单*/
+.nav-left-menu {
+    position: absolute;
+    top: 60px;
+    left: 50px;
+    bottom: 0;
+    width: 180px;
+    /*background-color: #F4F8F9;*/
+    background-color: #263238;
+    opacity: 0.9;
+    z-index: 4;
+    color: #ffffff;
+    box-shadow: 2px 2px 21px 3px #666;
+}
+
+    .nav-left-menu:hover {
+        opacity: 1;
+    }
+
+.nav-left-menu-top {
+    width: 100%;
+    height: 40px;
+    /*background-color: #7BB958;*/
+    background-color: #0D829D;
+    color: #FFFFFF;
+    cursor: default;
+}
+
+    .nav-left-menu-top > .menu-top-content {
+        float: left;
+        font-size: 14px;
+        line-height: 40px;
+        padding-left: 40px;
+    }
+
+    .nav-left-menu-top > .icon {
+        /*background-image: url(../image/imgs.png);*/
+        background-position: -430px -154px;
+        background-repeat: no-repeat;
+        height: 50px;
+        width: 50px;
+        float: right;
+        cursor: pointer;
+        display: none;
+    }
+
+.nav-left-menu-item {
+    display: none;
+}
+
+    .nav-left-menu-item > ul > li {
+        list-style: none;
+        height: 30px;
+        line-height: 30px;
+        font-size: 13px;
+        cursor: pointer;
+        padding-left: 40px;
+        font-family: sans-serif;
+        position: relative;
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+        .nav-left-menu-item > ul > li:hover {
+            color: #FFFFFF;
+            background-color: #3B9DC2;
+        }
+
+        .nav-left-menu-item > ul > li > .item-text {
+            /*margin-left:40px;*/
+            color: #ddd;
+        }
+
+        .nav-left-menu-item > ul > li > .item-icon {
+            position: absolute;
+            left: 15px;
+            top: 13px;
+            width: 16px;
+            height: 16px;
+        }
+
+.left-menu-active {
+    background-color: #20A9D9;
+    color: #fff;
+}
+
+.left-side-active {
+    background-color: #212832;
+    color: #33ACD8;
+}
+
+/*图层树*/
+#total-layertree .ktw-tree .node .expanded {
+    background: url('../image/layerexpaned.png') 4px no-repeat !important;
+}
+
+    #total-layertree .ktw-tree .node .expanded:hover {
+        background: url(../image/l1.png) no-repeat -144px -89px !important;
+    }
+
+.popbox {
+    position: absolute;
+}
+
+    /*#total-layertree.popbox > .popbox-icon {
+    background-color: #196a86 !important;
+    opacity: 0.8 !important;
+}*/
+
+    .popbox > .popbox-icon {
+        height: 35px;
+        width: 35px;
+        /*border: 1px solid rgb(153, 153, 153);*/
+        border: 1px solid #bbb;
+        /*background: rgba(0, 0, 0, 0.298039);*/
+        /*background-color: #0099CC;*/
+        /*opacity: 0.5;*/
+        position: absolute;
+        background-color: #196a86;
+        opacity: 0.8;
+        border-radius: 4px;
+    }
+
+        .popbox > .popbox-icon:hover {
+            /*border: 1px solid rgb(0, 153, 204);
+            background: rgba(0, 0, 0, 0.6);*/
+        }
+
+        .popbox > .popbox-icon > .icon {
+            height: 35px;
+            width: 35px;
+            /*margin-left: 3px;
+            margin-top: 3px;*/
+            background-image: url(../image/layertree1.png);
+            cursor: pointer;
+            background-size: 30px 30px;
+            background-repeat: no-repeat;
+            background-position: center, center;
+        }
+
+#selectLayer.popbox > .popbox-icon > .icon {
+    /*height: 16px;
+    width: 16px;
+    margin-left: 7px;
+    margin-top: 7px;
+    background-position: -464px -113px;
+    background-image: url(../image/l1.png);*/
+    height: 35px;
+    width: 35px;
+    background-image: url(../image/layertree1.png);
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+/*#selectLayer.popbox > .popbox-icon > .icon:hover {
+        height: 16px;
+        width: 16px;
+        margin-left: 7px;
+        margin-top: 7px;
+        background-position: -480px -113px;
+        background-image: url(../image/l1.png);
+    }*/
+
+.popbox .ktw-tree .node:hover {
+    background: rgba(0,153,204,0.2);
+}
+
+.popbox-content-content .node-selected {
+    background: rgba(0,153,204,0.4) !important;
+}
+
+.popbox > .popbox-icon > .icon:hover {
+    opacity: 0.9;
+}
+
+.popbox-content {
+    display: none;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fcfcfc;
+    font-weight: bold;
+    border: 1px solid #999;
+    min-height: 40px;
+    position: absolute;
+}
+
+    .popbox-content .ktw-tree {
+        font-weight: normal;
+        overflow: hidden;
+    }
+
+
+
+.popbox-content-bar {
+    display: inline-block;
+    height: 26px;
+    width: 26px;
+    float: right;
+}
+
+    .popbox-content-bar:hover {
+        background-color: #0099cc;
+    }
+
+    .popbox-content-bar > .icon {
+        height: 16px;
+        width: 16px;
+        margin-top: 5px;
+        margin-left: 5px;
+    }
+
+
+
+.popbox-content-content > .ktw-box {
+    background-color: inherit;
+    border: 0;
+}
+
+/*地图工具*/
+.mappanelsymbol {
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    right: 10px;
+    top: 67px;
+    border: 1px solid #999;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
+}
+
+    .mappanelsymbol .Icon {
+        height: 16px;
+        width: 16px;
+        margin-left: 7px;
+        margin-top: 7px;
+    }
+
+.icon-maptool-tool {
+    background-position: -272px -113px;
+    background-image: url(../image/l1.png);
+}
+
+.icon-maptool-tool {
+    background: url(../image/maptool/Tool.png) no-repeat center center;
+}
+
+/**通用查询和分析切换tab**/
+.commontab {
+    position: absolute;
+    top: 67px;
+    left: 100px;
+    height: 30px;
+    font-size: 14px;
+    line-height: 30px;
+    z-index: 3;
+    opacity: 0.7;
+}
+
+    .commontab:hover {
+        opacity: 1;
+    }
+
+    .commontab .commontab-query, .commontab .commontab-analysis {
+        /*background-color: #eee;*/
+        background-color: #019CC8;
+        color: #fff;
+        border-top-left-radius: 8px;
+        float: left;
+        cursor: pointer;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding-left: 18px;
+        padding-right: 18px;
+        /*color: #444;*/
+    }
+
+.commontab-query {
+}
+
+.commontab-analysis {
+    margin-left: 2px;
+}
+
+
+
+    .commontab-query.active, .commontab-analysis.active, .commontab-query:hover, .commontab-analysis:hover {
+        /*background-color: #019CC8;
+        color: #fff;*/
+        background-color: #eee;
+        color: #444;
+    }
+
+/**通用查询模块**/
+.globalQuery {
+    width: 409px;
+    height: 30px;
+    position: absolute;
+    top: 30px;
+    /*right: 200px;*/
+    z-index: 3;
+    left: 0px;
+    /*opacity: 0.7;*/
+    box-shadow: 2px 2px 3px #cccccc;
+    -moz-box-shadow: 2px 2px 3px #cccccc;
+    -webkit-box-shadow: 2px 2px 3px #cccccc;
+}
+
+.clearfix:after {
+    clear: both;
+    content: ".";
+    display: block;
+    visibility: hidden;
+    height: 0;
+}
+
+.clearfix {
+    zoom: 1;
+}
+
+.globalQuery:hover {
+    opacity: 1;
+}
+
+.globalQuery .spatialBox {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #95B8E7;
+    width: 58px;
+    height: 28px;
+    left: 299px;
+}
+
+.globalQuery .popsearch {
+    width: 97px;
+    height: 26px;
+    display: none;
+    /*background-color: pink;*/
+    position: absolute;
+    left: 0px;
+    top: 30px;
+    border-bottom: 1px solid #95B8E7;
+}
+
+.globalQuery .spatialBox .Button {
+    width: 22px;
+    height: 22px;
+    border: 1px solid white;
+    background-color: white;
+    /*display: inline-block;*/
+    cursor: pointer;
+    margin-top: 2px;
+    float: left;
+}
+
+    .globalQuery .spatialBox .Button:hover {
+        border-color: #95B8E7;
+        background-color: #EAF2FF;
+    }
+
+    .globalQuery .spatialBox .Button:active {
+        background-color: #E4E9EF;
+    }
+
+.globalQuery .searchBox {
+    position: absolute;
+    left: 0;
+    width: 417px;
+}
+
+    .globalQuery .searchBox .searchButton {
+        width: 50px;
+        height: 28px;
+        line-height: 28px;
+        text-align: center;
+        margin-left: -1px;
+        border: 1px solid #95b8e7;
+        background-color: #0099cc;
+        color: white;
+        /*float: left;*/
+        position: absolute;
+        left: 325px;
+        font-size: 13px;
+        cursor: pointer;
+        margin-left: 33px;
+    }
+
+        .globalQuery .searchBox .searchButton:hover {
+            background-color: #0692be;
+        }
+
+        .globalQuery .searchBox .searchButton:active {
+            background-color: #008dbf;
+        }
+
+.globalQuery .resultPanel {
+    position: absolute;
+    top: 30px;
+    width: 367px;
+    /*height: 425px;*/
+    border: 1px solid #95B8E7;
+    background-color: white;
+    display: none;
+}
+
+    .globalQuery .resultPanel .headerPanel {
+        width: 100%;
+        /*height: 35px;*/
+        line-height: 30px;
+        font-size: 13px;
+        background-color: #f3f3f3;
+    }
+
+        .globalQuery .resultPanel .headerPanel .classItem {
+            height: 22px;
+            line-height: 24px;
+            padding: 0 3px;
+            margin-top: 8px;
+            margin-left: 4px;
+            margin-right: 6px;
+            float: left;
+            text-align: center;
+            color: #666666;
+            font-size: 13px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .globalQuery .resultPanel .headerPanel .classItem-hover {
+            color: #206fd5;
+        }
+
+        .globalQuery .resultPanel .headerPanel .classItem-select {
+            color: #206fd5;
+            font-weight: bold;
+            border-bottom: 2px solid #008dbf;
+        }
+
+        .globalQuery .resultPanel .headerPanel .classItem-disabled {
+            cursor: not-allowed;
+        }
+
+    .globalQuery .resultPanel .poiPanel {
+        width: 100%;
+        height: 383px;
+    }
+
+.toolsymbol {
+    position: absolute;
+    width: 35px;
+}
+
+/**通用分析模块**/
+.globalGlandAnalysis {
+    width: 349px;
+    height: 30px;
+    position: absolute;
+    top: 30px;
+    /*right: 200px;*/
+    z-index: 3;
+    left: 0px;
+    /*opacity: 0.7;*/
+    box-shadow: 2px 2px 3px #cccccc;
+    -moz-box-shadow: 2px 2px 3px #cccccc;
+    -webkit-box-shadow: 2px 2px 3px #cccccc;
+    display: none;
+}
+
+.clearfix:after {
+    clear: both;
+    content: ".";
+    display: block;
+    visibility: hidden;
+    height: 0;
+}
+
+.clearfix {
+    zoom: 1;
+}
+
+.globalGlandAnalysis:hover {
+    opacity: 1;
+}
+
+.globalGlandAnalysis .analysislBox {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #95B8E7;
+    width: 178px;
+    height: 28px;
+    left: 129px;
+}
+
+.globalGlandAnalysis .popsearch {
+    width: 97px;
+    height: 26px;
+    display: none;
+    /*background-color: pink;*/
+    position: absolute;
+    left: 0px;
+    top: 30px;
+    border-bottom: 1px solid #95B8E7;
+}
+
+.globalGlandAnalysis .analysislBox .Button {
+    width: 22px;
+    height: 22px;
+    border: 1px solid white;
+    background-color: white;
+    /*display: inline-block;*/
+    cursor: pointer;
+    margin-top: 2px;
+    float: left;
+}
+
+    .globalGlandAnalysis .analysislBox .Button:hover {
+        border-color: #95B8E7;
+        background-color: #EAF2FF;
+    }
+
+    .globalGlandAnalysis .analysislBox .Button:active {
+        background-color: #E4E9EF;
+    }
+
+.globalGlandAnalysis .searchBox {
+    position: absolute;
+    left: 0;
+    width: 367px;
+}
+
+    .globalGlandAnalysis .searchBox .searchButton {
+        width: 50px;
+        height: 28px;
+        line-height: 28px;
+        text-align: center;
+        margin-left: -1px;
+        border: 1px solid #95b8e7;
+        background-color: #0099cc;
+        color: white;
+        /*float: left;*/
+        position: absolute;
+        left: 275px;
+        font-size: 13px;
+        cursor: pointer;
+        margin-left: 33px;
+    }
+
+        .globalGlandAnalysis .searchBox .searchButton:hover {
+            background-color: #0692be;
+        }
+
+        .globalGlandAnalysis .searchBox .searchButton:active {
+            background-color: #008dbf;
+        }
+
+.globalGlandAnalysis .resultPanel {
+    position: absolute;
+    top: 30px;
+    width: 357px;
+    /*height: 375px;*/
+    border: 1px solid #95B8E7;
+    background-color: white;
+    display: none;
+}
+
+    .globalGlandAnalysis .resultPanel .headerPanel {
+        width: 100%;
+        /*height: 35px;*/
+        line-height: 30px;
+        font-size: 13px;
+        background-color: #f3f3f3;
+    }
+
+        .globalGlandAnalysis .resultPanel .headerPanel .classItem {
+            height: 22px;
+            line-height: 24px;
+            padding: 0 3px;
+            margin-top: 8px;
+            margin-left: 4px;
+            margin-right: 6px;
+            float: left;
+            text-align: center;
+            color: #666666;
+            font-size: 13px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .globalGlandAnalysis .resultPanel .headerPanel .classItem-hover {
+            color: #206fd5;
+        }
+
+        .globalGlandAnalysis .resultPanel .headerPanel .classItem-select {
+            color: #206fd5;
+            font-weight: bold;
+            border-bottom: 2px solid #008dbf;
+        }
+
+        .globalGlandAnalysis .resultPanel .headerPanel .classItem-disabled {
+            cursor: not-allowed;
+        }
+
+    .globalGlandAnalysis .resultPanel .poiPanel {
+        width: 100%;
+        height: 383px;
+    }
+
+.toolsymbol {
+    position: absolute;
+    width: 35px;
+    cursor: pointer;
+}
+
+/*地图放大缩小工具*/
+.zoom-box {
+    width: 26px;
+    height: 52px;
+    background-color: pink;
+    right: 12px;
+    bottom: 60px;
+    position: absolute;
+}
+
+.zoom-in-box, .zoom-out-box {
+    width: 26px;
+    overflow: hidden;
+    background-color: #FFF;
+    height: 26px;
+    cursor: pointer;
+    position: relative;
+    opacity: 1;
+}
+
+.zoom-out-box {
+}
+
+.zoom-in {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 8px;
+    left: 8px;
+    background-image: url(../image/zoom.png);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+}
+
+    .zoom-in:hover {
+        background-position: -20px 0;
+    }
+
+.zoom-out {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 8px;
+    left: 8px;
+    background-image: url(../image/zoom.png);
+    background-repeat: no-repeat;
+    background-position: -10px 0;
+}
+
+    .zoom-out:hover {
+        background-position: -30px 0;
+    }
+/*专题图层*/
+/*.mappanelsymbol .Icon {
+    height: 16px;
+    width: 16px;
+    margin-left: 7px;
+    margin-top: 7px;
+    margin-bottom: 7px;
+    height: 40px;
+    width: 40px;
+    margin: 0;
+}*/
+
+.icon-maptool-topic {
+    background-position: -464px -113px;
+    background-image: url(../image/l1.png);
+}
+
+.icon-maptool-topic1 {
+    background-position: -480px -113px;
+    background-image: url('../image/l1.png');
+}
+
+.floatPanel {
+    position: absolute;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #999;
+    box-shadow: 2px 2px 3px #cccccc;
+    -moz-box-shadow: 2px 2px 3px #cccccc;
+    -webkit-box-shadow: 2px 2px 3px #cccccc;
+}
+
+    .floatPanel .Header {
+        height: 26px;
+        background: rgba(0,0,0,0.6);
+        width: 100%;
+        border-bottom: 1px solid #999;
+    }
+
+        .floatPanel .Header .Icon {
+            height: 16px;
+            width: 16px;
+            margin-top: 5px;
+            margin-left: 5px;
+            float: left;
+        }
+
+        .floatPanel .Header .Text {
+            height: 26px;
+            line-height: 26px;
+            display: inline-block;
+            color: #fcfcfc;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .floatPanel .Header .CloseButton {
+            height: 26px;
+            width: 26px;
+            background-image: url(../image/l1.png);
+            background-position: -397px -2px;
+            display: inline-block;
+            float: right;
+        }
+
+            .floatPanel .Header .CloseButton:hover {
+                background-color: #0099cc;
+            }
+
+        .floatPanel .Header .DockButton {
+            display: inline-block;
+            height: 26px;
+            width: 26px;
+            float: right;
+            margin-right: 6px;
+        }
+
+            .floatPanel .Header .DockButton:hover {
+                background-color: #0099cc;
+            }
+
+            .floatPanel .Header .DockButton .Icon {
+                height: 16px;
+                width: 16px;
+                margin-top: 5px;
+                margin-left: 5px;
+            }
+
+    .floatPanel .Content {
+        width: 100%;
+    }
+
+/*选中图层列表拖动时的箭头样式*/
+.indicator {
+    position: absolute;
+    font-size: 16px;
+    font-weight: bold;
+    width: 10px;
+    height: 10px;
+    display: none;
+    color: red;
+    z-index: 9999999;
+}
+
+.tipicLayer {
+    width: 100%;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+
+    .tipicLayer .row {
+        width: 100%;
+        height: 60px;
+        background: rgba(0,0,0,0.2);
+        border-bottom: 1px solid #cdcdcd;
+    }
+
+        .tipicLayer .row:hover {
+            background: rgba(0,153,204,0.2);
+        }
+
+        .tipicLayer .row .namepanel {
+            height: 30px;
+            width: 100%;
+        }
+
+            .tipicLayer .row .namepanel .icon {
+                width: 16px;
+                height: 16px;
+                margin-top: 7px;
+                margin-left: 10px;
+                float: left;
+                display: inline-block;
+            }
+
+            .tipicLayer .row .namepanel .text {
+                width: auto;
+                height: 30px;
+                line-height: 30px;
+                display: inline-block;
+                margin-left: 15px;
+                color: #fcfcfc;
+                font-weight: bold;
+            }
+
+            .tipicLayer .row .namepanel .switch {
+                width: 40px;
+                height: 20px;
+                border-radius: 10px;
+                display: inline-block;
+                float: right;
+                margin-right: 10px;
+                margin-top: 3px;
+                position: relative;
+            }
+
+                .tipicLayer .row .namepanel .switch .btn {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 9px;
+                    position: absolute;
+                    background: #fcfcfc;
+                    /*box-shadow: 0px 2px 4px rgba(0,0,0,0.4);*/
+                }
+
+            .tipicLayer .row .namepanel .switchstateopen {
+                background: rgba(255,130,71,0.8);
+            }
+
+            .tipicLayer .row .namepanel .switchbtnopen {
+                top: 1px;
+                right: 1px;
+            }
+
+            .tipicLayer .row .namepanel .switchstateclose {
+                background: rgba(255,255,255,0.4);
+                border: 1px solid rgba(0,0,0,0.15);
+            }
+
+            .tipicLayer .row .namepanel .switchbtnclose {
+                left: 0px;
+                top: 0px;
+                border: 1px solid rgba(0,0,0,0.1);
+            }
+
+        .tipicLayer .row .layeroperat {
+            height: 30px;
+            width: 100%;
+        }
+
+            .tipicLayer .row .layeroperat .sliderDiv {
+                height: 26px;
+                width: 140px;
+                margin-left: 40px;
+                display: inline-block;
+                margin-top: 5px;
+            }
+
+            .tipicLayer .row .layeroperat .range {
+                width: 35px;
+                height: 26px;
+                display: inline-block;
+                float: right;
+                margin-right: 10px;
+                margin-top: 5px;
+            }
+
+                .tipicLayer .row .layeroperat .range .btnicon {
+                    width: 16px;
+                    height: 16px;
+                    margin-top: 2px;
+                    display: inline-block;
+                }
+
+.icon-layerup { /*图层排序中的上升按钮*/
+    background-position: -496px -113px;
+    background-image: url('../image/l1.png');
+}
+
+.icon-layerdown { /*图层排序中的下降按钮*/
+    background-position: -512px -113px;
+    background-image: url('../image/l1.png');
+}
+
+/*地图提示框样式*/
+.MapTipContent {
+    width: 100%;
+}
+
+.MapTipHeadICon {
+    background-image: url(../image/infotip.png);
+    background-repeat: no-repeat;
+}
+
+.MapTipContent .row {
+    border-bottom: 1px solid #E4E9EF;
+}
+
+.MapTipContent .Title {
+    width: 80px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    display: inline-block;
+}
+
+.MapTipContent .Content {
+    height: 30px;
+    line-height: 30px;
+    display: inline-block;
+    border-left: 1px solid #E4E9EF;
+    padding-left: 5px;
+    word-break: keep-all;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.MapTipContent .Link {
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    color: #0099cc;
+}
+
+    .MapTipContent .Link:hover {
+        cursor: pointer;
+    }
+
+/*地图弹框样式*/
+.ol-popup .panel-header {
+    background: none;
+    background-color: #0099CC !important;
+}
+
+    .ol-popup .panel-header .panel-title {
+        color: #FFFFFF;
+        font-weight: normal !important;
+    }
+
+.ol-popup {
+    cursor: default !important;
+}
+
+    .ol-popup > .panel > .panel-header > .panel-tool > .panel-tool-close {
+        background-image: url(../image/tip-close.png) !important;
+        position: relative;
+        top: 5px;
+    }
+
+        .ol-popup > .panel > .panel-header > .panel-tool > .panel-tool-close:hover {
+            background-color: transparent;
+        }
+
+/*地图比例尺*/
+.leaflet-control-scale {
+    margin-left: 52px !important;
+}
+
+.leaflet-control-scale-line {
+    background: transparent !important;
+    border-color: #333;
+    color: #000;
+}
+
+    .leaflet-control-scale-line:hover {
+        color: #000;
+        border-color: #000;
+    }
+
+/*土地生命周期导航*/
+.life-outer {
+    width: 150px;
+    height: 150px;
+    border: 1px solid pink;
+    background-color: aqua;
+    border-radius: 50% 50%;
+    position: absolute;
+    overflow: hidden;
+    opacity: 0.7;
+}
+
+    .life-outer:hover {
+        opacity: 1;
+    }
+
+.life-ring {
+    position: absolute;
+    line-height: 75px;
+    font-size: 24px;
+    width: 75px;
+    height: 75px;
+    left: 75px;
+    top: 75px;
+    background-color: transparent;
+}
+
+.life-inner {
+    width: 60px;
+    height: 60px;
+    border: 1px solid pink;
+    background-color: #018FAA;
+    border-radius: 50% 50%;
+    position: absolute;
+    left: 45px;
+    top: 45px;
+    text-align: center;
+}
+
+    .life-inner:hover {
+        background-color: #07BCEB;
+    }
+
+    .life-inner > .life-text {
+        font-size: 20px;
+        text-align: center;
+        line-height: 75px;
+        color: #ffffff;
+        font-weight: bold;
+    }
+
+
+.life-ring, .life-inner, .life-text-ring {
+    cursor: pointer;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.life-bottomright {
+    transform: skewX(30deg) translateX(22px);
+    background-color: #93431D;
+}
+
+    .life-bottomright:hover {
+        background-color: #E86642;
+    }
+
+    .life-bottomright div {
+        transform: skewX(-30deg) translate(13px,-9px);
+    }
+
+.life-bottommiddle {
+    transform: skew(-30deg,60deg) translate(7px,50px);
+    background-color: #A45C08;
+}
+
+    .life-bottommiddle:hover {
+        background-color: #E38C27;
+    }
+
+    .life-bottommiddle div {
+        font-size: 12px;
+        transform: skew(30deg,-60deg) translate(9px,3px);
+    }
+
+.life-bottomleft {
+    transform: skew(-30deg,0deg) translateX(-98px);
+    background-color: #999104;
+}
+
+    .life-bottomleft:hover {
+        background-color: #DDD00A;
+    }
+
+    .life-bottomleft div {
+        transform: skew(30deg,0deg) translate(39px,-11px);
+    }
+
+.life-topright {
+    transform: skew(-30deg,0deg) translate(-20px,-73px);
+    background-color: #B7585E;
+}
+
+    .life-topright:hover {
+        background-color: #ED616C;
+    }
+
+    .life-topright div {
+        transform: skew(30deg,0deg) translate(12px,9px);
+    }
+
+.life-topmiddle {
+    transform: skew(-30deg,60deg) translate(-66px,-23px);
+    background-color: #5759A6;
+}
+
+    .life-topmiddle:hover {
+        background-color: #838BE7;
+    }
+
+    .life-topmiddle div {
+        font-size: 12px;
+        transform: skew(30deg,-60deg) translate(26px,49px);
+    }
+
+.life-topleft {
+    transform: skewX(30deg) translate(-54px,-72px);
+    background-color: #05A189;
+}
+
+    .life-topleft:hover {
+        background-color: #1FEBCC;
+    }
+
+    .life-topleft div {
+        transform: skewX(-30deg) translate(36px,12px);
+    }
+
+.life-ring div {
+    display: inline-block;
+    position: relative;
+}
+
+.life-inner div {
+    line-height: 60px;
+    display: block;
+}
+
+.life-text:hover, .life-ring .label:hover {
+    text-shadow: 2px 2px 3px;
+}
+
+.life-ring .count {
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    display: none /*inline-block*/;
+    padding: 4px;
+    background: #E72C28;
+    vertical-align: top;
+    position: absolute;
+}
+
+    .life-ring .count span {
+        display: block;
+        color: #FFFFFF;
+        font-size: 14px;
+        line-height: 14px;
+        text-align: center;
+        margin-top: -3px;
+    }
+
+.life-bottomright .count {
+    margin-top: 11px;
+    margin-left: -5px;
+}
+
+.life-bottomleft .count {
+    margin-left: -39px;
+    margin-top: 14px;
+}
+
+.life-bottommiddle .count {
+    position: absolute;
+    left: 13px;
+    top: 36px;
+    font-size: 1px;
+    height: 0px;
+    width: 0px;
+}
+
+    .life-bottommiddle .count span {
+        font-size: 1px;
+        line-height: 2px;
+        transform: translate(-1px,1px) scale(0.6,0.6);
+        margin-top: -2px;
+        margin-left: -1px;
+    }
+
+.life-topright .count {
+    margin-left: -23px;
+    margin-top: 7px;
+}
+
+.life-topleft .count {
+    margin-left: -19px;
+    margin-top: 4px;
+}
+
+.life-topmiddle .count {
+    position: absolute;
+    font-size: 1px;
+    width: 0px;
+    height: 0px;
+    left: -10px;
+    top: 28px;
+}
+
+    .life-topmiddle .count span {
+        font-size: 1px;
+        line-height: 1px;
+        margin-left: -3px;
+        margin-top: 0px;
+        transform: scale(0.7,0.7);
+    }
+
+.life-inner .count {
+    margin-left: -8px;
+    margin-top: 5px;
+}
+
+.life-tip-tbl {
+    border-collapse: collapse;
+    min-width: 200px;
+    max-width: 400px;
+}
+
+    .life-tip-tbl td, .life-tip-tbl th {
+        min-width: 40px;
+        text-align: center;
+        line-height: 26px;
+        font-size: 14px;
+        overflow: hidden;
+        white-space: nowrap;
+        padding-left: 4px;
+        word-wrap: break-word;
+        padding-right: 3px;
+    }
+
+.btna {
+}
+
+
+
+#taxInfo .ktw-tab .TabItem {
+    position: absolute;
+    text-align: center;
+    background: #E6E6FA;
+    color: black;
+}
+
+#taxInfo .ktw-tab .TabItem-Selected {
+    background: #F8F8FF !important;
+    border: 0px;
+}
+
+
+#tipContent .MapTipTabContent {
+    width: 100%;
+    height: 219px;
+    overflow-x: hidden;
+    /*overflow-y: scroll;*/
+}
+
+    #tipContent .MapTipTabContent .Title {
+        width: 80px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        display: inline-block;
+        border-bottom: 1px solid #E4E9EF;
+    }
+
+    #tipContent .MapTipTabContent .TabContent {
+        height: 30px;
+        width: 170px;
+        line-height: 30px;
+        display: inline-block;
+        border-bottom: 1px solid #E4E9EF;
+        border-left: 1px solid #E4E9EF;
+        padding-left: 5px;
+        word-break: keep-all;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+/*通用统计分析图标*/
+.statistic-common {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    background-color: transparent;
+    float: left;
+    margin: 10px;
+    background-repeat: no-repeat;
+    background-position: center top;
+    cursor: pointer;
+    text-align: center;
+    margin-right: 0;
+    opacity: 0.8;
+}
+
+    .statistic-common:hover {
+        opacity: 1;
+    }
+
+    .statistic-common span {
+        font-size: 12px;
+        color: #fff;
+        line-height: 125px;
+    }
+
+.pop-xzqh {
+    padding-bottom: 5px !important;
+    padding-left: 5px !important;
+    background: rgba(0,0,0,0.8) !important;
+    padding-top: 5px !important;
+}
+.pop-flhz {
+    padding-bottom: 10px !important;
+    padding-left: 8px !important;
+    background: rgb(255,255,255) !important;
+    padding-top: 10px !important;
+    height:32px !important;
+    /*width:150px !important;*/
+    opacity:0.8 !important;
+}
+.pop-flhz:hover{
+    opacity:1 !important;
+}
+.pop-flhz .item:hover {
+    background-color: #eee;
+    color: #32589c;
+}
+.pop-flhz .item {
+    font-size: 14px;
+    height: 30px;
+    line-height: 30px;
+    padding-left: 10px;
+    cursor:pointer;
+}

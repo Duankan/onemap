@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Modal Window </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+     
+    </style>
+    <script type="text/javascript">
+
+        var ctr;
+
+        $(window).ready(function () {
+            ctr = new ktw.Window({
+                ID: "Modal",
+                Title: "有遮罩效果的窗体",
+                Height: 280,
+                Width: 470,
+                HAlign: 'center',
+                VAlign: 'center',
+                Modal: true,
+                Parent: $(document.body),
+                IsMaximize: false,
+                Maximizable: true,
+                Minimizable: true,
+                Draggable: true,
+                Resizable: true,
+                Url: "http://www.kingtopware.com"
+            });
+
+            ctr.Layout();
+        });
+
+    </script>
+</head>
+<body>
+    <h2>Modal Window</h2>
+    <p>有遮罩效果的窗体</p>
+
+</body>
+</html>

@@ -1,0 +1,566 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>人员管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link href="../../js/artDialog-7.0.0/css/dialog.css" rel="stylesheet" />
+    <link href="../../css/ktw.form2.css" rel="stylesheet" />
+    <link href="../../js/grid/css/grid.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog-plus.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script type="text/javascript" src="../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../js/ktw.onemap.js"></script>
+    <script type="text/javascript" src="../../js/appmana.js"></script>
+    <script src="../../js/grid/js/grid.js"></script>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var Config = null;
+        reloadconfig();//加载配置文件
+        var ServerUrl = null;
+        var curMenu;
+        ServerUrl = Ktw.cookie.ServerUrl;
+        $(function () {
+            curMenu = Config.SystemUri;
+            ktw.appmana.init("../../config/app.xml");
+            initTree();
+            var node = $('#organizeTree').tree('find', 1001);
+            $('#organizeTree').tree('select', node.target);
+        })
+        //加载左侧树结构
+        function initTree() {
+            $('#organizeTree').tree({
+                data: [{
+                    text: '地址管理',
+                    children: [{
+                        id: 1001,
+                        text: '基础地址',
+                    }, {
+                        text: '相对地址'
+                    }]
+                }],
+                onSelect: function (node) {
+                    if (node.text == '基础地址') {
+                        $(".BasicUris").show();
+                        $(".RelativeUris").hide();
+                        initdataGrid();
+                    }
+                    else if (node.text == '相对地址') {
+                        $(".RelativeUris").show();
+                        $(".BasicUris").hide();
+                        initreldataGrid();
+                        $("#relBasicID").html("");
+                        var BasicUri = (curMenu.BasicUris.length ? curMenu.BasicUris : [curMenu.BasicUris]);
+                        for (var i = 0; i < BasicUri.length; i++) {
+                            $("#relBasicID").append("<option value=" + BasicUri[i]["ID"] + ">" + BasicUri[i]["ID"] + "</option>")
+                        }
+                        $("#relBasicID").val(BasicUri[0]["ID"]);
+                    }
+                    else {
+                        $(".RelativeUris").hide();
+                        $(".BasicUris").hide();
+                    }
+                },
+                formatter: function (node) {
+                    if (!node.children || node.children.length == 0) return node.text;
+                    return node.text + '<span style="color:blue">(' + node.children.length + ')</span>';
+                },
+            });
+        }
+        //添加BasicUris
+        function addBasicUris() {
+            $("#basname").removeAttr('readonly');
+            $("#basname,#basid").val("");
+            var d = dialog({
+                title: "添加基础地址",
+                content: $('#baseditwin'),
+                okValue: '添 加',
+                ok: function () {
+                    var BasicUris = {};
+                    BasicUris.ID = $("#basname").val();
+                    BasicUris.Uri = $("#basid").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addBasicUris.validate(BasicUris)) {
+                        ktw.appmana.addBasicUris(BasicUris, function () {
+                            ktw.appmana.tip("保存成功!");
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+        //添加RelativeUris
+        function addRelativeUris() {
+            $("#relid,#relUri,#relBasicID,#finaladdr").val("");
+            $("#relid").removeAttr('readonly');
+            $("#relBasicID").removeAttr('disabled');
+            var d = dialog({
+                title: "添加相对地址",
+                content: $('#releditwin'),
+                okValue: '添 加',
+                ok: function () {
+                    var RelativeUris = {};
+                    RelativeUris.ID = $("#relid").val();
+                    RelativeUris.Uri = $("#relUri").val();
+                    RelativeUris.BasicID = $("#relBasicID").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addRelativeUris.validate(RelativeUris)) {
+                        ktw.appmana.addRelativeUris(RelativeUris, function () {
+                            ktw.appmana.tip("保存成功!");
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+        //初始化基础地址表格
+        function initdataGrid() {
+            var grid = new ktw.Grid();
+            grid.ID = "bastableGrid";
+            grid.isPage = false;
+            grid.headArr = [
+                [
+                    { text: "序号", width: "5%" },
+                    { text: "主键", width: "15%" },
+                    { text: "地址", width: "40%" },
+                    { text: "编辑", width: "20%" },
+                    { text: "删除", width: "20%" }
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "ID", type: "lab", title: "Title" },
+                { name: "Uri", type: "lab" },
+                { text: "编辑", key: "ID", type: "btn", clickName: "baseditItem", titleText: "进行编辑" },
+                { text: "删除", key: "ID", type: "btn", clickName: "basdeleteItem", titleText: "删除前要确认" }];
+            grid.initGrid = function () {
+                var BasicUris = curMenu.BasicUris;
+                BasicUris = BasicUris || [];
+                var arr = [];
+                for (var i = 0; i < BasicUris.length; i++) {
+                    arr.push(BasicUris[i]);
+                }
+                grid.init({ DataList: arr });
+            }
+            grid.initGrid();
+        }
+        //初始化相对地址表格
+        function initreldataGrid() {
+            var grid = new ktw.Grid();
+            grid.ID = "reltableGrid";
+            grid.isPage = false;
+            grid.headArr = [
+                [
+                    { text: "序号", width: "8%" },
+                    { text: "主键(ID)", width: "12%" },
+                    { text: "相对地址", width: "22%" },
+                    { text: "基础地址", width: "10%" },
+                    { text: "最终地址", width: "30%" },
+                    { text: "编辑", width: "8%" },
+                    { text: "删除", width: "8%" }
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "ID", type: "lab", title: "Title" },
+                { name: "Uri", type: "lab" },
+                { name: "BasicID", type: "lab" },
+                { name: "finaladdr", type: "lab" },
+                { text: "编辑", key: "ID", type: "btn", clickName: "releditItem", titleText: "进行编辑" },
+                { text: "删除", key: "ID", type: "btn", clickName: "reldeleteItem", titleText: "删除前要确认" }];
+            grid.initGrid = function () {
+                var RelativeUris = curMenu.RelativeUris;
+                RelativeUris = RelativeUris || [];
+                var arr = [];
+                for (var i = 0; i < RelativeUris.length; i++) {
+                    RelativeUris[i].finaladdr = ktw.appmana.getBasicUrisbyid(RelativeUris[i].BasicID).Uri + RelativeUris[i].Uri;
+                    arr.push(RelativeUris[i]);
+                }
+                grid.init({ DataList: arr });
+            }
+            grid.initGrid();
+        }
+        //读取配置文件
+        function reloadconfig() {
+            var config = null;
+            $.ajax({
+                url: "../../config/app.xml",
+                dataType: 'xml',
+                type: 'GET',
+                cache: false,
+                timeout: 2000,
+                async: false,
+                error: function (xml) {
+                    ktw.Alert("加载系统配置文件出错！");
+                    console.error(arguments);
+                },
+                success: function (xml) {
+                    config = $.xml2json(xml);
+                }
+            });
+            Config = config;
+        }
+        //删除基础地址
+        function basdeleteItem(item) {
+            var id = $(item).attr("btnkey");
+            if (id == "ServiceUrl") {
+                ktw.appmana.alert("基础地址不可删除!");
+                return;
+            }
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个菜单?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteBasicUris.validate(id)) {
+                        ktw.appmana.deleteBasicUris(id, function () {
+                            ktw.appmana.tip("删除成功!");
+                            refreshGrid();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //删除相对地址
+        function reldeleteItem(item) {
+            var id = $(item).attr("btnkey");
+            if (id == "SysService") {
+                ktw.appmana.alert("此项不可删除!");
+                return;
+            }
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个菜单?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteRelativeUris.validate(id)) {
+                        ktw.appmana.deleteRelativeUris(id, function () {
+                            ktw.appmana.tip("删除成功!");
+                            refreshGrid();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //编辑基础地址
+        function baseditItem(item) {
+            var id = $(item).attr("btnkey");
+            var BasicUris = ktw.appmana.getBasicUrisbyid(id);
+            setBasicUrisData(BasicUris);
+            $("#basname").attr('readonly', 'readonly');
+            var d = dialog({
+                title: BasicUris.ID,
+                content: $('#baseditwin'),
+                okValue: '确 定',
+                ok: function () {
+                    var BasicUris = {};
+                    BasicUris.ID = $("#basname").val();
+                    BasicUris.Uri = $("#basid").val();
+                    if (ktw.appmana.updateBasicUris.validate(id, BasicUris)) {
+                        ktw.appmana.updateBasicUris(id, BasicUris, function () {
+                            ktw.appmana.tip("更新成功!");
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+        //编辑相对地址
+        function releditItem(item) {
+            var id = $(item).attr("btnkey");
+            var RelativeUris = ktw.appmana.getRelativeUrisbyid(id);
+            setRelativeUrisData(RelativeUris);
+            $("#relid").attr('readonly', 'readonly');
+            //$("#relBasicID").attr('disabled', 'disabled');
+            var d = dialog({
+                title: RelativeUris.ID,
+                content: $('#releditwin'),
+                okValue: '确 定',
+                ok: function () {
+                    var RelativeUris = {};
+                    RelativeUris.ID = $("#relid").val();
+                    RelativeUris.Uri = $("#relUri").val();
+                    RelativeUris.BasicID = $("#relBasicID").val();
+                    if (ktw.appmana.updateRelativeUris.validate(id, RelativeUris)) {
+                        ktw.appmana.updateRelativeUris(id, RelativeUris, function () {
+                            ktw.appmana.tip("更新成功!");
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+
+        function setRelativeUrisData(RelativeUris) {
+            $("#relid,#relUri,#relBasicID").val("");
+            $("#relid").val(RelativeUris.ID);
+            $("#relUri").val(RelativeUris.Uri);
+            $("#relBasicID").val(RelativeUris.BasicID);
+            updateFinaladd();
+        }
+
+        function setBasicUrisData(BasicUris) {
+            $("#basname,#basid").val("");
+            $("#basname").val(BasicUris.ID);
+            $("#basid").val(BasicUris.Uri);
+        }
+        //刷表格
+        function refreshGrid() {
+            $.ajax({
+                url: ServerUrl + "confmana/select",
+                type: "post",
+                async: true,
+                data: { path: "/App/SystemUri" },
+                success: function (res) {
+                    if (res.success) {
+                        if (res.data.length == 1) {
+                            curMenu = $.xml2json(res.data[0]);
+                            initdataGrid();
+                            initreldataGrid();
+                        } else {
+
+                        }
+                    }
+                },
+                error: function () {
+                    console.error(arguments);
+                }
+            });
+        }
+        //更新最终地址显示框
+        function updateFinaladd() {
+            var basicid = $("#relBasicID").val();
+            if (ktw.IsNull(basicid)) {
+                return;
+            }
+            var url = ktw.appmana.getBasicUrisbyid(basicid).Uri + $("#relUri").val();
+            $("#finaladdr").val(url);
+        }
+    </script>
+    <style type="text/css">
+        .con-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 400px;
+            border-right: solid 1px #DDDDDD;
+        }
+
+        .header {
+            height: 25px;
+            padding-top: 5px;
+            padding-left: 10px;
+        }
+
+        #divtree {
+            padding-left: 5px;
+            height: 90%;
+        }
+
+        .con-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            left: 400px;
+            overflow: auto;
+        }
+
+        .bar {
+            margin-top: 5px;
+            margin-left: 10px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .bar-line {
+            width: 6px;
+            height: 20px;
+            position: absolute;
+            top: 50%;
+            margin-top: -10px;
+            background-color: #01B6EF;
+            display: inline-block;
+        }
+
+        .bar-txt {
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        .datagrid-toolbar {
+            border-top: 1px solid #DDDDDD;
+            text-align: right;
+        }
+
+        .box {
+            border: 1px solid #dddddd;
+            width: 96%;
+            margin: 0 auto;
+            box-shadow: #dddddd 0px 0px 20px;
+            padding: 5px;
+            margin-top: 5px;
+        }
+
+        #editwin {
+            display: none;
+            width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; height: 100%; background: #FFFFFF">
+        <div style="width: 30%; height: 100%; border-right: solid 1px #DDDDDD;">
+            <div class="header">地址管理</div>
+            <div id="divtree" style="width: 100%; height: 90%; overflow-x: hidden">
+                <ul id="organizeTree" style="width: 100%; height: 100%;"></ul>
+            </div>
+        </div>
+        <div id="rightdiv" style="position: absolute; right: 0px; top: 0px; height: 100%; width: calc(70% - 1px)">
+            <div class="BasicUris">
+                <div class="box">
+                    <div class="baseurlinfo">
+                        <div class="bar">
+                            <div class="bar-line"></div>
+                            <span class="bar-txt">基础地址</span>
+                        </div>
+                        <div class="right">
+                            <button class="btn" onclick="addBasicUris()">添加</button>
+                        </div>
+                        <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+                            <table id="bastableGrid"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="RelativeUris">
+                <div class="box">
+                    <div class="relativeurlinfo">
+                        <div class="bar">
+                            <div class="bar-line"></div>
+                            <span class="bar-txt">相对地址</span>
+                        </div>
+                        <div class="right">
+                            <button class="btn" onclick="addRelativeUris()">添加</button>
+                        </div>
+                        <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+                            <table id="reltableGrid"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="baseditwin">
+        <table class="form-tbl" style="width: 100%;">
+            <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">主键：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="basname" />
+                </td>
+                <td class="td-title">地址：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="basid" />
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="releditwin">
+        <table class="form-tbl" style="width: 100%;">
+            <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">主键(ID)：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="relid" />
+                </td>
+                <td class="td-title">相对地址：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="relUri" onblur="updateFinaladd()" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">基础地址：</td>
+                <td class="td-txt">
+                    <select id="relBasicID" class="form-select" onchange="updateFinaladd()"></select>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">最终地址：</td>
+                <td class="td-txt" colspan="3">
+                    <input type="text" class="form-txt" id="finaladdr" readonly="readonly" style="width: 98%;" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

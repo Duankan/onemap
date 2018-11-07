@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Draggable Window </title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+     
+    </style>
+    <script type="text/javascript">
+
+        var ctr;
+
+        $(window).ready(function () {
+            ctr = new ktw.Window({
+                ID: "draggable",
+                Title: "可拖拽的窗体",
+                Height: 280,
+                Width: 470,
+                HAlign: 'center',
+                VAlign: 'center',
+                Parent: $(document.body),
+                IsMaximize: false,
+                Maximizable: true,
+                Minimizable: true,
+                Draggable: true,
+                Resizable: true,
+                Url: "http://www.kingtopware.com"
+            });
+
+            ctr.Layout();
+        });
+
+    </script>
+</head>
+<body>
+    <h2>Draggable Window</h2>
+    <p>可拖拽的window窗体</p>
+   
+</body>
+</html>

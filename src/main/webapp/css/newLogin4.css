@@ -1,0 +1,178 @@
+﻿* {
+    padding: 0;
+    margin: 0;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+.header {
+    width: 100%;
+    height: 130px;
+    position: relative;
+}
+
+.logo {
+    width: 28%;
+    height: 56%;
+    left: 6%;
+    top: 24%;
+    position: absolute;
+}
+
+    .logo img {
+        width: 100%;
+    }
+
+.content {
+    width: 100%;
+    height: calc(100% - 210px);
+    /*background: rgba(0,0,0,0.5) url(../image/loginbg4.png) no-repeat 100% 100%;*/
+    position: absolute;
+    top:130px;
+    overflow: hidden;
+    background-size: cover;
+    z-index:999;
+}
+
+.swiper-container {
+    width: 100%;
+    height: calc(100% - 210px);    
+}
+.swiper-container img{
+    width: 100%;
+    height: 100%;    
+}
+
+.content_img1, .content_img2 {
+    position: absolute;
+}
+
+.content_img1 {
+    bottom: 0;
+    left: 21%;
+    height: 78%;
+    width: 30%;
+}
+
+    .content_img1 img, .content_img2 img {
+        width: 100%;
+        position: absolute;
+        bottom: 0px;
+    }
+
+.content_img2 {
+    top: 30%;
+    left: 21%;
+    height: 55%;
+    width: 30%;
+}
+
+.login-box {
+    width: 300px;
+    height: 340px;
+    background: rgba(255,255,255,0.6);
+    position: absolute;
+    top: calc(50% - 170px);
+    right: 16%;
+    border-radius: 8px;
+    font-family: 'Microsoft YaHei';
+}
+
+.login-header {
+    height: 50px;
+    width: 100%;
+    border-radius: 8px 8px 0px 0px;
+    font-size: 28px;
+    line-height: 50px;
+    text-align: center;
+    font-weight: 500;
+    margin-top: 25px;
+}
+
+.login-box p {
+    width: 80%;
+    height: 36px;
+    margin-left: 10%;
+}
+
+.userName, .password {
+    border: 1px solid #ddd;
+    background: #fff;
+    margin-top: 30px;
+}
+
+    .userName span, .password span {
+        width: 22px;
+        height: 22px;
+        margin-top: 7px;
+        display: block;
+        float: left;
+        margin-left: 15px;
+    }
+
+    .userName input, .password input {
+        border: none;
+        border-left: 1px solid #ddd;
+        margin-left: 10px;
+        padding-left: 10px;
+        display: block;
+        float: left;
+        width: 150px;
+        height: 22px;
+        margin-top: 7px;
+        color: #666;
+        font-size: 16px;
+    }
+
+    .userName img, .password img {
+        width: 100%;
+        height: 100%;
+    }
+/*.rPassword{
+				height: 20px;
+				margin-top: 20px;
+			}
+            .rPassword input {
+                margin-top: 4px;
+                display: block;
+                float: left;
+            }
+			.rPassword span{
+				line-height: 20px;
+				font-size: 14px;
+				margin-left: 5px;
+				color: #333;
+			}*/
+.register {
+    margin-top: 40px;
+}
+
+    .register input {
+        background: #f87501;
+        height: 100%;
+        width: 100%;
+        border: none;
+        color: #fff;
+        font-size: 16px;
+    }
+
+        .register input:hover {
+            background: #009900;
+        }
+
+.footer {
+    width: 100%;
+    height: 80px;
+    background: #e0e0e0;
+}
+
+    .footer p {
+        text-align: center;
+    }
+
+.copyright {
+    padding-top: 35px;
+}

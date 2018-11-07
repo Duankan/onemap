@@ -1,0 +1,12 @@
+{
+"total":"28",
+"rows":[
+{"itemid":"供地专题","productid":"K9-DL-01","listprice":"供地专题分为四个方面来展示土地资源的运行情况，便于国土部门及时了解和分析当前的形势发展。从指标与计划方面，可以了解本年度的计划于实际执行情况；从供应结构方面，可以直观各供地用途用地的总量及结构占比变化趋势……","unitcost":"http://192.168.1.251/big-screen/ktw/samples/big-screen/gtzyb/gongdi/contry.html","status":"P","attr1":"Spotless Male Puppy"},
+{"itemid":"耕地保护专题","productid":"K9-PO-02","listprice":"耕地是我国最为宝贵的资源。我国人多地少的国情决定了保护耕地的重要性，耕地保护事关我国农业稳定、粮食安全，是国计民生之大事。然而随着经济社会的发展，土地资源的稀缺性逐步显现，我国耕地面积日益减少……","unitcost":"http://192.168.1.251/big-screen/samples/big-screen/gtzyb/gengdi/contry.html","status":"P","attr1":"Male Puppy"},
+{"itemid":"执法专题","productid":"K9-BD-01","listprice":"能够查看当前区域级别（国、省、市）在执法监管方面的现状，支持对可选指标统计分析，指标可以是单一也可以互相组合，指标的统计结果能以统计图表的形式展示，并能对分析的结果形成基本的分析报告，供用户参考决策……","unitcost":"http://192.168.1.251/big-screen/ktw/samples/big-screen/gtzyb/weifa/","status":"P","attr1":"Female Puppy"},
+{"itemid":"房产专题","productid":"K9-BD-01","listprice":"土地是最宝贵的资源，也是不可再生的资源，而房地产行业作为中国经济的支柱产业，房地产业与土地不可分割的的特性决定了土地对房地产行业的决定性影响。但除此之外，由于房地产行业的复杂性，仅仅对土地这个因素……","unitcost":"http://192.168.1.251/big-screen/ktw/samples/big-screen/gtzyb/fangchan/contry.html","status":"P","attr1":"Male Adult"},
+{"itemid":"基础设施专题","productid":"FI-FW-01","listprice":"能够查看当前区域级别（国、省、市）基础设施及各其用地结构所占比例。支持各结构向下钻取查看其子类组成部分占比情况；支持对可选指标统计分析，指标可以是单一也可以互相组合，指标的统计结果能以统计图表……","unitcost":"http://192.168.1.251/big-screen/ktw/samples/big-screen/gtzyb/jichusheshi/index.html","status":"P","attr1":"Spotless"},
+{"itemid":"供地专题","productid":"FI-FW-01","listprice":"能够查看当前区域级别（国、省、市）基础设施及各其用地结构所占比例。支持各结构向下钻取查看其子类组成部分占比情况；支持对可选指标统计分析，指标可以是单一也可以互相组合，指标的统计结果能以统计图表……","unitcost":"../../html/policysupport/gongdi/index.html","status":"P","attr1":"Spotless"},
+{"itemid":"耕地利用","productid":"FI-FW-01","listprice":"能够查看当前区域级别（国、省、市）基础设施及各其用地结构所占比例。支持各结构向下钻取查看其子类组成部分占比情况；支持对可选指标统计分析，指标可以是单一也可以互相组合，指标的统计结果能以统计图表……","unitcost":"../../html/policysupport/gengdi/ploughUse.html","status":"P","attr1":"Spotless"},
+{"itemid":"耕地保护","productid":"FI-FW-01","listprice":"能够查看当前区域级别（国、省、市）基础设施及各其用地结构所占比例。支持各结构向下钻取查看其子类组成部分占比情况；支持对可选指标统计分析，指标可以是单一也可以互相组合，指标的统计结果能以统计图表……","unitcost":"../../html/policysupport/gengdi/ploughProtect.html","status":"P","attr1":"Spotless"}
+]}

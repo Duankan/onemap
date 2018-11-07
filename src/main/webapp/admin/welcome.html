@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>行政区划</title>
+    <link href="../js/ktop/ktop.css" rel="stylesheet" />
+    <script src="../js/ktop/ktop.js"></script>
+    <script src="../js/jquery-3.1.0.min.js"></script>
+    <style type="text/css">
+        .icon-26 {
+            width: 26px !important;
+        }
+
+        .icon-38 {
+            width: 38px !important;
+        }
+
+        .icon-50 {
+            width: 50px !important;
+        }
+
+        .icon-62 {
+            width: 62px !important;
+        }
+
+        .icon-80 {
+            width: 80px !important;
+        }
+
+        .icon-120 {
+            width: 120px !important;
+        }
+
+        #map {
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="map" style="width: 100%; height: 100%;"></div>
+
+    <script type="text/javascript">
+        var mousepos;
+        $(function () {
+            var areacode = window.top.ktw.App.Config.SystemTheme.AreaCode;
+            areacode = areacode.substr(0, 2);
+            var map = L.map('map', {
+                center: { lon: 111.5167236328125, lat: 27.415662034561 },
+                zoom: 7,
+                minZoom: 2,//地图最小级数
+                maxZoom: 18,//地图最大级数
+                attributionControl: false,
+                zoomControl: false
+            });
+            $.getJSON('../config/mapdata/geometryProvince/' + areacode + '.json', function (data) {
+                var geojsonLayer = new L.GeoJSON(data, {
+                    weight: 1,
+                    opacity: 1,
+                    color: '#ffffff',
+                    dashArray: '1',
+                    fillOpacity: 1,
+                    fillColor: '#2E2E31',
+                    onEachFeature: onEachFeature
+                });
+                geojsonLayer.addTo(map);
+                map.fitBounds(geojsonLayer);
+            });
+            function onEachFeature(feature, layer) {
+                var classname = "icon-26";
+                if (feature.properties.name.length > 6) {
+                    classname = "icon-120";
+                }
+                else if (feature.properties.name.length > 5) {
+                    classname = "icon-80";
+                } else if (feature.properties.name.length > 4) {
+                    classname = "icon-62";
+                } else if (feature.properties.name.length > 3) {
+                    classname = "icon-50";
+                } else if (feature.properties.name.length > 2) {
+                    classname = "icon-38";
+                }
+                layer.setStyle({
+                    fill: true,
+                    fillColor: feature.properties.color?feature.properties.color:"#aaa",
+                });
+                var myIcon = L.divIcon({
+                    className: classname,
+                    html: '<div class="icon">' + feature.properties.name + '</div>'
+                });
+                L.marker([feature.properties.cp[1], feature.properties.cp[0]], { icon: myIcon }).addTo(map);
+            }
+            var options = {
+                //控件方向
+                position: 'bottomright',
+                //字体颜色
+                fontColor: '#33FF99',
+                //背景颜色
+                backgroundColor: '#2F374C',
+                //字体大小
+                fontSize: 22,
+                //小数点位数
+                toFix: 7,
+            };
+            L.Control.MousePosition = L.Control.extend({
+                options: {
+                    position: 'topright',
+                    fontColor: '#33FF99',
+                    backgroundColor: '#2F374C',
+                    fontSize: 20,
+                    toFix: 7,
+                },
+                initialize: function (options) {
+                    L.Util.extend(this.options, options);
+                },
+                includes: L.Mixin.Events,
+                onAdd: function (map) {
+                    this._map = map;
+                    this._container = L.DomUtil.create('div', 'control-position');
+                    this._container.style.color = this.options.fontColor;
+                    this._container.style.backgroundColor = this.options.backgroundColor;
+                    this._container.style.fontSize = this.options.fontSize + 'px';
+                    this._container.innerHTML = '0,0 缩放级别:X';
+                    this._map.on('mousemove', this._setPositions, this);
+                    this._map.on('mouseout', this._resetPositions, this);
+                    return this._container;
+                },
+                _setPositions: function (e) {
+                    var mousePoint = new L.LatLng(e.latlng.lat, e.latlng.lng);
+                    var lat = (mousePoint.lat).toFixed(this.options.toFix);
+                    var lng = (mousePoint.lng).toFixed(this.options.toFix);
+                    var zoom = this._map.getZoom();
+                    this._container.innerHTML = lat + ',' + lng + " 缩放级别:" + zoom;
+                },
+                _resetPositions: function () {
+                    this._container.innerHTML = '0,0 缩放级别:X';
+                }
+            });
+            //mousepos = new L.Control.MousePosition(options).addTo(map);
+        });
+
+    </script>
+</body>
+</html>

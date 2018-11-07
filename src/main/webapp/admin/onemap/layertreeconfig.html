@@ -1,0 +1,2692 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>人员管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link href="../../js/artDialog-7.0.0/css/dialog.css" rel="stylesheet" />
+    <link href="../../css/ktw.form2.css" rel="stylesheet" />
+    <link href="../../js/grid/css/grid.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog-plus.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script type="text/javascript" src="../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../js/ktw.onemap.js"></script>
+    <script type="text/javascript" src="../../js/appmana.js"></script>
+    <script src="../../js/grid/js/grid.js"></script>
+    <!--<link href="../../js/colorPicker/jsColor.css" rel="stylesheet" />
+    <script src="../../js/colorPicker/jsColorPicker.min.js"></script>-->
+
+
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var Config = null;
+        reloadconfig();//加载配置文件
+        var state = "update";
+        var updateID = "";
+        var ServerUrl = null;
+        //当前点击的节点对象
+        var currentnode = null;
+        //当前点击的图层对象
+        var curmaplayer = null;
+        //当前点击的图层父节点
+        var curmaplayerparent = null;
+        //当前点击的父节点对象
+        var currentnodeparent = null;
+        ServerUrl = Ktw.cookie.ServerUrl;
+        var editIndex = undefined;
+        $(function () {
+            ktw.appmana.init("../../config/app.xml");
+            initTree();
+            var node = $('#organizeTree').tree('find', "__1001__");
+            $('#organizeTree').tree('select', node.target);
+            $(":radio").click(function () {
+                if ($("#layertitle")[0].innerHTML == "添加图层信息") {
+                    $(".queryconfig").hide();
+                    return;
+                }
+                if ($(this).val() == "true") {
+                    $(".queryconfig").hide();
+                }
+                else if ($(this).val() == "false") {
+                    $(".queryconfig").show();
+                }
+            });
+            /*var colors = jsColorPicker('#FColor', {
+                customBG: '#222',
+                readOnly: true,
+                // patch: false,
+                init: function (elm, colors) { // colors is a different instance (not connected to colorPicker)
+                    elm.style.backgroundColor = elm.value;
+                    elm.style.color = colors.rgbaMixCustom.luminance > 0.22 ? '#222' : '#ddd';
+                },
+                // appendTo: document.querySelector('.samples')
+            });*/
+        });
+        //读取配置文件
+        function reloadconfig() {
+            var config = null;
+            var b = false;
+            var count = 0;
+            function _load() {
+                $.ajax({
+                    url: "../../config/app.xml?i=" + new Date().getTime(),
+                    dataType: 'xml',
+                    type: 'GET',
+                    cache: false,
+                    timeout: 2000,
+                    async: false,
+                    error: function (xml) {
+                        console.log("加载系统配置文件出错！", arguments);
+                        console.error(arguments);
+                    },
+                    success: function (xml) {
+                        b = true;
+                        config = $.xml2json(xml);
+                    }
+                });
+            }
+            while (count < 5 && !b) {
+                _load();
+                count++;
+            }
+            Config = config;
+            console.log(config.SystemMap.ArrayOfMapLayer.MapLayer[2].Children.MapLayer[0].Text);
+        }
+        //初始化树
+        function initTree() {
+            var path = "/App/SystemMap/ArrayOfMapLayer"
+            var data = [{
+                text: '图层树配置',
+                id: "__1001__",
+                children: [],
+                haschild: true
+            }];
+            var MapLayer = Config.SystemMap.ArrayOfMapLayer.MapLayer;
+
+            if (MapLayer != undefined) {
+                if (MapLayer.length == undefined) {
+                    MapLayer = [MapLayer];
+                }
+                A(MapLayer, data[0]);
+            }
+            function A(MapLayer, arr) {
+                if (MapLayer == undefined) { return; }
+                if (MapLayer.length == undefined) { MapLayer = [MapLayer] }
+                arr.children = data.children || [];
+                for (var i = 0; i < MapLayer.length; i++) {
+                    var tmp = {};
+                    tmp.id = "_" + MapLayer[i].ID;
+                    tmp.text = MapLayer[i].Text;
+                    tmp.type = MapLayer[i].Type;
+                    tmp.children = [];
+                    arr.children.push(tmp);
+                    if (MapLayer[i].Children && MapLayer[i].Children.MapLayer) {
+                        tmp.haschild = true;
+                        A(MapLayer[i].Children.MapLayer, tmp);
+                    } else {
+                        tmp.haschild = false;
+                    }
+                }
+            }
+            $('#organizeTree').tree({
+                dnd: true,
+                data: data,
+                onDrop: function (target, source, point) {
+                    if (point == 'append') {
+                        //移动
+                        var dest = $('#organizeTree').tree('getNode', target);
+                        if (ktw.appmana.moveLayer.validate(source.id.substring(1), dest.id.substring(1))) {
+                            ktw.appmana.moveLayer(source.id.substring(1), dest.id.substring(1), function (res) {
+                                ktw.appmana.tip('移动成功！');
+                            }, function (res) {
+                                ktw.appmana.alert('移动失败！');
+                            });
+                        }
+                    }
+                    else {
+                        //排序
+                        var items = [];
+                        var parent = $('#organizeTree').tree('getParent', target);
+                        var childrens = parent.children;;
+                        for (var i = 0; i < childrens.length; i++) {
+                            items.push("/App/SystemMap/ArrayOfMapLayer//MapLayer/ID[text()='" + childrens[i].id.substring(1) + "']/..");
+                        }
+                        var cpath = "/App/SystemMap/ArrayOfMapLayer//MapLayer/ID[text()='" + parent.id.substring(1) + "']/../Children";
+                        if (parent.id == "__1001__") {
+                            cpath = "/App/SystemMap/ArrayOfMapLayer";
+                        }
+                        var data = { path: cpath, items: JSON.stringify(items) }
+                        $.ajax({
+                            type: "POST",
+                            data: data,
+                            url: ServerUrl + "confmana/order",
+                            success: function (data) {
+                                reloadconfig();
+                                initTree();
+                                if (data.success == true) {
+                                    ktw.appmana.tip('拖动成功！');
+                                } else ktw.appmana.alert('拖动失败！');
+                            },
+                            error: function (data) {
+                                reloadconfig();
+                                initTree();
+                                ktw.appmana.alert('服务请求失败！');
+                            }
+                        });
+                    }
+                },
+                onSelect: function (node) {
+                    state = "update";
+                    getmaplayer(node);
+                    if (node.id == '__1001__') {
+                        $(".baseinfo").show();
+                        $(".detailinfo").hide();
+                        $(".layerinfo").hide();
+                        initData();
+                        return;
+                    }
+                    //获取点击节点内容
+                    if (node.haschild == true || node.type == undefined) {
+                        $(".detailinfo").show();
+                        $("#title").html("" + node.text);
+                        $(".layerinfo").hide();
+                        $(".baseinfo").hide();
+                        $("#detailID").val(curmaplayer.ID);
+                        $("#detailText").val(curmaplayer.Text);
+                        $("#detailIcon").val(curmaplayer.Icon);
+                        //$("#detailIconCls").val(curmaplayer.IconCls);
+                        $("#detailVisible").val(curmaplayer.Visible);
+                        $("#detailOpen").val(curmaplayer.Open);
+                        $("#detailChecked").val(curmaplayer.Checked);
+                    }
+                    else if (node.haschild == false) {
+                        clearlayerdata();
+                        $(".layerinfo").show();
+                        $(".detailinfo").hide();
+                        $(".baseinfo").hide();
+
+                        switch (node.type) {
+                            case "WMS":
+                                $("#layertitle").html("" + node.text);
+                                $("#layerbaseinfo").show();
+                                $(".queryconfig").show();
+                                $("#tableWMTS").hide();
+                                $("#tableTile").hide();
+                                $("#WMSNoQuery1").val("true");
+                                if (curmaplayer.NoQuery == "true") {
+                                    $(".queryconfig").hide();
+                                    $("#WMSNoQuery1").val("false");
+                                }
+                                break;
+                            case "WMTS":
+                                $("#SpanWMTS").html("" + node.text);
+                                $("#layerbaseinfo").hide();
+                                $("#tableWMTS").show();
+                                $("#tableTile").hide();
+                                break;
+                            case "Tile":
+                                $("#SpanTile").html("" + node.text);
+                                $("#layerbaseinfo").hide();
+                                $("#tableWMTS").hide();
+                                $("#tableTile").show();
+                                break;
+                            default:
+                                $("#layerbaseinfo").hide();
+                                $("#tableWMTS").hide();
+                                $("#tableTile").hide();
+                                break;
+                        }
+                        initlayerdata(node, curmaplayer);
+                    }
+                    if (node.text == "图层树配置") {
+                        $(".detailinfo").hide();
+                        $(".baseinfo").hide();
+                        $(".layerinfo").hide();
+                    }
+                },
+                //对树节点做操作
+                onContextMenu: function (e, node) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $(this).tree('select', node.target);
+                    if ((node.haschild) == false) {
+                        $('#yztree').menu('show', { left: e.pageX, top: e.pageY });
+                    };
+                    if ((node.haschild) == true || node.type == undefined) {
+                        if (node.text == "图层树配置") {
+                            $("#miDelete").hide()
+                        }
+                        else { $("#miDelete").show() }
+                        $('#mtree').menu('show', { left: e.pageX, top: e.pageY });
+                    }
+                    //删除文件夹节点
+                    $("div[name=miDeletefold]").unbind("click");
+                    $("div[name=miDeletefold]").click(function (e) {
+                        deleteMapLayer(node);
+                    });
+                    //删除叶子结点
+                    $("div[name=miDeletenode]").unbind("click");
+                    $("div[name=miDeletenode]").click(function (e) {
+                        deleteMapLayerChild(node);
+                    });
+                    $("div[name=Addfolders]").unbind("click");
+                    $("div[name=Addfolders]").click(function (e) {
+                        addMapLayer();
+                    });
+                    $("div[name=addleafnode]").unbind("click");
+                    $("div[name=addleafnode]").click(function (e) {
+                        addMapLayerChild();
+                    });
+                },
+                formatter: function (node) {
+                    if (!node.children || node.children.length == 0) return node.text;
+                    return node.text + '<span style="color:blue">(' + node.children.length + ')</span>';
+                },
+                onBeforeDrop: function (target, source, point) {
+                    var dest = $('#organizeTree').tree('getNode', target);
+                    var dest_p = $('#organizeTree').tree('getParent', target);
+                    var src_p = $('#organizeTree').tree('getParent', source.target);
+                    if (point == "append") {
+                        //拖动的目标必须是一个图层目录
+                        if (dest.type) {
+                            return false;
+                        }
+                    } else {
+                        //排序必须限制拖动的范围在同一个图层目录下
+                        if (dest_p.id != src_p.id) {
+                            return false;
+                        }
+                    }
+                }
+            });
+        }
+        //删除图层
+        function deleteMapLayerChild(node) {
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个图层?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteMapLayerChild.validate(node.id.substring(1))) {
+                        ktw.appmana.deleteMapLayerChild(node.id.substring(1), function () {
+                            ktw.appmana.tip("删除成功!");
+                            reloadconfig();
+                            initTree();
+                            var node = $('#organizeTree').tree('find', "__1001__");
+                            $('#organizeTree').tree('select', node.target);
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //添加图层目录
+        function addMapLayer() {
+            $("#foldID,#foldText").val("");
+            $("#foldIcon").val("image/maptool/layers.png");
+            $("#foldChecked,#foldOpen").val("false");
+            $("#foldVisible").val("true");
+            var d = dialog({
+                title: "添加图层目录",
+                content: $('#folders'),
+                okValue: '添 加',
+                ok: function () {
+                    var MapLayer = {};
+                    MapLayer.ID = $("#foldID").val();
+                    MapLayer.Text = $("#foldText").val();
+                    MapLayer.Icon = $("#foldIcon").val();
+                    MapLayer.Visible = $("#foldVisible").val();
+                    MapLayer.Open = $("#foldOpen").val();
+                    MapLayer.Checked = $("#foldChecked").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (curmaplayer == null) {
+                        curmaplayer = { ID: "__1001__" };
+                    }
+                    if (ktw.appmana.addMapLayer.validate(curmaplayer.ID, MapLayer)) {
+                        ktw.appmana.addMapLayer(curmaplayer.ID, MapLayer, function () {
+                            ktw.appmana.tip("保存成功!");
+                            reloadconfig();
+                            initTree();
+                            var node = $('#organizeTree').tree('find', "_" + MapLayer.ID);
+                            $('#organizeTree').tree('select', node.target);
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+        //删除图层目录
+        function deleteMapLayer(node) {
+            var id = node.id;
+            id = id || "";
+            if (id.indexOf("_") == 0) {
+                id = id.substr(1);
+            }
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个图层目录?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteMapLayer.validate(id)) {
+                        ktw.appmana.deleteMapLayer(id, function () {
+                            ktw.appmana.tip("删除成功!");
+                            $('#organizeTree').tree('remove', currentnode.target);
+                            $('#organizeTree').tree('select', currentnodeparent.target);
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        function changeQuery() {
+            var val = $('#WMSNoQuery input[name="NoQuery"]:checked ').val();
+            if (val == "false") {
+                $("#WMSKey2,#SearchFields2,#DisplayFields2,#WMSGeometryName2").attr("readonly", "readonly").val("");
+            } else {
+                $("#WMSKey2,#SearchFields2,#WMSGeometryName2,#DisplayFields2").removeAttr("readonly");
+            }
+        }
+
+        //添加图层
+        function addMapLayerChild() {
+            //WMSID  WMSText WMSUrl WMSVisible  WMSFilter  WMSEPSG  WMSIconCls  WMSTypeName  WMSSld WMSStyles WMSChecked WMSLifeCycle  WMSServerType WMSMaxZoom  WMSMinZoom  WMSArgs WMSXMin WMSYMin  WMSXMax  WMSYMax WMSNoQuery
+            //WMTSID  WMTSText  WMTSUrl WMTSVisible WMTSEPSG WMTSArgs  WMTSTypeName WMTSChecked  WMTSMaxZoom  WMTSMinZoom WMTSXMin  WMTSYMin  WMTSXMax WMTSYMax  WMTSIconCls
+            //tileID tileText tileUrl tileVisible tileArgs  tileChecked  tileIconCls  tileMaxZoom tileMinZoom tileXMin tileYMin  tileXMax  tileYMax
+            changeForm("WMS");
+            //WMS初始化
+            $("#maplayer").val("WMS"); $("#WMSID,#WMSText,#WMSUrl,#WMSFilter,#WMSEPSG,#WMSIconCls,#WMSTypeName,#WMSSld,#WMSStyles,#WMSMaxZoom,#WMSMinZoom,#WMSArgs,#WMSXMin,#WMSYMin,#WMSXMax,#WMSYMax,#WMSNoQuery").val("");
+            $("#WMSIconCls").val("icon-tree-polygon");
+            $("#WMSVisible").val("true");
+            $("#WMSChecked").val("false");
+            $("#WMSLifeCycle").val("");
+            $("#WMSServerType").val("hgis");
+            $("#WMSNoQuery input[name='NoQuery']").get(1).checked = true;
+            $("#WMSKey2, #SearchFields2,#WMSGeometryName2,#DisplayFields2").attr("readonly", "readonly").val("");
+            //WMTS初始化
+            $("#WMTSID,#WMTSText,#WMTSUrl,#WMTSEPSG,#WMTSArgs,#WMTSTypeName,#WMTSMaxZoom,#WMTSMinZoom,#WMTSXMin,#WMTSYMin,#WMTSXMax ,#WMTSYMax  ").val("");
+            $("#WMTSIconCls").val("icon-tree-polygon");
+            $("#WMTSVisible,#WMTSChecked").val("true");
+            //Tile初始化
+            $("#tileID,#tileText,#tileUrl,#tileArgs,#tileIconCls,#tileMaxZoom,#tileMinZoom,#tileXMin,#tileYMin,#tileXMax,#tileYMax").val("");
+            $("#tileVisible,#tileChecked").val("true");
+            $("#tileIconCls").val("icon-tree-polygon");
+            var d = dialog({
+                title: "添加图层",
+                content: $('#addMapLayer'),
+                okValue: '添 加',
+                ok: function () {
+                    var arg = {};
+                    arg.Type = $("#maplayer").val();
+                    arg.Legend = {};
+                    if ($("#maplayer").val() == "WMS") {
+                        arg.ID = $("#WMSID").val();
+                        arg.Text = $("#WMSText").val();
+                        arg.Url = $("#WMSUrl").val();
+                        arg.Visible = $("#WMSVisible").val();
+                        arg.Filter = $("#WMSFilter").val();
+                        arg.Key = $("#WMSKey2").val();
+                        arg.GeometryName = $("#WMSGeometryName2").val();
+                        arg.SearchFields = $("#SearchFields2").val();
+                        arg.DisplayFields = $("#DisplayFields2").val();
+                        arg.EPSG = $("#WMSEPSG").val();
+                        arg.IconCls = $("#WMSIconCls").val();
+                        arg.TypeName = $("#WMSTypeName").val();
+                        arg.Sld = $("#WMSSld").val();
+                        arg.Styles = $("#WMSStyles").val();
+                        arg.Checked = $("#WMSChecked").val();
+                        arg.LifeCycle = $("#WMSLifeCycle").val();
+                        arg.ServerType = $("#WMSServerType").val();
+                        arg.MaxZoom = $("#WMSMaxZoom").val();
+                        arg.MinZoom = $("#WMSMinZoom").val();
+                        arg.Args = $("#WMSArgs").val();
+                        arg.Bounds = {};
+                        arg.Bounds.XMin = $("#WMSXMin").val();
+                        arg.Bounds.YMin = $("#WMSYMin").val();
+                        arg.Bounds.XMax = $("#WMSXMax").val();
+                        arg.Bounds.YMax = $("#WMSYMax").val();
+                        var noquery = $('#WMSNoQuery input[name="NoQuery"]:checked ').val();
+                        arg.NoQuery = noquery == "true" ? "false" : "true";
+                        arg.DefaultQuery = null;
+                        arg.DetailFields = null;
+                        arg.WFSVersion = null;
+                    }
+                        //WMTS
+                    else if ($("#maplayer").val() == "WMTS") {
+                        arg.ID = $("#WMTSID").val();
+                        arg.Text = $("#WMTSText").val();
+                        arg.Url = $("#WMTSUrl").val();
+                        arg.Visible = $("#WMTSVisible").val();
+                        arg.EPSG = $("#WMTSEPSG").val();
+                        arg.Args = $("#WMTSArgs").val();
+                        arg.TypeName = $("#WMTSTypeName").val();
+                        arg.Checked = $("#WMTSChecked").val();
+                        arg.MaxZoom = $("#WMTSMaxZoom").val();
+                        arg.MinZoom = $("#WMTSMinZoom").val();
+                        arg.Bounds = {};
+                        arg.Bounds.XMin = $("#WMTSXMin").val();
+                        arg.Bounds.YMin = $("#WMTSYMin").val();
+                        arg.Bounds.XMax = $("#WMTSXMax").val();
+                        arg.Bounds.YMax = $("#WMTSYMax").val();
+                        arg.IconCls = $("#WMTSIconCls").val();
+                    }
+                        //Tile
+                    else if ($("#maplayer").val() == "Tile") {
+                        arg.ID = $("#tileID").val();
+                        arg.Text = $("#tileText").val();
+                        arg.Url = $("#tileUrl").val();
+                        arg.Visible = $("#tileVisible").val();
+                        arg.Args = $("#tileArgs").val();
+                        arg.Checked = $("#tileChecked").val();
+                        arg.IconCls = $("#tileIconCls").val();
+                        arg.MaxZoom = $("#tileMaxZoom").val();
+                        arg.MinZoom = $("#tileMinZoom").val();
+                        arg.Bounds = {};
+                        arg.Bounds.XMin = $("#tileXMin").val();
+                        arg.Bounds.YMin = $("#tileYMin").val();
+                        arg.Bounds.XMax = $("#tileXMax").val();
+                        arg.Bounds.YMax = $("#tileYMax").val();
+                    }
+                    else {
+                    }
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addMapLayerChild.validate(curmaplayer, currentnode, arg)) {
+                        ktw.appmana.addMapLayerChild(currentnode, arg, function () {
+                            ktw.appmana.tip("保存成功!");
+                            reloadconfig();
+                            initTree();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+        //获取当前点击节点图层信息
+        function getmaplayer(node) {
+            var id = node.id;
+            currentnode = node;
+            if (!node.id) return;
+            if (node.id != "__1001__") {
+                curmaplayer = ktw.appmana.getMaplayerByid(node.id.substr(1));
+                curmaplayerparent = ktw.appmana.getMaplayerParentByid(node.id.substr(1));
+                if (curmaplayerparent.Default || curmaplayerparent.SystemMap) {
+                    curmaplayerparent = null;
+                    currentnodeparent = $('#organizeTree').tree('find', "__1001__");
+                } else {
+                    currentnodeparent = $('#organizeTree').tree('find', "_" + curmaplayerparent.ID);
+                }
+            }
+            else {
+                curmaplayer = null;
+                curmaplayerparent = null;
+                currentnodeparent = null;
+            }
+            return;
+        }
+        //图层信息赋值
+        function initlayerdata(node, curmaplayer) {
+            $(".Type").val(node.type);
+            switch (node.type) {
+                case "WMS":
+                    $("#WMSID1").val(curmaplayer.ID);
+                    $("#WMSText1").val(curmaplayer.Text);
+                    $("#WMSUrl1").val(curmaplayer.Url);
+                    $("#WMSVisible1").val(curmaplayer.Visible);
+                    $("#WMSFilter1").val(curmaplayer.Filter);
+                    $("#WMSEPSG1").val(curmaplayer.EPSG);
+                    $("#WMSIconCls1").val(curmaplayer.IconCls);
+                    $("#WMSTypeName1").val(curmaplayer.TypeName);
+                    $("#WMSSld1").val(curmaplayer.Sld);
+                    $("#WMSStyles1").val(curmaplayer.Styles);
+                    $("#WMSChecked1").val(curmaplayer.Checked);
+                    $("#WMSLifeCycle1").val(curmaplayer.LifeCycle);
+                    $("#WMSServerType1").val(curmaplayer.ServerType);
+                    $("#WMSMaxZoom1").val(curmaplayer.MaxZoom);
+                    $("#WMSMinZoom1").val(curmaplayer.MinZoom);
+                    $("#WMSArgs1").val(curmaplayer.Args);
+                    if (curmaplayer.Bounds != null) {
+                        $("#WMSXMin1").val(curmaplayer.Bounds.XMin);
+                        $("#WMSYMin1").val(curmaplayer.Bounds.YMin);
+                        $("#WMSXMax1").val(curmaplayer.Bounds.XMax);
+                        $("#WMSYMax1").val(curmaplayer.Bounds.YMax);
+                    };
+                    $("input[name='NoQuery']").get(0).checked = true;
+                    if (curmaplayer.NoQuery == "true")
+                        $("input[name='NoQuery']").get(1).checked = true;
+                    $("#WMSKey").val(curmaplayer.Key);
+                    $("#WMSGeometryName").val(curmaplayer.GeometryName);
+                    $("#WMSDefaultQuery").val(curmaplayer.DefaultQuery || "false");
+                    $("#WFSVersion").val(curmaplayer.WFSVersion);
+                    $("#WMSSearchFields").val(curmaplayer.SearchFields);
+                    $("#DisplayFields").val(curmaplayer.DisplayFields);
+                    break;
+                    //WMTS
+                case "WMTS":
+                    $("#WMTSID1").val(curmaplayer.ID);
+                    $("#WMTSText1").val(curmaplayer.Text);
+                    $("#WMTSUrl1").val(curmaplayer.Url);
+                    $("#WMTSVisible1").val(curmaplayer.Visible);
+                    $("#WMTSEPSG1").val(curmaplayer.EPSG);
+                    $("#WMTSArgs1").val(curmaplayer.Args);
+                    $("#WMTSTypeName1").val(curmaplayer.TypeName);
+                    $("#WMTSChecked1").val(curmaplayer.Checked);
+                    $("#WMTSMaxZoom1").val(curmaplayer.MaxZoom);
+                    $("#WMTSMinZoom1").val(curmaplayer.MinZoom);
+                    if (curmaplayer.Bounds != null) {
+                        $("#WMTSXMin1").val(curmaplayer.Bounds.XMin);
+                        $("#WMTSYMin1").val(curmaplayer.Bounds.YMin);
+                        $("#WMTSXMax1").val(curmaplayer.Bounds.XMax);
+                        $("#WMTSYMax1").val(curmaplayer.Bounds.YMax);
+                    };
+                    $("#WMTSIconCls1").val(curmaplayer.IconCls);
+                    break;
+                    //Tile
+                case "Tile":
+                    $("#tileID1").val(curmaplayer.ID);
+                    $("#tileText1").val(curmaplayer.Text);
+                    $("#tileUrl1").val(curmaplayer.Url);
+                    $("#tileVisible1").val(curmaplayer.Visible);
+                    $("#tileArgs1").val(curmaplayer.Args);
+                    $("#tileChecked1").val(curmaplayer.Checked);
+                    $("#tileIconCls1").val(curmaplayer.IconCls);
+                    $("#tileMaxZoom1").val(curmaplayer.MaxZoom);
+                    $("#tileMinZoom1").val(curmaplayer.MinZoom);
+                    if (curmaplayer.Bounds != null) {
+                        $("#tileXMin1").val(curmaplayer.Bounds.XMin);
+                        $("#tileYMin1").val(curmaplayer.Bounds.YMin);
+                        $("#tileXMax1").val(curmaplayer.Bounds.XMax);
+                        $("#tileYMax1").val(curmaplayer.Bounds.YMax);
+                    };
+                    break;
+                default: break;
+            }
+            var data = [];
+            if (curmaplayer.DetailFields != null && curmaplayer.DetailFields.Field != null) {
+                for (var i = 0; i < curmaplayer.DetailFields.Field.length; i++) {
+                    data.push({ "ByName": curmaplayer.DetailFields.Field[i].ByName, "Name": curmaplayer.DetailFields.Field[i].Name })
+                }
+            }
+            initdataGrid();
+        }
+
+        //图层信息清空
+        function clearlayerdata(node, curmaplayer) {
+            $("#layertitle").html("添加图层信息");
+            $(".queryconfig").hide();
+            $("#layerID").val("");
+            $("#layerText").val("");
+            $("#layerUrl").val("");
+            $("#layerTypeName").val("");
+            $("#layerVisible").val("");
+            $("#layerChecked").val("");
+            $("#layerEPSG").val("");
+            $("#layerLayerType").val("");
+            $("#layerFilter").val("");
+            $("#layerSld").val("");
+            $("#layerMaxZoom").val("");
+            $("#layerMinZoom").val("");
+            $("#layerType").val("");
+            $("#layerArgs").val("");
+            $("#layerXMin").val("");
+            $("#layerYMin").val("");
+            $("#layerXMax").val("");
+            $("#layerYMax").val("");
+            $("#layerIconCls").val("");
+            $("#layerIcon").val("");
+            $("#layerNoQuery").val("");
+            $("#Key").val("");
+            $("#GeometryName").val("");
+            $("#DefaultQuery").val("");
+            $("#ServerType").val("");
+            $("#SearchFields").val("");
+            $("#DisplayFields").val("");
+            $("#WMS").val("");
+            $("#WFS").val("");
+            $("#OWS").val("");
+            $("#WPS").val("");
+        }
+        //基本信息赋值
+        function initData() {
+            var ArrayOfMapLayer = Config.SystemMap.ArrayOfMapLayer;
+            $("#ltheight").val(ArrayOfMapLayer.Default.Size.Height);
+            $("#ltwidth").val(ArrayOfMapLayer.Default.Size.Width);
+            $("#lttop").val(ArrayOfMapLayer.Default.Position.Top);
+            $("#ltleft").val(ArrayOfMapLayer.Default.Position.Left);
+            $("#ltContentTop").val(ArrayOfMapLayer.Default.Position.ContentTop);
+            $("#ltContentLeft").val(ArrayOfMapLayer.Default.Position.ContentLeft);
+            $("#ltRight").val(ArrayOfMapLayer.Default.Position.Right);
+            $("#ltContentRight").val(ArrayOfMapLayer.Default.Position.ContentRight);
+            $("#electHeight").val(ArrayOfMapLayer.Selected.Size.Height);
+            $("#electWidth").val(ArrayOfMapLayer.Selected.Size.Width);
+            $("#electTop").val(ArrayOfMapLayer.Selected.Position.Top);
+            $("#electRight").val(ArrayOfMapLayer.Selected.Position.Right);
+            $("#electContentTop").val(ArrayOfMapLayer.Selected.Position.ContentTop);
+            $('#electContentRight').val(ArrayOfMapLayer.Selected.Position.ContentRight);
+            $("#electLeft").val(ArrayOfMapLayer.Selected.Position.Left);
+            $('#electContentLeft').val(ArrayOfMapLayer.Selected.Position.ContentLeft);
+        }
+        //初始化图例信息表格
+        function initdataGrid() {
+            var grid = new ktw.Grid();
+            grid.ID = "tableGrid";
+            grid.isPage = false;
+            grid.isEdit = true;
+            grid.headArr = [
+                [
+                    { text: "序号", width: "8%" },
+                    { text: "字段名", width: "30%" },
+                    { text: "字段值", width: "30%" },
+                    { text: "上移", width: "8%" },
+                    { text: "下移", width: "8%" },
+                    { text: "编辑", width: "15%" }
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "ByName", type: "lab", title: "Title", canEdit: true },
+                { name: "Name", type: "lab", canEdit: true },
+                { text: "上移", key: "ByName", type: "btn", clickName: "orderFieldASC" },
+                { text: "下移", key: "ByName", type: "btn", clickName: "orderFieldDESC" },
+                { type: "btnEdit", key: "ByName" }];
+            grid.initGrid = function () {
+                if (curmaplayer.DetailFields != null && curmaplayer.DetailFields != "") {
+                    curmaplayer.DetailFields.Field = curmaplayer.DetailFields.Field || [];
+                    for (var i = 0; i < curmaplayer.DetailFields.Field.length; i++) {
+                        curmaplayer.DetailFields.Field[i].Index = i + 1;
+                    }
+                    grid.init({ DataList: curmaplayer.DetailFields.Field });
+                }
+                else {
+                    grid.init({ DataList: [] });
+                }
+            }
+            grid.initGrid();
+            grid.onDeleteRow = function (keyStr) {
+                var d = dialog({
+                    title: '提示',
+                    content: '是否删除这个字段?',
+                    okValue: '是',
+                    width: 200,
+                    ok: function () {
+                        if (ktw.appmana.deleteField.validate(keyStr)) {
+                            ktw.appmana.deleteField(currentnode, keyStr, function () {
+                                ktw.appmana.tip("删除成功!");
+                                reloadconfig();
+                                getmaplayer(currentnode);
+                                initdataGrid();
+                            }, function () {
+                                ktw.appmana.alert("删除失败!");
+                            });
+                        }
+                    },
+                    cancelValue: '否',
+                    cancel: function () { }
+                });
+                d.showModal();
+            }
+            grid.onUpdateRow = function (keyStr, dataModel) {
+                console.log(arguments);
+                var b = false;
+                if (ktw.appmana.updateField.validate(currentnode, keyStr, dataModel)) {
+                    ktw.appmana.updateField(currentnode, keyStr, dataModel, function () {
+                        b = true;
+                        ktw.appmana.tip("更新成功!");
+                    }, function () {
+                        ktw.appmana.alert("更新失败!");
+                    });
+                }
+                return b;
+            }
+        }
+        //排序详细字段-升序
+        function orderFieldASC(item) {
+            var currentByname = $(item).parents("tr").children("td").eq(1).find("span").html();
+            var lastByname = $(item).parents("tr").prev().children("td").eq(1).find("span").html();
+            if (lastByname == undefined) return;
+            console.log(currentByname);
+            console.log(lastByname);
+            if (ktw.appmana.orderFieldASC.validate(currentnode, currentByname, lastByname)) {
+                ktw.appmana.orderFieldASC(currentnode, currentByname, lastByname, function () {
+                    reloadconfig();
+                    getmaplayer(currentnode);
+                    initdataGrid();
+                    ktw.appmana.tip("升序成功!");
+                }, function (res) {
+                    conole.error(res);
+                    ktw.appmana.alert("升序失败!");
+                });
+            }
+        }
+        //排序详细字段-降序
+        function orderFieldDESC(item) {
+            var currentByname = $(item).parents("tr").children("td").eq(1).find("span").html();
+            var nextByname = $(item).parents("tr").next().children("td").eq(1).find("span").html();
+            if (nextByname == undefined) return;
+            console.log(currentByname);
+            console.log(nextByname);
+            if (ktw.appmana.orderFieldDESC.validate(currentnode, currentByname, nextByname)) {
+                ktw.appmana.orderFieldDESC(currentnode, currentByname, nextByname, function () {
+                    reloadconfig();
+                    getmaplayer(currentnode);
+                    initdataGrid();
+                    ktw.appmana.tip("降序成功!");
+                }, function (res) {
+                    conole.error(res);
+                    ktw.appmana.alert("降序成功!");
+                });
+            }
+        }
+        //修改基本信息
+        function updateArrayOfMapLayer() {
+            var arg = {};
+            arg.Height = $("#ltheight").val();
+            arg.Width = $("#ltwidth").val();
+            arg.Top = $("#lttop").val();
+            arg.Left = $("#ltleft").val();
+            arg.Right = $("#ltRight").val();
+            arg.ContentRight = $("#ltContentRight").val();
+            arg.ContentTop = $("#ltContentTop").val();
+            arg.ContentLeft = $("#ltContentLeft").val();
+            arg.Height2 = $("#electHeight").val();
+            arg.Width2 = $("#electWidth").val();
+            arg.Top2 = $("#electTop").val();
+            arg.Left2 = $("#electLeft").val();
+            arg.Right2 = $("#electRight").val();
+            arg.ContentRight2 = $("#electContentRight").val();
+            arg.ContentTop2 = $("#electContentTop").val();
+            arg.ContentLeft2 = $("#electContentLeft").val();
+            if (ktw.appmana.updateArrayOfMapLayer.validate(arg)) {
+                ktw.appmana.updateArrayOfMapLayer(arg, function () {
+                    ktw.appmana.refreshApp();
+                    Config = ktw.App.Config;
+                    ktw.appmana.tip("保存成功!");
+                }, function (res) {
+                    conole.error(res);
+                    ktw.appmana.alert("保存失败!");
+                });
+            }
+        }
+        //修改图层目录
+        function updateMapLayer() {
+            var parent = $('#organizeTree').tree('getParent', currentnode.target);
+            var arg = {};
+            arg.ID = $("#detailID").val();
+            arg.Text = $("#detailText").val();
+            arg.Icon = $("#detailIcon").val();
+            //arg.IconCls = $("#detailIconCls").val();
+            arg.Visible = $("#detailVisible").val();
+            arg.Open = $("#detailOpen").val();
+            arg.Checked = $("#detailChecked").val();
+            if (ktw.appmana.updateMapLayer.validate(parent, curmaplayer, arg)) {
+                ktw.appmana.updateMapLayer(currentnode, arg, function () {
+                    ktw.appmana.refreshApp();
+                    Config = ktw.App.Config;
+                    getmaplayer(currentnode);
+                    ktw.appmana.tip("保存成功!");
+                }, function (res) {
+                    conole.error(res);
+                    ktw.appmana.alert("保存失败!");
+                });
+            }
+        }
+        //修改图层
+        function updateMapLayerChild() {
+            var parent = $('#organizeTree').tree('getParent', currentnode.target);
+            var arg = {};
+            arg.Type = curmaplayer.Type;
+            switch (curmaplayer.Type) {
+                case "WMS":
+                    arg.ID = $("#WMSID1").val();
+                    arg.Text = $("#WMSText1").val();
+                    arg.Url = $("#WMSUrl1").val();
+                    arg.Visible = $("#WMSVisible1").val();
+                    arg.Filter = $("#WMSFilter1").val();
+                    arg.EPSG = $("#WMSEPSG1").val();
+                    arg.IconCls = $("#WMSIconCls1").val();
+                    arg.TypeName = $("#WMSTypeName1").val();
+                    arg.Sld = $("#WMSSld1").val();
+                    arg.Styles = $("#WMSStyles1").val();
+                    arg.Checked = $("#WMSChecked1").val();
+                    arg.LifeCycle = $("#WMSLifeCycle1").val();
+                    arg.ServerType = $("#WMSServerType1").val();
+                    arg.MaxZoom = $("#WMSMaxZoom1").val();
+                    arg.MinZoom = $("#WMSMinZoom1").val();
+                    arg.Args = $("#WMSArgs1").val();
+                    arg.Bounds = {};
+                    arg.Bounds.XMin = $("#WMSXMin1").val();
+                    arg.Bounds.YMin = $("#WMSYMin1").val();
+                    arg.Bounds.XMax = $("#WMSXMax1").val();
+                    arg.Bounds.YMax = $("#WMSYMax1").val();
+                    arg.NoQuery = $('#WMSNoQuery1 input[name="NoQuery"]:checked ').val();
+                    arg.GeometryName = $("#WMSGeometryName").val();
+                    arg.Key = $("#WMSKey").val();
+                    arg.DefaultQuery = $("#WMSDefaultQuery").val();
+                    arg.SearchFields = $("#WMSSearchFields").val();
+                    arg.DisplayFields = $("#DisplayFields").val();
+                    arg.WFSVersion = $("#WFSVersion").val();
+                    break;
+                    //WMTS
+                case "WMTS":
+                    arg.ID = $("#WMTSID1").val();
+                    arg.Text = $("#WMTSText1").val();
+                    arg.Url = $("#WMTSUrl1").val();
+                    arg.Visible = $("#WMTSVisible1").val();
+                    arg.EPSG = $("#WMTSEPSG1").val();
+                    arg.Args = $("#WMTSArgs1").val();
+                    arg.TypeName = $("#WMTSTypeName1").val();
+                    arg.Checked = $("#WMTSChecked1").val();
+                    arg.MaxZoom = $("#WMTSMaxZoom1").val();
+                    arg.MinZoom = $("#WMTSMinZoom1").val();
+                    arg.Bounds = {};
+                    arg.Bounds.XMin = $("#WMTSXMin1").val();
+                    arg.Bounds.YMin = $("#WMTSYMin1").val();
+                    arg.Bounds.XMax = $("#WMTSXMax1").val();
+                    arg.Bounds.YMax = $("#WMTSYMax1").val();
+                    arg.IconCls = $("#WMTSIconCls1").val();
+                    break;
+                    //Tile
+                case "Tile":
+                    arg.ID = $("#tileID1").val();
+                    arg.Text = $("#tileText1").val();
+                    arg.Url = $("#tileUrl1").val();
+                    arg.Visible = $("#tileVisible1").val();
+                    arg.Args = $("#tileArgs1").val();
+                    arg.Checked = $("#tileChecked1").val();
+                    arg.IconCls = $("#tileIconCls1").val();
+                    arg.MaxZoom = $("#tileMaxZoom1").val();
+                    arg.MinZoom = $("#tileMinZoom1").val();
+                    arg.Bounds = {};
+                    arg.Bounds.XMin = $("#tileXMin1").val();
+                    arg.Bounds.YMin = $("#tileYMin1").val();
+                    arg.Bounds.XMax = $("#tileXMax1").val();
+                    arg.Bounds.YMax = $("#tileYMax1").val();
+                    break;
+            }
+            if (ktw.appmana.updateMapLayerChild.validate(parent, currentnode, arg)) {
+                ktw.appmana.updateMapLayerChild(curmaplayer, currentnode, arg, function () {
+                    ktw.appmana.tip("保存成功!");
+                    reloadconfig();
+                    getmaplayer(currentnode);
+                    initTree();
+                }, function (res) {
+                    conole.error(res);
+                    ktw.appmana.alert("保存失败!");
+                });
+            }
+        }
+        //新增字段
+        function addField() {
+            $("#ByName,#Name").val("");
+            var d = dialog({
+                title: "添加字段",
+                content: $('#editfield'),
+                okValue: '添 加',
+                ok: function () {
+                    var Field = {};
+                    Field.ByName = $("#ByName").val();
+                    Field.Name = $("#Name").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addField.validate(currentnode, currentnode, Field)) {
+                        ktw.appmana.addField(currentnode, Field, function () {
+                            ktw.appmana.tip("保存成功!");
+                            reloadconfig();
+                            getmaplayer(currentnode);
+                            initdataGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+        //批量新增图层的所有字段(除了几何字段)
+        function addFieldBatch() {
+            var d = dialog({
+                title: '提示',
+                content: '是否重置这个图层的冒泡弹框字段?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    var layer = ktw.appmana.getMaplayerByid(curmaplayer.ID);
+                    var url = ktw.GetSystemUrlByRelID(layer.Url) + "?service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=" + layer.TypeName;
+                    $.ajax({
+                        url: url,
+                        type: "get",
+                        async: false,
+                        success: function (res) {
+                            console.log(res);
+                            res = $.xml2json(res);
+                            console.log(res);
+                            var arr = res.complexType.complexContent.extension.sequence.element;
+                            var fieldarr = [];
+                            for (var i = 0; i < arr.length; i++) {
+                                if (arr[i].type.indexOf("gml") == 0) {
+                                    continue;
+                                }
+                                var tmp = { Field: {} };
+                                tmp.Field.ByName = arr[i].name;
+                                tmp.Field.Name = arr[i].name;
+                                fieldarr.push(tmp);
+                            }
+                            ktw.appmana.addFieldBatch(currentnode, fieldarr, function () {
+                                ktw.appmana.tip("保存成功!");
+                                reloadconfig();
+                                getmaplayer(currentnode);
+                                initdataGrid();
+                            });
+
+                        },
+                        error: function (res) {
+                            console.error(res);
+                            ktw.appmana.alert("获取图层字段名称失败,请检查图层地址:" + url);
+                        }
+                    });
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        function changeForm(value) {
+            switch (value) {
+                case "Tile": $("#WMSM").hide();
+                    $("#WMTS").hide();
+                    $("#Tile").show();
+                    break;
+                case "WMS": $("#WMSM").show();
+                    $("#WMTS").hide();
+                    $("#Tile").hide();
+                    break;
+                case "WMTS": $("#WMSM").hide();
+                    $("#WMTS").show();
+                    $("#Tile").hide();
+                    break;
+                default: $("#WMSM").hide();
+                    $("#WMTS").hide();
+                    $("#Tile").hide();
+            }
+        }
+        //编辑图例
+        function Legend() {
+            var d = dialog({
+                title: "编辑图例",
+                content: $('#editlegend'),
+                width: 700,
+            });
+            initLendatagrid();
+            d.showModal();
+        }
+        //初始化图例表格
+        function initLendatagrid() {
+            var grid = new ktw.Grid();
+            grid.ID = "tableLegend";
+            grid.isPage = false;
+            grid.headArr = [
+                [
+                    { text: "序号", width: "6%" },
+                    { text: "标识类型", width: "10%" },
+                    { text: "名称", width: "20%" },
+                    { text: "填充颜色", width: "10%" },
+                    { text: "填充透明度", width: "10%" },
+                    { text: "边框宽度", width: "10%" },
+                    { text: "边框颜色", width: "10%" },
+                    { text: "边框透明度", width: "10%" },
+                    { text: "编辑", width: "7%" },
+                    { text: "删除", width: "7%" }
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "SubType", type: "lab", title: "Title" },
+                { name: "Text", type: "lab" },
+                { name: "FColor", type: "lab" },
+                { name: "FOpacity", type: "lab" },
+                { name: "Width", type: "lab" },
+                { name: "Color", type: "lab" },
+                { name: "Opacity", type: "lab" },
+                { text: "编辑", key: "Text", type: "btn", clickName: "updatemLegend", titleText: "进行编辑" },
+                { text: "删除", key: "Text", type: "btn", clickName: "deletemLegend", titleText: "删除前要确认" }];
+            grid.initGrid = function () {
+                if (curmaplayer.Legend == null) curmaplayer.Legend = {};
+                if (curmaplayer.Legend != null) {
+                    if (curmaplayer.Legend == "") curmaplayer.Legend = {};
+                    if (curmaplayer.Legend.Item != null) {
+                        curmaplayer.Legend.Item = curmaplayer.Legend.Item.length ? curmaplayer.Legend.Item : [curmaplayer.Legend.Item];
+                        for (var i = 0; i < curmaplayer.Legend.Item.length; i++) {
+                            curmaplayer.Legend.Item.Index = i + 1;
+                            if (curmaplayer.Legend.Item[i].Fill != null) {
+                                curmaplayer.Legend.Item[i].FColor = curmaplayer.Legend.Item[i].Fill.Color;
+                                curmaplayer.Legend.Item[i].FOpacity = curmaplayer.Legend.Item[i].Fill.Opacity;
+                            }
+                            if (curmaplayer.Legend.Item[i].Border != null) {
+                                curmaplayer.Legend.Item[i].Width = curmaplayer.Legend.Item[i].Border.Width;
+                                curmaplayer.Legend.Item[i].Color = curmaplayer.Legend.Item[i].Border.Color;
+                                curmaplayer.Legend.Item[i].Opacity = curmaplayer.Legend.Item[i].Border.Opacity;
+                            }
+                        }
+                    }
+                }
+                grid.init({ DataList: curmaplayer.Legend.Item });
+            }
+            grid.initGrid();
+        }
+        //添加图层图例
+        function addmLegend() {
+            $("#legendText,#FColor,#FOpacity,#Width,#Color,#Opacity").val("");
+            $("#legendSubType").val("point");
+            var d = dialog({
+                title: "添加图例",
+                content: $('#editlegendwin'),
+                okValue: '添 加',
+                ok: function () {
+                    var legend = {};
+                    legend.SubType = $("#legendSubType").val();
+                    legend.Text = $("#legendText").val();
+                    legend.Fill = {};
+                    legend.Fill.Color = $("#FColor").val();
+                    legend.Fill.Opacity = $("#FOpacity").val();
+                    legend.Border = {};
+                    legend.Border.Color = $("#Color").val();
+                    legend.Border.Opacity = $("#Opacity").val();
+                    legend.Border.Width = $("#Width").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addmLegend.validate(curmaplayer, currentnode, legend)) {
+                        ktw.appmana.addmLegend(currentnode, legend, function () {
+                            ktw.appmana.tip("保存成功!");
+                            reloadconfig();
+                            getmaplayer(currentnode);
+                            initLendatagrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 800,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+        //删除图层图例
+        function deletemLegend(item) {
+            var id = $(item).attr("btnkey");
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个图例?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deletemLegend.validate(id)) {
+                        ktw.appmana.deletemLegend(currentnode, id, function () {
+                            ktw.appmana.tip("删除成功!");
+                            reloadconfig();
+                            getmaplayer(currentnode);
+                            initLendatagrid();
+                            d.close().remove();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //编辑图层图例
+        function updatemLegend(item) {
+            var id = $(item).attr("btnkey");
+            var legend = ktw.appmana.getmLegendbyid(curmaplayer, id);
+            setlegend(legend);
+            var d = dialog({
+                title: legend.Text,
+                content: $('#editlegendwin'),
+                okValue: '确 定',
+                ok: function () {
+                    var legend = {};
+                    legend.SubType = $("#legendSubType").val();
+                    legend.Text = $("#legendText").val();
+                    legend.Fill = {};
+                    legend.Fill.Color = $("#FColor").val();
+                    legend.Fill.Opacity = $("#FOpacity").val();
+                    legend.Border = {};
+                    legend.Border.Color = $("#Color").val();
+                    legend.Border.Opacity = $("#Opacity").val();
+                    legend.Border.Width = $("#Width").val();
+                    if (ktw.appmana.updatemLegend.validate(curmaplayer, id, legend)) {
+                        ktw.appmana.updatemLegend(currentnode, id, legend, function () {
+                            ktw.appmana.tip("更新成功!");
+                            reloadconfig();
+                            getmaplayer(currentnode);
+                            initLendatagrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 800,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+        //图例信息赋值
+        function setlegend(legend) {
+            $("#legendSubType").val(legend.SubType);
+            $("#legendText").val(legend.Text);
+            if (legend.Fill != null) {
+                $("#FColor").val(legend.Fill.Color);
+                $("#FOpacity").val(legend.Fill.Opacity);
+            }
+            if (legend.Border != null) {
+                $("#Color").val(legend.Border.Color);
+                $("#Opacity").val(legend.Border.Opacity);
+                $("#Width").val(legend.Border.Width);
+            }
+            var dt = dialog({ content: "提交中..." });
+        }
+    </script>
+    <style type="text/css">
+        .con-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 400px;
+            border-right: solid 1px #DDDDDD;
+        }
+
+        .header {
+            height: 25px;
+            padding-top: 5px;
+            padding-left: 10px;
+        }
+
+        #divtree {
+            padding-left: 5px;
+            height: 90%;
+        }
+
+        .con-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            left: 400px;
+            overflow: auto;
+        }
+
+        .bar {
+            margin-top: 5px;
+            margin-left: 10px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .bar-line {
+            width: 6px;
+            height: 20px;
+            position: absolute;
+            top: 50%;
+            margin-top: -10px;
+            background-color: #01B6EF;
+            display: inline-block;
+        }
+
+        .bar-txt {
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        .datagrid-toolbar {
+            border-top: 1px solid #DDDDDD;
+            text-align: right;
+        }
+
+        .box {
+            border: 1px solid #dddddd;
+            width: 96%;
+            margin: 0 auto;
+            box-shadow: #dddddd 0px 0px 20px;
+            padding: 5px;
+            margin-top: 5px;
+        }
+
+        #editwin {
+            display: none;
+            width: 600px;
+        }
+
+        .baseinfo .form-txt {
+            width: calc(90% - 30px);
+        }
+
+        .form-label {
+            vertical-align: inherit;
+        }
+
+        .bar {
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; height: 100%; background: #FFFFFF">
+        <div style="width: 30%; height: 100%; border-right: solid 1px #DDDDDD;">
+            <div class="header">图层树配置</div>
+            <div id="divtree" style="width: 99%; height: 90%; overflow-x: hidden">
+                <ul id="organizeTree" style="width: 100%; height: 100%;">
+                    </u>
+            </div>
+        </div>
+        <!--基本信息-->
+        <div id="rightdiv" style="position: absolute; right: 0px; top: 0px; height: 100%; width: calc(70% - 1px)">
+            <div class="baseinfo">
+                <div class="box">
+                    <div class="siteinfo">
+                        <div class="bar">
+                            <div class="bar-line"></div>
+                            <span class="bar-txt">图层树位置信息</span>
+                        </div>
+                        <table class="form-tbl">
+                            <colgroup>
+                                <col style="width: 18%" />
+                                <col style="width: 30%" />
+                                <col style="width: 18%" />
+                                <col style="width: 30%" />
+                            </colgroup>
+                            <tr>
+                                <td class="td-title">高度：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="ltheight" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                                <td class="td-title">宽度：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="ltwidth" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">上边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="lttop" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                                <td class="td-title">左边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="ltleft" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">右边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="ltRight" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                                <td class="td-title">弹出框右边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="ltContentRight" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">弹出框上边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="ltContentTop" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                                <td class="td-title">弹出框左边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="ltContentLeft" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+                    <div class="basemapinfo">
+                        <div class="bar">
+                            <div class="bar-line"></div>
+                            <span class="bar-txt">选中图层树信息</span>
+                        </div>
+                        <table class="form-tbl">
+                            <colgroup>
+                                <col style="width: 18%" />
+                                <col style="width: 30%" />
+                                <col style="width: 18%" />
+                                <col style="width: 30%" />
+                            </colgroup>
+                            <tr>
+                                <td class="td-title">高度：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="electHeight" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                                <td class="td-title">宽度：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="electWidth" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">上边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="electTop" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                                <td class="td-title">右边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="electRight" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">左边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="electLeft" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                                <td class="td-title">弹出框左边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="electContentLeft" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">弹出框上边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="electContentTop" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                                <td class="td-title">弹出框右边距：</td>
+                                <td class="td-text">
+                                    <div>
+                                        <input class="form-txt" id="electContentRight" readonly="readonly" />&nbsp;像素
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="center">
+                        <button class="btn" onclick="updateArrayOfMapLayer()" style="display:none">保存</button>
+                    </div>
+                </div>
+            </div>
+            <div class="detailinfo">
+                <div class="box">
+                    <div style="margin-top: 5px; margin-left: 10px; margin-bottom: 5px; position: relative">
+                        <div style="width: 6px; height: 20px; position: absolute; top: 50%; margin-top: -10px; background-color: #01B6EF; display: inline-block"></div>
+                        <span id="title" style="font-size: 16px; margin-left: 10px">信息</span>
+                    </div>
+                    <table class="form-tbl" style="margin-top: 10px">
+                        <colgroup>
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                        </colgroup>
+                        <tr>
+                            <td class="td-title">主键(ID)：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="detailID" name="ID" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">名称：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="detailText" name="Text" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">图标位置：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input class="form-txt" id="detailIcon" name="Icon" />
+                                </div>
+                            </td>
+                            <td class="td-title">是否展开：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <select id="detailOpen" class="form-select">
+                                        <option value="true">true</option>
+                                        <option value="false">false</option>
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">是否选中：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <select id="detailChecked" class="form-select">
+                                        <option value="true">true</option>
+                                        <option value="false">false</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td class="td-title">是否可见：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <select id="detailVisible" class="form-select">
+                                        <option value="true">true</option>
+                                        <option value="false">false</option>
+                                    </select>
+                                </div>
+                            </td>
+
+                        </tr>
+                    </table>
+                    <div class="center">
+                        <button id="baseinfosave" class="btn" onclick="updateMapLayer()">保存</button>
+                    </div>
+                </div>
+            </div>
+            <!--图层基本信息-->
+            <div class="layerinfo" style="height: 100%;overflow-y:auto;">
+                <div id="layerbaseinfo" style="width: 98%; display: inline-block; overflow-y: auto">
+                    <div class="box">
+                        <div class="bar">
+                            <div class="bar-line"></div>
+                            <span class="bar-txt" id="layertitle">查询配置</span>
+                        </div>
+                        <table class="form-tbl" style="margin-top: 10px" id="tableWMS">
+                            <colgroup>
+                                <col style="width: 18%" />
+                                <col style="width: 35%" />
+                                <col style="width: 15%" />
+                                <col style="width: 35%" />
+                            </colgroup>
+                            <tr>
+                                <td class="td-title">图层类型：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt Type" readonly="readonly" />
+                                    </div>
+                                </td>
+                                <td class="td-title">图例：</td>
+                                <td class="td-txt">
+                                    <div class="center" style="margin-top:0">
+                                        <button class="btn" onclick="Legend()" style="margin-top:0">编辑</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">主键(ID)：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" readonly="readonly" class="form-txt layerID" id="WMSID1" />
+                                    </div>
+                                </td>
+                                <td class="td-title">名称：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSText1" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">是否可见：</td>
+                                <td class="td-txt">
+                                    <select id="WMSVisible1" class="form-select" title="是否在图层树上显示">
+                                        <option value="true">true</option>
+                                        <option value="false">false</option>
+                                    </select>
+                                </td>
+                                <td class="td-title">图层名称：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSTypeName1" title="输入发布的图层名称,例如 onemap:t_inf_onemap_jsydspxxb" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">过滤条件：</td>
+                                <td class="td-txt" colspan="3">
+                                    <div>
+                                        <input type="text" class="form-txt" style="width:98%" id="WMSFilter1" title="输入出图条件,即CQLFilter" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">坐标参考系：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSEPSG1" title="如 EPSG:4546,常见坐标系:&#10;1. EPSG:4490 大地2000坐标系&#10;2. EPSG:4543 大地2000,高斯克吕格投影,3度分带,中央经线102E&#10;3. EPSG:4544 大地2000,高斯克吕格投影,3度分带,中央经线105E&#10;4. EPSG:4545 大地2000,高斯克吕格投影,3度分带,中央经线108E&#10;5. EPSG:4546 大地2000,高斯克吕格投影,3度分带,中央经线111E&#10;6. EPSG:4547 大地2000,高斯克吕格投影,3度分带,中央经线114E&#10;7. EPSG:4548 大地2000,高斯克吕格投影,3度分带,中央经线117E&#10;8. EPSG:4549 大地2000,高斯克吕格投影,3度分带,中央经线120E&#10;9. EPSG:4550 大地2000,高斯克吕格投影,3度分带,中央经线123E" />
+                                    </div>
+                                </td>
+                                <td class="td-title">图标样式：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSIconCls1" title="面:icon-tree-polygon&#10;线:icon-tree-line&#10;点:icon-tree-point" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">sld文件：</td>
+                                <td class="td-txt" colspan="3">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSSld1" style="width:98%" title="要应用的sld路径,如 config/p.sld" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">后台样式：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSStyles1" title="填写你在gis服务器上发布了的样式,如 polygon2018" />
+                                    </div>
+                                </td>
+                                <td class="td-title">是否选中：</td>
+                                <td class="td-txt">
+                                    <select id="WMSChecked1" class="form-select" title="图层树加载之初是否处于选中状态">
+                                        <option value="true">true</option>
+                                        <option value="false">false</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">生命周期：</td>
+                                <td class="td-txt">
+                                    <select id="WMSLifeCycle1" class="form-select layerType" title="这个图层是否属于某个土地生命周期">
+                                        <option value="">空</option>
+                                        <option value="p">p</option>
+                                        <option value="z">z</option>
+                                        <option value="c">c</option>
+                                        <option value="g">g</option>
+                                        <option value="y">y</option>
+                                        <option value="b">b</option>
+                                        <option value="w">w</option>
+                                    </select>
+                                </td>
+                                <td class="td-title">服务器类型：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <select id="WMSServerType1" class="form-select" title="这个图层的gis服务器的类型&#10;1. hgis&#10;2. geoserver">
+                                            <option value="hgis">hgis</option>
+                                            <option value="geoserver">geoserver</option>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">最大级别：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSMaxZoom1" title="1-22" />
+                                    </div>
+                                </td>
+                                <td class="td-title">最小级别：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSMinZoom1" title="1-22" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">XMin：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSXMin1" title="左下角x值,如:112.76004255450486" />
+                                    </div>
+                                </td>
+                                <td class="td-title">YMin：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSYMin1" title="左下角y值,如:27.823056638582234" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">XMax：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSXMax1" title="右下角x值,如:112.93119285808113" />
+                                    </div>
+                                </td>
+                                <td class="td-title">YMax：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSYMax1" title="右下角y值,如:27.99213871934136" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">图层地址：</td>
+                                <td class="td-txt" colspan="3">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSUrl1" style="width: 98%" title="填写值:&#10;1. 图层的绝对地址,如 http://192.168.1.130:8081/hgis/onemap/ows&#10;2. 引用的地址管理中的相对地址,如 OneMapOWS" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">其他参数：</td>
+                                <td class="td-txt" colspan="3">
+                                    <div>
+                                        <input type="text" class="form-txt" id="WMSArgs1" style="width: 98%" title="如 {subdomains:['0', '1' , '2' , '3' , '4' , '5' , '6' , '7'],offsetx:0.0000,offsety:-1.0590}" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">是否支持查询：</td>
+                                <td class="td-txt">
+                                    <div id="WMSNoQuery1">
+                                        <label>
+                                            <input name="NoQuery" type="radio" value="false" />支持查询
+                                        </label>
+                                        <label>
+                                            <input name="NoQuery" type="radio" value="true" />
+                                            不支持查询
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="queryconfig">
+                            <div class="bar">
+                                <div class="bar-line"></div>
+                                <span class="bar-txt">查询配置</span>
+                            </div>
+                            <table class="form-tbl">
+                                <colgroup>
+                                    <col style="width: 18%" />
+                                    <col style="width: 30%" />
+                                    <col style="width: 18%" />
+                                    <col style="width: 30%" />
+                                </colgroup>
+                                <tr>
+                                    <td class="td-title">查询主键：</td>
+                                    <td class="td-txt">
+                                        <div>
+                                            <input class="form-txt" id="WMSKey" name="WMSKey" title="图层的主键,如:&#10;1. jsyd_guid&#9;(图层onemap:t_inf_onemap_jsydspxxb)&#10;2. zdxm_guid&#9;(图层onemap:t_inf_onemap_zdxxb)&#10;3. cbyd_guid&#9;(图层onemap:t_inf_onemap_cbydxxb)&#10;4. gdxm_guid&#9;(图层onemap:t_inf_onemap_tdgyxxb)&#10;5. djfz_guid&#9;(图层onemap:t_inf_onemap_djfzxxb)&#10;6. bcgdfa_guid&#9;(图层onemap:t_inf_onemap_bcgdxxb)&#10;7. wfyd_guid&#9;(图层onemap:t_inf_onemap_ajdjxxb)" />
+                                        </div>
+                                    </td>
+                                    <td class="td-title">几何字段：</td>
+                                    <td class="td-txt">
+                                        <div>
+                                            <input class="form-txt" id="WMSGeometryName" name="WMSGeometryName" title="图层的几何字段名称,常见的有 the_geom、geometry" />
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="td-title">默认查询：</td>
+                                    <td class="td-txt">
+                                        <select id="WMSDefaultQuery" class="form-select" title="如果用户没有选择图层树中的图层,这个图层是否加入到查询的选项卡中">
+                                            <option value="true">true</option>
+                                            <option value="false">false</option>
+                                        </select>
+                                    </td>
+                                    <td class="td-title">WFS版本：</td>
+                                    <td class="td-txt">
+                                        <div>
+                                            <input class="form-txt" id="WFSVersion" name="WFSVersion" title="一般:1.0.0、1.1.0" />
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="td-title">查询字段：</td>
+                                    <td class="td-txt">
+                                        <div>
+                                            <input class="form-txt" id="WMSSearchFields" name="WMSSearchFields" title="查询框中模糊匹配的关键字,多个字段使用[,]分割,如[aj_mc,jsydxmmc,tdyt]" />
+                                        </div>
+                                    </td>
+                                    <td class="td-title">显示字段：</td>
+                                    <td class="td-txt">
+                                        <div>
+                                            <input class="form-txt" id="DisplayFields" name="DisplayFields" title="查询列表中显示的内容,两个字段使用[,]分割,如[aj_mc,jsydxmmc]" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="queryconfig">
+                            <div class="bar">
+                                <div class="bar-line"></div>
+                                <span class="bar-txt">详细字段</span>
+                            </div>
+                            <div class="tableGridinfo">
+                                <div class="right">
+                                    <button class="btn" onclick="addField()">添加</button>
+                                    <button class="btn" onclick="addFieldBatch()">初始所有字段</button>
+                                </div>
+                                <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+                                    <table id="tableGrid"></table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="center">
+                            <button class="btn" onclick="updateMapLayerChild()">保存</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="box" id="tableWMTS">
+                    <div class="bar">
+                        <div class="bar-line"></div>
+                        <span class="bar-txt" id="SpanWMTS">查询配置</span>
+                    </div>
+                    <table class="form-tbl" style="margin-top: 10px">
+                        <colgroup>
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                        </colgroup>
+                        <tr>
+                            <td class="td-title">图层类型：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt Type" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">图例：</td>
+                            <td class="td-txt">
+                                <div class="center" style="margin-top:0">
+                                    <button class="btn" onclick="Legend()" style="margin-top:0">编辑</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">主键(ID)</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" readonly="readonly" class="form-txt" id="WMTSID1" />
+                                </div>
+                            </td>
+                            <td class="td-title">名称</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSText1" />
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="td-title">是否可见：</td>
+                            <td class="td-txt">
+                                <select id="WMTSVisible1" class="form-select">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </td>
+                            <td class="td-title">坐标参考系：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSEPSG1" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">图层名称：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSTypeName1" />
+                                </div>
+                            </td>
+                            <td class="td-title">是否选中：</td>
+                            <td class="td-txt">
+                                <select id="WMTSChecked1" class="form-select">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">最大级别：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSMaxZoom1" />
+                                </div>
+                            </td>
+                            <td class="td-title">最小级别：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSMinZoom1" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">XMin：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSXMin1" />
+                                </div>
+                            </td>
+                            <td class="td-title">YMin：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSYMin1" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">XMax：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSXMax1" />
+                                </div>
+                            </td>
+                            <td class="td-title">YMax：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSYMax1" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">图标样式：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSIconCls1" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">图层地址：</td>
+                            <td class="td-txt" colspan="3">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSUrl1" style="width:98%" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">其他参数：</td>
+                            <td class="td-txt" colspan="3">
+                                <div>
+                                    <input type="text" class="form-txt" id="WMTSArgs1" style="width:98%" />
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="center">
+                        <button class="btn" onclick="updateMapLayerChild()">保存</button>
+                    </div>
+                </div>
+                <div class="box" id="tableTile">
+                    <div class="bar">
+                        <div class="bar-line"></div>
+                        <span class="bar-txt" id="SpanTile">查询配置</span>
+                    </div>
+                    <table class="form-tbl" style="margin-top: 10px">
+                        <colgroup>
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                            <col style="width: 15%" />
+                            <col style="width: 35%" />
+                        </colgroup>
+                        <tr>
+                            <td class="td-title">图层类型：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt Type" readonly="readonly" />
+                                </div>
+                            </td>
+                            <td class="td-title">图例：</td>
+                            <td class="td-txt">
+                                <div class="center" style="margin-top:0">
+                                    <button class="btn" onclick="Legend()" style="margin-top:0">编辑</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">主键(ID)：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" readonly="readonly" class="form-txt" id="tileID1" />
+                                </div>
+                            </td>
+                            <td class="td-title">名称：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileText1" />
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="td-title">可见性：</td>
+                            <td class="td-txt">
+                                <select id="tileVisible1" class="form-select">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </td>
+                            <td class="td-title">是否选中：</td>
+                            <td class="td-txt">
+                                <select id="tileChecked1" class="form-select">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">图标样式：</td>
+                            <td class="td-txt" colspan="1">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileIconCls1" />
+                                </div>
+                            </td>
+                            <td class="td-title">最大级别：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileMaxZoom1" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+
+                            <td class="td-title">最小级别：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileMinZoom1" />
+                                </div>
+                            </td>
+                            <td class="td-title">XMin：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileXMin1" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">YMin：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileYMin1" />
+                                </div>
+                            </td>
+                            <td class="td-title">XMax：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileXMax1" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">YMax：</td>
+                            <td class="td-txt">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileYMax1" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">图层地址：</td>
+                            <td class="td-txt" colspan="3">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileUrl1" style="width:98%" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">其他参数</td>
+                            <td class="td-txt" colspan="3">
+                                <div>
+                                    <input type="text" class="form-txt" id="tileArgs1" style="width:98%" />
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="center">
+                        <button class="btn" onclick="updateMapLayerChild()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="mtree" class="easyui-menu" style="width: 120px; border: 0px">
+        <div id="miAdd" name="Addfolders" data-options="iconCls:'icon-unit'">新增图层目录</div>
+        <div name="addleafnode" data-options="iconCls:'icon-unit'">新增图层</div>
+        <div id="miDelete" name="miDeletefold" data-options="iconCls:'icon-remove'">删除</div>
+    </div>
+    <div id="yztree" class="easyui-menu" style="width: 120px; border: 0px">
+        <div name="miDeletenode" data-options="iconCls:'icon-remove'">删除</div>
+    </div>
+    <div id="folders">
+        <table class="form-tbl" style="margin-top: 10px">
+            <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">主键(ID)：</td>
+                <td class="td-txt">
+                    <div>
+                        <input class="form-txt" id="foldID" />
+                    </div>
+                </td>
+                <td class="td-title">名称：</td>
+                <td class="td-txt">
+                    <div>
+                        <input class="form-txt" id="foldText" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">图标位置：</td>
+                <td class="td-txt">
+                    <div>
+                        <input class="form-txt" id="foldIcon" />
+                    </div>
+                </td>
+                <td class="td-title">是否展开：</td>
+                <td class="td-txt">
+                    <div>
+                        <select id="foldOpen" class="form-select">
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">是否选中：</td>
+                <td class="td-txt">
+                    <div>
+                        <select id="foldChecked" class="form-select">
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </div>
+                </td>
+                <td class="td-title">是否可见：</td>
+                <td class="td-txt">
+                    <div>
+                        <select id="foldVisible" class="form-select">
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </div>
+                </td>
+
+            </tr>
+        </table>
+    </div>
+    <div id="editfield">
+        <table class="form-tbl" style="width: 100%;">
+            <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">字段名：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="ByName" />
+                </td>
+                <td class="td-title">字段值：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="Name" />
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="addMapLayer">
+        <div style="margin-top: -10px; margin-left: 30px; margin-bottom: 5px; position: relative">
+            <span class="bar-txt">图层类型&nbsp</span>
+            <div style="display: inline-block; width: 200px">
+                <select id="maplayer" class="form-select" onchange="changeForm(value)">
+                    <option value="WMTS">WMTS</option>
+                    <option value="Tile">Tile</option>
+                    <option value="WMS">WMS</option>
+                </select>
+            </div>
+        </div>
+        <table class="form-tbl" style="margin-top: 10px" id="WMSM">
+            <colgroup>
+                <col style="width: 18%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">主键(ID)：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt layerID" id="WMSID" />
+                    </div>
+                </td>
+                <td class="td-title">名称：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSText" />
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="td-title">是否可见：</td>
+                <td class="td-txt">
+                    <select id="WMSVisible" class="form-select">
+                        <option value="true">true</option>
+                        <option value="false">false</option>
+                    </select>
+                </td>
+                <td class="td-title">图层名称：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSTypeName" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">坐标参考系：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSEPSG" />
+                    </div>
+                </td>
+                <td class="td-title">图标样式：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSIconCls" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">sld文件：</td>
+                <td class="td-txt" colspan="3">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSSld" style="width:98%" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">过滤条件：</td>
+                <td class="td-txt" colspan="3">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSFilter" style="width:98%" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">后台样式：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSStyles" />
+                    </div>
+                </td>
+                <td class="td-title">是否选中：</td>
+                <td class="td-txt">
+                    <select id="WMSChecked" class="form-select">
+                        <option value="false">false</option>
+                        <option value="true">true</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">生命周期：</td>
+                <td class="td-txt">
+                    <select id="WMSLifeCycle" class="form-select layerType">
+                        <option value="">空</option>
+                        <option value="p">p</option>
+                        <option value="z">z</option>
+                        <option value="c">c</option>
+                        <option value="g">g</option>
+                        <option value="y">y</option>
+                        <option value="b">b</option>
+                        <option value="w">w</option>
+                    </select>
+                </td>
+                <td class="td-title">服务器类型：</td>
+                <td class="td-txt">
+                    <div>
+                        <select id="WMSServerType" class="form-select">
+                            <option value="hgis">hgis</option>
+                            <option value="geoserver">geoserver</option>
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">最大级别：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSMaxZoom" />
+                    </div>
+                </td>
+                <td class="td-title">最小级别：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSMinZoom" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">XMin：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSXMin" />
+                    </div>
+                </td>
+                <td class="td-title">YMin：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSYMin" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">XMax：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSXMax" />
+                    </div>
+                </td>
+                <td class="td-title">YMax：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSYMax" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">图层地址：</td>
+                <td class="td-txt" colspan="3">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSUrl" style="width:98%" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">其他参数：</td>
+                <td class="td-txt" colspan="3">
+                    <div>
+                        <input type="text" class="form-txt" id="WMSArgs" style="width:98%" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">是否支持查询：</td>
+                <td class="td-txt">
+                    <div id="WMSNoQuery">
+                        <label>
+                            <input name="NoQuery" type="radio" value="true" onclick="changeQuery()" />支持查询
+                        </label>
+                        <label>
+                            <input name="NoQuery" type="radio" value="false" onclick="changeQuery()" />
+                            不支持查询
+                        </label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">图层主键：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" readonly="readonly" class="form-txt" id="WMSKey2" />
+                    </div>
+                </td>
+                <td class="td-title">查询字段：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" readonly="readonly" class="form-txt" id="SearchFields2" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">几何字段：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" readonly="readonly" class="form-txt" id="WMSGeometryName2" />
+                    </div>
+                </td>
+                <td class="td-title">显示字段：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" readonly="readonly" class="form-txt" id="DisplayFields2" />
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <table class="form-tbl" style="margin-top: 10px" id="WMTS">
+            <colgroup>
+                <col style="width: 18%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">主键(ID)：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSID" />
+                    </div>
+                </td>
+                <td class="td-title">名称：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSText" />
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="td-title">是否可见：</td>
+                <td class="td-txt">
+                    <select id="WMTSVisible" class="form-select">
+                        <option value="true">true</option>
+                        <option value="false">false</option>
+                    </select>
+                </td>
+                <td class="td-title">坐标参考系：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSEPSG" />
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="td-title">图层名称：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSTypeName" />
+                    </div>
+                </td>
+                <td class="td-title">是否选中：</td>
+                <td class="td-txt">
+                    <select id="WMTSChecked" class="form-select">
+                        <option value="true">true</option>
+                        <option value="false">false</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">最大级别：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSMaxZoom" />
+                    </div>
+                </td>
+                <td class="td-title">最小级别：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSMinZoom" />
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="td-title">XMin：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSXMin" />
+                    </div>
+                </td>
+                <td class="td-title">YMin：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSYMin" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">XMax：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSXMax" />
+                    </div>
+                </td>
+                <td class="td-title">YMax：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSYMax" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">图标样式：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSIconCls" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">图层地址：</td>
+                <td class="td-txt" colspan="3">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSUrl" style="width:98%" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">其他参数：</td>
+                <td class="td-txt" colspan="3">
+                    <div>
+                        <input type="text" class="form-txt" id="WMTSArgs" style="width:98%" />
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <table class="form-tbl" style="margin-top: 10px" id="Tile">
+            <colgroup>
+                <col style="width: 18%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">主键(ID)：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="tileID" />
+                    </div>
+                </td>
+                <td class="td-title">名称：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="tileText" />
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="td-title">可见性：</td>
+                <td class="td-txt">
+                    <select id="tileVisible" class="form-select">
+                        <option value="true">true</option>
+                        <option value="false">false</option>
+                    </select>
+                </td>
+                <td class="td-title">是否选中：</td>
+                <td class="td-txt">
+                    <select id="tileChecked" class="form-select">
+                        <option value="true">true</option>
+                        <option value="false">false</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">图标样式：</td>
+                <td class="td-txt" colspan="1">
+                    <div>
+                        <input type="text" class="form-txt" id="tileIconCls" />
+                    </div>
+                </td>
+                <td class="td-title">最大级别：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="tileMaxZoom" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">最小级别：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="tileMinZoom" />
+                    </div>
+                </td>
+                <td class="td-title">XMin：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="tileXMin" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">YMin：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="tileYMin" />
+                    </div>
+                </td>
+                <td class="td-title">XMax：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="tileXMax" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">YMax：</td>
+                <td class="td-txt">
+                    <div>
+                        <input type="text" class="form-txt" id="tileYMax" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">图层地址：</td>
+                <td class="td-txt" colspan="3">
+                    <div>
+                        <input type="text" class="form-txt" id="tileUrl" style="width:98%" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">其他参数：</td>
+                <td class="td-txt" colspan="3">
+                    <div>
+                        <input type="text" class="form-txt" id="tileArgs" style="width:98%" />
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="basemapinfo" style="width:700px;" id="editlegend">
+        <div class="right">
+            <button class="btn" onclick="addmLegend()">添加</button>
+        </div>
+        <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+            <table id="tableLegend"></table>
+        </div>
+    </div>
+    <div id="editlegendwin">
+        <table class="form-tbl" style="width: 100%;">
+            <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">标识类型：</td>
+                <td class="td-txt">
+                    <select id="legendSubType" class="form-select">
+                        <option value="point">point</option>
+                        <option value="line">line</option>
+                        <option value="polygon">polygon</option>
+                    </select>
+                </td>
+                <td class="td-title">名称：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="legendText" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">填充颜色：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="FColor" />
+                </td>
+                <td class="td-title">填充透明度：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="FOpacity" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">边框宽度：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="Width" />
+                </td>
+                <td class="td-title">边框颜色：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="Color" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">边框透明度：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="Opacity" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/authorization.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script src="../../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../../js/guid.js"></script>
+    <script src="../../../js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../../js/md5.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.onemap.js"></script>
+    <link href="../../../css/ktw.form.css" rel="stylesheet" />
+    <style type="text/css">
+        html, body {
+            overflow: auto !important;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .form-container {
+            width: 80%;
+            margin: 0 auto;
+            min-width: 900px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <table class="form-tbl">
+            <colgroup>
+                <col style="width: 18%" />
+                <col style="width: 30%" />
+                <col style="width: 18%" />
+                <col style="width: 30%" />
+            </colgroup>
+            <tr>
+                <td colspan="4" style="text-align: right; border: 0; padding-right: 2px;">单位:公顷、万元</td>
+            </tr>
+            <!--基本信息-->
+            <tr>
+                <td class="form-kind" colspan="4">
+                    <div><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>基本信息</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">录入时间</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.lrsj"></div>
+                </td>
+                <td class="from-title">年份</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.nf"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">案卷编号</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.aj_bh"></div>
+                </td>
+                <td class="from-title">案卷名称</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.aj_mc"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">流程类型</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.lc_lx"></div>
+                </td>
+                <td class="from-title">流程名称</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.lc_mc"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">行政区代码</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.xzq_dm"></div>
+                </td>
+                <td class="from-title">行政区名称</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.xzq_mc"></div>
+                </td>
+            </tr>
+            <!--项目信息-->
+            <tr>
+                <td class="form-kind" colspan="4">
+                    <div><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>项目信息</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">项目名称</td>
+                <td class="form-text">
+                    <div id="xmmc" readname="T_INF_ONEMAP_BCGDXXB.xm_mc"></div>
+                </td>
+                <td class="from-title">地块名称</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.dk_mc"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">补充耕地方式</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.bcgd_fs"></div>
+                </td>
+                <td class="from-title">补充耕地图幅号及地块编号</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.bh"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">立项单位</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.lxdw"></div>
+                </td>
+                <td class="from-title">承担单位</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.cd_dw"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">实施年度</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.ss_nd"></div>
+                </td>
+                <td class="from-title">资金安排</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.zj"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">验收文号</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.ys_wh"></div>
+                </td>
+                <td class="from-title">验收单位</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.ys_dw"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">验收日期</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.ys_rq"></div>
+                </td>
+                <td class="from-title">实施单位联系人</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.ss_dw_lxr"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">实施单位联系电话</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.ss_dw_lx_dh"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">备注</td>
+                <td class="form-text" colspan="3">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.bz"></div>
+                </td>
+            </tr>
+            <!--面积信息-->
+            <tr>
+                <td class="form-kind" colspan="4">
+                    <div><span style="display: inline-block; width: 9px; height: 9px; background-image: url(../../../image/icon1.png); margin-right: 5px;"></span>面积信息</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">已补充面积</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.ybc_mj"></div>
+                </td>
+                <td class="from-title">可补充面积</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.kbc_mj"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="from-title">项目新增耕地面积</td>
+                <td class="form-text">
+                    <div readname="T_INF_ONEMAP_BCGDXXB.xzgdmj"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script type="text/javascript">
+        function param(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+        var guid = param("guid");
+        $(function () {
+            ktw.cookie.init("../../../config/app.xml");
+            ktw.InitForm(guid);
+            $("#xmmc", window.parent.document).html($("#xmmc").html());
+            $("#type", window.parent.document).html(" 补地>> ");
+        });
+
+    </script>
+</body>
+</html>

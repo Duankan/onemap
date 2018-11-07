@@ -1,0 +1,489 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>流向矩阵</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="Shortcut Icon" href="image/site.jpg" />
+    <link href="js/ktop/ktop.css" rel="stylesheet" />
+    <link href="css/admin.css" rel="stylesheet" />
+    <script src="js/ktop/ktop.js"></script>
+    <script src="js/ktop/proj4-compressed.js"></script>
+    <script src="js/ktop/proj4leaflet.js"></script>
+    <link href="css/ktw.form.css" rel="stylesheet" />
+    <link rel="stylesheet" href="theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="css/app.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <link rel="stylesheet" type="text/css" href="css/icon.css" />
+    <!-- JS框架 jQuery -->
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <!--提示框插件-->
+    <link href="js/tooltip/tooltip.css" rel="stylesheet" />
+    <script src="js/tooltip/tooltip.js"></script>
+    <!-- 第三方UI框架 easyUI -->
+    <script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="js/easyui-lang-zh_CN.js"></script>
+    <!-- JS实现的LINQ -->
+    <script type="text/javascript" src="js/linq.min.js"></script>
+    <script type="text/javascript" src="js/ajaxfileupload.js"></script>
+    <!-- json、xml类型数据格式的操作 -->
+    <script type="text/javascript" src="js/data.util.js"></script>
+
+    <!-- 提供对旧浏览器一些特性的兼容 -->
+    <script type="text/javascript" src="js/polyfill.min.js"></script>
+
+    <!-- loading动画加载效果，框架中UCWaitBox控件就是借助它实现的 -->
+    <script type="text/javascript" src="js/spin.js"></script>
+
+    <!-- 框架界面布局 -->
+    <script type="text/javascript" src="js/ktw.ui.js"></script>
+    <script type="text/javascript" src="js/ktw.onemap.js"></script>
+
+    <!-- jQuery.form.js是一个form插件，支持ajax表单提交和ajax文件上传 -->
+    <script type="text/javascript" src="js/jquery.form.js"></script>
+
+    <script src="js/highcharts.js"></script>
+    <script type="text/javascript">
+        var data;
+        var data2;
+        var owsurl;
+        var templayername = "";
+        var field1;
+        var field2;
+        var destcrs = "";
+        var msg;
+        var waitbox = null;
+        var countHeader = [];//统计name
+        var countData = [];//统计结果data
+        var formDataList = [];//变化增
+        var toDataList = [];//
+        $(window).ready(function () {
+            msg = new ktw.Messager({
+                AutoShow: false,
+                Height: 120,
+                HideOk: true,
+                HideCancle: true
+            });
+            waitbox = new ktw.UCWaitBox($(document.body));
+            waitbox.Show();
+            //errordata();
+            //errordata2();
+            //AddTableRow();
+
+            //getdata();
+        });
+        //部件通讯
+        function WidgetCommunication(s) {
+            templayername = s.param.templayername;
+            owsurl = s.param.owsurl;
+            field1 = s.param.field1;
+            field2 = s.param.field2;
+            destcrs = s.param.destcrs;
+            getdata();
+        }
+        //获取地址参数方法
+        function GetQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+        //获取所有流向数据失败后处理
+        function errordata() {
+            data = { "arr": [{ "area": 31526406.699282043, "toDl": "城镇村及工矿用地", "count": 2309, "fromDl": "耕地" }, { "area": 24578650.234998982, "toDl": "城镇村及工矿用地", "count": 1459, "fromDl": "林地" }, { "area": 18040557.457321383, "toDl": "耕地", "count": 551, "fromDl": "林地" }, { "area": 7325509.810586294, "toDl": "城镇村及工矿用地", "count": 342, "fromDl": "其它土地" }, { "area": 6073318.553617973, "toDl": "城镇村及工矿用地", "count": 1639, "fromDl": "水域及水利设施用地" }, { "area": 3010225.6773895337, "toDl": "交通运输用地", "count": 231, "fromDl": "耕地" }, { "area": 2085700.9525829135, "toDl": "交通运输用地", "count": 149, "fromDl": "林地" }, { "area": 1498686.4716268398, "toDl": "城镇村及工矿用地", "count": 240, "fromDl": "园地" }, { "area": 1227365.580906273, "toDl": "林地", "count": 75, "fromDl": "园地" }, { "area": 1054918.1391376501, "toDl": "城镇村及工矿用地", "count": 109, "fromDl": "草地" }, { "area": 466796.31533872423, "toDl": "交通运输用地", "count": 101, "fromDl": "城镇村及工矿用地" }, { "area": 232597.4808331582, "toDl": "交通运输用地", "count": 104, "fromDl": "水域及水利设施用地" }, { "area": 218174.9119805965, "toDl": "交通运输用地", "count": 14, "fromDl": "其它土地" }, { "area": 191785.3219350431, "toDl": "耕地", "count": 16, "fromDl": "草地" }, { "area": 188390.54785721915, "toDl": "水域及水利设施用地", "count": 19, "fromDl": "城镇村及工矿用地" }, { "area": 124880.13533271496, "toDl": "水域及水利设施用地", "count": 8, "fromDl": "耕地" }, { "area": 104519.49819460703, "toDl": "交通运输用地", "count": 27, "fromDl": "园地" }, { "area": 85280.09166458128, "toDl": "草地", "count": 2, "fromDl": "园地" }, { "area": 75481.28465251198, "toDl": "耕地", "count": 19, "fromDl": "城镇村及工矿用地" }, { "area": 70278.44717087435, "toDl": "耕地", "count": 12, "fromDl": "园地" }, { "area": 69146.88576978809, "toDl": "林地", "count": 3, "fromDl": "耕地" }, { "area": 59329.864230881554, "toDl": "其它土地", "count": 4, "fromDl": "林地" }, { "area": 42498.96438500842, "toDl": "耕地", "count": 34, "fromDl": "水域及水利设施用地" }, { "area": 40369.77458508195, "toDl": "城镇村及工矿用地", "count": 9, "fromDl": "交通运输用地" }, { "area": 33803.58635316717, "toDl": "交通运输用地", "count": 7, "fromDl": "草地" }, { "area": 27924.969128213015, "toDl": "水域及水利设施用地", "count": 3, "fromDl": "林地" }, { "area": 19266.512624127954, "toDl": "耕地", "count": 7, "fromDl": "其它土地" }, { "area": 15085.79227159424, "toDl": "林地", "count": 1, "fromDl": "城镇村及工矿用地" }, { "area": 2839.265390861554, "toDl": "其它土地", "count": 2, "fromDl": "园地" }, { "area": 2199.369964430761, "toDl": "水域及水利设施用地", "count": 1, "fromDl": "其它土地" }, { "area": 2002.038721725161, "toDl": "其它土地", "count": 2, "fromDl": "水域及水利设施用地" }, { "area": 571.7046711699369, "toDl": "其它土地", "count": 1, "fromDl": "耕地" }], "total": 32 }
+        }
+        //获取所有流向数据
+        function getdata() {
+            $.ajax({
+                url: owsurl + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + field1 + "," + field2 + "&destcrs=" + destcrs,
+                type: 'GET',
+                error: function (data) {
+                    errordata();
+                    getdata2();
+                    debugger;
+                    console.log(data.responseText);
+                    //msg.Alert('服务请求失败！', { "Type": 'error' });
+                },
+                success: function (redata) {
+                    data = redata;
+                    getdata2();
+                }
+            });
+        }
+        //获取流向统计汇总数据
+        function getdata2() {
+            $.ajax({
+                url: owsurl + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + field1 + "," + field2 + "&destcrs=" + destcrs + "&stats=true",
+                type: 'GET',
+                error: function (data) {
+                    errordata2();
+                    AddTableRow();
+                    console.log(data.responseText);
+                },
+                success: function (redata) {
+                    data2 = redata;
+                    AddTableRow();
+                }
+            });
+        }
+        //获取流向统计汇总数据失败后处理
+        function errordata2() {
+            data2 = { "arr": [{ "filed": "耕地", "AddArea": 1.8439867988088954E7, "AddCount": 639, "ReduceArea": -3.4731231102445245E7, "ReduceCount": -2552, "TotalArea": -1.629136311435629E7, "TotalCount": -1913 }, { "filed": "林地", "AddArea": 1311598.2589476556, "AddCount": 79, "ReduceArea": -4.4792163478262365E7, "ReduceCount": -2166, "TotalArea": -4.348056521931471E7, "TotalCount": -2087 }, { "filed": "其它土地", "AddArea": 64742.87301463821, "AddCount": 9, "ReduceArea": -7565150.605155449, "ReduceCount": -364, "TotalArea": -7500407.732140811, "TotalCount": -355 }, { "filed": "水域及水利设施用地", "AddArea": 343395.0222825779, "AddCount": 31, "ReduceArea": -6350417.037557865, "ReduceCount": -1779, "TotalArea": -6007022.0152752865, "TotalCount": -1748 }, { "filed": "园地", "AddArea": 0.0, "AddCount": 0, "ReduceArea": -2988969.3549540373, "ReduceCount": -358, "TotalArea": -2988969.3549540373, "TotalCount": -358 }, { "filed": "草地", "AddArea": 85280.09166458128, "AddCount": 2, "ReduceArea": -1280507.0474258603, "ReduceCount": -132, "TotalArea": -1195226.955761279, "TotalCount": -130 }, { "filed": "城镇村及工矿用地", "AddArea": 7.209785968383487E7, "AddCount": 6107, "ReduceArea": -745753.9401200496, "ReduceCount": -140, "TotalArea": 7.135210574371481E7, "TotalCount": 5967 }, { "filed": "交通运输用地", "AddArea": 6151818.422672699, "AddCount": 633, "ReduceArea": -40369.77458508195, "ReduceCount": -9, "TotalArea": 6111448.648087617, "TotalCount": 624 }] }
+        }
+
+        function AddTableRow() {
+            var formdata = [];//横轴
+            var todata = [];//纵轴
+            var Table = document.getElementById("NewTable");   //取得自定义的表对象
+            NewRow = Table.insertRow();
+            var innerHtml = "<th><div style='border-style:solid; border-width: 1px 0 0 1px;'><div class=\"firstdiv\"><div style='margin-top: -48px;float: right;margin-right: -12px;'>历史</div><div style='margin-left: -48px;float: left;'>现状</div></div><div></th>";
+            //获得横轴纵轴字段内容
+            for (var i = 0; i < data2.arr.length; i++) {
+                todata.push(data2.arr[i].filed);
+                formdata.push(data2.arr[i].filed);
+                innerHtml += "<th class='formdiv'>" + data2.arr[i].filed + "</th>";
+            }
+            NewRow.innerHTML = innerHtml;
+            for (var j = 0; j < todata.length; j++) {
+                NewRow = Table.insertRow();
+                NewRow.innerHTML = "<th class='todiv'>" + todata[j] + "</th>";
+                countHeader.push(todata[j]);//统计用
+                for (var i = 0; i < formdata.length; i++) {
+                    var NewCell = NewRow.insertCell();
+                    if (formdata[i] == todata[j]) {
+                        for (var t = 0; t < data2.arr.length; t++) {
+                            if (data2.arr[t].filed == formdata[i]) {
+                                if (data2.arr[t].TotalArea < 0) {
+                                    $(NewCell).css({ "background": "#00ce9b", color: "#fff" })
+                                } else {
+                                    $(NewCell).css({ "background": "#ff2c55", color: "#fff" })
+                                }
+                                NewCell.innerHTML = (data2.arr[t].TotalArea/10000).toFixed(4);
+                                countData.push(Number((data2.arr[t].TotalArea/10000).toFixed(4)))
+                                break;
+                            }
+                        }
+                    }
+                    for (k = 0; k < data.arr.length; k++) {
+                        if (data.arr[k].toDl == todata[j] && data.arr[k].fromDl == formdata[i]) {
+                            NewCell.innerHTML = (data.arr[k].area/10000).toFixed(4);
+                            break;
+                        }
+                    }
+
+                }
+            }
+            waitbox.Close();
+
+        }
+
+        //柱状图统计
+        var lsnum = 0;
+        function showBox() {
+            lsnum++;
+            var KtwWinddow = new window.top.ktw.Window({
+                ID: "ktw-Statistics_zzt",
+                Content: '<div id="container' + lsnum + '" style="width:100%;height:100%"></div>',
+                IconCls: "icon-Search2 ",
+                Height: 350,
+                Width: 750,
+                Left: 80,
+                Top: 145,
+                Draggable: true,
+                Title: '柱状图',
+                Parent: $(window).Target,
+                InitVisible: false,
+                Modal: false,
+                IsMaximize: false,
+                IsMinimize: false,
+                Maximizable: true,
+                Minimizable: true
+            });
+            //生成统计图
+            $('#container' + lsnum,window.top.document.body).highcharts({
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: '土地利用变化整体情况（单位：公顷）'
+                },
+                xAxis: {
+                    categories: countHeader,
+                    labels: {
+                        rotation: "-30"
+                    },
+                },
+                yAxis: {
+                    title: {
+                        text: '公顷'
+                    },
+                    labels: {
+                        format: '{value:.,0f}'//就这个地方设置显示格式
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="padding:0">{series.name}: </td>' +
+                    '<td style="padding:0;"><b>{point.y:.1f} 公顷</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                credits: {
+                    enabled: false
+                },
+                //取消下面总计点
+                legend: {
+                    enabled: false
+                },
+                series: [{
+                    color: '#ff2c55',
+                    negativeColor: '#00ce9b',//就是这个属性设置负值的颜色
+                    name: "总计",
+                    data: countData
+                }],
+                plotOptions: {
+                    column: {
+                        dataLabels: {
+                            pointPadding: 0.2,
+                            borderWidth: 0,
+                            enabled: true, // dataLabels设为true
+                            style: {
+                                color: '#323232'
+                            }
+                        },
+                        point: {
+                            events: {
+                                click: function (e) {
+                                    var lsName = e.currentTarget.category;
+                                    var lsValue = e.currentTarget.y;
+                                    var lsValueName = "" + e.currentTarget.y
+                                    if (lsValueName.indexOf("-") > -1) {
+                                        lsValue = Number(lsValueName.split("-")[1]);
+                                        lsValueName = "减少"
+
+                                    } else {
+                                        lsValueName = "增加"
+                                    }
+                                    $("#container" + lsnum,window.top.document.body).append('<div id="containerList' + lsnum + '" style="position:absolute;width:100%;height:100%;top:0;background:#fff;"></div>')
+                                    waitbox.Show();
+                                    $.ajax({
+                                        url:owsurl + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + field1 + "," + field2 + "&destcrs=" + destcrs + "&getOne=" + lsName,
+                                      //  url: "http://192.168.227.104:8081/hgis/ows?service=wps&version=2017.06.21&request=statDltbChanges&path=tmp:tmp_7181b126-358f-4b15-af6f-2c94cb47d94d&fieldMap=over_一级分类,一级分类&destcrs=EPSG:4546&getOne=" + lsName,
+                                        type: 'GET',
+                                        success: function (redata) {                                           
+
+                                            waitbox.Close();
+                                            var dataZList = [];//增数据
+                                            var dataJList = [];//减数据
+                                            var dataZName = [];//增名称
+                                            var dataJName = [];//减名称
+                                            var dataCName = [];//综合名字
+                                            //添加增加来源
+                                            for (var i = 0; i < redata.arr1.length; i++) {
+                                                dataZName.push(redata.arr1[i].toDl)
+                                            }
+                                            //添加增加来源
+                                            for (var i = 0; i < redata.arr2.length; i++) {
+                                                dataJName.push(redata.arr2[i].fromDl)
+                                            };
+                                            //筛选过滤来源去重
+                                            //dataCName = quchong(dataZName, dataJName);
+                                            dataCName=$.unique(dataZName.concat(dataJName))
+
+                                            //通过名字来放置数据
+                                            for (var i = 0; i < dataCName.length; i++) {
+                                                //增加
+                                                var lsoff = 0;
+                                                for (var j = 0; j < redata.arr1.length; j++) {
+                                                    lsoff++;
+                                                    if (dataCName[i] == redata.arr1[j].toDl) {
+                                                        dataZList.push(Number((redata.arr1[j].area/10000).toFixed(4)));
+                                                        lsoff++;
+                                                        break;
+                                                    }
+                                                    else if (j == redata.arr1.length - 1 && lsoff == redata.arr1.length) {
+                                                        dataZList.push(0);
+                                                    }
+                                                }
+                                                //减少
+                                                lsoff = 0;
+                                                for (var k = 0; k < redata.arr2.length; k++) {
+                                                    lsoff++;
+                                                    if (dataCName[i] == redata.arr2[k].fromDl) {
+                                                        lsoff++;
+                                                        dataJList.push(Number((redata.arr2[k].area/10000).toFixed(4)));
+                                                        break;
+                                                    } else if (k == redata.arr2.length - 1 && lsoff == redata.arr2.length) {
+                                                        dataJList.push(0);
+                                                    }
+                                                }
+                                            };
+
+                                            //单个统计图
+                                            $('#containerList' + lsnum, window.top.document.body).highcharts({
+                                                chart: {
+                                                    type: 'column'
+                                                },
+                                                title: {
+                                                    text: lsName + '变化（总计：' + lsValueName + ' ' + lsValue + ' 公顷）'
+                                                },
+                                                xAxis: {
+                                                    categories: dataCName,
+                                                    crosshair: true,
+                                                    labels: {
+                                                        rotation: "-30"
+                                                    },
+                                                },
+                                                yAxis: {
+                                                    min: 0,
+                                                    title: {
+                                                        text: '公顷'
+                                                    },
+                                                    labels: {
+                                                        format: '{value:.,0f}'//就这个地方设置显示格式
+                                                    }
+                                                },
+                                                tooltip: {
+                                                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                                                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                                                    '<td style="padding:0"><b>{point.y:.1f} 公顷</b></td></tr>',
+                                                    footerFormat: '</table>',
+                                                    shared: true,
+                                                    useHTML: true
+                                                },
+                                                plotOptions: {
+                                                    column: {
+                                                        pointPadding: 0.2,
+                                                        borderWidth: 0,
+                                                        dataLabels: {
+                                                            enabled: true, // dataLabels设为true
+                                                            style: {
+                                                                color: '#323232'
+                                                            }
+                                                        },
+                                                    },
+
+                                                },
+                                                series: [{
+                                                    name: '减少',
+                                                    data: dataZList,
+                                                    color: '#00ce9b',//#ff2c55
+                                                }, {
+                                                    name: '增加',
+                                                    data: dataJList,
+                                                    color: '#ff2c55',//#00ce9b
+                                                }]
+                                            });
+                                            //添加返回按钮
+                                            $('#containerList' + lsnum, window.top.document.body).append('<div style="width:32px;height:32px;position:absolute;right:0;top:0;background:url(image/backtj.png);z-index:99999;" onclick="closeBox(this)"></div>')
+                                        },
+                                        error: function (data) {
+
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+                },
+
+            });
+            //窗口绑定resize事件
+            KtwWinddow.bind("onResize", function (s, e, c) {
+                var chart = $('#container' + lsnum, window.top.document.body).highcharts();
+                chart.reflow();
+                if ($('#containerList' + lsnum, window.top.document.body).length > 0) {
+                    var chartList = $('#containerList' + lsnum, window.top.document.body).highcharts();
+                    chartList.reflow();
+                };
+            });
+        }
+        //去重
+        function quchong(arr1, arr2) {
+            for (var i = arr1.length - 1 ; i > 0 ; i--) {
+                for (var j = 0 ; j < arr2.length ; j++) {
+                    if (arr1[i] == arr2[j]) {
+                        arr1.splice(i, 1); //利用splice函数删除元素，从第i个位置，截取长度为1的元素
+                        break;
+                    }
+                }
+            }
+            //alert(arr1.length)
+            for (var i = 0; i < arr2.length; i++) {
+                arr1.unshift(arr2[i]);
+            }
+            return arr1;
+        }
+       
+
+        //var ls = {"arr1":[{"area":284074.6966040213,"toDl":"城镇村及工矿用地土地","count":35,"fromDl":"耕地"},{"area":99619.57441845915,"toDl":"草地","count":7,"fromDl":"耕地"},{"area":70588.0320821668,"toDl":"林地","count":20,"fromDl":"耕地"},{"area":41123.73610048124,"toDl":"交通运输用地","count":3,"fromDl":"耕地"},{"area":35144.635134415235,"toDl":"水域及水利设施用地","count":4,"fromDl":"耕地"},{"area":9198.994014606587,"toDl":"园地","count":5,"fromDl":"耕地"}],"arr2":[{"area":724303.9175593746,"toDl":"耕地","count":901,"fromDl":"水域及水利设施用地"},{"area":173582.4834235164,"toDl":"耕地","count":97,"fromDl":"城镇村及工矿用地"},{"area":101295.66927230581,"toDl":"耕地","count":22,"fromDl":"林地"},{"area":70617.33998749021,"toDl":"耕地","count":21,"fromDl":"园地"},{"area":25236.452525908164,"toDl":"耕地","count":5,"fromDl":"草地"}]}
+    </script>
+    <style type="text/css">
+        table.gridtable {
+            width:98%;
+            height:90%;
+            font-family: verdana,arial,sans-serif;
+            font-size: 11px;
+            color: #333333;
+            border-width: 1px;
+            border-color: #666666;
+            border-collapse: collapse;
+        }
+
+            table.gridtable th:nth-child(n+2) {
+                border-width: 1px;
+                padding: 8px;
+                border-style: solid;
+                /*border-color: #666666;*/
+                /*background-color: #dedede;*/
+            }
+
+            table.gridtable td {
+                border-width: 1px;
+                padding: 8px;
+                border-style: solid;
+                text-align: center;
+                border-color: #666666;
+                background-color: #ffffff;
+            }
+
+        .formdiv {
+            background-color: #efefef;
+            padding: 0px;
+            border: solid 1px;
+        }
+
+        .todiv {
+            background-color: #d8d1d1;
+            padding: 0px;
+            border: solid 1px;
+        }
+
+        .firstdiv {
+            height: 0px;
+            width: 0px;
+            padding: 0px;
+            border-style: solid;
+            border-width: 65px 52px 52px 65px;
+            border-color: #efefef #efefef #d8d1d1 #d8d1d1;
+            /*border-left: solid 65px;
+            border-bottom: solid 35px;
+            border-top: solid 35px;
+            border-right: solid 65px red;*/
+        }
+
+        table caption {
+            height: 30px;
+            line-height: 30px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body style="overflow: auto;">
+    <div style="border-radius: 5px; cursor: pointer; color: #fff; position: absolute; padding: 5px; top: 3px; left: 5px; background: rgb(0, 153, 204);" onclick="showBox()">柱状图</div>
+    <table id="NewTable" class="gridtable">
+        <caption>土地利用现状流向矩阵表（单位：公顷）</caption>
+    </table>
+</body>
+</html>

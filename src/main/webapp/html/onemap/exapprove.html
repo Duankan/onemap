@@ -1,0 +1,544 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>人员管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/authorization.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        Ktw.cookie.init("../config/app.xml");
+        var ServerUrl = null;
+        ServerUrl = Ktw.cookie.ServerUrl;
+        var names = [], remark = [], id, ids = [];
+        var app;
+        var isadd;
+        var isdelete = false;
+        var dialog = new Ktw.Messager({ AutoShow: false, Type: "question" });
+        $(window).ready(function () {
+            addApproves();
+            Loadtree();
+            initGrid();
+            //概述和配置项联动
+            //var nameComBox = $("#name").prop('$this');
+            //nameComBox.bind("onSelectChanged", function (e, s) {
+            //    var i;
+            //    for (i = 0; i < names.length; i++) {
+            //        if (s == names[i]) break;
+            //    }
+            //    $("#remark").textbox('setValue', remark[i]);
+            //})
+        })
+        function initGrid() {
+            $("#dataGrid").datagrid({
+                rownumbers: true,
+                columns: [[
+                    { field: 'name', title: '名称', width: '20%', align: 'center', },
+                    { field: 'remark', title: '概述', width: '40%', align: 'center', },
+                    { field: 'oid', title: '排序', width: '15%', },
+                    //{ field: 'simurl', title: '地址', width: '15%', },
+                    { field: '_operate1', title: '删除', width: '15%', align: 'center', sortable: false, formatter: function (value, row, index) { return '<div class="gridoperate"><a class="icon-plotte" style="width:16px; height:16px;margin:auto;  background-color:transparent" onclick="Delete(this)">删除</a></div>'; } },
+                ]],
+                //删除当前行
+                onClickRow: function (s, e) {
+                    if (isdelete == false) { return; }
+                    dialog.Confirm('确认要删除选中记录吗？', function (r) {
+                        if (!r) return;
+                        var k = "";
+                        var i;
+                        for (i = 0; i < names.length; i++) {
+                            if (e.name == names[i]) break;
+                        }
+                        app = app + ","
+                        app = app.replace(ids[i] + ",", "");
+                        if (isdelete == true) {
+                            $.ajax({
+                                type: "GET",
+                                url: ServerUrl + " flow/updateflow/" + id + "/" + app,
+                                success: function (data) {
+                                    var k = "";
+                                    var orgTree = $("#organizeTree");
+                                    var node = orgTree.tree('getSelected');
+                                    node.approves = app;
+                                    onSelect(node);
+                                    Ktw.Alert("删除成功!", 'info')
+                                },
+                                error: function (data) {
+                                    Ktw.Alert("删除失败!")
+                                }
+                            })
+                        }
+                        isdelete = false;
+                    })
+                }
+            });
+        }
+        //加载左侧树
+        function Loadtree() {
+            var isLoad = true;
+            var children = [];
+            //初始化组织结构
+            var iconCls = ["icon-department", "icon-unit", "icon-user"];
+            $('#organizeTree').tree({
+                method: "get",
+                checkbox: false,
+                url: ServerUrl + "flow/getflow/0",
+                onBeforeExpand: function (node) {
+                    var k = "";
+                },
+                onSelect: function (node) { onSelect(node) },
+                onLoadSuccess: function () {
+                    var n = $("#organizeTree").tree("getSelected");
+                    if (n != null) $("#organizeTree").tree("select", n.target);
+                },
+                loadFilter: function (data) {
+                    var childarray = [];
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].text = data[i].ktext;
+                        if (data[i].pid == null || data[i].pid == "10001") {
+                            childarray.push(data[i]);
+                        } else {
+                            for (var j = 0; j < data.length; j++) {
+                                if (data[i].pid == data[j].id) {
+                                    if (data[j].children == undefined) {
+                                        data[j].children = [];
+                                    }
+                                    data[j].children.push(data[i]);
+                                    //data[j].state = "closed";
+                                    data[j].state = "open";
+                                }
+                            }
+
+                        }
+                        if (data[i].ktype == "Node") { data[i].iconCls = iconCls[1]; }
+                    }
+
+                    if (isLoad) {
+                        isLoad = false;
+                        return [{
+                            id: '10001',
+                            text: "辅助审批",
+                            name: "辅助审批",
+                            state: "open",
+                            ktype: "root",
+                            children: childarray
+                        }];
+                    }
+                    else { var a = []; return a; }
+                },
+                formatter: function (node) {
+                    if (!node.children || node.children.length == 0) return node.ktext;
+                    return node.text + '<span style="color:blue">(' + node.children.length + ')</span>';
+                },
+                //对树节点做操作
+                onContextMenu: function (e, node) {
+                    e.preventDefault();
+                    $("#miAdd").show();
+                    $("#miDelete").show();
+                    if (node.ktype == "Node") {
+                        $("#miAdd").hide();
+                    }
+                    if (node.ktype == "root") {
+                        $("#miDelete").hide();
+                    }
+                    $(this).tree('select', node.target);
+                    $('#mtree').menu('show', { left: e.pageX, top: e.pageY });
+                    $("div[name=miDeleteUnit]").click(function () {
+                        dialog.Confirm('确认要删除选中记录吗？', function (r) {
+                            if (!r) return;
+                            var orgTree = $("#organizeTree");
+                            var node = orgTree.tree('getSelected');
+                            var id = node.id;
+                            $.ajax({
+                                type: "GET",
+                                url: ServerUrl + "flow/deleteflow/" + id,
+                                success: function (data) {
+                                    Ktw.Alert("删除成功!", 'info')
+                                    Loadtree();
+                                },
+                                error: function (data) {
+                                    Ktw.Alert("删除失败!")
+                                }
+                            });
+                        });
+                    });
+                    $("div[name=miAddUnit]").click(function (e) {
+                        $("#editbox").form('reset');
+                        var orgTree = $("#organizeTree");
+                        var node = orgTree.tree('getSelected');
+                        if (node.ktype == "Node") { Ktw.Alert("该节点不可添加"); return; }
+                        $("#flowdlg").dialog("open").dialog("center");
+                        isadd = true;
+                    });
+                    $("div[name=miEditUnit]").click(function () {
+                        var orgTree = $("#organizeTree");
+                        var node = orgTree.tree('getSelected');
+                        $("#flowdlg").dialog("open").dialog("center");
+                        $("#Text1").textbox('setValue', node.ktext);
+                        $("#Text2").textbox('setValue', node.kvalue);
+                        isadd = false;
+                    });
+                }
+            });
+        }
+        //右侧删除配置项
+        function Delete(item) {
+            isdelete = true;
+        }
+        //获取所有配置项
+        function addApproves() {
+            $.ajax({
+                type: "GET",
+                url: ServerUrl + "approve/getapproves/all",
+                success: function (data) {
+                    var comdata = [];
+                    var k = "";
+                    for (var i = 0; i < data.length; i++) {
+                        names.push(data[i].name);
+                        remark.push(data[i].remark);
+                        ids.push(data[i].id)
+                        comdata.push({
+                            label: data[i].name,
+                            value: data[i].name,
+                        });
+                    }
+                    //var nameComBox = $("#name").prop('$this');
+                    //nameComBox.SetData(names);
+
+                    $('#name1').combobox({
+                        valueField: 'value',
+                        textField: 'label',
+                        data: comdata,
+                        onSelect: function (param) {
+                            var i;
+                            for (i = 0; i < names.length; i++) {
+                                if (param.value == names[i]) break;
+                            }
+                            $("#remark").textbox('setValue', remark[i]);
+                        }
+                    });
+                },
+                error: function (data) {
+                    var k = "";
+                }
+            });
+        }
+        //右侧添加配置
+        function Add() {
+            //if (app == undefined) { alert("请先选择节点！"); return; }
+            $("#dlg").dialog("open").dialog("center");
+        }
+        //添加节点配置项
+        function saveNode() {
+            //var name = $("#name").prop("$this").GetText();
+            var name = $('#name1').combobox('getValue')
+            var i;
+            for (i = 0; i < names.length; i++) {
+                if (name == names[i]) break;
+            }
+            if (app != null) {
+                var a = app.split(",");
+                if ($.inArray(ids[i], a) >= 0) { Ktw.Alert("该节点已存在！"); return; }
+                app = app + ids[i] + ',';
+            }
+            else if (app == null) {
+                app = ids[i] + ',';
+            }
+            $.ajax({
+                type: "GET",
+                url: ServerUrl + "flow/updateflow/" + id + "/" + app,
+                success: function (data) {
+                    var k = "";
+                    var orgTree = $("#organizeTree");
+                    var node = orgTree.tree('getSelected');
+                    node.approves = app;
+                    onSelect(node);
+                    $('#dlg').dialog('close');
+                },
+                error: function (data) {
+                    var k = "";
+                }
+            })
+        }
+        //修改地址
+        function updateUrl() {
+            isadd = "updateurl";
+            saveFlow();
+        }
+        //编辑添加左侧节点及节点修改地址
+        function saveFlow() {
+            var flow = {};
+            var url;
+            var orgTree = $("#organizeTree");
+            var node = orgTree.tree('getSelected');
+            debugger
+            //编辑
+            if (isadd == false) {
+                node.ktext = $("#Text1").textbox('getValue');
+                node.kvalue = $("#Text2").textbox('getValue');
+                flow = node;
+                url = ServerUrl + "flow/updatef ";
+            }
+                //添加
+            else if (isadd == true && isadd != "updateurl") {
+                flow.ktext = $("#Text1").textbox('getValue');
+                flow.kvalue = $("#Text2").textbox('getValue');
+                flow.pid = node.id;
+                url = ServerUrl + "flow/addflow ";
+                switch (node.ktype) {
+                    case "root": flow.ktype = "FlowType"; break;
+                    case "FlowType": flow.ktype = "Flow"; break;
+                    case "Flow": flow.ktype = "Node"; break;
+                    default: break;
+                }
+            }
+                //修改地址
+            else if (isadd == "updateurl") {
+                debugger
+                node.simurl = $("#simurl").val();
+                flow = node;
+                url = ServerUrl + "flow/updatef ";
+            }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(flow),
+                contentType: "application/json",
+                url: url,
+                success: function (data) {
+                    var k = "";
+                    $("#flowdlg").dialog('close');
+                    if (isadd == "updateurl" || isadd == false) Ktw.Alert("修改成功！");
+                    else if (isadd == true && isadd != "updateurl") Ktw.Alert("保存成功！");
+                    Loadtree();
+                },
+                error: function (data) {
+                    var k = "";
+                }
+            });
+        }
+        //单击左侧节点在右侧显示其配置项
+        function onSelect(node) {
+            if (node.ktype == "root" || node.ktype == "FlowType") {
+                $("#rightcontent").hide();
+                return;
+            }
+            $("#rightcontent").show();
+            $(".header", "#rightdiv").text(node.ktext);
+            if (node == undefined) return;
+            id = node.id;
+            var k = "";
+            app = node.approves;
+            if (node.ktype == "Flow") {
+                $("#Url").show();
+            }
+            else $("#Url").hide();
+            $("#simurl").val(node.simurl);
+            //if (node.approves != null) {
+            $.ajax({
+                type: "GET",
+                url: ServerUrl + "approve/getapproves/" + app,
+                success: function (data) {
+                    var k = "";
+                    var result = [];
+                    var p;
+                    var opts = $('#dataGrid').datagrid('getColumnFields');
+                    for (var i = 0; i < data.length; i++) {
+                        p = {};
+                        for (var j = 0; j < opts.length - 1; j++) {
+                            p[opts[j]] = data[i][opts[j]];
+                        }
+                        result.push(p);
+                    }
+                    $('#dataGrid').datagrid({
+                        data: result
+                    });
+                },
+                error: function (data) {
+                    var k = "";
+                }
+            });
+            //}
+        }
+    </script>
+    <style>
+        .exapprove {
+            width: 100%;
+            height: 100%;
+            background: #FFFFFF;
+        }
+
+        #flowdlg .catalog-info {
+            float: left;
+            width: calc(100% - 20px);
+            height: 24px;
+            margin: 5px 0 0 20px;
+        }
+
+            #flowdlg .catalog-info .title {
+                float: left;
+                width: 30%;
+                height: 100%;
+                line-height: 24px;
+            }
+
+            #flowdlg .catalog-info .value {
+                float: left;
+                width: calc(70% - 20px);
+                height: 100%;
+                line-height: 24px;
+            }
+            .datagrid-header td, .datagrid-body td, .datagrid-footer td {                
+                border-bottom: 1px solid #DDDDDD;
+                border-right: 1px solid #DDDDDD;
+                height: 40px;               
+                line-height: 40px;               
+            }
+            .datagrid-header td ,.datagrid-body td{
+                background:#FFFFFF;                
+            }
+            .datagrid-body td:nth-child(0) {
+                border-left: 1px solid #DDDDDD;
+            }
+            .datagrid-view {
+                margin-top: 10px;
+                margin-left: 10px;
+                border-left: 1px solid #DDDDDD;
+                border-top: 1px solid #DDDDDD;
+                box-shadow: #dddddd 0px 0px 20px;
+            }
+            .datagrid .panel-body {    
+                border-left: 1px solid #dddddd;
+            }
+            .header {                   
+                background:#FFFFFF;
+                font-size: 14px;
+                font-weight:normal;
+                border-bottom:0;
+                border-left: 1px solid #dddddd;
+                padding-top: 5px;
+                padding-left: 10px; 
+            }
+            .panel-header {
+                background:#FFFFFF;
+                border-left:1px solid #dddddd;
+            }
+            .panel-title {
+                font-size: 14px;
+                font-weight:normal;
+                padding-left: 10px;
+            } 
+            .grid-cell a:visited, .btna:visited {
+                color: #9353d4;
+                text-decoration: none;
+            }
+        .icon-plotte {
+            color:#4646a3;
+        }
+        .icon-plotte:hover {
+            color:#47b930;
+        }
+        .datagrid-cell {
+            text-align: center;   
+        }         
+    </style>
+</head>
+<body>
+    <div style="width: 100%; height: 100%; background: #FFFFFF">
+        <div style="width: 30%; height: 100%; border-right: solid 1px #DDDDDD;">
+            <div class="header">辅助审批</div>
+            <div id="divtree" style="width: 100%; height: 90%; overflow-x: hidden">
+                <ul id="organizeTree" style="width: 100%; height: 100%;"></ul>
+            </div>
+        </div>
+        <div id="rightdiv" style="position: absolute; right: 0px; top: 0px; height: 100%; width: 70%">
+            <div class="header">辅助审批</div>
+            <div id="rightcontent">
+            <div style="width: 100%; height: 40px;">
+                <a tabindex="22" id="A2" class="easyui-linkbutton" data-options="onClick:Add" style="position: absolute;border:0;border-radius:5px;color:#ffffff; background: #01B6EF;width: 60px; right: 10px; margin-top: 8px">添加</a>
+            </div>
+            <table id="dataGrid" class="easyui-datagrid" title="节点信息" style="width: 100%; top: 100px; right: 5px"></table>
+            <div id="Url" style="width: 80%;margin-left: 10px; height: 40px; float: left; margin-top: 10px; display: none">                url:<input id="simurl" style="width: 70%; height: 20px;outline: none;transition: all 0.5s; border: 1px solid #99ddf5; border-radius: 4px;padding-left: 5px;height: 30px;margin-left: 5px;margin-top: 4px;" />                <button style="padding: 5px 18px;background:#01B6EF; border-radius: 5px;text-align: center;line-height: 20px;float:right;margin-right: 5px;margin-top: 5px;cursor: pointer;color: #FFFFFF; margin-left: 5px" onclick="updateUrl()">修改</button>            </div>
+            </div>
+        </div>
+        <div id="mtree" class="easyui-menu" style="width: 110px; border: 0px">
+            <div id="miAdd" name="miAddUnit" data-options="iconCls:'icon-unit'">新增</div>
+            <div id="miEdit" name="miEditUnit" data-options="iconCls:'icon-edit'">编辑</div>
+            <div id="miDelete" name="miDeleteUnit" data-options="iconCls:'icon-remove'">删除</div>
+        </div>
+        <div id="dlg" class="easyui-dialog" data-options="title:'添加节点',width: 500,height: 250,closed: true,modal:true,buttons:'#dlg-buttons'">
+            <div class="ToolDiv" style="height: 40px;">
+                <div style="display: inline-block;">
+                    <div style="width: 100%; height: 30px; margin-top: 10px">
+                        <span style="float: left; margin-left: 15px">审批环节:</span>
+                        <select id="name1" class="easyui-combobox" style="float: left; width: 405px" data-options="panelHeight:'auto',editable:false">
+                        </select>
+                    </div>
+                    <!--   <div id="name" class="ktw-combobox" style="z-index: 2; width: 300px; height: 40px;" opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"0px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\"><div class=\"Icon icon-calendar\"></div><span class=\"Text\">审批环节</span></div>"}'>
+                    </div>-->
+                </div>
+            </div>
+            <div>
+                <div class="userinfo-title" style="width: 40px; top: 80px;">概述</div>
+                <div style="top: 80px; left: 50px; width: 430px; height: 64px; position: absolute;">
+                    <input id="remark" tabindex="20" name="remark" class="easyui-textbox" type="text" data-options="multiline:true" style="width: 100%; height: 100%;" />
+                </div>
+            </div>
+            <div style="width: 100%; height: 40px; top: 150px; position: absolute; text-align: center">
+                <a tabindex="21" id="btnsave" class="easyui-linkbutton" data-options="iconCls:'icon-ok',onClick:saveNode" style="width: 60px;">确定</a>
+            </div>
+        </div>
+        <div style="clear: both; height: 0"></div>
+        <div id="flowdlg" class="easyui-dialog" data-options="title:'目录信息',width: 400,height: 250,closed: true,modal:true,buttons:'#dlg-buttons'" style="position: relative; overflow: hidden;">
+            <form id="editbox">
+            <div class="catalog-info">
+                <div class="title">流程名称</div>
+                <div class="value">
+                    <input id="Text1" class="easyui-textbox" type="text" style="width: 100%; height: 100%;" />
+                </div>
+            </div>
+            <div class="catalog-info">
+                <div class="title">编码值</div>
+                <div class="value">
+                    <input id="Text2" tabindex="2" name="value" class="easyui-textbox" type="text" style="width: 100%; height: 100%;" />
+                </div>
+            </div>
+            <div class="catalog-info" style="height: 48px">
+                <div class="title">
+                    国土资源管<br>
+                    理业务模型
+                </div>
+                <div class="value">
+                    <input id="Text3" tabindex="2" name="value" class="easyui-textbox" type="text" style="width: 100%; height: 100%;" />
+                </div>
+            </div>
+            <div class="catalog-info">
+                <div class="title">模型编码</div>
+                <div class="value">
+                    <input id="Text4" tabindex="2" name="value" class="easyui-textbox" type="text" style="width: 100%; height: 100%;" />
+                </div>
+            </div>
+            </form>
+            <div id="dlg-buttons">
+                <a tabindex="21" id="A1" class="easyui-linkbutton" data-options="iconCls:'icon-ok',onClick:saveFlow" style="width: 60px;">保存</a>
+                <a tabindex="22" id="btncancel" class="easyui-linkbutton" iconcls="icon-cancel" style="width: 60px" onclick="javascript:$('#flowdlg').dialog('close');op=-1;">取消</a>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

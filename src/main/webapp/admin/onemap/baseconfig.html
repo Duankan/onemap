@@ -1,0 +1,1727 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>人员管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link href="../../js/artDialog-7.0.0/css/dialog.css" rel="stylesheet" />
+    <link href="../../css/ktw.form2.css" rel="stylesheet" />
+    <link href="../../js/grid/css/grid.css" rel="stylesheet" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog.js"></script>
+    <script src="../../js/artDialog-7.0.0/dist/dialog-plus.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script type="text/javascript" src="../../js/jquery.jdirk.js"></script>
+    <script type="text/javascript" src="../../js/jeasyui.extensions.validatebox.rules.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.form.js"></script>
+    <script type="text/javascript" src="../../js/md5.js"></script>
+    <script type="text/javascript" src="../../js/data.util.js"></script>
+    <script type="text/javascript" src="../../js/ktw.onemap.js"></script>
+    <script type="text/javascript" src="../../js/appmana.js"></script>
+    <script src="../../js/grid/js/grid.js"></script>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        //var Config = null;
+        //reloadconfig();//加载配置文件
+        var curMenu;
+        var updateID = "";
+        var ServerUrl = null;
+        ServerUrl = Ktw.cookie.ServerUrl;
+        $(function () {
+            ktw.appmana.init("../../config/app.xml");
+            initTree();
+            var node = $('#organizeTree').tree('find', 1001);
+            $('#organizeTree').tree('select', node.target);
+        });
+        //读取配置文件
+        //function reloadconfig() {
+        //    var config = null;
+        //    $.ajax({
+        //        url: "../../config/app.xml",
+        //        dataType: 'xml',
+        //        type: 'GET',
+        //        cache: false,
+        //        timeout: 2000,
+        //        async: false,
+        //        error: function (xml) {
+        //            ktw.Alert("加载系统配置文件出错！");
+        //            console.error(arguments);
+        //        },
+        //        success: function (xml) {
+        //            config = $.xml2json(xml);
+        //        }
+        //    });
+        //    Config = config;
+        //}
+        //初始化树
+        function initTree() {
+            $('#organizeTree').tree({
+                data: [{
+                    text: '底图切换配置',
+                    state: 'closed',
+                    children: [{
+                        id: 1001,
+                        text: '基本信息'
+                    }, {
+                        text: '底图类型'
+                    }, {
+                        text: '底图配置'
+                    }, {
+                        text: '全局图例'
+                    }]
+                }],
+                onSelect: function (node) {
+                    $(".header").html("");
+                    if (node.text == '基本信息') {
+                        $(".header").html(node.text)
+                        $(".baseinfo").show();
+                        $(".bgtype").hide();
+                        $(".bgconfig").hide();
+                        $("#legendinfo").hide();
+                        initData();
+                    }
+                    else if (node.text == '底图类型') {
+                        $(".header").html(node.text)
+                        curMenu = ktw.appmana.Config.SystemMap.MapSwitchInfo;
+                        $(".bgtype").show();
+                        $(".baseinfo").hide();
+                        $(".bgconfig").hide();
+                        $("#legendinfo").hide();
+                        initbginfo();
+                    }
+                    else if (node.text == '底图配置') {
+                        $(".header").html(node.text)
+                        curMenu = ktw.appmana.Config.SystemMap.LayerInfo;
+                        $(".bgconfig").show();
+                        $(".bgtype").hide();
+                        $(".baseinfo").hide();
+                        $("#legendinfo").hide();
+                        initbgconfig();
+                    }
+                    else if (node.text == '全局图例') {
+                        $(".header").html(node.text)
+                        curMenu = ktw.appmana.Config.SystemMap.LayerInfo;
+                        $(".bgconfig").hide();
+                        $(".bgtype").hide();
+                        $(".baseinfo").hide();
+                        $("#legendinfo").show();
+                        initlegendGrid(ktw.appmana.Config.SystemMap.Legend);
+                    }
+                    else {
+                        $(".bgtype").hide();
+                        $(".baseinfo").hide();
+                        $(".bgconfig").hide();
+                        $("#legendinfo").hide();
+                    }
+                },
+                formatter: function (node) {
+                    if (!node.children || node.children.length == 0) return node.text;
+                    return node.text + '<span style="color:blue">(' + node.children.length + ')</span>';
+                },
+            });
+            $('#organizeTree').tree("expandAll");
+        }
+
+        //基本信息赋值
+        function initData() {
+            var mapSwitchInfo = ktw.appmana.Config.SystemMap.MapSwitchInfo;
+            $("#top").val(mapSwitchInfo.Margin.Top);
+            $("#right").val(mapSwitchInfo.Margin.Right);
+            $("#bottom").val(mapSwitchInfo.Margin.Bottom);
+            $("#left").val(mapSwitchInfo.Margin.Left);
+            $("#SwitchWidth").val(mapSwitchInfo.SwitchWidth);
+            $("#SwitchHeight").val(mapSwitchInfo.SwitchHeight);
+            $("#Zoom").val(ktw.appmana.Config.SystemMap.Zoom);
+            $("#EPSG").val(ktw.appmana.Config.SystemMap.EPSG);
+            $("#Center").val(ktw.appmana.Config.SystemMap.Center);
+            $("#MaxZoom").val(ktw.appmana.Config.SystemMap.MaxZoom);
+            $("#MinZoom").val(ktw.appmana.Config.SystemMap.MinZoom);
+            $('#VerticalAlignment').val(mapSwitchInfo.VerticalAlignment);
+            $('#HorizontalAlignment').val(mapSwitchInfo.HorizontalAlignment);
+        }
+        //基本信息修改
+        function updateMapSwitchInfo() {
+            var arg = {};
+            //top right bottom left SwitchWidth SwitchHeight  VerticalAlignment HorizontalAlignment
+            arg.Top = $("#top").val();
+            arg.Right = $("#right").val();
+            arg.Bottom = $("#bottom").val();
+            arg.Left = $("#left").val();
+            arg.SwitchWidth = $("#SwitchWidth").val();
+            arg.SwitchHeight = $("#SwitchHeight").val();
+            arg.VerticalAlignment = $("#VerticalAlignment").val();
+            arg.HorizontalAlignment = $("#HorizontalAlignment").val();
+            //Zoom EPSG MaxZoom MinZoom Center
+            arg.Zoom = $("#Zoom").val();
+            arg.EPSG = $("#EPSG").val();
+            arg.MaxZoom = $("#MaxZoom").val();
+            arg.MinZoom = $("#MinZoom").val();
+            arg.Center = $("#Center").val();
+            if (ktw.appmana.updateMapSwitchInfo.validate(arg)) {
+                ktw.appmana.updateMapSwitchInfo(arg, function () {
+                    ktw.appmana.refreshApp();
+                    ktw.appmana.tip("保存成功!");
+                }, function (res) {
+                    conole.error(res);
+                    ktw.appmana.alert("保存失败!");
+                });
+            }
+        }
+        //初始化底图类型表格
+        function initbginfo() {
+            var grid = new ktw.Grid();
+            grid.ID = "bgtableGrid";
+            grid.isPage = false;
+
+            grid.headArr = [
+                [
+                    { text: "序号", width: "5%" },
+                    { text: "主键(ID)", width: "10%" },
+                    { text: "名称", width: "10%" },
+                    { text: "图标", width: "20%" },
+                    { text: "类型", width: "20%" },
+                    { text: "可见性", width: "10%" },
+                    { text: "索引", width: "10%" },
+                    { text: "编辑", width: "8%" },
+                    { text: "删除", width: "8%" },
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "ID", type: "lab", title: "Title" },
+                { name: "Text", type: "lab" },
+                { name: "BackImg", type: "lab" },
+                { name: "Type", type: "lab" },
+                { name: "IsVisible", type: "lab" },
+                { name: "Order", type: "lab" },
+                { text: "编辑", key: "ID", type: "btn", clickName: "editItem", titleText: "进行编辑" },
+                { text: "删除", key: "ID", type: "btn", clickName: "deleteItem", titleText: "删除前要确认" }];
+            grid.initGrid = function () {
+                curMenu.SwitchMaps = curMenu.SwitchMaps || [];
+                for (var i = 0; i < curMenu.SwitchMaps.length; i++) {
+                    curMenu.SwitchMaps[i].Index = i + 1;
+                }
+                grid.init({ DataList: curMenu.SwitchMaps });
+            }
+            grid.initGrid();
+        }
+        //底图类型添加
+        function addSwitchMaps() {
+            //typeID typeText typeTextBackImg typeType typeIsVisible typeIsFloat typeOrder
+            $("#typeID,#typeText,#typeTextBackImg,#typeType,#typeOrder").val("");
+            $("#typeIsVisible").val("true");
+            $("#typeID,#typeText,#typeTextBackImg,#typeType").removeAttr("readonly", "readonly");
+            //$("#typeIsFloat").val("true");
+            var d = dialog({
+                title: "添加底图类型",
+                content: $('#edittype'),
+                okValue: '添 加',
+                ok: function () {
+                    var SwitchMaps = {};
+                    SwitchMaps.ID = $("#typeID").val();
+                    SwitchMaps.Text = $("#typeText").val();
+                    SwitchMaps.BackImg = $("#typeTextBackImg").val();
+                    SwitchMaps.Type = $("#typeType").val();
+                    SwitchMaps.IsVisible = $("#typeIsVisible").val();
+                    SwitchMaps.Order = $("#typeOrder").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addSwitchMaps.validate(SwitchMaps)) {
+                        ktw.appmana.addSwitchMaps(SwitchMaps, function () {
+                            ktw.appmana.refreshApp();
+                            ktw.appmana.tip("保存成功!");
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+        //底图类型修改
+        function editItem(item) {
+            var id = $(item).attr("btnkey");
+            var SwitchMaps = ktw.appmana.getSwitchMapsbyid(id);
+            setData(SwitchMaps);
+            var d = dialog({
+                title: SwitchMaps.Text,
+                content: $('#edittype'),
+                okValue: '确 定',
+                ok: function () {
+                    //top right bottom left SwitchWidth SwitchHeight  VerticalAlignment HorizontalAlignment
+                    var SwitchMaps = {};
+                    SwitchMaps.ID = $("#typeID").val();
+                    SwitchMaps.Text = $("#typeText").val();
+                    SwitchMaps.BackImg = $("#typeTextBackImg").val();
+                    SwitchMaps.Type = $("#typeType").val();
+                    SwitchMaps.IsVisible = $("#typeIsVisible").val();
+                    //SwitchMaps.IsFloat = $("#typeIsFloat").val();
+                    SwitchMaps.Order = $("#typeOrder").val();
+                    if (ktw.appmana.updateSwitchMaps.validate(id, SwitchMaps)) {
+                        ktw.appmana.updateSwitchMaps(id, SwitchMaps, function () {
+                            ktw.appmana.refreshApp();
+                            ktw.appmana.tip("更新成功!");
+                            refreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+        function deleteItem(item) {
+            var id = $(item).attr("btnkey");
+            if (id == "VectorMap" || id == "ImageMap" || id == "StreetMap" || id == "FullSpotMap") {
+                ktw.appmana.alert("系统基础类型不可以删除,你可以选择隐藏!");
+                return;
+            }
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个底图?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteSwitchMaps.validate(id)) {
+                        ktw.appmana.deleteSwitchMaps(id, function () {
+                            ktw.appmana.tip("删除成功!");
+                            ktw.appmana.refreshApp();
+                            refreshGrid();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //给底图类型编辑窗口赋值
+        function setData(SwitchMaps) {
+            $("#typeID,#typeText,#typeTextBackImg,#typeType,#typeOrder,#typeIsVisible").val("");
+            $("#typeID").val(SwitchMaps.ID);
+            $("#typeText").val(SwitchMaps.Text);
+            $("#typeTextBackImg").val(SwitchMaps.BackImg);
+            $("#typeType").val(SwitchMaps.Type);
+            $("#typeIsVisible").val(SwitchMaps.IsVisible);
+            $("#typeOrder").val(SwitchMaps.Order);
+
+            $("#typeID,#typeText,#typeTextBackImg,#typeType").attr("readonly", "readonly");
+
+        }
+        //给底图配置编辑窗口赋值
+        function setbasData(BaseLayers) {
+            $("#maplayer").val(BaseLayers.Type);
+            $("#maplayer").attr('disabled', 'disabled');
+            switch (BaseLayers.Type) {
+                case "Tile": $("#WMS").hide();
+                    $("#WMTS").hide();
+                    $("#Tile").show();
+                    $("#tileID,#tileName,#tileUrl,#tileArgs,#tileOrder,#tileTypeEx,#tileXMin,#tileYMin,#tileXMax,#tileYMax,#tileMaxZoom,#tileMinZoom").val("");
+                    $("#tileVisible").val(BaseLayers.Visible);
+                    $("#tileID").val(BaseLayers.ID).attr("readonly", "readonly");
+                    $("#tileName").val(BaseLayers.Name);
+                    $("#tileUrl").val(BaseLayers.Url);
+                    $("#tileVisible").val(BaseLayers.Visible);
+                    $("#tileArgs").val(BaseLayers.Args);
+                    $("#tileOrder").val(BaseLayers.Order);
+                    $("#tileTypeEx").val(BaseLayers.TypeEx);
+                    $("#tileMaxZoom").val(BaseLayers.MaxZoom);
+                    $("#tileMinZoom").val(BaseLayers.MinZoom);
+                    if (BaseLayers.Bounds != null) {
+                        $("#tileXMin").val(BaseLayers.Bounds.XMin);
+                        $("#tileYMin").val(BaseLayers.Bounds.YMin);
+                        $("#tileXMax").val(BaseLayers.Bounds.XMax);
+                        $("#tileYMax").val(BaseLayers.Bounds.YMax);
+                    }
+                    break;
+                case "WMS": $("#WMS").show();
+                    $("#WMTS").hide();
+                    $("#Tile").hide(); $("#WMSID,#WMSName,#WMSUrl,#WMSFilter,#WMSArgs,#WMSTypeName,#WMSSld,#WMSStyles ,#WMSServerType,#WMSMaxZoom,#WMSMinZoom,#WMSVersion,#WMSOrder,#WMSTypeEx,#WMSXMin ,#WMSYMin,#WMSXMax,#WMSYMax").val("");
+                    $("#WMSVisible").val("true");
+                    $("#WMSID").val(BaseLayers.ID);
+                    $("#WMSName").val(BaseLayers.Name);
+                    $("#WMSUrl").val(BaseLayers.Url);
+                    $("#WMSVisible").val(BaseLayers.Visible);
+                    $("#WMSFilter").val(BaseLayers.Filter);
+                    $("#WMSArgs").val(BaseLayers.Args);
+                    $("#WMSTypeName").val(BaseLayers.TypeName);
+                    $("#WMSSld").val(BaseLayers.Sld);
+                    $("#WMSStyles").val(BaseLayers.Styles);
+                    $("#WMSServerType").val(BaseLayers.ServerType);
+                    $("#WMSMaxZoom").val(BaseLayers.MaxZoom);
+                    $("#WMSMinZoom").val(BaseLayers.MinZoom);
+                    $("#WMSVersion").val(BaseLayers.WMSVersion);
+                    $("#WMSOrder").val(BaseLayers.Order);
+                    $("#WMSTypeEx").val(BaseLayers.TypeEx);
+                    if (BaseLayers.Bounds != null) {
+                        $("#WMSXMin").val(BaseLayers.Bounds.XMin);
+                        $("#WMSYMin").val(BaseLayers.Bounds.YMin);
+                        $("#WMSXMax").val(BaseLayers.Bounds.XMax);
+                        $("#WMSYMax").val(BaseLayers.Bounds.YMax);
+                    }
+                    break;
+                case "WMTS": $("#WMS").hide();
+                    $("#WMTSID,#WMTSText,#WMTSUrl,#WMTSEPSG,#WMTSArgs,#WMTSTypeName,#WMTSTStyles,#WMTSMaxZoom,#WMTSMinZoom,#WMTSOrder,#WMTSWMTS,#WMTSOrder,#WMTSTypeEx, #WMTSXMin,#WMTSYMin,#WMTSXMax,#WMTSYMax").val("");
+                    $("#WMTSVisible").val("true");
+                    $("#WMTS").show();
+                    $("#Tile").hide();
+                    $("#WMTSID").val(BaseLayers.ID);
+                    $("#WMTSText").val(BaseLayers.Name);
+                    $("#WMTSUrl").val(BaseLayers.Url);
+                    $("#WMTSVisible").val(BaseLayers.Visible);
+                    $("#WMTSEPSG").val(BaseLayers.EPSG);
+                    $("#WMTSArgs").val(BaseLayers.Args);
+                    $("#WMTSTypeName").val(BaseLayers.TypeName);
+                    $("#WMTSTStyles").val(BaseLayers.Styles);
+                    $("#WMTSMaxZoom").val(BaseLayers.MaxZoom);
+                    $("#WMTSMinZoom").val(BaseLayers.MinZoom);
+                    $("#WMTSOrder").val(BaseLayers.Order);
+                    $("#WMTSTypeEx").val(BaseLayers.TypeEx);
+                    if (BaseLayers.Bounds != null) {
+                        $("#WMTSXMin").val(BaseLayers.Bounds.XMin);
+                        $("#WMTSYMin").val(BaseLayers.Bounds.YMin);
+                        $("#WMTSXMax").val(BaseLayers.Bounds.XMax);
+                        $("#WMTSYMax").val(BaseLayers.Bounds.YMax);
+                    }
+                    break;
+                default: $("#WMS").hide();
+                    $("#WMTS").hide();
+                    $("#Tile").hide();
+            }
+        }
+        //初始化底图配置表格
+        function initbgconfig() {
+            var grid = new ktw.Grid();
+            grid.ID = "configtableGrid";
+            grid.isPage = false;
+            grid.headArr = [
+                [
+                   { text: "序号", width: "5%" },
+                   { text: "主键", width: "6%" },
+                   { text: "名称", width: "18%" },
+                   { text: "图层地址", width: "10%" },
+                   { text: "图层类型", width: "10%" },
+                   { text: "底图类型", width: "10%" },
+                   { text: "图层名", width: "10%" },
+                   { text: "参考系", width: "10%" },
+                   { text: "可见性", width: "5%" },
+                   { text: "编辑", width: "8%" },
+                   { text: "删除", width: "8%" },
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "ID", type: "lab", title: "Title", cutLen: 8 },
+                { name: "Name", type: "lab", cutLen: 8 },
+                { name: "Url", type: "lab", cutLen: 8 },
+                { name: "Type", type: "lab", cutLen: 8 },
+                { name: "TypeEx", type: "lab", cutLen: 8 },
+                { name: "Layers", type: "lab", cutLen: 8 },
+                { name: "EPSG", type: "lab", cutLen: 8 },
+                { name: "Visible", type: "lab", cutLen: 8 },
+                { text: "编辑", key: "ID", type: "btn", clickName: "updateBaseLayers", titleText: "进行编辑" },
+                { text: "删除", key: "ID", type: "btn", clickName: "deleteBaseLayers", titleText: "删除前要确认" }];
+            grid.initGrid = function () {
+                curMenu.BaseLayers = curMenu.BaseLayers || [];
+                for (var i = 0; i < curMenu.BaseLayers.length; i++) {
+                    curMenu.BaseLayers[i].Index = i + 1;
+                }
+                grid.init({ DataList: curMenu.BaseLayers });
+            }
+            grid.initGrid();
+        }
+        //底图配置修改
+        function updateBaseLayers(item) {
+            var id = $(item).attr("btnkey");
+            var BaseLayers = ktw.appmana.getBaseLayersbyid(id);
+            setbasData(BaseLayers);
+            //SwitchMap();
+            var d = dialog({
+                title: BaseLayers.Name,
+                content: $('#editconfig'),
+                okValue: '确 定',
+                ok: function () {
+                    var BaseLayers = {};
+                    BaseLayers.Type = $("#maplayer").val();
+                    if ($("#maplayer").val() == "WMS") {
+                        BaseLayers.ID = $("#WMSID").val();
+                        BaseLayers.Name = $("#WMSName").val();
+                        BaseLayers.Url = "<![CDATA[" + $("#WMSUrl").val() + "]]>";
+                        BaseLayers.Visible = $("#WMSVisible").val();
+                        BaseLayers.Filter = $("#WMSFilter").val();
+                        BaseLayers.Args = $("#WMSArgs").val();
+                        BaseLayers.TypeName = $("#WMSTypeName").val();
+                        BaseLayers.Sld = $("#WMSSld").val();
+                        BaseLayers.Styles = $("#WMSStyles").val();
+                        BaseLayers.ServerType = $("#WMSServerType").val();
+                        BaseLayers.MaxZoom = $("#WMSMaxZoom").val();
+                        BaseLayers.MinZoom = $("#WMSMinZoom").val();
+                        BaseLayers.WMSVersion = $("#WMSVersion").val();
+                        BaseLayers.Order = $("#WMSOrder").val();
+                        BaseLayers.TypeEx = $("#WMSTypeEx").val();
+                        BaseLayers.Bounds = {};
+                        BaseLayers.Bounds.XMin = $("#WMSXMin").val();
+                        BaseLayers.Bounds.YMin = $("#WMSYMin").val();
+                        BaseLayers.Bounds.XMax = $("#WMSXMax").val();
+                        BaseLayers.Bounds.YMax = $("#WMSYMax").val();
+                    }
+                        //WMTS
+                    else if ($("#maplayer").val() == "WMTS") {
+                        BaseLayers.ID = $("#WMTSID").val();
+                        BaseLayers.Text = $("#WMTSText").val();
+                        BaseLayers.Url = "<![CDATA[" + $("#WMTSUrl").val() + "]]>";
+                        BaseLayers.Visible = $("#WMTSVisible").val();
+                        BaseLayers.EPSG = $("#WMTSEPSG").val();
+                        BaseLayers.Args = $("#WMTSArgs").val();
+                        BaseLayers.TypeName = $("#WMTSTypeName").val();
+                        BaseLayers.Styles = $("#WMTSTStyles").val();
+                        BaseLayers.MaxZoom = $("#WMTSMaxZoom").val();
+                        BaseLayers.MinZoom = $("#WMTSMinZoom").val();
+                        BaseLayers.Order = $("#WMTSOrder").val();
+                        BaseLayers.TypeEx = $("#WMTSTypeEx").val();
+                        BaseLayers.Bounds = {};
+                        BaseLayers.Bounds.XMin = $("#WMTSXMin").val();
+                        BaseLayers.Bounds.YMin = $("#WMTSYMin").val();
+                        BaseLayers.Bounds.XMax = $("#WMTSXMax").val();
+                        BaseLayers.Bounds.YMax = $("#WMTSYMax").val();
+                    }
+                        //Tile
+                    else if ($("#maplayer").val() == "Tile") {
+                        BaseLayers.ID = $("#tileID").val();
+                        BaseLayers.Name = $("#tileName").val();
+                        BaseLayers.Url = "<![CDATA[" + $("#tileUrl").val() + "]]>";
+                        BaseLayers.Visible = $("#tileVisible").val();
+                        BaseLayers.Args = $("#tileArgs").val();
+                        BaseLayers.Order = $("#tileOrder").val();
+                        BaseLayers.TypeEx = $("#tileTypeEx").val();
+                        BaseLayers.MaxZoom = $("#tileMaxZoom").val();
+                        BaseLayers.MinZoom = $("#tileMinZoom").val();
+                        BaseLayers.Bounds = {};
+                        BaseLayers.Bounds.XMin = $("#tileXMin").val();
+                        BaseLayers.Bounds.YMin = $("#tileYMin").val();
+                        BaseLayers.Bounds.XMax = $("#tileXMax").val();
+                        BaseLayers.Bounds.YMax = $("#tileYMax").val();
+                    }
+                    else {
+                    }
+                    if (ktw.appmana.updateBaseLayers.validate(id, BaseLayers)) {
+                        ktw.appmana.updateBaseLayers(id, BaseLayers, function () {
+                            ktw.appmana.tip("更新成功!");
+                            ktw.appmana.refreshApp();
+                            barefreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+        //底图配置删除
+        function deleteBaseLayers(item) {
+            var id = $(item).attr("btnkey");
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个菜单?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteBaseLayers.validate(id)) {
+                        ktw.appmana.deleteBaseLayers(id, function () {
+                            ktw.appmana.tip("删除成功!");
+                            ktw.appmana.refreshApp();
+                            barefreshGrid();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //function SwitchMap() {
+        //    reloadconfig();//加载配置文件
+        //    var data = [];
+        //    var SwitchMaps = Config.SystemMap.MapSwitchInfo.SwitchMaps;
+        //    $("#bgcTypeEx").html("");
+        //    for (var i = 0; i < SwitchMaps.length; i++) {
+        //        $("#bgcTypeEx").append("<option value=" + SwitchMaps[i]["Type"] + ">" + SwitchMaps[i]["Type"] + "</option>")
+        //    }
+        //}
+        //底图配置添加
+        function addBaseLayers() {
+            changeForm("WMS");
+            $("#maplayer").val("WMS");
+            $("#maplayer").removeAttr('disabled'); $("#WMSID,#WMSName,#WMSUrl,#WMSFilter,#WMSArgs,#WMSTypeName,#WMSSld,#WMSStyles ,#WMSServerType,#WMSMaxZoom,#WMSMinZoom,#WMSVersion,#WMSOrder,#WMSTypeEx,#WMSXMin ,#WMSYMin,#WMSXMax,#WMSYMax").val("");
+            $("#WMSVisible").val("true");
+            $("#WMTSID,#WMTSText,#WMTSUrl,#WMTSEPSG,#WMTSArgs,#WMTSTypeName,#WMTSTStyles,#WMTSMaxZoom,#WMTSMinZoom,#WMTSOrder,#WMTSWMTS,#WMTSOrder,#WMTSTypeEx, #WMTSXMin,#WMTSYMin,#WMTSXMax,#WMTSYMax").val("");
+            $("#WMTSVisible").val("true");
+            $("#tileID,#tileName,#tileUrl,#tileArgs,#tileOrder,#tileTypeEx,#tileXMin,#tileYMin,#tileXMax,#tileYMax,#tileMaxZoom,#tileMinZoom").val("");
+            $("#tileID").removeAttr("readonly");
+            $("#tileVisible").val("true");
+            var d = dialog({
+                title: "添加底图",
+                content: $('#editconfig'),
+                okValue: '添 加',
+                ok: function () {
+                    //WMS
+                    var BaseLayers = {};
+                    BaseLayers.Type = $("#maplayer").val();
+                    if ($("#maplayer").val() == "WMS") {
+                        BaseLayers.ID = $("#WMSID").val();
+                        BaseLayers.Name = $("#WMSName").val();
+                        BaseLayers.Url = $("#WMSUrl").val();
+                        BaseLayers.Visible = $("#WMSVisible").val();
+                        BaseLayers.Filter = $("#WMSFilter").val();
+                        BaseLayers.Args = $("#WMSArgs").val();
+                        BaseLayers.TypeName = $("#WMSTypeName").val();
+                        BaseLayers.Sld = $("#WMSSld").val();
+                        BaseLayers.Styles = $("#WMSStyles").val();
+                        BaseLayers.ServerType = $("#WMSServerType").val();
+                        BaseLayers.MaxZoom = $("#WMSMaxZoom").val();
+                        BaseLayers.MinZoom = $("#WMSMinZoom").val();
+                        BaseLayers.WMSVersion = $("#WMSVersion").val();
+                        BaseLayers.Order = $("#WMSOrder").val();
+                        BaseLayers.TypeEx = $("#WMSTypeEx").val();
+                        BaseLayers.Bounds = {};
+                        BaseLayers.Bounds.XMin = $("#WMSXMin").val();
+                        BaseLayers.Bounds.YMin = $("#WMSYMin").val();
+                        BaseLayers.Bounds.XMax = $("#WMSXMax").val();
+                        BaseLayers.Bounds.YMax = $("#WMSYMax").val();
+                    }
+                        //WMTS
+                    else if ($("#maplayer").val() == "WMTS") {
+                        BaseLayers.ID = $("#WMTSID").val();
+                        BaseLayers.Text = $("#WMTSText").val();
+                        BaseLayers.Url = $("#WMTSUrl").val();
+                        BaseLayers.Visible = $("#WMTSVisible").val();
+                        BaseLayers.EPSG = $("#WMTSEPSG").val();
+                        BaseLayers.Args = $("#WMTSArgs").val();
+                        BaseLayers.TypeName = $("#WMTSTypeName").val();
+                        BaseLayers.Styles = $("#WMTSTStyles").val();
+                        BaseLayers.MaxZoom = $("#WMTSMaxZoom").val();
+                        BaseLayers.MinZoom = $("#WMTSMinZoom").val();
+                        BaseLayers.Order = $("#WMTSOrder").val();
+                        BaseLayers.TypeEx = $("#WMTSTypeEx").val();
+                        BaseLayers.Bounds = {};
+                        BaseLayers.Bounds.XMin = $("#WMTSXMin").val();
+                        BaseLayers.Bounds.YMin = $("#WMTSYMin").val();
+                        BaseLayers.Bounds.XMax = $("#WMTSXMax").val();
+                        BaseLayers.Bounds.YMax = $("#WMTSYMax").val();
+                    }
+                        //Tile
+                    else if ($("#maplayer").val() == "Tile") {
+                        BaseLayers.ID = $("#tileID").val();
+                        BaseLayers.Name = $("#tileName").val();
+                        BaseLayers.Url = $("#tileUrl").val();
+                        BaseLayers.Visible = $("#tileVisible").val();
+                        BaseLayers.Args = $("#tileArgs").val();
+                        BaseLayers.Order = $("#tileOrder").val();
+                        BaseLayers.TypeEx = $("#tileTypeEx").val();
+                        BaseLayers.MaxZoom = $("#tileMaxZoom").val();
+                        BaseLayers.MinZoom = $("#tileMinZoom").val();
+                        BaseLayers.Bounds = {};
+                        BaseLayers.Bounds.XMin = $("#tileXMin").val();
+                        BaseLayers.Bounds.YMin = $("#tileYMin").val();
+                        BaseLayers.Bounds.XMax = $("#tileXMax").val();
+                        BaseLayers.Bounds.YMax = $("#tileYMax").val();
+                    }
+                    else {
+                    }
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addBaseLayers.validate(BaseLayers)) {
+                        ktw.appmana.addBaseLayers(BaseLayers, function () {
+                            ktw.appmana.tip("保存成功!");
+                            ktw.appmana.refreshApp();
+                            barefreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+
+        //初始化图例表格
+        function initlegendGrid(Legend) {
+            var grid = new ktw.Grid();
+            grid.ID = "legendGrid";
+            grid.isPage = false;
+            grid.headArr = [
+                [
+                    { text: "序号", width: "6%" },
+                    { text: "标识类型", width: "10%" },
+                    { text: "所属类型", width: "10%" },
+                    { text: "名称", width: "10%" },
+                    { text: "填充颜色", width: "10%" },
+                    { text: "填充透明度", width: "10%" },
+                    { text: "边框宽度", width: "10%" },
+                    { text: "边框颜色", width: "10%" },
+                    { text: "边框透明度", width: "10%" },
+                    { text: "编辑", width: "7%" },
+                    { text: "删除", width: "7%" }
+                ]];
+            grid.columnArr = [
+                { type: "index" },
+                { name: "SubType", type: "lab", title: "Title" },
+                { name: "TypeEx", type: "lab" },
+                { name: "Text", type: "lab" },
+                { name: "FColor", type: "lab" },
+                { name: "FOpacity", type: "lab" },
+                { name: "Width", type: "lab" },
+                { name: "Color", type: "lab" },
+                { name: "Opacity", type: "lab" },
+                { text: "编辑", key: "Text,TypeEx", type: "btn", clickName: "updateLegend", titleText: "进行编辑" },
+                { text: "删除", key: "Text,TypeEx", type: "btn", clickName: "deleteLegend", titleText: "删除前要确认" }];
+            grid.initGrid = function () {
+                var Items = [];
+                if (Legend) {
+                    Legend = Legend.length ? Legend : [Legend];
+                    var t = 0;
+                    for (var i = 0; i < Legend.length; i++) {
+                        if (Legend[i].Item == undefined) {
+                            break;
+                        }
+                        var Item = Legend[i].Item.length > 0 ? Legend[i].Item : [Legend[i].Item];
+                        for (var j = 0; j < Item.length; j++, t++) {
+                            Item[j].Index = t + 1;
+                            Item[j].TypeEx = Legend[i].TypeEx;
+                            if (Item[j].Fill != null) {
+                                Item[j].FColor = Item[j].Fill.Color;
+                                Item[j].FOpacity = Item[j].Fill.Opacity;
+                            }
+                            if (Item[j].Border != null) {
+                                Item[j].Width = Item[j].Border.Width;
+                                Item[j].Color = Item[j].Border.Color;
+                                Item[j].Opacity = Item[j].Border.Opacity;
+                            }
+                            Items.push(Item[j]);
+                        }
+                    }
+                }
+                grid.init({ DataList: Items });
+            }
+            grid.initGrid();
+        }
+        //刷新底图类型表格
+        function refreshGrid() {
+            $.ajax({
+                url: ServerUrl + "confmana/select",
+                type: "post",
+                async: true,
+                data: { path: "/App/SystemMap/MapSwitchInfo" },
+                success: function (res) {
+                    if (res.success) {
+                        if (res.data.length == 1) {
+                            curMenu = $.xml2json(res.data[0]);
+                            initbginfo();
+                        } else {
+
+                        }
+                    }
+                },
+                error: function () {
+                    console.error(arguments);
+                }
+            });
+        }
+        //刷新图例表格
+        function lerefreshGrid() {
+            $.ajax({
+                url: ServerUrl + "confmana/select",
+                type: "post",
+                async: true,
+                data: { path: "/App/SystemMap" },
+                success: function (res) {
+                    if (res.success) {
+                        if (res.data.length == 1) {
+                            var SystemMap = $.xml2json(res.data[0]);
+                            initlegendGrid(SystemMap.Legend);
+                        } else {
+
+                        }
+                    }
+                },
+                error: function () {
+                    console.error(arguments);
+                }
+            });
+        }
+        //刷新底图配置表格
+        function barefreshGrid() {
+            $.ajax({
+                url: ServerUrl + "confmana/select",
+                type: "post",
+                async: true,
+                data: { path: "/App/SystemMap/LayerInfo" },
+                success: function (res) {
+                    if (res.success) {
+                        if (res.data.length == 1) {
+                            curMenu = $.xml2json(res.data[0]);
+                            initbgconfig();
+                        } else {
+
+                        }
+                    }
+                },
+                error: function () {
+                    console.error(arguments);
+                }
+            });
+        }
+
+        function changeForm(value) {
+            switch (value) {
+                case "Tile": $("#WMS").hide();
+                    $("#WMTS").hide();
+                    $("#Tile").show();
+                    break;
+                case "WMS": $("#WMS").show();
+                    $("#WMTS").hide();
+                    $("#Tile").hide();
+                    break;
+                case "WMTS": $("#WMS").hide();
+                    $("#WMTS").show();
+                    $("#Tile").hide();
+                    break;
+                default: $("#WMS").hide();
+                    $("#WMTS").hide();
+                    $("#Tile").hide();
+            }
+        }
+        //添加图例
+        function addLegend() {
+            getType();
+            //legendSubType  legendTypeEx  legendText  FColor FOpacity Width  Color  Opacity
+            $("#legendText,#FColor,#FOpacity,#Width,#Color,#Opacity").val("");
+            $("#legendSubType").val("point");
+            $("#legendTypeEx").val("Image");
+            var d = dialog({
+                title: "添加图例",
+                content: $('#editlegend'),
+                okValue: '添 加',
+                ok: function () {
+                    var legend = {};
+                    var TypeEx = $("#legendTypeEx").val();
+                    legend.SubType = $("#legendSubType").val();
+                    legend.Text = $("#legendText").val();
+                    legend.Fill = {};
+                    legend.Fill.Color = $("#FColor").val();
+                    legend.Fill.Opacity = $("#FOpacity").val();
+                    legend.Border = {};
+                    legend.Border.Color = $("#Color").val();
+                    legend.Border.Opacity = $("#Opacity").val();
+                    legend.Border.Width = $("#Width").val();
+                    var dt = dialog({ content: "提交中..." });
+                    if (ktw.appmana.addLegend.validate(TypeEx, legend)) {
+                        ktw.appmana.addLegend(TypeEx, legend, function () {
+                            ktw.appmana.tip("保存成功!");
+                            ktw.appmana.refreshApp();
+                            lerefreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+
+            d.showModal();
+        }
+        //删除图例
+        function deleteLegend(item) {
+            var id = $(item).attr("btnkey");
+            var Text = id.split(",")[0];
+            var TypeEx = id.split(",")[1];
+            var d = dialog({
+                title: '提示',
+                content: '是否删除这个菜单?',
+                okValue: '是',
+                width: 200,
+                ok: function () {
+                    if (ktw.appmana.deleteLegend.validate(Text, TypeEx)) {
+                        ktw.appmana.deleteLegend(Text, TypeEx, function () {
+                            ktw.appmana.tip("删除成功!");
+                            ktw.appmana.refreshApp();
+                            lerefreshGrid();
+                        }, function () {
+                            ktw.appmana.alert("删除失败!");
+                        });
+                    }
+                },
+                cancelValue: '否',
+                cancel: function () { }
+            });
+            d.showModal();
+        }
+        //修改图例
+        function updateLegend(item) {
+            getType();
+            var id = $(item).attr("btnkey");
+            var Text = id.split(",")[0];
+            var TypeEx = id.split(",")[1];
+            var legend = ktw.appmana.getLegendbyid(Text, TypeEx);
+            setlegend(TypeEx, legend);
+            var d = dialog({
+                title: legend.Text,
+                content: $('#editlegend'),
+                okValue: '确 定',
+                ok: function () {
+                    var legend = {};
+                    var TypeEx = $("#legendTypeEx").val();
+                    legend.SubType = $("#legendSubType").val();
+                    legend.Text = $("#legendText").val();
+                    legend.Fill = {};
+                    legend.Fill.Color = $("#FColor").val();
+                    legend.Fill.Opacity = $("#FOpacity").val();
+                    legend.Border = {};
+                    legend.Border.Color = $("#Color").val();
+                    legend.Border.Opacity = $("#Opacity").val();
+                    legend.Border.Width = $("#Width").val();
+                    if (ktw.appmana.updateLegend.validate(TypeEx, Text, legend)) {
+                        ktw.appmana.updateLegend(TypeEx, Text, legend, function () {
+                            ktw.appmana.tip("更新成功!");
+                            ktw.appmana.refreshApp();
+                            lerefreshGrid();
+                            d.close().remove();
+                        });
+                    }
+                    return false;
+                },
+                width: 600,
+                cancelValue: '取消',
+                cancel: function () {
+                    d.close();
+                }
+            });
+            d.showModal();
+        }
+        function setlegend(TypeEx, legend) {
+            $("#legendTypeEx").val(TypeEx);
+            $("#legendSubType").val(legend.SubType);
+            $("#legendText").val(legend.Text);
+            if (legend.Fill != null) {
+                $("#FColor").val(legend.Fill.Color);
+                $("#FOpacity").val(legend.Fill.Opacity);
+            }
+            if (legend.Border != null) {
+                $("#Color").val(legend.Border.Color);
+                $("#Opacity").val(legend.Border.Opacity);
+                $("#Width").val(legend.Border.Width);
+            }
+            var dt = dialog({ content: "提交中..." });
+        }
+        //
+        function getType() {
+            $("#legendTypeEx").html("");
+            var SwitchMaps = ktw.appmana.Config.SystemMap.MapSwitchInfo.SwitchMaps;
+            if (SwitchMaps != null) {
+                SwitchMaps = SwitchMaps.length ? SwitchMaps : [SwitchMaps];
+                for (var i = 0; i < SwitchMaps.length; i++) {
+                    $("#legendTypeEx").append("<option value=" + SwitchMaps[i]["Type"] + ">" + SwitchMaps[i]["Type"] + "</option>")
+                }
+            }
+        }
+    </script>
+    <style type="text/css">
+        .con-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 400px;
+            border-right: solid 1px #DDDDDD;
+        }
+
+        .header {
+            height: 25px;
+            padding-top: 5px;
+            padding-left: 10px;
+        }
+
+        #divtree {
+            padding-left: 5px;
+            height: 90%;
+        }
+
+        #rightdiv {
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            overflow: auto;
+            height: calc(100% - 5px);
+            width: calc(70% - 1px);
+        }
+
+        .con-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            left: 400px;
+            overflow: auto;
+        }
+
+        .bar {
+            margin-top: 5px;
+            margin-left: 10px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .bar-line {
+            width: 6px;
+            height: 20px;
+            position: absolute;
+            top: 50%;
+            margin-top: -10px;
+            background-color: #01B6EF;
+            display: inline-block;
+        }
+
+        .bar-txt {
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        .datagrid-toolbar {
+            border-top: 1px solid #DDDDDD;
+            text-align: right;
+        }
+
+        .box {
+            border: 1px solid #dddddd;
+            width: 96%;
+            margin: 0 auto;
+            box-shadow: #dddddd 0px 0px 20px;
+            padding: 5px;
+            margin-top: 5px;
+        }
+
+        #editwin {
+            display: none;
+            width: 600px;
+        }
+
+        .baseinfo .form-txt {
+            width: calc(90% - 30px);
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; height: 100%; background: #FFFFFF">
+        <div style="width: 30%; height: 100%; border-right: solid 1px #DDDDDD;">
+            <div class="header">底图配置</div>
+            <div id="divtree" style="width: 99%; height: 90%; overflow-x: hidden">
+                <ul id="organizeTree" style="width: 100%; height: 100%;"></ul>
+            </div>
+        </div>
+        <!--基本信息-->
+        <div id="rightdiv">
+            <div class="header">基本信息</div>
+            <div class="baseinfo">
+                <div class="siteinfo">
+                    <div class="box">
+                        <div style="margin-top: 20px; margin-left: 10px; margin-bottom: 10px; position: relative">
+                            <div style="width: 6px; height: 20px; position: absolute; top: 50%; margin-top: -10px; background-color: #01B6EF; display: inline-block"></div>
+                            <span style="font-size: 16px; margin-left: 10px">位置信息</span>
+                        </div>
+                        <table class="form-tbl">
+                            <colgroup>
+                                <col style="width: 15%" />
+                                <col style="width: 35%" />
+                                <col style="width: 15%" />
+                                <col style="width: 35%" />
+                            </colgroup>
+                            <tr>
+                                <td class="td-title">上边距：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="top" readonly="readonly" />&nbsp 像素
+                                    </div>
+                                </td>
+                                <td class="td-title">右边距：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="right" readonly="readonly" />&nbsp 像素
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">下边距：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="bottom" readonly="readonly" />&nbsp 像素
+                                    </div>
+                                </td>
+                                <td class="td-title">左边距：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="left" readonly="readonly" />&nbsp 像素
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">宽度：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="SwitchWidth" readonly="readonly" />&nbsp 像素
+                                    </div>
+                                </td>
+                                <td class="td-title">高度：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="SwitchHeight" readonly="readonly" />&nbsp 像素
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">上下居中：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <select id="VerticalAlignment" class="form-select" style="width:83%" disabled>
+                                            <option value="top">top</option>
+                                            <option value="right">right</option>
+                                            <option value="bottom">bottom</option>
+                                            <option value="left">left</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="td-title">左右居中：</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <select id="HorizontalAlignment" class="form-select" style="width:83%" disabled>
+                                            <option value="top">top</option>
+                                            <option value="right">right</option>
+                                            <option value="bottom">bottom</option>
+                                            <option value="left">left</option>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="basemapinfo">
+                    <div class="box">
+                        <div style="margin-top: 20px; margin-left: 10px; margin-bottom: 10px; position: relative">
+                            <div style="width: 6px; height: 20px; position: absolute; top: 50%; margin-top: -10px; background-color: #01B6EF; display: inline-block"></div>
+                            <span style="font-size: 16px; margin-left: 10px">底图信息</span>
+                        </div>
+                        <table class="form-tbl">
+                            <colgroup>
+                                <col style="width: 15%" />
+                                <col style="width: 35%" />
+                                <col style="width: 15%" />
+                                <col style="width: 35%" />
+                            </colgroup>
+                            <tr>
+                                <td class="td-title">默认级别</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="Zoom" />
+                                    </div>
+                                </td>
+                                <td class="td-title">坐标参考系</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="EPSG" readonly="readonly" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">最大级别</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="MaxZoom" />
+                                    </div>
+                                </td>
+                                <td class="td-title">最小级别</td>
+                                <td class="td-txt">
+                                    <div>
+                                        <input type="text" class="form-txt" id="MinZoom" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-title">地图中心点</td>
+                                <td class="td-txt" colspan="3" style="width: calc(100% - 30px)">
+                                    <div>
+                                        <input type="text" class="form-txt" id="Center" style="width: 92%" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="center">
+                    <button id="baseinfosave" class="btn" onclick="updateMapSwitchInfo()">保存</button>
+                </div>
+                <div style="clear: both; height: 0"></div>
+                <div id="basehint" style="width: 100%; text-align: center; color: red">
+                </div>
+            </div>
+            <div class="bgtype" style="width: 100%; height: calc(100% - 50px);">
+                <div class="box">
+                    <div class="basemapinfo">
+                        <div class="bar">
+                            <div class="bar-line"></div>
+                            <span class="bar-txt">底图类型</span>
+                        </div>
+                        <div class="right">
+                            <button class="btn" onclick="addSwitchMaps()">添加</button>
+                        </div>
+                        <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+                            <table id="bgtableGrid"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bgconfig" style="width: 100%; height: calc(100% - 50px);">
+                <div class="box">
+                    <div class="basemapinfo">
+                        <div class="bar">
+                            <div class="bar-line"></div>
+                            <span class="bar-txt">底图配置</span>
+                        </div>
+                        <div class="right">
+                            <button class="btn" onclick="addBaseLayers()">添加</button>
+                        </div>
+                        <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+                            <table id="configtableGrid"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box" id="legendinfo">
+                <div class="bar">
+                    <div class="bar-line"></div>
+                    <span class="bar-txt">图例配置</span>
+                </div>
+                <div class="right">
+                    <button class="btn" onclick="addLegend()">添加</button>
+                </div>
+                <div style="width: calc(100%-1); height: 100%; margin-top: 10px; margin-left: 1px;">
+                    <table id="legendGrid"></table>
+                </div>
+            </div>
+        </div>
+        <!--底图类型-->
+        <div id="edittype">
+            <table class="form-tbl" style="width: 100%;">
+                <colgroup>
+                    <col style="width: 15%" />
+                    <col style="width: 35%" />
+                    <col style="width: 15%" />
+                    <col style="width: 35%" />
+                </colgroup>
+                <tr>
+                    <td class="td-title">主键(ID)：</td>
+                    <td class="td-txt">
+                        <input type="text" class="form-txt" id="typeID" />
+                    </td>
+                    <td class="td-title">名称：</td>
+                    <td class="td-txt">
+                        <input type="text" class="form-txt" id="typeText" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">图标：</td>
+                    <td class="td-txt">
+                        <input type="text" class="form-txt" id="typeTextBackImg" />
+                    </td>
+                    <td class="td-title">类型：</td>
+                    <td class="td-txt">
+                        <input type="text" class="form-txt" id="typeType" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">是否可见：</td>
+                    <td class="td-txt">
+                        <select id="typeIsVisible" class="form-select">
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </td>
+                    <td class="td-title">索引：</td>
+                    <td class="td-txt">
+                        <input type="text" class="form-txt" id="typeOrder" />
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+        <!--底图配置-->
+        <div id="editconfig">
+            <div style="margin-top: -10px; margin-left: 10px; margin-bottom: 5px; position: relative">
+                <span class="bar-txt">图层类型&nbsp</span>
+                <div style="display: inline-block; width: 209px">
+                    <select id="maplayer" class="form-select" onchange="changeForm(value)">
+                        <option value="WMTS">WMTS</option>
+                        <!--<option value="Mapping">Mapping</option>-->
+                        <option value="Tile">Tile</option>
+                        <option value="WMS">WMS</option>
+                    </select>
+                </div>
+            </div>
+            <table class="form-tbl" style="margin-top: 10px" id="WMS">
+                <colgroup>
+                    <col style="width: 15%" />
+                    <col style="width: 35%" />
+                    <col style="width: 15%" />
+                    <col style="width: 35%" />
+                </colgroup>
+                <tr>
+                    <td class="td-title">主键(ID)</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSID" />
+                        </div>
+                    </td>
+                    <td class="td-title">名称</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSName" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">图层地址</td>
+                    <td class="td-txt" colspan="3">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSUrl" style="width:98%" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">是否可见</td>
+                    <td class="td-txt">
+                        <select id="WMSVisible" class="form-select">
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </td>
+                    <td class="td-title">过滤条件</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSFilter" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">其他参数</td>
+                    <td class="td-txt" colspan="3">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSArgs" style="width:98%" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">图层名称</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSTypeName" />
+                        </div>
+                    </td>
+                    <td class="td-title">sld路径</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSSld" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">style名称</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSStyles" />
+                        </div>
+                    </td>
+                    <!--<td class="td-title">服务器类型</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSServerType" value="hgis" readonly="readonly" />
+                        </div>
+                    </td>-->
+                    <td class="td-title">WMS版本</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSVersion" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">最大级别</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSMaxZoom" />
+                        </div>
+                    </td>
+                    <td class="td-title">最小级别</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSMinZoom" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">索引</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSOrder" />
+                        </div>
+                    </td>
+                    <td class="td-title">影像开关</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSTypeEx" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">XMin</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSXMin" />
+                        </div>
+                    </td>
+                    <td class="td-title">YMin</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSYMin" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">XMax</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSXMax" />
+                        </div>
+                    </td>
+                    <td class="td-title">YMax</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMSYMax" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <table class="form-tbl" style="margin-top: 10px" id="WMTS">
+                <colgroup>
+                    <col style="width: 15%" />
+                    <col style="width: 35%" />
+                    <col style="width: 15%" />
+                    <col style="width: 35%" />
+                </colgroup>
+                <tr>
+                    <td class="td-title">主键(ID)</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSID" />
+                        </div>
+                    </td>
+                    <td class="td-title">名称</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSText" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">图层地址</td>
+                    <td class="td-txt" colspan="3">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSUrl" style="width:98%" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">是否可见</td>
+                    <td class="td-txt">
+                        <select id="WMTSVisible" class="form-select">
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </td>
+                    <td class="td-title">坐标参考系</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSEPSG" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">其他参数</td>
+                    <td class="td-txt" colspan="3">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSArgs" style="width:98%" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">图层名称</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSTypeName" />
+                        </div>
+                    </td>
+                    <td class="td-title">style名称</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSTStyles" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">最大级别</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSMaxZoom" />
+                        </div>
+                    </td>
+                    <td class="td-title">最小级别</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSMinZoom" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">索引</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSOrder" />
+                        </div>
+                    </td>
+                    <td class="td-title">影像开关</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSTypeEx" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">XMin</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSXMin" />
+                        </div>
+                    </td>
+                    <td class="td-title">YMin</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSYMin" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">XMax</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSXMax" />
+                        </div>
+                    </td>
+                    <td class="td-title">YMax</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="WMTSYMax" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <table class="form-tbl" style="margin-top: 10px" id="Tile">
+                <colgroup>
+                    <col style="width: 15%" />
+                    <col style="width: 35%" />
+                    <col style="width: 15%" />
+                    <col style="width: 35%" />
+                </colgroup>
+                <tr>
+                    <td class="td-title">主键(ID)</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileID" />
+                        </div>
+                    </td>
+                    <td class="td-title">名称</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileName" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">图层地址</td>
+                    <td class="td-txt" colspan="3">
+                        <div>
+                            <input type="text" class="form-txt" id="tileUrl" style="width:98%" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">是否可见</td>
+                    <td class="td-txt">
+                        <select id="tileVisible" class="form-select">
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                    </td>
+                    <td class="td-title">其他参数</td>
+                    <td class="td-txt" colspan="3">
+                        <div>
+                            <input type="text" class="form-txt" id="tileArgs" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">最大级别</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileMaxZoom" />
+                        </div>
+                    </td>
+                    <td class="td-title">最小级别</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileMinZoom" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">索引</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileOrder" />
+                        </div>
+                    </td>
+                    <td class="td-title">影像开关</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileTypeEx" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">XMin</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileXMin" />
+                        </div>
+                    </td>
+                    <td class="td-title">YMin</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileYMin" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-title">XMax</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileXMax" />
+                        </div>
+                    </td>
+                    <td class="td-title">YMax</td>
+                    <td class="td-txt">
+                        <div>
+                            <input type="text" class="form-txt" id="tileYMax" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!--图例-->
+    <div id="editlegend">
+        <table class="form-tbl" style="width: 100%;">
+            <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+                <col style="width: 15%" />
+                <col style="width: 35%" />
+            </colgroup>
+            <tr>
+                <td class="td-title">标识类型：</td>
+                <td class="td-txt">
+                    <select id="legendSubType" class="form-select">
+                        <option value="point">point</option>
+                        <option value="line">line</option>
+                        <option value="polygon">polygon</option>
+                    </select>
+                </td>
+                <td class="td-title">所属类型：</td>
+                <td class="td-txt">
+                    <select id="legendTypeEx" class="form-select">
+                        <option value="Image">Image</option>
+                        <option value="Vector">Vector</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">名称：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="legendText" />
+                </td>
+                <td class="td-title">填充颜色：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="FColor" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">填充透明度：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="FOpacity" />
+                </td>
+                <td class="td-title">边框宽度：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="Width" />
+                </td>
+            </tr>
+            <tr>
+                <td class="td-title">边框颜色：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="Color" />
+                </td>
+                <td class="td-title">边框透明度：</td>
+                <td class="td-txt">
+                    <input type="text" class="form-txt" id="Opacity" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

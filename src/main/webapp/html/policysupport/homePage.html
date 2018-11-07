@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>决策支持平台首页</title>
+    <link rel="stylesheet" href="../../css/animations.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/ktw.ui.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var parent;
+        function WidgetCommunication(s, e) {
+            parent = s.parent;
+            var param = s.param;
+            parent.one("onClosing", function () {
+                //TODO 解绑事件
+            });
+        }
+        $(function () {
+            var links = $(".main-panel .link");
+            for (var i = 0; i < links.length; i++) {
+                (function (j) {
+                    setTimeout(function () {
+                        $(links[j]).addClass("link-load-style");
+                    }, 100 * j);
+                })(i);
+            }
+            links.click(function () {
+                parent.triggerHandler('pageChange', $(this).attr('tag'));
+            });
+        });
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .home-page {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-image: url(image/bg.png);
+            background-size: 100% 100%;
+            color: #fff;
+            font-size: 16px;
+            overflow: hidden;
+        }
+
+            .home-page .main-panel {
+                position: absolute;
+                width: 1200px;
+                height: 600px;
+                left: calc(50% - 600px);
+                top: calc(50% - 300px);
+            }
+
+                .home-page .main-panel .subject {
+                    position: relative;
+                    float: left;
+                    width: 400px;
+                    height: 200px;
+                }
+
+                    .home-page .main-panel .subject .link {
+                        position: relative;
+                        width: 390px;
+                        height: 190px;
+                        margin: auto;
+                        margin-top: 5px;
+                        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.8);
+                        transition: All 0.5s ease-in-out;
+                        -webkit-transition: All 0.5s ease-in-out;
+                        -moz-transition: All 0.5s ease-in-out;
+                        -o-transition: All 0.5s ease-in-out;
+                        transform: rotateY(-90deg);
+                        -webkit-transform: rotateY(-90deg);
+                        -moz-transform: rotateY(-90deg);
+                        cursor: pointer;
+                        background-size:100% 100%;
+                    }
+
+                        .home-page .main-panel .subject .link:hover {
+                            transform: scale(1.02) !important;
+                            -webkit-transform: scale(1.02) !important;
+                            -moz-transform: scale(1.02) !important;
+                            -webkit-transform: scale(1.02) !important;
+                            transition: All 0.2s ease-in-out;
+                            -webkit-transition: All 0.2s ease-in-out;
+                            -moz-transition: All 0.2s ease-in-out;
+                            -o-transition: All 0.2s ease-in-out;
+                            border: 3px solid #cbd2ec;
+                        }
+
+                    .home-page .main-panel .subject .subject-title {
+                        position: absolute;
+                        width: 100%;
+                        height: 40px;
+                        line-height: 40px;
+                        text-align: center;
+                        bottom: 0px;
+                        background-color:rgba(0, 0, 0, 0.3);
+                    }
+
+                    .home-page .main-panel .subject .special {
+                        bottom:30px;
+                        background-color:transparent;
+                        font-size:20px;
+                    }
+
+        .link-load-style {
+            -webkit-transform:rotateY(0deg) !important;
+            -moz-transform: rotateY(0deg) !important;
+            transform: rotateY(0deg) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="home-page">
+        <div class="main-panel">
+            <div class="subject">
+                <div class="link" tag="jianshe/macroAnalysis.html" style="background-image: url(image/item-img1.png);">
+                    <div class="subject-title">建设用地供应宏观分析</div>
+                </div>
+            </div>
+            <div class="subject">
+                <div class="link" tag="jianshe/microanalysis.html" style="background-image: url(image/item-img2.png);">
+                    <div class="subject-title">建设用地供应微观分析</div>
+                </div>
+            </div>
+            <div class="subject" style="width: 200px;">
+                <div class="link" tag="gengdi/ploughProtect.html" style="width: 190px; background-image: url(image/item-img3.png);">
+                    <div class="subject-title special">耕地保护专题</div>
+                </div>
+            </div>
+            <div class="subject" style="width: 200px;">
+                <div class="link" tag="gengdi/ploughUse.html" style="width: 190px; background-image: url(image/item-img4.png);">
+                    <div class="subject-title special" style="top:30px;">耕地利用专题</div>
+                </div>
+            </div>
+            <div class="subject" style="width: 200px;">
+                <div class="link" tag="kuangchan/mineral.html" style="width: 190px; background-image: url(image/item-img5.png);">
+                    <div class="subject-title special">矿产专题分析</div>
+                </div>
+            </div>
+            <div class="subject" style="width: 200px;">
+                <div class="link" tag="house/houseProperty.html" style="width: 190px;background-image: url(image/item-img6.png);">
+                    <div class="subject-title special">房产专题</div>
+                </div>
+            </div>
+            <div class="subject">
+                <div class="link" tag="jichusheshi/baselife.html" style="background-image: url(image/item-img7.png);">
+                    <div class="subject-title">基础设施专题分析</div>
+                </div>
+            </div>
+            <div class="subject">
+                <div class="link" tag="landresources/landResources.html" style="background-image: url(image/item-img8.png);">
+                    <div class="subject-title special" style="bottom:70px;font-size:22px;">土地资源运行总体情况</div>
+                </div>
+            </div>
+            <div class="subject">
+                <div class="link" tag="lvyou/tour.html" style="background-image: url(image/item-img9.png);">
+                    <div class="subject-title">旅游专题分析</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

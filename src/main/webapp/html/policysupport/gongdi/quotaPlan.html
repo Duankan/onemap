@@ -1,0 +1,337 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <script src="../../../js/jquery.min.js"></script>
+    <script src="../../../js/echarts.min.js"></script>
+    <script>
+        var meterOption, lineOption, historyOption;  //统计图表的配置项和数据
+        var meterChart, lineChart, historyChart; //echarts实例
+        $(function () {
+            initChart();
+        });
+        /*初始化统计图表的配置项和数据以及echarts实例*/
+        function initChart() {
+            meterChart = echarts.init($("#meter-chart")[0]);
+            lineChart = echarts.init($("#line-chart")[0]);
+            historyChart = echarts.init($("#history-chart")[0]);
+            meterOption = {
+                tooltip: {
+                    formatter: "{a} <br/>{b} : {c}%"
+                },
+                series: [
+                    {
+                        name: '业务指标',
+                        type: 'gauge',
+                        startAngle: 180,
+                        endAngle: 0,
+                        center: ['50%', '85%'],    // 默认全局居中
+                        radius: "100%",  // 仪表盘大小
+                        splitLine: {
+                            show: false
+                        },
+                        axisLine: {            // 坐标轴线
+                            lineStyle: {       // 属性lineStyle控制线条样式
+                                width: 35,
+                                color: [[0.2, '#91c7ae'], [0.8, '#2888bf'], [1, '#00d2db']]  //轴分隔块颜色
+                            }
+                        },
+                        axisTick: {            // 坐标轴小标记
+                            show: false,
+                            splitNumber: 10,   // 每份split细分多少段
+                            length: 12,        // 属性length控制线长
+                        },
+                        axisLabel: {           // 坐标轴文本标签，详见axis.axisLabel
+                            formatter: function (v) {
+                                switch (v + '') {
+                                    case '10': return '低';
+                                    case '50': return '中';
+                                    case '90': return '高';
+                                    default: return '';
+                                }
+                            },
+                            color: "#32ffff",
+                            textStyle: {       // 其余属性默认使用全局文本样式，详见TEXTSTYLE
+                                color: '#fff',
+                                fontSize: 15,
+                                fontWeight: 'bolder'
+                            }
+                        },
+                        pointer: {    //仪表盘指针宽度长度
+                            width: "5%",
+                            length: '90%'
+                        },
+                        itemStyle: {   //仪表盘指针样式
+                            normal: {
+                                color: "#32ffff",
+                                opacity: 0.5
+                            }
+                        },
+                        detail: {
+                            offsetCenter: [0, -60],       // x, y，单位px
+                            formatter: '{value}%',
+                            textStyle: {       // 其余属性默认使用全局文本样式，详见TEXTSTYLE
+                                fontSize: 26
+                            }
+                        },
+                        data: [{ value: 90 }]
+                    }
+                ]
+            };
+
+            //meterOption.series[0].data[0].value = (Math.random() * 100).toFixed(2) - 0;
+            meterChart.setOption(meterOption, true);
+
+            lineOption = {
+                //title: {
+                //    text: '折线图堆叠',
+                //    textStyle: {
+                //        color:"#32ffff"
+                //    }
+                //},
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['计划供地', '实际供地'],
+                    bottom: 10,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                series: [
+                     {
+                         name: '计划供地',
+                         type: 'line',
+                         data: [220, 182, 191, 234, 290, 330, 310, 220, 182, 191, 234, 290],
+                         itemStyle: {
+                             normal: {
+                                 color: "#24babc"
+                             }
+                         }
+                     },
+                    {
+                        name: '实际供地',
+                        type: 'line',
+                        data: [120, 132, 101, 134, 90, 230, 210, 120, 132, 101, 134, 90],
+                        itemStyle: {
+                            normal: {
+                                color: "#ef9037"
+                            }
+                        }
+                    }
+                ]
+            };
+            lineChart.setOption(lineOption, true);
+
+            historyOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                legend: {
+                    data: ['总体指标', '实际执行'],
+                    bottom: 20,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: ['2010年', '2011年', '2012年', '2013年', '2014年', '2015年', '2016年', '2017年']
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '总体指标',
+                        type: 'line',
+                        data: [220, 182, 191, 234, 290, 330, 310, 220],
+                        itemStyle: {
+                            normal: {
+                                color: "#6cd8cc"
+                            }
+                        }
+                    },
+                    {
+                        name: '实际执行',
+                        type: 'line',
+                        data: [120, 132, 101, 134, 90, 230, 210, 120],
+                        itemStyle: {
+                            normal: {
+                                color: "#9400d3"
+                            }
+                        }
+                    }
+                ]
+            };
+            historyChart.setOption(historyOption, true);
+        }
+        $(window).resize(function () {
+            meterChart.resize();
+            lineChart.resize();
+            historyChart.resize();
+        });
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .quota-plan {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+            .quota-plan .quota-plan-top {
+                width: 100%;
+                height: 45%;
+                border-bottom: 5px solid #3b5866;
+            }
+
+                .quota-plan .quota-plan-top .quota-top-chart .quota-meter {
+                    position: relative;
+                    width: 45%;
+                    height: 100%;
+                    float: left;
+                }
+
+                .quota-plan .quota-plan-top .quota-top-chart .quota-line {
+                    position: relative;
+                    width: calc(55% - 5px);
+                    height: 100%;
+                    float: left;
+                    margin-left: 5px;
+                }
+
+            .quota-plan .quota-describe {
+                position: relative;
+                height: 100%;
+                float: left;
+            }
+
+                .quota-plan .quota-describe .text-border {
+                    position: relative;
+                    width: 90%;
+                    height: 90%;
+                    margin: auto;
+                    margin-top: 10px;
+                    background-image: url(../../../image/border-text2.png);
+                    background-size: 100% 100%;
+                }
+
+            .quota-plan .quota-plan-bottom {
+                position: relative;
+                width: 100%;
+                height: 55%;
+                border-top: 5px solid #3b5866;
+            }
+
+                .quota-plan .quota-plan-top .quota-top-chart,
+                .quota-plan .quota-plan-bottom .quota-history {
+                    position: relative;
+                    float: left;
+                    height: 100%;
+                    border-right: 5px solid #3b5866;
+                }
+
+                .quota-plan .quota-plan-top .title,
+                .quota-plan .quota-plan-bottom .title {
+                    position: absolute;
+                    color: #32ffff;
+                    top: 10px;
+                    left: 20px;
+                }
+
+                .quota-plan .quota-plan-top .quota-chart,
+                .quota-plan .quota-plan-bottom .quota-chart {
+                    width: 100%;
+                    height: 100%;
+                }
+    </style>
+</head>
+<body>
+    <div class="quota-plan">
+        <div class="quota-plan-top">
+            <div class="quota-top-chart" style="width: calc(70% - 5px);">
+                <div class="quota-meter">
+                    <span class="title">总体情况</span>
+                    <div class="quota-chart" id="meter-chart"></div>
+                </div>
+                <div class="quota-line">
+                    <span class="title">本年度情况</span>
+                    <div class="quota-chart" id="line-chart"></div>
+                </div>
+            </div>
+            <div class="quota-describe" style="width: 30%;overflow:hidden;">
+                <div class="text-border">
+                    <div style="position: relative; float: left; width: 85%; height: 85%; margin-left: 40px; margin-top: 70px; color: #32ffff; text-indent: 2em;">
+                        湘潭市2016年土地供应总量为137宗；面积629.1622公顷；鹤壁市2015年土地供应总量为219宗，面积728.36公顷；同比减少13.61%
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="quota-plan-bottom">
+            <div class="quota-history" style="width: calc(60% - 5px);">
+                <span class="title">历史对比</span>
+                <div class="quota-chart" id="history-chart"></div>
+            </div>
+            <div class="quota-describe" style="width: 40%;overflow:hidden;">
+                <div class="text-border">
+                    <div style="position: relative; float: left; width: 85%; height: 85%; margin-left: 40px; margin-top: 70px; color: #32ffff; text-indent: 2em;">
+                        湘潭市2016年土地供应总量为137宗；面积629.1622公顷；鹤壁市2015年土地供应总量为219宗，面积728.36公顷；同比减少13.61%
+                        湘潭市2016年土地供应总量为137宗；面积629.1622公顷；鹤壁市2015年土地供应总量为219宗，面积728.36公顷；同比减少13.61%
+                        湘潭市2016年土地供应总量为137宗；面积629.1622公顷；鹤壁市2015年土地供应总量为219宗，面积728.36公顷；同比减少13.61%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

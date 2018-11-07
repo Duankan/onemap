@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>业务详细信息</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .nav {
+        }
+    </style>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var feature;
+        var selectID;
+        var node;//记录当前选中的节点的数据信息
+        var dataGrid;
+        function WidgetCommunication(s) {//部件通讯
+            var parent = s.parent;
+            feature = s.param.feature;
+            selectID = s.param.selectID;
+            ktw.InitControl();
+            initPage();
+            //注册页面关闭事件
+            parent.one("onClosing", function () {
+
+            });
+        }
+     
+        //初始化页面
+        function initPage() {
+            var data = [];
+            var props = feature.getProperties();
+            if (props) {
+                data.push(props);
+            }
+            $('#dg').datagrid({
+                columns: [[
+                    { field: '运作单位', title: '运作单位', width: 100, align: "center" },
+                    { field: '受理日期', title: '受理日期', width: 100, align: "center" },
+                    { field: '项目名称', title: '项目名称', width: 100, align: "center" },
+                    { field: '批准文号', title: '批准文号', width: 100, align: "center" },
+                    { field: '用地面积', title: '用地面积', width: 100, align: "center" },
+                    { field: '上报状态', title: '上报状态', width: 100, align: "center" },
+                    { field: '获批状态', title: '获批状态', width: 100, align: "center" },
+                    { field: '缴费状态', title: '缴费状态', width: 100, align: "center" },
+                    {
+                        field: 'price', title: '查看受理详细信息', width: 100, align: "center", formatter: function (value, row, index) {
+                            //return "<a onclick='' href='javascript:accept()'>查看</a>";
+                            return "<a  href='acceptCheck.html?feature=feature'>查看</a>";
+                        }
+                    },
+                    {
+                        field: 'price1', title: '查看审批详细信息', width: 100, align: "center", formatter: function (value, row, index) {
+                            return "<a href='approveCheck.html?feature=feature'>查看</a>";
+                        }
+                    }
+                ]],
+                rownumbers: true,
+                data: data
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="nav">
+        当前位置:市级农转征受理
+    </div>
+    <table id="dg"></table>
+</body>
+</html>

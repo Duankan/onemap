@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>查看审批详细信息</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">   
+          .Content {
+            width:100%;
+            height:100%
+        }      
+        .Content .RowDiv {
+                border: 1px solid #E4E9EF;
+                width:100%;
+                height: 30px;
+                line-height: 30px;   
+            }
+         .Content .left, .Content .right {
+                width: 50%;
+                float: left;
+            }
+                .Content .RowDiv div {
+                    float: left;
+                }
+                .Content .RowDiv .ToolDiv {
+                    width: 224px;
+                    height: 100%;
+                }
+                  .Content .RowDiv .Field {
+                    width: 120px;
+                    height: 100%;
+                    display: inline-block;     
+                    text-align: center;
+                    background-color:#EAF0FB   
+                }
+
+                .Content .RowDiv .Value {
+                  height: 100%;
+                  background-color:White;
+                 
+                }
+             
+    </style>
+    <script type="text/javascript">
+        var Ktw = window.top.window.ktw;
+        var feature;
+
+        function WidgetCommunication(s) {//部件通讯
+            var parent = s.parent;
+            feature = s.param.feature;
+            init();
+
+        }
+        function init() {
+            var fields = $(".Value").attr("field");
+            $.each($(".Value"), function (o, s) {
+                var name = $(s).attr("field");
+                var value = feature.getProperties()[name];
+                $(s).html(value);
+            });
+            if ($("#txt1") != null) $("#txt1").remove();
+            if ($("#txt2") != null) $("#txt2").remove();
+            $("#phaseTwo").append('<div id="txt1" style="width:100%;line-height: 30px;text-align:right;">未征收土地面积1公顷</div>');
+            $("#landSup").append('<div  id="txt2" style="width:100%;line-height: 30px;text-align:right;">剩余未供地面积1公顷</div>')
+            var data = [];
+            var props = feature.getProperties();
+            if (props) {
+                data.push(props);
+            }
+            $('#Table1').datagrid({
+                columns: [[
+                    { field: '审批文号', title: '审批文号', width: 100, align: "center" },
+                    { field: '项目名称', title: '项目名称', width: 100, align: "center" },
+                    { field: '总征收面积', title: '总征收面积', width: 100, align: "center" },
+                    { field: '剩余可征收面积', title: '剩余可征收面积', width: 100, align: "center" },
+                    { field: '本次征收面积', title: '本次征收面积', width: 100, align: "center" }
+                ]],
+                rownumbers: true,
+                data: data
+            });
+            $('#tab').tabs({
+                border: false,
+                onSelect: function (title, index) {
+                    var tab = $('#tab').tabs('getSelected');
+                    if (tab.attr("bind") == "true") return;
+                    switch (index) {
+                        case 1:
+                            tab.attr("bind", true);
+                            $('#Table2').datagrid({
+                                columns: [[
+                                    { field: '文件名称', title: '文件名称', width: 300, align: "center" },
+                                    { field: '下载', title: '下载', width: 40, align: "center" },
+                                    { field: '操作', title: '操作', width: 40, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            });
+                            $('#Table3').datagrid({
+                                columns: [[
+                                    { field: '文件名称', title: '文件名称', width: 300, align: "center" },
+                                    { field: '下载', title: '下载', width: 40, align: "center" },
+                                ]],
+                                rownumbers: true,
+                                data: data
+                            }); break;
+                        default: return;
+                    }
+                }
+            });          
+        }
+
+    </script>
+</head>
+<body>
+    <div class="Content" style="overflow-y:scroll;overflow-x:hidden">
+        <div class="basicInfo" >
+            <div class="RowDiv" style="text-align: center;font-size:20px; background-color:#EAF0FB"><strong>项目审批信息</strong></div>
+            <div class="left"> 
+             <div class="RowDiv">
+                <div class="Field">运作单位:</div>
+                <div class="Value" field="运作单位"></div>
+            </div>
+           <div class="RowDiv">
+                <div class="Field">获批征地面积:</div>
+                <div class="Value" field="获批征地面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>
+            <div class="RowDiv">
+                <div class="Field">一期公告时间:</div>
+                <div class="Value" field="一期公告时间"></div>
+            </div>
+             <div class="RowDiv">
+                <div class="Field">二期公告次数:</div>
+                <div class="Value" field="二期公告次数"></div>
+            </div>
+               <div class="RowDiv">
+                <div class="Field">本次实际补偿金额:</div>
+                <div class="Value" field="本次实际补偿金额"><div style="position:relative;left:150px">万元</div></div>
+            </div>         
+            </div>
+             <div class="right">
+            <div class="RowDiv">
+                <div class="Field">审批文号:</div>
+                <div class="Value" field="审批文号"></div>
+            </div>
+            <div class="RowDiv">
+                <div class="Field">剩余获批未征面积:</div>
+                <div class="Value" field="剩余获批未征面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>
+               <div class="RowDiv">
+                <div class="Field">本次实际征地面积:</div>
+                <div class="Value" field="本次实际征地面积"><div style="position:relative;left:150px">公顷</div></div>
+            </div>
+            <div class="RowDiv">
+                <div class="Field">二期公告时间:</div>
+                <div class="Value" field="二期公告时间"></div>
+            </div>
+            <div class="RowDiv" style="background-color:#EAF0FB">
+            </div>       
+            </div>         
+      </div>
+        <div class="otherInfo" style="margin-top:0px">
+              <div id="tab" class="easyui-tabs" data-options="border:false" style="width:100%;border:1px solid #E4E9EF">
+                   <div title="项目来源" style="overflow: hidden">
+                    <div style="font-size:14px;line-height: 30px;background-color:#5B73AB;color:white"><strong>项目名称:</strong></div>
+                     <table id="Table1"></table>
+                   </div>
+                    <div title="相关图件信息" tabindex="1" style="overflow: hidden">
+                        <div style="font-size:14px;line-height: 30px;background-color:#EAF0FB">导入相关图件信息:</div>
+                         <div class="RowDiv">
+                             <div class="Field">导入图件资料:</div>
+                             <div class="Value" field="导入图件资料"></div>
+                         </div>   
+                       <table id="Table2"></table>
+                        <div style="font-size:14px;line-height: 30px;background-color:#EAF0FB">界址点文件列表</div>
+                        <div class="RowDiv">
+                             <div class="Field">导入界址点文件:</div>
+                             <div class="Value" field="导入界址点文件"></div>
+                         </div>   
+                        <table id="Table3"></table>
+                   </div>    
+              </div>
+                    <div style="width:100%;text-align:center"><input type="button" style="width:90px;height:20px;background-color:#EAF0FB;text-align:center" value="返回" onclick="javascript: history.go(-1);"></div>
+        </div>
+   </div>
+</body>
+</html>

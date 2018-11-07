@@ -1,0 +1,823 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/echarts.min.js"></script>
+    <script src="../../js/guid.js"></script>
+    <script src="../../js/linq.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <script>
+        var parent;
+        var param;
+        var Ktw = window.top.window.ktw;
+        var dialog = new Ktw.Messager({ AutoShow: false, Height: "124", Type: "question", Modal: false });  //提示框对象
+        var byDateChart, byRegionChart, mapChart;  //统计图初始化
+        var byDateOption, byRegionOption, mapOption; //统计图配置项
+        var regionCombobox, dateCombobox;
+        //TODO 界面设计数据 需从服务端获取
+        var jsontest = {
+            "gdp": {
+                "regions": [
+                    { "name": '雨湖区', "year": '2015', "value": '345万人' },
+                    { "name": '雨湖区', "year": '2016', "value": '456万人' },
+                    { "name": '雨湖区', "year": '2017', "value": '567万人' },
+                    { "name": '湘乡市', "year": '2015', "value": '123万人' },
+                    { "name": '湘乡市', "year": '2016', "value": '234万人' }
+                ],
+                "baseinfo": {
+                    "name": '地均GDP与房价指标',
+                    "unit": '比值',
+                    "description": '比值越高表示房价上涨潜力越大，反之则表示房价上涨潜力越小',
+                    "updatetime": '2017-09-13'
+                }
+            },
+            "houseprice": {
+                "regions": [
+                    { "name": '雨湖区', "year": '2015', "value": '234万人' },
+                    { "name": '雨湖区', "year": '2016', "value": '345万人' },
+                    { "name": '雨湖区', "year": '2017', "value": '456万人' },
+                    { "name": '湘乡市', "year": '2015', "value": '112万人' },
+                    { "name": '湘乡市', "year": '2016', "value": '223万人' },
+                    { "name": '岳塘区', "year": '2015', "value": '894万人' },
+                    { "name": '岳塘区', "year": '2016', "value": '326万人' },
+                    { "name": '岳塘区', "year": '2017', "value": '854万人' },
+                    { "name": '韶山市', "year": '2015', "value": '354万人' },
+                    { "name": '韶山市', "year": '2016', "value": '635万人' }
+                ],
+                "baseinfo": {
+                    "name": '湘潭市经济增长指数',
+                    "unit": '比值',
+                    "description": '比值越高表示房价上涨潜力越大，反之则表示房价上涨潜力越小',
+                    "updatetime": '2017-09-14'
+                }
+            },
+            "landuse": {
+                "regions": [
+                    { "name": '雨湖区', "year": '2015', "value": '456万人' },
+                    { "name": '雨湖区', "year": '2016', "value": '567万人' },
+                    { "name": '雨湖区', "year": '2017', "value": '678万人' },
+                    { "name": '湘乡市', "year": '2015', "value": '234万人' },
+                    { "name": '湘乡市', "year": '2016', "value": '345万人' },
+                    { "name": '湘潭县', "year": '2015', "value": '567万人' },
+                    { "name": '湘潭县', "year": '2016', "value": '685万人' },
+                    { "name": '湘潭县', "year": '2017', "value": '611万人' },
+                    { "name": '韶山市', "year": '2015', "value": '486万人' },
+                    { "name": '韶山市', "year": '2016', "value": '365万人' }
+                ],
+                "baseinfo": {
+                    "name": '人口男女比例',
+                    "unit": '比值',
+                    "description": '比值越高表示房价上涨潜力越大，反之则表示房价上涨潜力越小',
+                    "updatetime": '2017-09-15'
+                }
+            },
+            "synthesise1": {
+                "regions": [
+                    { "name": '雨湖区', "year": '2015', "value": '456万人' },
+                    { "name": '雨湖区', "year": '2016', "value": '567万人' },
+                    { "name": '雨湖区', "year": '2017', "value": '678万人' },
+                    { "name": '湘乡市', "year": '2015', "value": '234万人' },
+                    { "name": '湘乡市', "year": '2016', "value": '345万人' },
+                    { "name": '湘潭县', "year": '2015', "value": '567万人' },
+                    { "name": '湘潭县', "year": '2016', "value": '685万人' },
+                    { "name": '湘潭县', "year": '2017', "value": '611万人' },
+                    { "name": '韶山市', "year": '2015', "value": '486万人' },
+                    { "name": '韶山市', "year": '2016', "value": '365万人' }
+                ],
+                "baseinfo": {
+                    "name": '地均GDP与房价指标',
+                    "unit": '比值',
+                    "description": '比值越高表示房价上涨潜力越大，反之则表示房价上涨潜力越小',
+                    "updatetime": '2017-09-15'
+                }
+            },
+            "synthesise2": {
+                "regions": [
+                    { "name": '雨湖区', "year": '2015', "value": '456万人' },
+                    { "name": '雨湖区', "year": '2016', "value": '567万人' },
+                    { "name": '雨湖区', "year": '2017', "value": '678万人' },
+                    { "name": '湘乡市', "year": '2015', "value": '234万人' },
+                    { "name": '湘乡市', "year": '2016', "value": '345万人' },
+                    { "name": '湘潭县', "year": '2015', "value": '567万人' },
+                    { "name": '湘潭县', "year": '2016', "value": '685万人' },
+                    { "name": '湘潭县', "year": '2017', "value": '611万人' },
+                    { "name": '韶山市', "year": '2015', "value": '486万人' },
+                    { "name": '韶山市', "year": '2016', "value": '365万人' }
+                ],
+                "baseinfo": {
+                    "name": '地均GDP与房价指标',
+                    "unit": '比值',
+                    "description": '比值越高表示房价上涨潜力越大，反之则表示房价上涨潜力越小',
+                    "updatetime": '2017-09-15'
+                }
+            }
+        }
+        /*插件通信方法*/
+        function WidgetCommunication(s, e) {
+            parent = s.parent;
+            param = s.param;
+            regionCombobox = $("#region").prop("$this");
+            dateCombobox = $("#date").prop("$this");
+            initBaseInfo(param);
+            initChart();
+            getMapData();
+            parent.one("onClosing", function () {
+                //TODO 解绑事件
+            });
+        }
+
+        /*初始化指标基本信息*/
+        function initBaseInfo(param) {
+            if (Ktw.IsNull(param)) return;
+            var data = jsontest[param];
+            //初始化指标combox
+            var regionData = [];
+            var byYears;    //行政区指标根据年份分组
+            var regions = Enumerable.From(data.regions).GroupBy("s=>s.name").ToArray();
+            for (var i = 0, len = regions.length; i < len; i++) {
+                var source = regions[i].source;
+                if (source.length) {
+                    regionData.push({ Name: source[0].name, Value: source[0].name });
+                }
+            }
+            regionCombobox.SetData(regionData);
+            dateCombobox.unbind("onSelectChanged");
+            dateCombobox.bind("onSelectChanged", function (e, s) {
+                var objSelect = Enumerable.From(byYears).Where("s=>s.year == '" + s.Value + "'").ToArray();
+                $(".index-value .value").append($('<div class="number"></div>'));
+                $(".index-value .value div:last-child").html(objSelect.length > 0 ? objSelect[0].value : '');
+                $(".index-value .value div:first-child").animate({ marginTop: '-50px' }, 500, function () {
+                    $(this).remove();
+                });
+            });
+            regionCombobox.unbind("onSelectChanged");
+            regionCombobox.bind("onSelectChanged", function (e, s) {
+                var timeData = [];
+                byYears = Enumerable.From(data.regions).Where("s=>s.name == '" + s.Value + "'").ToArray();
+                for (var j = 0, length = byYears.length; j < length; j++) {
+                    timeData.push({ Name: byYears[j].year, Value: byYears[j].year });
+                }
+                dateCombobox.SetData(timeData);
+                dateCombobox.SetSelectedIndex(0);
+            });
+            regionCombobox.SetSelectedIndex(0);
+            //初始化指标基本信息
+            var baseInfo = $(".base-info .base-info-value");
+            for (var i = 0, len = baseInfo.length; i < len; i++) {
+                $(baseInfo[i]).html(data.baseinfo[$(baseInfo[i]).attr('field')]);
+            }
+        }
+        /*初始化统计图*/
+        function initChart() {
+            byDateChart = echarts.init(document.getElementById("chart-by-date"));
+            byRegionChart = echarts.init(document.getElementById("chart-by-region"));
+            mapChart = echarts.init(document.getElementById("chart-map"));
+            byDateOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                grid: {
+                    top: '20%',
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: ['2010年', '2011年', '2012年', '2013年', '2014年', '2015年', '2016年', '2017年']
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '指标值为',
+                        type: 'line',
+                        data: [220, 182, 191, 234, 290, 330, 310, 220],
+                        itemStyle: {
+                            normal: {
+                                color: "#6cd8cc"
+                            }
+                        }
+                    }
+                ]
+            };
+            byDateChart.setOption(byDateOption, true);
+
+            byRegionOption = {
+                color: ['#3398DB'],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                grid: {
+                    top: '20%',
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                legend: {
+                    data: ['2015年', '2016年', '2017年'],
+                    bottom: 5,
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['雨湖区', '岳塘区', '湘乡市', '韶山市', '湘潭县'],
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '2015年',
+                        type: 'bar',
+                        stack: '总量',
+                        barWidth: '60%',
+                        data: [198, 334, 390, 330, 220],
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: "#ef9037"
+                            }
+                        }
+                    },
+                    {
+                        name: '2016年',
+                        type: 'bar',
+                        stack: '总量',
+                        barWidth: '60%',
+                        data: [212, 312, 380, 340, 235],
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: "#5793f3"
+                            }
+                        }
+                    },
+                    {
+                        name: '2017年',
+                        type: 'bar',
+                        stack: '总量',
+                        barWidth: '60%',
+                        data: [220, 320, 400, 320, 216],
+                        label: {
+                            normal: {
+                                show: true
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: "#dd393e"
+                            }
+                        }
+                    }
+                ]
+            };
+            byRegionChart.setOption(byRegionOption, true);
+
+            mapOption = {
+                baseOption: {
+                    timeline: {
+                        axisType: 'category',
+                        autoPlay: true,
+                        playInterval: 1500,
+                        data: ['2011', '2012', '2013', '2014', '2015', '2016', '2017'],
+                        label: {
+                            formatter: function (s) {
+                                return s + "年"
+                            },
+                            normal: {
+                                color: "#32ffff"  //轴圆圈
+                            },
+                            emphasis: {
+                                color: "#32ffff" //轴圆圈填充
+                            }
+                        },
+                        lineStyle: {
+                            color: "#32ffff"
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: "#32ffff"  //轴圆圈
+                            },
+                            emphasis: {
+                                color: "#32ffff" //轴圆圈填充
+                            }
+                        },
+                        checkpointStyle: {
+                            color: "#32ffff",  //选中时填充色
+                            borderColor: "#3385ff"  //选中时的边框颜色
+                        },
+                        controlStyle: {
+                            normal: {
+                                color: '#304654',
+                                borderColor: '#304654'
+                            },
+                            emphasis: {
+                                color: '#32ffff',
+                                borderColor: '#32ffff'
+                            }
+                        }
+                    }
+                },
+                options: [
+                   {
+                       title: { subtext: '2011年湘潭市宏观经济指标', subtextStyle: { color: "#32ffff", fontSize: 16 } },
+                       visualMap: {
+                           min: 0,
+                           max: 1000,
+                           left: 'right',
+                           top: 'bottom',
+                           text: ['高', '低'],           // 文本，默认为数值文本
+                           calculable: true,
+                           inRange: {
+                               color: ['#325fff', '#b5c334', '#c1232b'],
+                               symbolSize: [30, 100]
+                           },
+                           textStyle: {
+                               color: "#eee"
+                           }
+                       },
+                       tooltip: {
+                           trigger: 'item'
+                       },
+                       roam: true,
+                       series: [{
+                           name: '2011年经济指标',
+                           type: 'map',
+                           mapType: '湘潭',
+                           label: {
+                               normal: {
+                                   show: true,
+                                   color:'#fff'
+                               },
+                               emphasis: {
+                                   show: true
+                               }
+                           },
+                           data: [
+                               { name: '雨湖区', value: randomData() },
+                               { name: '岳塘区', value: randomData() },
+                               { name: '湘乡市', value: randomData() },
+                               { name: '韶山市', value: randomData() },
+                               { name: '湘潭县', value: randomData() }
+                           ]
+                       }]
+                   },
+                   {
+                       title: { subtext: '2012年湘潭市宏观经济指标', subtextStyle: { color: "#32ffff", fontSize: 16 } },
+                       series: [{
+                           name: '2012年经济指标',
+                           type: 'map',
+                           mapType: '湘潭',
+                           label: {
+                               normal: {
+                                   show: true
+                               },
+                               emphasis: {
+                                   show: true
+                               }
+                           },
+                           data: [
+                               { name: '雨湖区', value: randomData() },
+                               { name: '岳塘区', value: randomData() },
+                               { name: '湘乡市', value: randomData() },
+                               { name: '韶山市', value: randomData() },
+                               { name: '湘潭县', value: randomData() }
+                           ]
+                       }]
+                   },
+                   {
+                       title: { subtext: '2013年湘潭市宏观经济指标', subtextStyle: { color: "#32ffff", fontSize: 16 } },
+                       series: [{
+                           name: '2013年经济指标',
+                           type: 'map',
+                           mapType: '湘潭',
+                           label: {
+                               normal: {
+                                   show: true
+                               },
+                               emphasis: {
+                                   show: true
+                               }
+                           },
+                           data: [
+                              { name: '雨湖区', value: randomData() },
+                               { name: '岳塘区', value: randomData() },
+                               { name: '湘乡市', value: randomData() },
+                               { name: '韶山市', value: randomData() },
+                               { name: '湘潭县', value: randomData() }
+                           ]
+                       }]
+                   },
+                   {
+                       title: { subtext: '2014年湘潭市宏观经济指标', subtextStyle: { color: "#32ffff", fontSize: 16 } },
+                       series: [{
+                           name: '2014年经济指标',
+                           type: 'map',
+                           mapType: '湘潭',
+                           label: {
+                               normal: {
+                                   show: true
+                               },
+                               emphasis: {
+                                   show: true
+                               }
+                           },
+                           data: [
+                               { name: '雨湖区', value: randomData() },
+                               { name: '岳塘区', value: randomData() },
+                               { name: '湘乡市', value: randomData() },
+                               { name: '韶山市', value: randomData() },
+                               { name: '湘潭县', value: randomData() }
+                           ]
+                       }]
+                   },
+                   {
+                       title: { subtext: '2015年湘潭市宏观经济指标', subtextStyle: { color: "#32ffff", fontSize: 16 } },
+                       series: [{
+                           name: '2015年经济指标',
+                           type: 'map',
+                           mapType: '湘潭',
+                           label: {
+                               normal: {
+                                   show: true
+                               },
+                               emphasis: {
+                                   show: true
+                               }
+                           },
+                           data: [
+                               { name: '雨湖区', value: randomData() },
+                               { name: '岳塘区', value: randomData() },
+                               { name: '湘乡市', value: randomData() },
+                               { name: '韶山市', value: randomData() },
+                               { name: '湘潭县', value: randomData() }
+                           ]
+                       }]
+                   },
+                   {
+                       title: { subtext: '2016年湘潭市宏观经济指标', subtextStyle: { color: "#32ffff", fontSize: 16 } },
+                       series: [{
+                           name: '2016年经济指标',
+                           type: 'map',
+                           mapType: '湘潭',
+                           label: {
+                               normal: {
+                                   show: true
+                               },
+                               emphasis: {
+                                   show: true
+                               }
+                           },
+                           data: [
+                               { name: '雨湖区', value: randomData() },
+                               { name: '岳塘区', value: randomData() },
+                               { name: '湘乡市', value: randomData() },
+                               { name: '韶山市', value: randomData() },
+                               { name: '湘潭县', value: randomData() }
+                           ]
+                       }]
+                   },
+                   {
+                       title: { subtext: '2017年湘潭市宏观经济指标', subtextStyle: { color: "#32ffff", fontSize: 16 } },
+                       series: [{
+                           name: '2017年经济指标',
+                           type: 'map',
+                           mapType: '湘潭',
+                           label: {
+                               normal: {
+                                   show: true
+                               },
+                               emphasis: {
+                                   show: true
+                               }
+                           },
+                           data: [
+                               { name: '雨湖区', value: randomData() },
+                               { name: '岳塘区', value: randomData() },
+                               { name: '湘乡市', value: randomData() },
+                               { name: '韶山市', value: randomData() },
+                               { name: '湘潭县', value: randomData() }
+                           ]
+                       }]
+                   }
+                ],
+                tooltip: {
+                    trigger: 'item'
+                },
+                visualMap: {
+                    min: 0,
+                    max: 2500,
+                    left: 'left',
+                    top: 'bottom',
+                    text: ['高', '低'],           // 文本，默认为数值文本
+                    calculable: true
+                }
+            };
+
+        }
+        $(window).resize(function () {
+            byDateChart.resize();
+            byRegionChart.resize();
+            mapChart.resize();
+        });
+        function randomData() {
+            return Math.round(Math.random() * 1000);
+        }
+        /*读取json地图数据*/
+        function getMapData() {
+            $.ajax({
+                url: 'data/湘潭市.json',
+                type: 'get',
+                datatype: 'json',
+                success: function (res) {
+                    echarts.registerMap('湘潭', res);
+                    mapChart.setOption(mapOption, true);
+                    mapChart.on('timelineplaychanged', function (s) {
+                        debugger
+                    });
+                },
+                error: function (e) {
+                    dialog.Alert("连接服务器失败！", "error");
+                }
+            });
+        }
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .indexView {
+            width: calc(100% - 40px);
+            height: calc(100% - 40px);
+            position: relative;
+            padding: 20px;
+            background-color: #08122e;
+        }
+
+            .indexView .index-top {
+                width: 100%;
+                height: 35%;
+                position: relative;
+            }
+
+            .indexView .index-bottom {
+                width: 100%;
+                height: calc(65% - 20px);
+                position: relative;
+                top: 20px;
+                background-size: 100% 100%;
+            }
+
+            .indexView .index-left {
+                width: 35%;
+                height: 100%;
+                position: relative;
+                float: left;
+                overflow: hidden;
+            }
+
+                .indexView .index-left .index-value {
+                    background-image: url(../../image/charttwo.png);
+                    background-size: 100% 100%;
+                    overflow: hidden;
+                }
+                    /*设置指标combobox文字样式*/
+                    .indexView .index-left .index-value .combobox-div .ktw-combobox .text-text input[type=text] {
+                        color: #fff;
+                        font-size: 14px;
+                    }
+
+                .indexView .index-left .index-baseinfo {
+                    background-image: url(../../image/charttwo.png);
+                }
+
+                    .indexView .index-left .index-baseinfo .base-info {
+                        position: relative;
+                        width: 90%;
+                        height: 85%;
+                        margin: auto;
+                        top: 60px;
+                        color: #39fe4d;
+                        font-size: 15px;
+                    }
+
+                        .indexView .index-left .index-baseinfo .base-info > div {
+                            width: 100%;
+                            height: 40px;
+                        }
+
+                        .indexView .index-left .index-baseinfo .base-info .base-info-title {
+                            height: 100%;
+                            line-height: 40px;
+                            width: 30%;
+                            float: left;
+                        }
+
+                        .indexView .index-left .index-baseinfo .base-info .base-info-value {
+                            height: 100%;
+                            line-height: 40px;
+                            width: 65%;
+                            float: right;
+                        }
+
+                .indexView .index-left .title {
+                    position: absolute;
+                    color: #32ffff;
+                    font-size: 16px;
+                }
+
+                .indexView .index-left .index-top .title {
+                    left: 50px;
+                    top: 3px;
+                }
+
+                .indexView .index-left .index-top .value {
+                    position: relative;
+                    color: #39fe4d;
+                    width: 100%;
+                    height:50px;
+                    text-align: center;
+                    font-size: 30px;
+                    top: 80px;
+                    overflow:hidden;
+                }
+                .indexView .index-left .index-top .value .number{
+                    float:left;
+                    line-height:50px;
+                    width:100%;
+                    height:100%;
+                }
+                .indexView .index-left .index-top .source {
+                    position: absolute;
+                    color: #39fe4d;
+                    font-size: 16px;
+                    bottom: 10px;
+                    right: 30px;
+                }
+
+                .indexView .index-left .index-top .combobox-div {
+                    position: relative;
+                    width: 220px;
+                    height: 26px;
+                    margin: 0 auto;
+                    top: 35px;
+                    color: #ad9178 !important;
+                    text-align: center;
+                    font-size: 12px;
+                }
+
+                    .indexView .index-left .index-top .combobox-div > div {
+                        float: left;
+                        height: 100%;
+                    }
+
+                    .indexView .index-left .index-top .combobox-div :first-child {
+                        margin-right: 20px;
+                    }
+
+                .indexView .index-left .index-bottom .title {
+                    left: 70px;
+                    top: 10px;
+                }
+
+            .indexView .index-right {
+                width: calc(65% - 20px);
+                height: 100%;
+                position: relative;
+                float: left;
+                margin-left: 20px;
+            }
+
+                .indexView .index-right .index-map {
+                    background-image: url(../../image/border-text2.png);
+                }
+
+                    .indexView .index-right .index-map > div {
+                        position: relative;
+                        width: 90%;
+                        height: 90%;
+                        margin: auto;
+                        top: 30px;
+                    }
+
+                .indexView .index-right .index-top > div {
+                    position: relative;
+                    width: calc(49% - 4px);
+                    height: 100%;
+                    border-radius: 5px;
+                    border: 2px solid #1e8a9a;
+                }
+
+                    .indexView .index-right .index-top > div .title {
+                        position: absolute;
+                        color: #32ffff;
+                        top: 10px;
+                        left: 20px;
+                        font-size: 16px;
+                    }
+    </style>
+</head>
+<body>
+    <div class="indexView">
+        <div class="index-left">
+            <div class="index-value index-top">
+                <span class="title">指标当前值</span>
+                <div class="combobox-div">
+                    <div id="region" class="ktw-combobox" opt='{"TipInfo":"行政区","PopupHeight":75,"Width":100,"BodyCSS": { "background-color": "transparent" },"TextField":"Name","ValueField":"Value","IsOverShow":true, "Border":"0px","Padding":"0px","TextAlign":"center","TipAlign":"center"}'></div>
+                    <div id="date" class="ktw-combobox" opt='{"TipInfo":"时间","PopupHeight":75,"Width":100,"BodyCSS": { "background-color": "transparent","color":"red" },"TextField":"Name","ValueField":"Value","IsOverShow":true, "Border":"0px","Padding":"0px","TextAlign":"center","TipAlign":"center"}'></div>
+                </div>
+                <div class="value">
+                    <div class="number"></div>
+                </div>
+                <span class="source">来源：地方统计局</span>
+            </div>
+            <div class="index-baseinfo index-bottom">
+                <span class="title">基本信息</span>
+                <div class="base-info">
+                    <div>
+                        <div class="base-info-title">指标名称</div>
+                        <div field="name" class="base-info-value"></div>
+                    </div>
+                    <div>
+                        <div class="base-info-title">指标单位</div>
+                        <div field="unit" class="base-info-value"></div>
+                    </div>
+                    <div>
+                        <div class="base-info-title">更新时间</div>
+                        <div field="updatetime" class="base-info-value"></div>
+                    </div>
+                    <div style="height: auto;">
+                        <div class="base-info-title">指标描述</div>
+                        <div field="description" class="base-info-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="index-right">
+            <div class="index-top">
+                <div style="float: left;">
+                    <span class="title">各年份湘潭市GDP总值变化</span>
+                    <div id="chart-by-date" style="width: 100%; height: 100%;"></div>
+                </div>
+                <div style="float: right;">
+                    <span class="title">近三年各行政区GDP值</span>
+                    <div id="chart-by-region" style="width: 100%; height: 100%;"></div>
+                </div>
+            </div>
+            <div class="index-bottom index-map">
+                <div id="chart-map"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

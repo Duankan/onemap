@@ -1,0 +1,843 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>土地资源运行总体情况</title>
+    <link rel="stylesheet" href="../../../css/icon.css" />
+    <link rel="stylesheet" href="../../../js/ktop/ktop.css" />
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/echarts.min.js"></script>
+    <script type="text/javascript" src="../../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../../js/ktw.ui.js"></script>
+    <script type="text/javascript" src="../../../js/ktop/ktop.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var generalCaseOpt, farmCaseOpt, constructCaseOpt, geologyCaseOpt, sourceReservesOpt, mineRightOpt, mapOption;  //统计图表的配置项和数据
+        var generalCaseChart, farmCaseChart, constructCaseChart, geologyCaseChart, sourceReservesChart, mineRightChart, mapChart; //echarts实例
+        //var dialog = new Ktw.Messager({ AutoShow: false, Height: "124", Type: "question", Modal: false });  //提示框对象
+        $(function () {
+            initGeneralCase();
+            iniFarmCase();
+            initConstructCase();
+            initGeologyCase();
+            initMineSource();
+            initMap();
+        });
+        /*土地总体情况*/
+        function initGeneralCase() {
+            generalCaseChart = echarts.init($("#general-case")[0]);
+            generalCaseOpt = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                color: ['#8e75f2', '#405ffc', '#28dffa'],
+                legend: {
+                    orient: 'vertical',
+                    left: 10,
+                    bottom: 10,
+                    data: ['农用地', '建设用地', '未利用地'],
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                series: {
+                    name: '',
+                    type: 'pie',
+                    radius: '60%',
+                    center: ['60%', '50%'],
+                    data: [
+                        { name: '农用地', value: 352 },
+                        { name: '建设用地', value: 452 },
+                        { name: '未利用地', value: 520 }
+                    ],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            };
+            generalCaseChart.setOption(generalCaseOpt);
+        }
+        /*农用地各结构部分情况*/
+        function iniFarmCase() {
+            //此数据需从服务端获取
+            var farmData = [
+                { year: '2015年', plough: 5000, garden: 6000, forest: 4620, grassland: 10000, others: 8021 },
+                { year: '2016年', plough: 4200, garden: 5230, forest: 3556, grassland: 8660, others: 7000 },
+                { year: '2017年', plough: 6200, garden: 4255, forest: 4000, grassland: 8000, others: 5000 },
+            ];
+            var years = [], seriesData = [];
+            var colors = ["#8e75f2", "#405ffc", "#28dafa"];
+            farmCaseChart = echarts.init($("#farm-case")[0]);
+            farmCaseOpt = {
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: function (params, ticket, callback) {
+                        var tooltipStr = params[0].name.split("&")[1] + '<br/>';
+                        for (var i = 0, length = params.length; i < length; i++) {
+                            tooltipStr += params[i].seriesName + ': ' + params[i].value + '亩' + '<br/>';
+                        }
+                        return tooltipStr;
+                    },
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: [],
+                    top: '7%',
+                    selected: {
+                        '2015年': false,
+                        '2016年': false
+                    },
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    top: '18%',
+                    left: 0,
+                    right: '7%',
+                    bottom: '5%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value',
+                    name: '亩',
+                    nameGap: 6,
+                    axisLabel: {
+                        formatter: '{value}'
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            type: 'dashed'
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'category',
+                    inverse: true,
+                    data: ['plough&耕地', 'garden&园地', 'forest&林地', 'grassland&牧草地', 'others&其它'],
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    axisLabel: {
+                        formatter: function (value) {
+                            var itemValue = value.split('&');
+                            return '{' + itemValue[0] + '| }\n{value|' + itemValue[1] + '}';
+                        },
+                        rich: {
+                            value: {
+                                lineHeight: 30,
+                                align: 'center'
+                            },
+                            plough: {
+                                align: 'right',
+                                backgroundColor: {
+                                    image: '../../../image/menu_zhuanti.png'
+                                },
+                                width: 16,
+                                height: 16
+                            },
+                            garden: {
+                                align: 'right',
+                                backgroundColor: {
+                                    image: '../../../image/menu_zhuanti.png'
+                                },
+                                width: 16,
+                                height: 16
+                            },
+                            forest: {
+                                align: 'right',
+                                backgroundColor: {
+                                    image: '../../../image/menu_zhuanti.png'
+                                },
+                                width: 16,
+                                height: 16
+                            },
+                            grassland: {
+                                align: 'right',
+                                backgroundColor: {
+                                    image: '../../../image/menu_zhuanti.png'
+                                },
+                                width: 16,
+                                height: 16
+                            },
+                            others: {
+                                align: 'right',
+                                backgroundColor: {
+                                    image: '../../../image/menu_zhuanti.png'
+                                },
+                                width: 16,
+                                height: 16
+                            }
+                        }
+                    }
+                },
+                series: []
+            };
+            for (var i = 0, length = farmData.length; i < length; i++) {
+                years.push(farmData[i].year);
+                var data = [];
+                for (var k in farmData[i]) {
+                    if (k == 'year') continue;
+                    data.push(farmData[i][k]);
+                }
+                seriesData.push({
+                    name: farmData[i].year,
+                    type: 'bar',
+                    data: data,
+                    label: { normal: { show: true, textBorderColor: '#333', textBorderWidth: 2 } },
+                    itemStyle: { normal: { color: colors[i] } }
+                });
+            }
+            farmCaseOpt.series = seriesData;
+            farmCaseOpt.legend.data = years;
+            farmCaseChart.setOption(farmCaseOpt);
+        }
+        /*读取json地图数据*/
+        function initMap() {
+            //mapChart = echarts.init($("#map")[0]);
+            //mapOption = {
+            //    title: { subtext: '湘潭市行政区划', subtextStyle: { color: "#32ffff", fontSize: 16 } },
+            //    visualMap: {
+            //        left: 'right',
+            //        top: 'bottom',
+            //        text: ['高', '低'],           // 文本，默认为数值文本
+            //        calculable: true,
+            //        show: true,
+            //        inRange: {
+            //            color: ['#00d2db', '#30b2bd', '#2888bf'],
+            //            symbolSize: [0, 100]
+            //        },
+            //        textStyle: {
+            //            color: "#fff"
+            //        }
+            //    },
+            //    tooltip: {
+            //        show: false,
+            //        trigger: 'item'
+            //    },
+            //    roam: true,
+            //    series: [{
+            //        name: '',
+            //        type: 'map',
+            //        map: '湘潭',
+            //        label: {
+            //            normal: {
+            //                show: true
+            //            },
+            //            emphasis: {
+            //                show: true
+            //            }
+            //        },
+            //        itemStyle: {
+            //            emphasis: {
+            //                areaColor: '#35ffff'
+            //            }
+            //        },
+            //        data: [
+            //            { name: '雨湖区', value: 0 },
+            //            { name: '岳塘区', value: 50 },
+            //            { name: '湘乡市', value: 100 },
+            //            { name: '韶山市', value: 150 },
+            //            { name: '湘潭县', value: 200 }
+            //        ]
+            //    }]
+            //}
+            //$.ajax({
+            //    url: '../data/湘潭市.json',
+            //    type: 'get',
+            //    datatype: 'json',
+            //    success: function (res) {
+            //        echarts.registerMap('湘潭', res);
+            //        mapChart.setOption(mapOption, true);
+            //    },
+            //    error: function (e) {
+            //        dialog.Alert("加载地图失败！", "error");
+            //    }
+            //});
+            var map = L.map('map-panel', {
+                center: { lon: 111.4291763305664, lat: 27.206268310546875 },
+                zoomControl: false,
+                zoom: 11,
+                minZoom: 3,//地图最小级数
+                maxZoom: 18,//地图最大级数
+                attributionControl: false
+            });
+            //$(map.getContainer()).css("background", 'transparent');  //TODO 返回map容器（dom对象）并设置样式
+            var option = {
+                layers: 'onemap:t_inf_onemap_jsydspxxb',
+                format: 'image/png',
+                transparent: true
+            };
+            option.SLD_BODY = loadSLD('p.sld'); //TODO 嵌入项目后调用封装的公用函数
+            var baseLayer = new L.nonTiledLayer.wms('http://192.168.1.70:8081/hgis/onemap/wms', option);
+            var tempLayer = new L.nonTiledLayer.wms('http://192.168.1.70:8081/hgis/onemap/wms', {
+                layers: 'onemap:t_inf_onemap_tdgyxxb',
+                format: 'image/png',
+                transparent: true,
+				SLD_BODY:loadSLD('g.sld'),
+            });
+            map.addLayer(baseLayer);
+            map.addLayer(tempLayer);
+        }
+        /*获取图层样式xml文件*/
+        function loadSLD(url) {
+            var strXml = null;
+            $.ajax({
+                url: url,
+                dataType: 'text',
+                type: 'GET',
+                timeout: 2000,
+                async: false,
+                success: function (xml) {
+                    strXml = xml.replace(/\r\n\s*/g, "");
+                },
+                error: function (xml) {
+                    dialog.Alert("加载XML文件出错！");
+                }
+            });
+            return strXml;
+        }
+        /*建设用地各结构部分情况*/
+        function initConstructCase() {
+            constructCaseChart = echarts.init($("#construct-case")[0]);
+            constructCaseOpt = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b}: {c} ({d}%)"
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 10,
+                    bottom: 10,
+                    textStyle: {
+                        color: "#fff"
+                    },
+                    data: ['农用地', '商服用地', '工矿仓储用地', '公共管理与公共服务用地', '住宅用地', '交通运输用地', '水利设施用地']
+                },
+                color: ['#405ffc', '#7b87ff', '#9d8ffe', '#d0fff0', '#63ffcd', '#4cadff', '#293bec'],
+                series: {
+                    name: '建设用地',
+                    type: 'pie',
+                    radius: ['40%', '55%'],
+                    center: ['55%', '50%'],    // 默认全局居中
+                    label: {
+                        normal: {
+                            formatter: '{b|{b}：}{c}  {per|{d}%}  ',
+                            backgroundColor: '#181f29',
+                            borderColor: '#91c7ae',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            rich: {
+                                a: {
+                                    color: '#999',
+                                    lineHeight: 22,
+                                    align: 'center'
+                                },
+                                b: {
+                                    fontSize: 12,
+                                    lineHeight: 24
+                                },
+                            }
+                        }
+                    },
+                    data: [
+                        { value: 335, name: '农用地' },
+                        { value: 310, name: '商服用地' },
+                        { value: 234, name: '工矿仓储用地' },
+                        { value: 135, name: '公共管理与公共服务用地' },
+                        { value: 1048, name: '住宅用地' },
+                        { value: 251, name: '交通运输用地' },
+                        { value: 147, name: '水利设施用地' }
+                    ]
+                }
+            };
+            constructCaseChart.setOption(constructCaseOpt);
+        }
+        /*矿产资源情况*/
+        function initMineSource() {
+            //数据需从服务端获取
+            var sourceReservesData = [
+                { year: '2011年', coal: 5000, Ironore: 6000, phosphor: 5500, manganese: 7100, leadzinc: 6000 },
+                { year: '2012年', coal: 5500, Ironore: 7000, phosphor: 6000, manganese: 5300, leadzinc: 5600 },
+                { year: '2013年', coal: 7000, Ironore: 9000, phosphor: 4000, manganese: 4500, leadzinc: 4500 },
+                { year: '2014年', coal: 9000, Ironore: 11000, phosphor: 3000, manganese: 4000, leadzinc: 3500 },
+                { year: '2015年', coal: 12000, Ironore: 10000, phosphor: 2900, manganese: 3800, leadzinc: 2800 },
+                { year: '2016年', coal: 11000, Ironore: 8000, phosphor: 3200, manganese: 4300, leadzinc: 2000 },
+                { year: '2017年', coal: 9000, Ironore: 7000, phosphor: 2400, manganese: 3800, leadzinc: 1800 }
+            ];
+            var mineRightData = [
+             { year: '2013年', prospect: 7000, mining: 9000 },
+             { year: '2014年', prospect: 9000, mining: 11000 },
+             { year: '2015年', prospect: 12000, mining: 10000 },
+             { year: '2016年', prospect: 11000, mining: 8000 },
+             { year: '2017年', prospect: 9000, mining: 7000 }
+            ];
+            var reserveSeries = [], reserveYears = [], reserveLegend = [];
+            var reserveObj = {
+                coal: { name: '煤炭', color: '#28dafa', series: [] },
+                Ironore: { name: '铁矿', color: '#4cadff', series: [] },
+                phosphor: { name: '磷矿', color: '#917eff', series: [] },
+                manganese: { name: '锰矿', color: '#9e60ed', series: [] },
+                leadzinc: { name: '铅锌', color: '#c6bcfe', series: [] }
+            };
+            var mineRightSeries = [], mineRightYears = [], mineRightLegend = [];
+            var mineRightObj = {
+                prospect: { name: '探矿权', color: '#9e60ed', series: [] },
+                mining: { name: '采矿权', color: '#4cadff', series: [] }
+            };
+            sourceReservesChart = echarts.init($("#source-reserves")[0]);
+            mineRightChart = echarts.init(document.getElementById("mine-right"));
+            sourceReservesOpt = {
+                title: {
+                    text: '矿产资源储量',
+                    textStyle: {
+                        color: '#3dcfde',
+                        fontFamily: 'SimSun',
+                        fontSize: 15
+                    },
+                    top: '4%',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [],
+                    top: '15%',
+                    type: 'scroll',
+                    pageIconColor: '#32ffff',
+                    textStyle: {
+                        color: "#fff"
+                    }
+                },
+                grid: {
+                    top: '28%',
+                    left: '2%',
+                    right: '6%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            type: 'dashed'
+                        }
+                    }
+                },
+                series: []
+            };
+            for (var i = 0, length = sourceReservesData.length; i < length; i++) {
+                reserveYears.push(sourceReservesData[i].year);
+                reserveObj.coal.series.push(sourceReservesData[i].coal);
+                reserveObj.Ironore.series.push(sourceReservesData[i].Ironore);
+                reserveObj.phosphor.series.push(sourceReservesData[i].phosphor);
+                reserveObj.manganese.series.push(sourceReservesData[i].manganese);
+                reserveObj.leadzinc.series.push(sourceReservesData[i].leadzinc);
+            }
+            for (var k in reserveObj) {
+                reserveLegend.push(reserveObj[k].name);
+                reserveSeries.push({
+                    name: reserveObj[k].name,
+                    type: 'line',
+                    data: reserveObj[k].series,
+                    itemStyle: { normal: { color: reserveObj[k].color } }
+                });
+            }
+            sourceReservesOpt.legend.data = reserveLegend;
+            sourceReservesOpt.xAxis.data = reserveYears;
+            sourceReservesOpt.series = reserveSeries;
+            sourceReservesChart.setOption(sourceReservesOpt);
+            mineRightOpt = {
+                title: {
+                    text: '近五年新立探矿权和采矿权',
+                    textStyle: {
+                        color: '#3dcfde',
+                        fontFamily: 'SimSun',
+                        fontSize: 15
+                    },
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: [],
+                    textStyle: {
+                        color: "#fff"
+                    },
+                    top: '10%'
+                },
+                grid: {
+                    top: '25%',
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    data: []
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: "#fff"
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            type: 'dashed'
+                        }
+                    }
+                },
+                series: []
+            };
+            for (var i = 0, length = mineRightData.length; i < length; i++) {
+                mineRightYears.push(mineRightData[i].year);
+                mineRightObj.prospect.series.push(mineRightData[i].prospect);
+                mineRightObj.mining.series.push(mineRightData[i].mining);
+            }
+            for (var k in mineRightObj) {
+                mineRightLegend.push(mineRightObj[k].name);
+                mineRightSeries.push({
+                    name: mineRightObj[k].name,
+                    type: 'bar',
+                    data: mineRightObj[k].series,
+                    itemStyle: { normal: { color: mineRightObj[k].color } }
+                });
+            }
+            mineRightOpt.legend.data = mineRightLegend;
+            mineRightOpt.xAxis.data = mineRightYears;
+            mineRightOpt.series = mineRightSeries;
+            sourceReservesChart.setOption(sourceReservesOpt, true);
+            mineRightChart.setOption(mineRightOpt, true);
+        }
+        /*地质环境情况*/
+        function initGeologyCase() {
+            geologyCaseChart = echarts.init($("#geology-case")[0]);
+            geologyCaseOpt = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b}: {c} ({d}%)"
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 10,
+                    bottom: 10,
+                    textStyle: {
+                        color: "#fff"
+                    },
+                    data: ['滑坡', '泥石流', '崩塌', '地面塌陷', '地面沉降', '地裂缝', '不稳定斜坡', '其它']
+                },
+                color: ['#405ffc', '#7b87ff', '#9d8ffe', '#d0fff0', '#63ffcd', '#4cadff', '#293bec', '#9e60ed'],
+                series: [
+
+                    {
+                        name: '地质情况',
+                        type: 'pie',
+                        radius: ['40%', '55%'],
+                        center: ['55%', '50%'],    // 默认全局居中
+                        label: {
+                            normal: {
+                                formatter: '{b|{b}：}{c}  {per|{d}%}  ',
+                                backgroundColor: '#181f29',
+                                borderColor: '#91c7ae',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                rich: {
+                                    a: {
+                                        color: '#999',
+                                        lineHeight: 22,
+                                        align: 'center'
+                                    },
+                                    b: {
+                                        fontSize: 12,
+                                        lineHeight: 24
+                                    },
+                                }
+                            }
+                        },
+                        data: [
+                            { value: 335, name: '滑坡' },
+                            { value: 310, name: '泥石流' },
+                            { value: 234, name: '崩塌' },
+                            { value: 135, name: '地面塌陷' },
+                            { value: 1048, name: '地面沉降' },
+                            { value: 251, name: '地裂缝' },
+                            { value: 147, name: '不稳定斜坡' },
+                            { value: 520, name: '其它' }
+                        ]
+                    }
+                ]
+            };
+            geologyCaseChart.setOption(geologyCaseOpt);
+        }
+        /*窗体变化时页面自适应*/
+        $(window).resize(function () {
+            generalCaseChart.resize();
+            farmCaseChart.resize();
+            constructCaseChart.resize();
+            geologyCaseChart.resize();
+            sourceReservesChart.resize();
+            mineRightChart.resize();
+            //mapChart.resize();
+        });
+
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .land-resources {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-color: #000;
+            overflow: hidden;
+            background-image: url(image/bg.png); /*TODO 需更换背景*/
+            background-size: 100% 100%;
+        }
+
+            /*leftPanel布局*/
+            .land-resources > .land-resources-left {
+                position: absolute;
+                display: inline-block;
+                height: 69%;
+                width: 22%;
+                left: 2%;
+            }
+
+                .land-resources > .land-resources-left > div {
+                    position: relative;
+                    width: 100%;
+                    height: 55%;
+                    border-width: 1px 0;
+                    border-style: solid;
+                    border-color: #026bae;
+                }
+
+            /*centerPanel布局*/
+            .land-resources > .land-resources-center {
+                position: absolute;
+                display: inline-block;
+                height: 67%;
+                width: 50%;
+                left: 25%;
+            }
+
+                .land-resources > .land-resources-center > .land-resources-title {
+                    position: relative;
+                    margin: auto;
+                    margin-top: 15px;
+                    width: 90%;
+                    height: 50px;
+                    text-align: center;
+                    font-size: 24px;
+                    color: #3dcfff;
+                }
+
+                .land-resources > .land-resources-center > .map {
+                    position: relative;
+                    width: 100%;
+                    height: calc(100% - 69px);
+                    /*border-radius: 8px;*/
+                    /*background-color:#30b2bd;*/
+                    margin: auto;
+                    top: 2%;
+                }
+
+                    .land-resources > .land-resources-center > .map > div {
+                        width: 100%;
+                        height: 100%;
+                        background-color: transparent;
+                    }
+
+            /*rightPanel布局*/
+            .land-resources > .land-resources-right {
+                position: absolute;
+                display: inline-block;
+                height: 69%;
+                width: 22%;
+                right: 2%;
+            }
+
+                .land-resources > .land-resources-right > div {
+                    position: relative;
+                    width: 100%;
+                    height: 94%;
+                    border-width: 1px 0;
+                    border-style: solid;
+                    border-color: #026bae;
+                }
+            /*bottomPanel布局*/
+            .land-resources > .land-resources-bottom {
+                position: absolute;
+                width: 100%;
+                height: 28%;
+                bottom: 1%;
+            }
+
+                .land-resources > .land-resources-bottom > div {
+                    position: relative;
+                    width: 47%;
+                    height: 100%;
+                    border-width: 1px 0;
+                    border-style: solid;
+                    border-color: #026bae;
+                }
+
+            .land-resources div > .title {
+                position: absolute;
+                top: -12px;
+                left: 10%;
+                color: #32ffff;
+                background-color: #08122e;
+                border: 1px solid #026bae;
+                text-indent: 6px;
+                height: 22px;
+                line-height: 22px;
+                font-size: 14px;
+                transform: skew(-30deg);
+            }
+
+                .land-resources div > .title > .describe-btn {
+                    cursor: pointer;
+                    width: 22px;
+                    display: inline-block;
+                    color: #f6d94d;
+                    transform: skew(30deg);
+                }
+
+
+                    .land-resources div > .title > .describe-btn:hover:before {
+                        width: 160px;
+                        content: attr(describe-info);
+                        background-color: #2085c5;
+                        border-radius: 8px;
+                        color: #ddd;
+                        padding: 10px;
+                        position: absolute;
+                        left: 130%;
+                        top: -50%;
+                        margin-top: 8px;
+                        text-indent: 2em;
+                        /*white-space: pre;*/
+                        font-size: 12px;
+                    }
+
+                    .land-resources div > .title > .describe-btn:hover:after {
+                        content: "";
+                        position: absolute;
+                        top: 10%;
+                        left: 80%;
+                        width: 0;
+                        height: 0;
+                        border-right: 12px solid #2085c5;
+                        border-top: 12px solid transparent;
+                        border-bottom: 12px solid transparent;
+                    }
+    </style>
+</head>
+<body>
+    <div class="land-resources">
+        <div class="land-resources-left">
+            <div class="general-case" style="top: 3%; height: 37%;">
+                <div id="general-case" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">土地总体情况</div>
+                    <div class="describe-btn" describe-info="展示湘潭市本年度土地利用总量及各组成部分（农用地与建设用地）所占比例">?</div>
+                </div>
+            </div>
+            <div style="top: 8%; height: 52%;">
+                <div id="farm-case" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">农用地各结构部分情况</div>
+                    <div class="describe-btn" describe-info="展示近三年湘潭市农用地各结构部分情况，结合历年数据反映农用地的变化情况">?</div>
+                </div>
+            </div>
+        </div>
+        <div class="land-resources-center">
+            <!--TODO 需美工修饰-->
+            <div class="land-resources-title">
+                <div style="width: 14%; height: 52px; transform: skew(-30deg); float: left; border-bottom: 2px solid #17526e;"></div>
+                <div style="background-color: #08122e; width: calc(72% - 4px); height: 100%; transform: skew(-30deg); float: left; border: 2px solid #17526e;">
+                    <div style="height: 100%; line-height: 50px; transform: skew(30deg)">土地资源运行总体情况</div>
+                </div>
+                <div style="width: 14%; height: 52px; transform: skew(-30deg); float: left; border-top: 2px solid #17526e;"></div>
+            </div>
+            <div class="map">
+                <div id="map-panel"></div>
+            </div>
+        </div>
+        <div class="land-resources-right">
+            <div style="top: 3%;">
+                <div id="source-reserves" style="width: 100%; height: 50%;"></div>
+                <div id="mine-right" style="width: 100%; height: 50%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">矿产资源情况</div>
+                    <div class="describe-btn" describe-info="展示湘潭市历年矿产资源储量的变化情况，以及近五年新立探矿权和采矿权量">?</div>
+                </div>
+            </div>
+        </div>
+        <div class="land-resources-bottom">
+            <div style="float: left; margin-left: 2%;">
+                <div id="construct-case" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">建设用地各结构部分情况</div>
+                    <div class="describe-btn" describe-info="展示湘潭市建设用地各类用地面积以及占比情况">?</div>
+                </div>
+            </div>
+            <div style="float: right; margin-right: 2%;">
+                <div id="geology-case" style="width: 100%; height: 100%;"></div>
+                <div class="title">
+                    <div style="display: inline-block; transform: skew(30deg);">地质环境情况</div>
+                    <div class="describe-btn" describe-info="展示湘潭市各类地质灾害发生量以及占比情况">?</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

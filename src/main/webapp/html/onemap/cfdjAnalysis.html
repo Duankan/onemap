@@ -1,0 +1,364 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+      <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../../css/ktw.form.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+   <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/linq.min.js"></script>
+    <script type="text/javascript" src="../../js/guid.js"></script>
+    <script src="../../js/echarts.js"></script>
+    <script src="../../js/echarts.min.js"></script>
+     <script type="text/javascript" src="../../js/highcharts.js"></script>
+    <script type="text/javascript" src="../../js/highcharts-3d.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <script>
+        var Ktw = window.top.window.ktw;
+        var xarray = [];
+        var dataGrid;
+        var winWidth;
+        var result = [];
+        var datamodules = [];
+        var myChart;
+        var ctr;
+        var datas;
+        var areadata1 = Ktw.cookie.AreaTree.Children;
+        var areadata2 = Ktw.cookie.AreaTree;
+        $(window).ready(function () {
+            //    //清除屏幕
+            Ktw.ClearFinal();
+            ctr = new ktw.UCWaitBox({
+                Parent: $(".Content")
+            });
+            winWidth = $(window).width() >= 1000 ? $(window).width() : 1000;
+            initDataGrid();
+                initCharts("Columnar");
+            var myDate = new Date();
+            var starttime = myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-1", endtime = myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate();
+            $('#starttime').datebox('setValue', starttime);
+            $('#endtime').datebox('setValue', endtime);
+                Statistics();
+                $(".Button[operatetype]").click(function (evt) {
+                    var type = $(this).attr("operatetype");
+                    if (type == "Statistics") Statistics();
+                    if (type == "Export") exportData(evt);
+                });
+        });
+        function initCharts() {
+            myChart = echarts.init(document.getElementById('chart'));
+            myChart.clear();
+            var data1 = [];
+            xarray = [];
+            result = Enumerable.From(result).GroupBy('s=>s.qxdm').ToArray();
+            //柱状图数据源
+            for (var i = 0; i < result.length; i++) {
+                data1.push(result[i].source.length);
+                if (result[i].source[0].qxdm == areadata2.areacode) xarray.push(areadata2.areaname);
+                $.each(areadata1, function (j, value) {
+                    if (result[i].source[0].qxdm == value.areacode)
+                    xarray.push(value.areaname);
+                });
+            }
+            var yAxis = [
+                        {
+                            name: '记录数/条',
+                            type: 'value',
+                        },
+            ];
+            var series = [{
+                name: '查封登记记录数',
+                type: "bar",
+                data: data1
+            }];
+
+            chartOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top:70,
+                    containLabel: true
+                },
+                xAxis: [
+                   {
+                       type: 'category',
+                       data: xarray,
+                       axisLabel: {
+                           interval: 0,//横轴信息全部显示  
+                       }
+                   }
+                ],            
+                toolbox: {
+                    show: true,
+                    left: 20,
+                    feature: {
+                        saveAsImage: { type: 'png' }
+                    }
+                },
+                yAxis: yAxis,
+                series:series,
+            };
+            myChart.setOption(chartOption);
+            window.onresize = function () {
+                Ktw.App.MenuInit.currentParent.Layout();
+                winWidth = $(window).width();
+                var height = $(window).height();
+                if (winWidth >= 1000) {
+                    winWidth = window.innerWidth;
+                    initDataGrid();
+                    $(".Content").css({
+                        "width": winWidth,
+                        "overflow": "hidden"
+                    });
+                    myChart.resize();
+                }
+                else {
+                    $(".Content").css({
+                        "width": winWidth,
+                        "overflow-x": "auto",
+                    });
+                    winWidth = 1000;
+                    initDataGrid();
+                    myChart.resize();
+                }
+            }
+            myChart.off('dblclick');//解除双击绑定事件
+            myChart.on('dblclick', function (param) {
+                var myDate = new Date();
+                result = [];
+                var starttime = $("#starttime").data().combo.previousText;
+                var endtime = $("#endtime").data().combo.previousText;
+                var cfjg = param.name;
+                var map = { starttime: starttime, endtime: endtime, cfjg: cfjg };
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify(map),
+                    contentType: "application/json",
+                    url: Ktw.App.ServerUrl + "cfdj/getInfoByCfdj",
+                    beforeSend: function () {
+                        ctr.Show();
+                    },
+                    complete: function () {
+                        ctr.Close();
+                    },
+                    success: function (data) {
+                        //保留4位小数
+                        var RegStr = '^[\\+\\-]?\\d+\\.?\\d{0,4}';
+                        if (data.success == false) {
+                            //Ktw.Alert(data.message);
+                            return;
+                        }
+                        result = data.data;
+                        datamodules = [];
+                        for (var i = 0; i < result.length; i++) datamodules.push(result[i]);
+                        $('#dataModule').datagrid({
+                            data: datamodules
+                        });
+                    },
+                    error: function (e) {
+                        var k = "";
+                    }
+                })
+            })
+        }
+        function Statistics() {
+            var myDate = new Date();
+            var cfjg = "";
+            var starttime = myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-1", endtime = myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate();
+            result = [];
+                if ($("#starttime").data().combo.previousText != "" || $("#endtime").data().combo.previousText != "") {
+                    starttime = $("#starttime").data().combo.previousText;
+                    endtime = $("#endtime").data().combo.previousText;
+                    if (starttime > endtime) { Ktw.Alert("请选择正确登记时间!"); return; }
+                }
+                else {
+                    Ktw.Alert("请选择登记时间!");
+                    return;
+                }
+            var map = { starttime: starttime, endtime: endtime, cfjg:cfjg };
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(map),
+                contentType: "application/json",
+                url: Ktw.App.ServerUrl + "cfdj/getInfoByCfdj",
+                beforeSend: function () {
+                    ctr.Show();
+                },
+                complete: function () {
+                    ctr.Close();
+                },
+                success: function (data) {
+                    //保留4位小数
+                    var RegStr = '^[\\+\\-]?\\d+\\.?\\d{0,4}';
+                    if (data.success == false) {
+                        //Ktw.Alert(data.message);
+                        return;
+                    }
+                    result = data.data;
+                    datamodules = [];
+                    for (var i = 0; i < result.length; i++) datamodules.push(result[i]);
+                    $('#dataModule').datagrid({
+                        data: datamodules
+                    });
+                    initCharts();
+                },
+                error: function (e) {
+                    var k = "";
+                }
+            });
+        }
+        function exportData(e) {
+            if (result.length < 1) {
+                Ktw.Alert("当前无数据,不支持导出");
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(datamodules),
+                contentType: "application/json",
+                url: Ktw.App.ServerUrl + "cfdj/exportone",
+                success: function (e) {
+                    if (e.success) {
+                        var path = e.data;
+                        if (!ktw.IsNull(path)) {
+                            var downlaod = Ktw.App.Root + path;
+                            window.open(downlaod);
+                        }
+
+                    }
+                },
+                error: function (e) {
+                    var k = "";
+                    Ktw.Alert("服务请求失败!");
+                }
+            });
+        }
+        function initDataGrid() {
+            var width = (winWidth - 30) / 13;
+            $('#dataModule').datagrid({
+                //rownumbers: true,
+                loadMsg: "数据正在加载中，请稍后......",
+                fit: true,        //自动大小
+                fitColumns: true, //自适应列宽
+                singleSelect: true,  //是否单选
+                idField: 'ywh',
+                columns: [[
+                    { field: 'rownumber', title: '序号', width: width/2, align: 'center', formatter: function (value, row, index) { return index+1 } },
+                    { field: 'zxswh', title: '执行书文号', width: width, align: 'center' },
+                    { field: 'cfqssj', title: '查封起始时间', width: width, align: 'center' },
+                    { field: 'cfjssj', title: '查封结束时间', width: width, align: 'center' },
+                    { field: 'bdcdyh', title: '不动产单元号', width: width, align: 'center' },
+                    { field: 'cfjg', title: '查封机构', width: width, align: 'center' },
+                    { field: 'djsj', title: '登记时间', width: width, align: 'center' },
+                    { field: 'sharenum', title: '房屋所有权证号', width: width, align: 'center' },
+                    { field: 'proposer', title: '申请人', width: width, align: 'center' },
+                    { field: 'bproposer', title: '被申请人', width: width, align: 'center' },
+                    { field: 'cflx', title: '查封类型', width: width, align: 'center' },
+                ]]
+            });
+        }
+    </script>
+     <style>
+        .Content {
+            width: 100%;
+            height: 100%;
+        }
+
+            .Content .ToolDiv {
+                width: 100%;
+                height: 42px;
+                border-bottom: 1px solid #E4E9EF;
+            }
+
+               .Content .ToolDiv .Title {
+                    width: 85px;
+                    text-align: center;
+                    line-height: 20px;
+                    height: 20px;
+                    display: inline-block;
+                    float: left;
+                }
+
+                    .Content .ToolDiv .Title .Icon {
+                        width: 16px;
+                        height: 16px;
+                        display: inline-block;
+                        margin-top: 11px;
+                    }
+
+                    .Content .ToolDiv .Title .Text {
+                        display: inline-block;
+                        float: right;
+                        width: 49px;
+                    }
+
+            .Content .HiddenBtn {
+                filter: alpha(Opacity=80);
+                -moz-opacity: 0.8;
+                opacity: 0.8;
+            }
+
+               .Content .HiddenBtn .ArrowBtn {
+                    cursor: pointer;
+                }
+                div#statictable .panel-body-noheader {
+             border: 0;
+         }
+                 .stc-nav {
+            /*background-color: pink;*/
+            height: 30px;
+            padding-top: 4px;
+            padding-left: 5px;
+            padding-right: 5px;
+            /*min-width:500px*/
+        }
+        .panel-body-noborder {
+            border-bottom-width: 1px;
+            border-bottom-color: #dddddd;
+            border-top-width: 1px;
+            border-top-color: #dddddd;
+        }
+         .Content .ToolDiv .Title .Icon  {
+         margin-top: 2px;
+         }
+    </style>
+</head>
+<body>   
+    <div class="Content">
+        <div id="topport" style="width: 100%;min-width:1000px; height: 49%;">
+            <div id="searchModule" class="ToolDiv" style="position:relative; width:98%;margin-left:1%; margin-top:5px; border-bottom:0px;border:1px solid #CACACA; border-radius:10px;">
+        <div id="time" style="display: inline-block;vertical-align: top;margin-top:10px;margin-left:15px">登记时间：
+                 <input id="starttime" name="JSZZRQ" class="easyui-datebox" data-options="width:120,editable:false" />  &nbsp;  至：<input id="endtime" name="JSZZRQ" class="easyui-datebox" data-options="width:120,editable:false" />
+                </div>        
+                <div class="Button" id="export" operatetype="Export" style="float:right; padding-right:10px;">
+                   <span class="button">导出</span>
+                </div>
+               <div class="Button" id="static" operatetype="Statistics" style="float:right;padding-right:10px;">
+                     <span class="button">统计</span>
+                </div>&nbsp;&nbsp;
+            </div>
+                   <div id="statictable" style="width:98%;height:calc(100% - 50px); margin:0 auto;margin-top:5px;border:1px solid #CACACA; border-radius:10px;">
+                  <div id="dataModule" style="width:100%;"></div>
+                       </div>
+         
+        </div>
+         <div id="chartModule" style="width: 98%; height:calc(49% - 40px); min-height:80px; bottom:0px; margin:0 auto;margin-top:5px;margin-bottom:5px;margin-left:1%; border:1px solid #CACACA; border-radius:10px;">
+           <div id="chart" style="width: 99%; height: 98%;float:left;margin-left:5px"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Window Url</title>
+    <link href="../../css/icon.css" rel="stylesheet" />
+    <link href="../../css/app.css" rel="stylesheet" />
+    <link href="../../css/main.css" rel="stylesheet" />
+    <link href="../demo.css" rel="stylesheet" />
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/ktw.ui.js"></script>
+    <style type="text/css">
+     
+    </style>
+    <script type="text/javascript">
+
+        var ctr;
+
+        $(window).ready(function () {
+            ctr = new ktw.Window({
+                ID: "ktw",
+                Title: "内嵌页面Url",
+                Height: 280,
+                Width: 470,
+                Left: 20,
+                Top: 130,
+                Parent: $(document.body),
+                IsMaximize: false,
+                Maximizable: true,
+                Minimizable: true,
+                Draggable: false,
+                Resizable: true,
+                Url: "http://www.kingtopware.com"
+            });
+
+            ctr.Layout();
+        });
+
+        //打开窗体
+        function show() {
+            ctr.Open();
+        }
+
+    </script>
+</head>
+<body>
+    <h2>Window</h2>
+    <p>基础用法示例,填充内容为页面资源地址Url</p>
+    <button style="background-color: #0099cc; color: white; width: 60px; height: 30px; cursor: pointer;" onclick="show();">显示</button>
+</body>
+</html>
