@@ -7,7 +7,7 @@
 
 	<display-name>金拓维应用后台服务</display-name>
 	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
+		<welcome-file>onemap.html</welcome-file>
 	</welcome-file-list>
 
 

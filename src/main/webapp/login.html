@@ -81,6 +81,7 @@
 		                return;
 		            }
 		            var user = { name: name, password: hex_md5(pwd) };
+		            // window.location.href="index.html";
 		            $.ajax({
 		                type: "POST",
 		                data: JSON.stringify(user),

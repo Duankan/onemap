@@ -11,13 +11,10 @@
 	http://www.springframework.org/schema/mvc/spring-mvc.xsd
 	http://www.springframework.org/schema/util 
 	http://www.springframework.org/schema/util/spring-util.xsd ">
-
 	<!-- 自动扫描且只扫描@Controller -->
-	<!--com.kingtopware.*.controller -->
 	<!-- 配置自动扫描的包,注册后这些包里使用component等注解修饰的类可以加入到IOC容器管理中 -->
 	<context:component-scan base-package="com.kingtopware">
 	</context:component-scan>
-
 	<!-- 设置最大上传大小 10M -->
 	<bean id="multipartResolver"
 		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
@@ -30,7 +27,6 @@
 	<mvc:annotation-driven>
 		<mvc:message-converters register-defaults="true">
 			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
-				<!-- <property name="supportedMediaTypes" value="text/plain;charset=UTF-8" /> -->
 				<property name="supportedMediaTypes">
 				<list>
                         <value>application/json;charset=UTF-8</value>
@@ -43,6 +39,6 @@
 	</mvc:annotation-driven>
 
 	<!--重定向 即如果当前路径是/ 则重定向到/admin/index -->
-	<mvc:view-controller path="/" view-name="redirect:/index" />
+	<mvc:view-controller path="/" view-name="redirect:/onemap" />
 
 </beans>

@@ -19,7 +19,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_6">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -36,7 +36,6 @@
     <orderEntry type="library" name="Maven: org.aspectj:aspectjrt:1.7.4" level="project" />
     <orderEntry type="library" name="Maven: org.aspectj:aspectjweaver:1.7.4" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-aop:4.2.4.RELEASE" level="project" />
-    <orderEntry type="library" name="Maven: aopalliance:aopalliance:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-beans:4.2.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context:4.2.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-core:4.2.4.RELEASE" level="project" />
@@ -53,7 +52,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.alibaba:jconsole:1.8.0">
         <CLASSES>
-          <root url="jar://G:/dankin0814/tool/Java/jdk1.8.0_161/lib/jconsole.jar!/" />
+          <root url="jar://C:/APP/Java/jdk1.8.0_161/lib/jconsole.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -62,7 +61,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.alibaba:tools:1.8.0">
         <CLASSES>
-          <root url="jar://G:/dankin0814/tool/Java/jdk1.8.0_161/lib/tools.jar!/" />
+          <root url="jar://C:/APP/Java/jdk1.8.0_161/lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -108,79 +107,22 @@
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="library" name="Maven: com.vividsolutions:jts:1.13" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-opengis:14.2" level="project" />
-    <orderEntry type="library" name="Maven: net.java.dev.jsr-275:jsr-275:1.0-beta-2" level="project" />
-    <orderEntry type="library" name="Maven: commons-pool:commons-pool:1.5.4" level="project" />
-    <orderEntry type="library" name="Maven: javax.media:jai_core:1.1.3" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-cql:14.2" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-process:14.2" level="project" />
-    <orderEntry type="library" name="Maven: org.geotools:gt-coverage:14.2" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.imageio-ext:imageio-ext-tiff:1.1.13" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.imageio-ext:imageio-ext-utilities:1.1.13" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.imageio-ext:imageio-ext-geocore:1.1.13" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.imageio-ext:imageio-ext-streams:1.1.13" level="project" />
-    <orderEntry type="library" name="Maven: javax.media:jai_codec:1.1.3" level="project" />
-    <orderEntry type="library" name="Maven: org.jaitools:jt-zonalstats:1.4.0" level="project" />
-    <orderEntry type="library" name="Maven: org.jaitools:jt-utils:1.4.0" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.affine:jt-affine:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.iterators:jt-iterators:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.utilities:jt-utilities:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.scale:jt-scale:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.translate:jt-translate:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.algebra:jt-algebra:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.bandmerge:jt-bandmerge:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.bandselect:jt-bandselect:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.bandcombine:jt-bandcombine:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.border:jt-border:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.buffer:jt-buffer:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.crop:jt-crop:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.lookup:jt-lookup:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.mosaic:jt-mosaic:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.nullop:jt-nullop:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.rescale:jt-rescale:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.stats:jt-stats:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: com.google.guava:guava:17.0" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.warp:jt-warp:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.zonal:jt-zonal:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.binarize:jt-binarize:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.format:jt-format:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.colorconvert:jt-colorconvert:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.errordiffusion:jt-errordiffusion:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.orderdither:jt-orderdither:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.colorindexer:jt-colorindexer:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.imagefunction:jt-imagefunction:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.piecewise:jt-piecewise:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.classifier:jt-classifier:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.rlookup:jt-rlookup:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: it.geosolutions.jaiext.vectorbin:jt-vectorbin:1.0.8" level="project" />
-    <orderEntry type="library" name="Maven: org.geotools:gt-shapefile:14.2" level="project" />
-    <orderEntry type="library" name="Maven: javax.media:jai_imageio:1.1" level="project" />
     <orderEntry type="library" name="Maven: org.geotools.xsd:gt-xsd-core:14.2" level="project" />
-    <orderEntry type="library" name="Maven: org.geotools:gt-graph:14.2" level="project" />
-    <orderEntry type="library" name="Maven: picocontainer:picocontainer:1.2" level="project" />
-    <orderEntry type="library" name="Maven: commons-jxpath:commons-jxpath:1.3" level="project" />
-    <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.1" level="project" />
-    <orderEntry type="library" name="Maven: org.eclipse.emf:common:2.6.0" level="project" />
-    <orderEntry type="library" name="Maven: org.eclipse.emf:ecore:2.6.1" level="project" />
-    <orderEntry type="library" name="Maven: org.eclipse.xsd:xsd:2.6.0" level="project" />
     <orderEntry type="library" name="Maven: org.geotools.xsd:gt-xsd-gml2:14.2" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-epsg-extension:14.2" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-data:14.2" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-jdbc:14.2" level="project" />
-    <orderEntry type="library" name="Maven: commons-dbcp:commons-dbcp:1.4" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-geojson:14.2" level="project" />
-    <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1" level="project" />
-    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" name="Maven: org.geotools.jdbc:gt-jdbc-postgis:14.2" level="project" />
-    <orderEntry type="library" name="Maven: org.postgresql:postgresql:9.4-1201-jdbc41" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-api:14.2" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-main:14.2" level="project" />
-    <orderEntry type="library" name="Maven: org.jdom:jdom:1.1.3" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-referencing:14.2" level="project" />
-    <orderEntry type="library" name="Maven: com.googlecode.efficient-java-matrix-library:core:0.26" level="project" />
-    <orderEntry type="library" name="Maven: jgridshift:jgridshift:1.0" level="project" />
-    <orderEntry type="library" name="Maven: net.sf.geographiclib:GeographicLib-Java:1.44" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-metadata:14.2" level="project" />
     <orderEntry type="library" name="Maven: net.sf.json-lib:json-lib:jdk15:2.2.3" level="project" />
+    <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2" level="project" />
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.4" level="project" />
     <orderEntry type="library" name="Maven: net.sf.ezmorph:ezmorph:1.0.6" level="project" />
     <orderEntry type="library" name="Maven: org.ansj:ansj_seg:5.1.1" level="project" />
     <orderEntry type="library" name="Maven: org.nlpcn:nlp-lang:1.7.2" level="project" />
@@ -195,5 +137,16 @@
     <orderEntry type="library" name="Maven: ant:ant:1.6.5" level="project" />
     <orderEntry type="library" name="Maven: org.dom4j:dom4j:2.0.0" level="project" />
     <orderEntry type="library" name="Maven: jaxen:jaxen:1.1.6" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.data:spring-data-redis:1.8.6.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.data:spring-data-keyvalue:1.2.6.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-oxm:4.3.10.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: redis.clients:jedis:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-pool2:2.3" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:18.0" level="project" />
+    <orderEntry type="library" name="Maven: aopalliance:aopalliance:1.0" level="project" />
+    <orderEntry type="library" name="Maven: cglib:cglib:3.2.5" level="project" />
+    <orderEntry type="library" name="Maven: org.ow2.asm:asm:5.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.ant:ant:1.9.6" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.ant:ant-launcher:1.9.6" level="project" />
   </component>
 </module>

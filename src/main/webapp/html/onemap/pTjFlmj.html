@@ -1,35 +1,4 @@
-﻿<!--<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title></title>
-    <script src="../../js/jquery-3.1.0.min.js"></script>
-    <script>
-        $(function () {
-            var map = {};
-            map.starttime = "2005";
-            map.endtime = "2017";
-            map.countyarea="市辖区,双清区"
-        $.ajax({
-            type: "POST",
-            data: JSON.stringify(map),
-            contentType: "application/json",
-            url: "http://192.168.3.245:8081/onemap/" + "jsydsp/getInfoByflmj",
-            success: function (data) {
-                alert("success")
-            },
-            error: function (e) {
-                alert("error")
-            }
-        });
-    })
-    </script>
-</head>
-<body>
-
-</body>
-</html>-->
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -114,7 +83,6 @@
                 }
                 windowresize();
             });
-            //var fieldComBox = $("#field").prop('$this');
             $("#field").prop("$this").bind("onSelectChanged", function () {
                 initCharts();
             })
@@ -247,7 +215,7 @@
                        type: 'category',
                        data: xarray,
                        axisLabel: {
-                           interval: 0,//横轴信息全部显示  
+                           interval: 0,//横轴信息全部显示
                        }
                    }
                 ],
@@ -290,10 +258,6 @@
         }
         function Statistics(type) {
             var county = "";
-            //var areadata = Ktw.cookie.AreaTree.Children;
-            //$.each(areadata, function (i, value) {
-            //    county += value.areaname + ",";
-            //});
             result = [];
             y = [];
             county = $("#area").prop("$this").GetText();
@@ -447,13 +411,11 @@
             height: 100%;
 
         }
-
             .Content .ToolDiv {
                 width: 100%;
                 height: 40px;
                 border-bottom: 1px solid #E4E9EF;
             }
-
                 .Content .ToolDiv .Title {
                     width: 85px;
                     text-align: right;
@@ -462,20 +424,17 @@
                     display: inline-block;
                     float: left;
                 }
-
                     .Content .ToolDiv .Title .Icon {
                         width: 16px;
                         height: 16px;
                         display: inline-block;
                         margin-top: 11px;
                     }
-
                     .Content .ToolDiv .Title .Text {
                         display: inline-block;
                         float: right;
                         width: 49px;
                     }
-
             .Content .HiddenBtn {
                 filter: alpha(Opacity=80);
                 -moz-opacity: 0.8;
@@ -510,6 +469,9 @@
 <body>
     <div class="Content">
          <div class="stc-nav">
+             <span class="btng left btng-left active" id="byarea" style="margin-left:0.5%">按行政区</span>
+             <span class="btng left" id="byyear">按年份</span>
+             <span class="btng left btng-right" id="byquarter">按季度</span>
             <span class="btng right btng-right active" id="map" style="margin-right:1%">图</span>
             <span class="btng right btng-left" id="tab">表</span>
         </div>

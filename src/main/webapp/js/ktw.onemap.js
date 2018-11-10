@@ -382,8 +382,10 @@
         $this.GetData(layertreedata, ArrayOfMapLayer.MapLayer, layerdata);
         $this.InitTree(layertreedata);
         $this.layertreedata = layertreedata;
+        //初始化图层右键功能
         $this.InitTreeMenu();
         $this.InitSelectedList();
+        //勾选/去勾选的添加删除图层操作
         $this.LayoutSelectedList();
     }
     function funExt(control) {

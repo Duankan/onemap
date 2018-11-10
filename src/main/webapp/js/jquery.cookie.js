@@ -517,7 +517,8 @@
             return;
         }
         var $this = this;
-        $.get(this.ServerUrl + "sysareacode/getbyfilter/" + encodeURIComponent("areacode like '%" + this.config.SystemTheme.AreaCode.substr(0, 4) + "%'"), null, function (res) {
+        var cfg=this.ServerUrl + "sysareacode/getbyfilter/" + encodeURIComponent("areacode like '" + this.config.SystemTheme.AreaCode.substr(0, 2) + "%'");
+        $.get(cfg, null, function (res) {
             if (res.success) {
                 if (!res.data || res.data.length == 0) {
                     ktw.Error("未找到当前行政区划!");
@@ -526,14 +527,11 @@
                 }
                 var tmp = [];
                 for (var i = 0; i < res.data.length; i++) {
-                    var item = res.data[i];
-                    if (item.arealevel == 2) {
+                        var item = res.data[i];
                         $this.AreaTree = item;
                         $this.AreaTree.Children = tmp;
-                    } else {
                         tmp.push(item);
                     }
-                }
             } else {
                 console.error(res.message);
             }
