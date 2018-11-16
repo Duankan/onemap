@@ -1,6 +1,5 @@
 package com.kingtopware.onemap.controller;
 
-import java.net.URLEncoder;
 import java.util.*;
 import javax.annotation.Resource;
 
@@ -8,9 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.kingtopware.framework.bean.XzqTudi;
 import com.kingtopware.framework.util.*;
 import com.kingtopware.onemap.bean.*;
-import com.kingtopware.onemap.biz.TudiBiz;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
 import org.nlpcn.commons.lang.util.StringUtil;
@@ -39,8 +36,6 @@ public class JsydspController extends BaseController<JsydspEntity> {
     private static Logger logger = Logger.getLogger(JsydspController.class);
     @Resource
     public JsydspService srv;
-    @Autowired
-    public TudiBiz tudiBiz;//处理统计分析（利用现状）
     @Autowired
     public RedisUtil redisUtil;
 
@@ -197,170 +192,118 @@ public class JsydspController extends BaseController<JsydspEntity> {
         }
     }
 
-    /**
-     * 根据行政区（武汉市的县区）统计各县区的土地使用情
-     * @param
-     * @return
-     */
-    @RequestMapping(value = "/getinfobyys", method = RequestMethod.POST)
-    public ResultList<XzqTudi> getInfoByjdq(@RequestBody String map) {
-        String key="getInfoByjdq_"+map;
-        if (redisUtil.exists(key)) {
-            return (ResultList<XzqTudi>) redisUtil.get(key);
-        }
-        tudiBiz.staticsEveryXzqLand(map);
-        HttpUtils httpUtils = new HttpUtils();
-        JSONObject jasonObject = JSONObject.parseObject(map);
-        String url = jasonObject.getString("url");
-        String typename = jasonObject.getString("typename");
-        String clip = jasonObject.getString("clip");
-        String groupFields = jasonObject.getString("groupFields");
-        String statisticsFields = jasonObject.getString("statisticsFields");
-        JSONArray jsonArray2 = JSON.parseArray(statisticsFields);
-        JSONObject jsonObject3 = (JSONObject) jsonArray2.get(0);
-        String operate = jsonObject3.getString("operate");
-        String field = jsonObject3.getString("field");
-        String filter = jasonObject.getString("filter");
-        String cql = jasonObject.getString("cql");
-        StringBuilder sb = new StringBuilder();
-        sb.append(url);
-        sb.append("?");
-        sb.append("request=aggregate&service=wps");
-        JSONObject jsonObject1 = new JSONObject();
-        JSONArray jsonArray = new JSONArray();
-        JSONObject jsonObject2 = new JSONObject();
-        jsonObject2.put("field", field);
-        jsonObject2.put("operate", operate);
-        jsonArray.add(jsonObject2);
-        jsonObject1.put("statisticsFields", jsonArray);
-        jsonObject1.put("typename", typename);
-        jsonObject1.put("clip", clip);
-        jsonObject1.put("groupFields", groupFields);
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("statistics", jsonObject1.toJSONString());
-        Map<String, String> head = new HashMap<String, String>();
-        head.put("Content-Type", "application/x-www-form-urlencoded");
-        String re = httpUtils.doPost(sb.toString(), params, head);
-        List<XzqTudi> l = new ArrayList<XzqTudi>();
-        if (!StringUtil.isBlank(re)) {
-            JSONArray objects = JSON.parseArray(re);
-            for (int i = 0; i < objects.size(); i++) {
-                XzqTudi xzqTudi = new XzqTudi();
-                xzqTudi.setName(objects.getJSONObject(i).getString("行政区"));
-                xzqTudi.setSum(Float.valueOf(objects.getJSONObject(i).getString("SUM_TBMJ")));
-                l.add(xzqTudi);
-            }
-        }
-        ResultList<XzqTudi> rs = new ResultList<XzqTudi>();
-        rs.setData(l);
-        redisUtil.set(key,rs,6000L);
-        return rs;
-    }
+//    /**
+//     * 根据行政区（武汉市的县区）统计各县区的土地使用情
+//     *
+//     * @param
+//     * @return
+//     */
+//    @RequestMapping(value = "/getinfobyys", method = RequestMethod.POST)
+//    public ResultList<XzqTudi> getInfoByjdq(@RequestBody String map) {
+//        ResultList<XzqTudi> rs = new ResultList<XzqTudi>();
+//        List<XzqTudi> l = new ArrayList<XzqTudi>();
+//        String key = "getInfoByjdq_" + map;
+//        if (redisUtil.exists(key)) {
+//            rs.setData((List<XzqTudi>) redisUtil.get(key));
+//            return rs;
+//        }
+//        HttpUtils httpUtils = new HttpUtils();
+//        JSONObject jasonObject = JSONObject.parseObject(map);
+//        String url = jasonObject.getString("url") + "?" + "request=aggregate&service=wps";
+//        jasonObject.remove("url");
+//        //设置请求头和请求参数
+//        List<Map<String, Object>> li = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject.toJSONString());
+//        String re = httpUtils.doPost(url, li.get(1), li.get(0));
+//        if (!StringUtil.isBlank(re)) {
+//            JSONArray objects = JSON.parseArray(re);
+//            for (int i = 0; i < objects.size(); i++) {
+//                XzqTudi xzqTudi = new XzqTudi();
+//                xzqTudi.setName(objects.getJSONObject(i).getString("行政区"));
+//                xzqTudi.setSum(Float.valueOf(objects.getJSONObject(i).getString("SUM_TBMJ")));
+//                l.add(xzqTudi);
+//            }
+//            redisUtil.set(key, l);
+//        }
+//        rs.setData(l);
+//        return rs;
+//    }
 
-    @RequestMapping("/staticsBiaoge")
-    public Map<String,Object> staticsBiao() throws Exception {
-        HttpUtils httpUtils = new HttpUtils();
-        String[] strs = {"01", "02", "03", "04", "10", "11", "12", "20"};
-        String url = "http://192.168.1.63:8080/hgis/ows?request=aggregate&service=wps";
-        JSONObject j1 = new JSONObject();
-        JSONObject j2 = new JSONObject();
-        JSONArray jr = new JSONArray();
-        j2.put("field", "TBMJ");
-        j2.put("operate", "sum");
-        jr.add(j2);
-        j1.put("statisticsFields", jr);
-        j1.put("typename", "ktw:dileituban");
-        j1.put("clip", "0");
-        j1.put("groupFields", "行政区");
-        Map<String, String> params = new HashMap<String, String>();
-        Map<String, String> head = new HashMap<String, String>();
-        head.put("Content-Type", "application/x-www-form-urlencoded");
-        List<String> listRES = new ArrayList<String>();//放不同地类的所有请求数据
-        for (String str : strs) {
-            String cqlFilter = "DLBM like " + "'" + str + "%'";
-            j1.put("filter", cqlFilter);
-            params.put("statistics", j1.toJSONString());
-            String re = httpUtils.doPost(url, params, head);
-            if (!StringUtils.isEmpty(re)) {
-                listRES.add(re);
-            }
-        }
-        //赋值
-        List<Datagrid> listDTOs = new ArrayList<Datagrid>();
-        //初始化一个容器盛放所有的rows
-        if (listRES.size() != 0) {
-            JSONArray count = JSONArray.parseArray(listRES.get(2));//取得行政区的个数
-            for (int i = 0; i < count.size(); i++) {
-                Datagrid datagrid = new Datagrid();
-                listDTOs.add(datagrid);
-            }
-        }
-        for (int i = 0; i < listRES.size(); i++) {//i=0,1,2...表示地类发生改变
-            JSONArray arrayI = JSONArray.parseArray(listRES.get(i));
-            for (int j = 0; j < arrayI.size(); j++) {//j=0,1....表示行政区在发生变化
-                //添加耕地数据
-                if (i == 0) {
-                    listDTOs.get(j).setGendi(arrayI.getJSONObject(j).getString("SUM_TBMJ"));
-                    listDTOs.get(j).setXzqname(arrayI.getJSONObject(j).getString("行政区"));
-                    listDTOs.get(j).setStartdate("2018-11-10");
-                    listDTOs.get(j).setOrder("0001");
-                }
-                //添加园地数据
-                if (i == 1) {
-                    listDTOs.get(j).setYuan(arrayI.getJSONObject(j).getString("SUM_TBMJ"));
-                    listDTOs.get(j).setXzqname(arrayI.getJSONObject(j).getString("行政区"));
-                    listDTOs.get(j).setStartdate("2018-11-10");
-                    listDTOs.get(j).setOrder("0001");
-                }
-                //添加林地数据
-                if (i == 2) {
-                    listDTOs.get(j).setLindi(arrayI.getJSONObject(j).getString("SUM_TBMJ"));
-                    listDTOs.get(j).setXzqname(arrayI.getJSONObject(j).getString("行政区"));
-                    listDTOs.get(j).setStartdate("2018-11-10");
-                    listDTOs.get(j).setOrder("0001");
-                }
-                //添加草地数据
-                if (i == 3) {
-                    listDTOs.get(j).setCao(arrayI.getJSONObject(j).getString("SUM_TBMJ"));
-                    listDTOs.get(j).setXzqname(arrayI.getJSONObject(j).getString("行政区"));
-                    listDTOs.get(j).setStartdate("2018-11-10");
-                    listDTOs.get(j).setOrder("0001");
-                }
-                //添加交通运输数据
-                if (i == 4) {
-                    listDTOs.get(j).setJiaot(arrayI.getJSONObject(j).getString("SUM_TBMJ"));
-                    listDTOs.get(j).setXzqname(arrayI.getJSONObject(j).getString("行政区"));
-                    listDTOs.get(j).setStartdate("2018-11-10");
-                    listDTOs.get(j).setOrder("0001");
-                }
-                //添加水利数据
-                if (i == 5) {
-                    listDTOs.get(j).setShuili(arrayI.getJSONObject(j).getString("SUM_TBMJ"));
-                    listDTOs.get(j).setXzqname(arrayI.getJSONObject(j).getString("行政区"));
-                    listDTOs.get(j).setStartdate("2018-11-10");
-                    listDTOs.get(j).setOrder("0001");
-                }
-                //添加其他土地数据
-                if (i == 6) {
-                    listDTOs.get(j).setQita(arrayI.getJSONObject(j).getString("SUM_TBMJ"));
-                    listDTOs.get(j).setXzqname(arrayI.getJSONObject(j).getString("行政区"));
-                    listDTOs.get(j).setStartdate("2018-11-10");
-                    listDTOs.get(j).setOrder("0001");
-                }
-                //添加城镇数据
-                if (i == 7) {
-                    listDTOs.get(j).setChenzhen(arrayI.getJSONObject(j).getString("SUM_TBMJ"));
-                    listDTOs.get(j).setXzqname(arrayI.getJSONObject(j).getString("行政区"));
-                    listDTOs.get(j).setStartdate("2018-11-10");
-                    listDTOs.get(j).setOrder("0001");
-                }
-            }
+//    @RequestMapping("/staticsBiaoge")
+//    public Map<String, Object> staticsBiao(@RequestBody String map) throws Exception {
+//        String key = "staticsBiao_" + map;
+//        HashMap<String, Object> resultmap = new HashMap<String, Object>();
+//        List<Datagrid> listDTOs = new ArrayList<Datagrid>();
+//        if (redisUtil.exists(key)) {
+//            listDTOs = (List<Datagrid>) redisUtil.get(key);
+//            resultmap.put("rows", listDTOs);
+//            return resultmap;
+//        }
+//        HttpUtils httpUtils = new HttpUtils();
+//        JSONObject jasonObject = JSONObject.parseObject(map);
+//        String url = jasonObject.getString("url") + "?" + "request=aggregate&service=wps";
+//        String cqlField = jasonObject.getString("cqlField");
+//        JSONArray cqlConditionArray = (JSONArray) jasonObject.get("cqlCondition");
+//        List<String> listRES = new ArrayList<String>();//放不同地类的所有请求数据
+//        for (int i = 0; i < cqlConditionArray.size(); i++) {
+//            String cqlFilter = cqlField + " like " + "'" + cqlConditionArray.get(i) + "%'";
+//            jasonObject.put("filter", cqlFilter);
+//            //设置请求头和请求参数
+//            List<Map<String, Object>> l = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject.toJSONString());
+//            String re = httpUtils.doPost(url, l.get(1), l.get(0));
+//            if (!StringUtils.isEmpty(re)) {
+//                listRES.add(re);
+//            }
+//        }
+//        //初始化一个容器盛放所有的rows
+//        if (listRES.size() != 0) {
+//            JSONArray count = JSONArray.parseArray(listRES.get(2));//取得行政区的个数
+//            for (int i = 0; i < count.size(); i++) {
+//                Datagrid datagrid = new Datagrid();
+//                listDTOs.add(datagrid);
+//            }
+//            listDTOs = jsydspBiz.fillBiaoGeData(listRES, listDTOs);
+//            redisUtil.set(key, listDTOs);
+//        }
+//        resultmap.put("rows", listDTOs);
+//        return resultmap;
+//    }
+//    /**
+//     * 统计不稳新增echarts
+//     * @param map
+//     * @return
+//     */
+//    @RequestMapping("/statisticBWXZCharts")
+//    public Map<String, Object> statisticBWXZCharts(@RequestBody String map) {
+//        String key = "statisticBWXZCharts_" + map;
+//        Map<String, Object> resultMap =null;
+//        if (redisUtil.exists(key)) {
+//            return (Map<String, Object>) redisUtil.get(key);
+//        }
+//        HttpUtils httpUtils = new HttpUtils();
+//        JSONObject jasonObject = JSONObject.parseObject(map);
+//        JSONObject jasonObject2 = JSONObject.parseObject(map);
+//        String url = jasonObject.getString("url") + "?" + "request=aggregate&service=wps";
+//        String groupField1 = StringUtils.substringBefore(jasonObject.getString("groupFields"), ",");//dlmc
+//        String groupField2 = StringUtils.substringAfter(jasonObject.getString("groupFields"), ",");//xzqmc
+//        jasonObject2.put("groupFields",groupField1);
+//        //设置请求头和请求参数
+//        List<Map<String, Object>> l = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject.toJSONString());
+//        List<Map<String, Object>> l2 = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject2.toJSONString());
+//        String re = httpUtils.doPost(url, l.get(1), l.get(0));
+//        String re2=httpUtils.doPost(url,l2.get(1),l2.get(0));
+//        resultMap=jsydspBiz.statisticBWXZ(re,re2,groupField1,groupField2);
+//        if(resultMap!=null){
+//            resultMap.put("code",1);
+//            resultMap.put("msg","成功");
+//        }
+//        else {
+//            resultMap.put("code",-1);
+//            resultMap.put("msg","失败");
+//        }
+//        redisUtil.set(key, resultMap);
+//        return resultMap;
+//    }
 
-        }
-        HashMap<String,Object> map=new HashMap<String, Object>();
-        map.put("rows",listDTOs);
-        return map;
-    }
     @RequestMapping(value = "/getinfo/{guid}", method = RequestMethod.GET)
     public JsydspEntity GetBybusiness(@PathVariable(value = "guid") String guid) {
         try {
@@ -475,19 +418,19 @@ public class JsydspController extends BaseController<JsydspEntity> {
             ArrayList<Datagrid> data = new ArrayList<Datagrid>();
             JSONArray jasonObject = JSONArray.parseArray(param);
             for (int i = 0; i < jasonObject.size(); i++) {
-                Datagrid datagrid=new Datagrid();
+                Datagrid datagrid = new Datagrid();
                 JSONObject jdObject = (JSONObject) jasonObject.get(i);
                 datagrid.setXzqname(jdObject.getString("xzqname"));
-                datagrid.setGendi(jdObject.getString("gendi"));
-                datagrid.setYuan(jdObject.getString("yuan"));
-                datagrid.setLindi(jdObject.getString("lindi"));
-                datagrid.setCao(jdObject.getString("cao"));
-                datagrid.setJiaot(jdObject.getString("jiaot"));
-                datagrid.setShuili(jdObject.getString("shuili"));
-                datagrid.setQita(jdObject.getString("qita"));
-                datagrid.setChenzhen(jdObject.getString("chenzhen"));
+                datagrid.setGendi(Double.valueOf(jdObject.getString("gendi")==null?"0":jdObject.getString("gendi")));
+                datagrid.setYuan(Double.valueOf(jdObject.getString("yuan")==null?"0":jdObject.getString("yuan")));
+                datagrid.setLindi(Double.valueOf(jdObject.getString("lindi")==null?"0":jdObject.getString("lindi")));
+                datagrid.setCao(Double.valueOf(jdObject.getString("cao")==null?"0":jdObject.getString("cao")));
+                datagrid.setJiaot(Double.valueOf(jdObject.getString("jiaot")==null?"0":jdObject.getString("jiaot")));
+                datagrid.setShuili(Double.valueOf(jdObject.getString("shuili")==null?"0":jdObject.getString("shuili")));
+                datagrid.setQita(Double.valueOf(jdObject.getString("qita")==null?"0":jdObject.getString("qita")));
+                datagrid.setChenzhen(Double.valueOf(jdObject.getString("chenzhen")==null?"0":jdObject.getString("chenzhen")));
                 datagrid.setAreacode(jdObject.getString("areacode"));
-                datagrid.setSum(jdObject.getString("sum"));
+                datagrid.setSum(Double.valueOf(jdObject.getString("sum")==null?"0":jdObject.getString("sum")));
                 datagrid.setStartdate(jdObject.getString("startdate"));
                 datagrid.setOrder(jdObject.getString("order"));
                 data.add(datagrid);
@@ -497,7 +440,7 @@ public class JsydspController extends BaseController<JsydspEntity> {
             String downurl = ContextLoader.getCurrentWebApplicationContext().getServletContext().getRealPath("/")
                     + filePath;
             ArrayList<String> cols = new ArrayList<String>();
-            cols.add("order");
+//            cols.add("order");
             cols.add("startdate");
             cols.add("xzqname");
             cols.add("sum");
@@ -509,24 +452,24 @@ public class JsydspController extends BaseController<JsydspEntity> {
             cols.add("shuili");
             cols.add("chenzhen");
             cols.add("qita");
-            cols.add("CL_JSYD_MJ");
+//            cols.add("CL_JSYD_MJ");
             ArrayList<ArrayList<ExcelUtil.ColHeader>> col1 = new ArrayList<ArrayList<ExcelUtil.ColHeader>>();
             // 1 第一行表头
             ArrayList<ExcelUtil.ColHeader> cols2 = new ArrayList<ExcelUtil.ColHeader>();
             col1.add(cols2);
-            cols2.add(new ExcelUtil.ColHeader("序号", 5, 1));
+//            cols2.add(new ExcelUtil.ColHeader("序号", 5, 1));
             cols2.add(new ExcelUtil.ColHeader("统计时间", 5, 1));
             cols2.add(new ExcelUtil.ColHeader("县市区", 5, 1));
-            cols2.add(new ExcelUtil.ColHeader("审批合计(公顷)", 1, 10));
+            cols2.add(new ExcelUtil.ColHeader("行政区合计(公顷)", 1, 8));
 
             // 2 第二行表头
             ArrayList<ExcelUtil.ColHeader> cols3 = new ArrayList<ExcelUtil.ColHeader>();
             col1.add(cols3);
-            cols3.add(new ExcelUtil.ColHeader("", 1, 1));
+//            cols3.add(new ExcelUtil.ColHeader("", 1, 1));
             cols3.add(new ExcelUtil.ColHeader("", 1, 1));
             cols3.add(new ExcelUtil.ColHeader("", 1, 1));
             cols3.add(new ExcelUtil.ColHeader("总面积", 4, 1));
-            cols3.add(new ExcelUtil.ColHeader("行政区用地", 1, 8));
+            cols3.add(new ExcelUtil.ColHeader("八大类用地", 1, 8));
             cols3.add(new ExcelUtil.ColHeader("", 1, 1));
             cols3.add(new ExcelUtil.ColHeader("", 1, 1));
             cols3.add(new ExcelUtil.ColHeader("", 1, 1));
@@ -534,17 +477,17 @@ public class JsydspController extends BaseController<JsydspEntity> {
             cols3.add(new ExcelUtil.ColHeader("", 1, 1));
             cols3.add(new ExcelUtil.ColHeader("", 1, 1));
             cols3.add(new ExcelUtil.ColHeader("", 1, 1));
-            cols3.add(new ExcelUtil.ColHeader("原有集体建设用地", 4, 1));
+//            cols3.add(new ExcelUtil.ColHeader("原有集体建设用地", 4, 1));
 
             // 3 第三行表头
             ArrayList<ExcelUtil.ColHeader> cols4 = new ArrayList<ExcelUtil.ColHeader>();
             col1.add(cols4);
-            cols4.add(new ExcelUtil.ColHeader("", 1, 1));
+//            cols4.add(new ExcelUtil.ColHeader("", 1, 1));
             cols4.add(new ExcelUtil.ColHeader("", 1, 1));
             cols4.add(new ExcelUtil.ColHeader("", 1, 1));
             cols4.add(new ExcelUtil.ColHeader("", 1, 1));
             cols4.add(new ExcelUtil.ColHeader("耕地", 3, 1));
-            cols4.add(new ExcelUtil.ColHeader("行政区用地", 1, 6));
+            cols4.add(new ExcelUtil.ColHeader("六大类用地", 1, 6));
             cols4.add(new ExcelUtil.ColHeader("", 1, 1));
             cols4.add(new ExcelUtil.ColHeader("", 1, 1));
             cols4.add(new ExcelUtil.ColHeader("", 1, 1));
@@ -555,13 +498,13 @@ public class JsydspController extends BaseController<JsydspEntity> {
             // 4 第四行表头
             ArrayList<ExcelUtil.ColHeader> cols5 = new ArrayList<ExcelUtil.ColHeader>();
             col1.add(cols5);
-            cols5.add(new ExcelUtil.ColHeader("", 1, 1));
+//            cols5.add(new ExcelUtil.ColHeader("", 1, 1));
             cols5.add(new ExcelUtil.ColHeader("", 1, 1));
             cols5.add(new ExcelUtil.ColHeader("", 1, 1));
             cols5.add(new ExcelUtil.ColHeader("", 1, 1));
             cols5.add(new ExcelUtil.ColHeader("", 1, 1));
             cols5.add(new ExcelUtil.ColHeader("园地", 2, 1));
-            cols5.add(new ExcelUtil.ColHeader("耕地demo", 1, 2));
+            cols5.add(new ExcelUtil.ColHeader("林，草", 1, 2));
             cols5.add(new ExcelUtil.ColHeader("", 1, 1));
             cols5.add(new ExcelUtil.ColHeader("交通设施", 2, 1));
             cols5.add(new ExcelUtil.ColHeader("水利用地", 2, 1));
@@ -570,7 +513,7 @@ public class JsydspController extends BaseController<JsydspEntity> {
             // 4 第四行表头
             ArrayList<ExcelUtil.ColHeader> cols6 = new ArrayList<ExcelUtil.ColHeader>();
             col1.add(cols6);
-            cols6.add(new ExcelUtil.ColHeader("", 1, 1));
+//            cols6.add(new ExcelUtil.ColHeader("", 1, 1));
             cols6.add(new ExcelUtil.ColHeader("", 1, 1));
             cols6.add(new ExcelUtil.ColHeader("", 1, 1));
             cols6.add(new ExcelUtil.ColHeader("", 1, 1));

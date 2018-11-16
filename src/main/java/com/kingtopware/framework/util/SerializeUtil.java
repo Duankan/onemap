@@ -1,9 +1,13 @@
 package com.kingtopware.framework.util;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+ * @author dankin
+ */
 public class SerializeUtil {
     public static byte[] serialize(Object object) {
         ObjectOutputStream oos = null;
@@ -16,7 +20,7 @@ public class SerializeUtil {
             byte[] bytes = baos.toByteArray();
             return bytes;
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         return null;
     }

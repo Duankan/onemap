@@ -1,0 +1,61 @@
+{
+  "XZQMJ": {
+    "url": "http://192.168.1.93:8080/hgis/ows",
+    "typename": "ktw:DLTB_hebing_chulihou",
+    "groupFields": "行政区",
+    "statisticsFields": [
+      {
+        "operate": "sum",
+        "field": "TBMJ"
+      }
+    ],
+    "clip": "0"
+  },
+  "BIAOGE": {
+    "url": "http://192.168.1.93:8080/hgis/ows",
+    "typename": "ktw:DLTB_hebing_chulihou",
+    "groupFields": "行政区",
+    "statisticsFields": [
+      {
+        "operate": "sum",
+        "field": "TBMJ"
+      }
+    ],
+    "clip": "0",
+    "cqlCondition": [
+      "01",
+      "02",
+      "03",
+      "04",
+      "10",
+      "11",
+      "12",
+      "20"
+    ],
+    "cqlField": "DLBM"
+  },
+  "BWXZCHART": {
+    "url": "http://192.168.1.93:8080/hgis/ows",
+    "typename": "ktw:BWTC",
+    "groupFields": "DLMC,F_XZQHMC",
+    "statisticsFields": [
+      {
+        "operate": "sum",
+        "field": "TBDLMJ"
+      }
+    ],
+    "clip": "0"
+  },
+  "HBCCCHART": {
+    "url": "http://192.168.1.93:8080/hgis/ows",
+    "typename": "ktw:HBTC_CC",
+    "groupFields": "DLMC,F_XZQHMC",
+    "statisticsFields": [
+      {
+        "operate": "sum",
+        "field": "TBDLMJ"
+      }
+    ],
+    "clip": "0"
+  }
+}

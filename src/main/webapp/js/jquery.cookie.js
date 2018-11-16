@@ -185,7 +185,7 @@
         imguri: null,
         Root: null,
         ServerUrl: null,
-        AreaTree: null
+        AreaTree: null,
     };
 
     /*验证cookie*/

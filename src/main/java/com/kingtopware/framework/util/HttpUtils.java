@@ -17,11 +17,11 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+/**
+ * @author dankin
+ */
 public class HttpUtils {
     private Logger logger = LoggerFactory.getLogger(HttpUtils.class);
     private static CookieStore cookieStore;
@@ -125,5 +125,16 @@ public class HttpUtils {
             e.printStackTrace();
         }
         return null;
+    }
+    //添加头，添加参数
+    public static List<Map<String,Object>> addHeadAndParam(String heads,String params){
+        List<Map<String,Object>> list=new ArrayList<Map<String, Object>>();
+        Map<String,Object> head=new HashMap<String, Object>();
+        Map<String,Object> param=new HashMap<String, Object>();
+        head.put("Content-Type",heads);
+        param.put("statistics",params);
+        list.add(head);
+        list.add(param);
+        return list;
     }
 }

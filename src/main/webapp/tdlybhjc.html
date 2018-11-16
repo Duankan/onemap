@@ -123,7 +123,9 @@
             });
             reloadconfig();
             InitMap();
-
+            // ktw.InitCommonTab();//初始化通用查询和通用分析切换面板
+            //   ktw.GlobalQuery();//初始化通用查询
+            // ktw.GlobalGlandAnalysis();//初始化通用分析
 
             //联动
             mapsmap1.push(Map1);
@@ -409,16 +411,18 @@
         function djfx() {
             isonload = true;
             var queryurl;
-            if (currentA.layerurl == currentB.layerurl) {
-                queryurl = "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=intersection_new&RELLAYERS={'optype':'clip','tolerance':'0.000001','usegrid':'1','layers':[{'typename':'" + currentA.layername + "'},{'typename':'" + currentB.layername + "'}]}";
+            if (currentA.layerurl == currentB.layerurl) {            
+                queryurl = "http://" + currentA.layerurl + "/hgis/ows?" + "service=wps&request=fastintersection&RELLAYERS={'optype':'clip','tolerance':'0.000001','usegrid':'1','layers':[{'typename':'" + currentA.layername + "'},{'typename':'" + currentB.layername + "'}]}";
             }
             else {
-                queryurl = "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=intersection_new&RELLAYERS={'optype':'clip','tolerance':'0.000001','usegrid':'1','layers':[{'typename':'" + currentA.layername + "'},{'typename':'" + currentB.layername + "','host':'" + currentB.layerurl + "'}]}";
+                queryurl = "http://" + currentA.layerurl + "/hgis/ows?" + "service=wps&request=fastintersection&RELLAYERS={'optype':'clip','tolerance':'0.000001','usegrid':'1','layers':[{'typename':'" + currentA.layername + "'},{'typename':'" + currentB.layername + "','host':'" + currentB.layerurl + "'}]}";
             }
             $.ajax({
-                url: queryurl,
-                type: 'GET',
+                type: "get",
+                url: encodeURI(queryurl),
+                dataType: "json",
                 error: function (data) {
+                    console.log(data);
                     msg.Alert('服务请求失败！', { "Type": 'error' });
                     waitbox.Close();
                     isonload = false;
@@ -438,6 +442,7 @@
                     //querydata();
                 },
                 success: function (data) {
+                  //  data = JSON.parse(data);
                     templayername = data.layers;
                    // templayername = "cite:DLTB09_zt";
                     var args = {
@@ -465,7 +470,7 @@
                 srsName: EPSG,
                 startIndex: (pageIndex - 1) * pageSize,
                 count: pageSize,
-                sortBy: "标识码"
+                sortBy: "BSM"
             });
             var queryTack = new L.QueryTask(queryPram);
             UserState = "Search";
@@ -502,6 +507,8 @@
         }
 
         function QueryDataSuccess(data) {
+
+            console.log(data);
             if (UserState == "Search") {
                 //叠加分析及查询请求结束标志
                 isonload = false;
@@ -531,10 +538,10 @@
                     url: "http://" + currentB.layerurl + "/hgis/ows",
                     typename: layerB,
                     srsName: EPSG,
-                    CQL_FILTER: "gid='" + MapBID + "'",
+                    CQL_FILTER: "BSM='" + MapBID + "'",
                     startIndex: 0,
                     count: 5,
-                    sortBy: "标识码"
+                    sortBy: "BSM"
                 });
                 var queryTack = new L.QueryTask(queryPram);
                 UserState = "SearchMapB";
@@ -580,22 +587,22 @@
             //获取对应的column;
             if (dataGrid == null) {
                 var columns = [];
-                columns.push({ field: "over_标识码", title: currentB.nf + "标识码", width: 100, align: 'center', sortable: false });
-                columns.push({ field: "标识码", title: currentA.nf + "标识码", width: 100, align: 'center', sortable: false });
-                columns.push({ field: "over_地类编码", title: currentB.nf + "地类编码", width: 100, align: 'center', sortable: false });
-                columns.push({ field: "地类编码", title: currentA.nf + "地类编码", width: 100, align: 'center', sortable: false });
-                columns.push({ field: "over_一级分类", title: currentB.nf + "一级分类", width: 180, align: 'center', sortable: false });
-                columns.push({ field: "一级分类", title: currentA.nf + "一级分类", width: 180, align: 'center', sortable: false });
-                columns.push({ field: "over_地类名称", title: currentB.nf + "二级分类", width: 100, align: 'center', sortable: false });
-                columns.push({ field: "地类名称", title: currentA.nf + "二级分类", width: 100, align: 'center', sortable: false });
-                columns.push({ field: "over_权属单位名", title: currentB.nf + "权属单位名", width: 110, align: 'center', sortable: false });
-                columns.push({ field: "权属单位名", title: currentA.nf + "权属单位名", width: 110, align: 'center', sortable: false });
-                columns.push({ field: "over_座落单位名", title: currentB.nf + "座落单位名", width: 110, align: 'center', sortable: false });
-                columns.push({ field: "座落单位名", title: currentA.nf + "座落单位名", width: 110, align: 'center', sortable: false });
-                columns.push({ field: "over_批准文号", title: currentB.nf + "批准文号", width: 160, align: 'center', sortable: false });
-                columns.push({ field: "批准文号", title: currentA.nf + "批准文号", width: 160, align: 'center', sortable: false });
-                columns.push({ field: "over_图斑面积", title: currentB.nf + "图斑面积", width: 100, align: 'center', sortable: false });
-                columns.push({ field: "图斑面积", title: currentA.nf + "图斑面积", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "over_BSM", title: currentB.nf + "标识码", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "BSM", title: currentA.nf + "标识码", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "over_DLBM", title: currentB.nf + "地类编码", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "DLBM", title: currentA.nf + "地类编码", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "over_DLMCYJ", title: currentB.nf + "一级分类", width: 180, align: 'center', sortable: false });
+                columns.push({ field: "DLMCYJ", title: currentA.nf + "一级分类", width: 180, align: 'center', sortable: false });
+                columns.push({ field: "over_DLMC", title: currentB.nf + "二级分类", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "DLMC", title: currentA.nf + "二级分类", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "over_QSDWMC", title: currentB.nf + "权属单位名", width: 110, align: 'center', sortable: false });
+                columns.push({ field: "QSDWMC", title: currentA.nf + "权属单位名", width: 110, align: 'center', sortable: false });
+                columns.push({ field: "over_ZLDWMC", title: currentB.nf + "座落单位名", width: 110, align: 'center', sortable: false });
+                columns.push({ field: "ZLDWMC", title: currentA.nf + "座落单位名", width: 110, align: 'center', sortable: false });
+                columns.push({ field: "over_PZWH", title: currentB.nf + "批准文号", width: 160, align: 'center', sortable: false });
+                columns.push({ field: "PZWH", title: currentA.nf + "批准文号", width: 160, align: 'center', sortable: false });
+                columns.push({ field: "over_TBMJ", title: currentB.nf + "图斑面积", width: 100, align: 'center', sortable: false });
+                columns.push({ field: "TBMJ", title: currentA.nf + "图斑面积", width: 100, align: 'center', sortable: false });
                 dataGrid = new ktw.UCDataGrid({
                     PageIndex: pageIndex,
                     PageSize: pageSize,
@@ -624,6 +631,7 @@
                         pageSize = e.size;
                         waitbox = new ktw.UCWaitBox($("#datagriddiv"));
                         waitbox.Show();
+                        alert("1");
                         querystatisticaldata();
                     }
                 });
@@ -642,17 +650,17 @@
                     //}
                     //else if (isSpitScreen == true) {
                         GeomC = layerAdata.features[e.index];
-                        MapAID = e.Row["gid1"];
+                        MapAID = e.Row["BSM"];
                         //MapBID = e.Row["标识码"];
-                        MapBID = e.Row["over_gid"];
+                        MapBID = e.Row["over_BSM"];
                         var queryPram = new L.QueryParameter.WfsQueryParameter({
                             url: "http://" + currentA.layerurl + "/hgis/ows",
                             typename: layerA,
                             srsName: EPSG,
-                            CQL_FILTER: "gid='" + MapAID + "'",
+                            CQL_FILTER: "BSM='" + MapAID + "'",
                             startIndex: 0,
                             count: 5,
-                            sortBy: "标识码"
+                            sortBy: "BSM"
                         });
                         var queryTack = new L.QueryTask(queryPram);
                         UserState = "SearchMapA";
@@ -808,6 +816,7 @@
         }
 
         function querystatisticaldata() {
+            console.log(templayername + "@" + "over_" + currentB.analysisfield + "='" + strArray[0] + "' " + "and " + currentA.analysisfield + "='" + strArray[1] + "'");
             var queryPram = new L.QueryParameter.WfsQueryParameter({
                 url: "http://" + currentA.layerurl + "/hgis/ows",
                 typename: templayername,
@@ -815,7 +824,7 @@
                 CQL_FILTER: "over_" + currentB.analysisfield + "='" + strArray[0] + "' " + "and " + currentA.analysisfield + "='" + strArray[1] + "'",
                 startIndex: (pageIndex - 1) * pageSize,
                 count: pageSize,
-                sortBy: "标识码"
+                sortBy: "BSM"
             });
           
             var queryTack = new L.QueryTask(queryPram);
@@ -844,8 +853,9 @@
             waitbox = new ktw.UCWaitBox($("#ktw-Statistics"));
             waitbox.Show();
             $.ajax({
-                url: "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + "over_" + currentB.analysisfield + "," + currentB.analysisfield + "&destcrs=" + currentA.destcrs + "&start=" + startindex + "&end=10",
+                url: "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + "over_" + currentB.analysisfield + "," + currentB.analysisfield + "&destcrs=EPSG:32649&start=" + startindex + "&end=10",
                 type: 'GET',
+                dataType: "json",
                 error: function (data) {
                     msg.Alert('服务请求失败！', { "Type": 'error' });
                     waitbox.Close();
@@ -882,8 +892,9 @@
             tjzd = $("#combobox3").prop("$this").GetValue();
             isonload = true;
             $.ajax({
-                url: "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + "over_" + currentB.analysisfield + "," + currentA.analysisfield + "&destcrs=" + currentA.destcrs + "&getOne=" + tjzd,
+                url: "http://" + currentA.layerurl + "/hgis/ows" + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + "over_" + currentB.analysisfield + "," + currentA.analysisfield + "&destcrs=EPSG:32649" + "&getOne=" + tjzd,
                 type: 'GET',
+                dataType: "json",
                 error: function (data) {
                     msg.Alert('服务请求失败！', { "Type": 'error' });
                     waitbox.Close();
@@ -956,7 +967,7 @@
                     templayername: templayername,
                     field1: "over_" + currentB.analysisfield,
                     field2: currentA.analysisfield,
-                    destcrs: currentA.destcrs
+                    destcrs: "EPSG:32649"
                 }
             });
             ctr.Layout();

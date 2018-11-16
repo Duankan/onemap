@@ -1,15 +1,15 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title></title>
-    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
-    <link href="../../css/icon.css" rel="stylesheet" />
-    <link href="../../css/app.css" rel="stylesheet" />
-    <link href="../../css/icon.css" rel="stylesheet" />
-    <link href="../../css/main.css" rel="stylesheet" />
-    <link href="../../css/ktw.form.css" rel="stylesheet" />
-    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css"/>
+    <link href="../../css/icon.css" rel="stylesheet"/>
+    <link href="../../css/app.css" rel="stylesheet"/>
+    <link href="../../css/icon.css" rel="stylesheet"/>
+    <link href="../../css/main.css" rel="stylesheet"/>
+    <link href="../../css/ktw.form.css" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="../../css/app.css"/>
     <script type="text/javascript" src="../../js/jquery.min.js"></script>
     <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
     <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
@@ -22,45 +22,81 @@
     <script src="../../js/ktw.ui.js"></script>
     <script>
         var Ktw = window.top.window.ktw;
-        var xarray = [];
-        var dataGrid;
         var winWidth;
-        var result = [];
+        var datamodules ={
+            data:[],//放excel需要的数据
+            cols:[],//放动态生成excel需要的列
+        };
         var way;
-        var ctr;//等待条
         var myChart;
-        var datamodules = [];
-        var datas;
+        var ctr;
+        var params;//传递的参数
+        var stype = "bwxz";//初始化查不稳新增
+        /**echart数据**/
+        var echartsData =
+            {
+                lengdArray: [],//图例数据
+                datas: [],//所有的series数据 结构：[{name:'',data:[12,....]},....]
+                rowDatas: {},//行数据  结构：{name:'',data:[12.....]}
+                seriedata: [],//行数据里面的data  结构：上面里面的data
+                xarray: [],//x周
+                postConfig:{},//动态请求的参数
+            };
+        /**表格相关数据**/
+        var bioageData={
+            rows:[],//数据
+            columns:[],//动态显示的列数
+            postConfig:{},//动态请求的参数
+        }
         $(window).ready(function () {
-            //清除屏幕
-            Ktw.ClearFinal();
             ctr = new ktw.UCWaitBox({
                 Parent: $(".Content")
             });
             way = $(".active", ".stc-nav")[0].innerText;
+            //清除屏幕
+            Ktw.ClearFinal();
             winWidth = $(window).width() >= 1000 ? $(window).width() : 1000;
+            getParamJson();
             initTarget();
             initDataGrid();
-            var myDate = new Date();
-            $("#field").prop("$this").SetSelectedItem('项目个数');
+            Statistics();
+            initCharts();
             $("#statictable").hide();
+            windowresize();
             $(".Button[operatetype]").click(function (evt) {
                 var type = $(this).attr("operatetype");
-                if (type == "Statistics") Statistics();
+                if (type == "Statistics") Statistics(stype);
                 if (type == "Export") exportData(evt);
             });
-            var date = [];
-            for (var i = 2008; i <= myDate.getFullYear() ; i++) {
-                date.push(i);
-            }
-            var syearComBox = $("#startyear").prop('$this');
-            var eyearComBox = $("#endyear").prop('$this');
-            syearComBox.SetData(date);
-            eyearComBox.SetData(date);
-            syearComBox.SetValue(myDate.getFullYear());
-            eyearComBox.SetValue(myDate.getFullYear());
             var countyarea = $("#area").prop("$this");
-            Statistics();
+            // var byarea = [datas];
+            /**绑定按钮点击事件**/
+            $("#byarea").bind("click", function (e) {
+                $("#byarea").addClass("active");
+                $("#hbcc").removeClass("active");
+                $("#lsfb").removeClass("active");
+                // $("#area").prop("$this").SetSelectedItem(byarea[0]);
+                stype = "bwxz";
+                Statistics(stype);
+            });
+            //后背擦除点击事件
+            $("#hbcc").bind("click", function (e) {
+                $("#hbcc").addClass("active");
+                $("#byarea").removeClass("active");
+                $("#lsfb").removeClass("active");
+                stype = "hbcc";
+                Statistics(stype);
+
+            });
+            //零散分布点击事件
+            $("#lsfb").bind("click", function (e) {
+                $("#lsfb").addClass("active");
+                $("#byarea").removeClass("active");
+                $("#hbcc").removeClass("active");
+                stype = "lsfb";
+                Statistics(stype);
+            });
+            //表按钮点击事件
             $("#tab").bind("click", function (e) {
                 if ($("#tab").hasClass("active")) {
                     $("#tab").removeClass("active");
@@ -72,6 +108,7 @@
                 }
                 windowresize();
             });
+            //图按钮点击事件
             $("#map").bind("click", function (e) {
                 if ($("#map").hasClass("active")) {
                     $("#map").removeClass("active");
@@ -83,11 +120,8 @@
                 }
                 windowresize();
             });
-            $("#field").prop("$this").bind("onSelectChanged", function () {
-                initCharts();
-            })
-            windowresize();
         })
+
         function windowresize(t) {
             if ($("#searchModule").find("br").length > 0) {
                 $("#newline").remove();
@@ -100,8 +134,8 @@
                     document.getElementById("searchModule").style.height = 40 + "px";
                     document.getElementById("statictable").style.height = ((Ktw.App.MenuInit.currentParent.Height - 70) * 0.49 - 47) + "px";
                     document.getElementById("chartModule").style.height = (Ktw.App.MenuInit.currentParent.Height - 70) * 0.49 + "px";
-                    $("#static").css({ "top": -5, "right": 90 });
-                    $("#export").css({ "top": -5, "right": 10 });
+                    $("#static").css({"top": -5, "right": 90});
+                    $("#export").css({"top": -5, "right": 10});
                     $("#topport").css("min-width", 1000);
                     $("#chartModule").css("min-width", 1000);
                     $(".stc-nav").css("min-width", 1000);
@@ -121,8 +155,8 @@
                     if (brs.length <= 0) {
                         $("<br id='newline'/>").insertBefore("#newline1");
                     }
-                    $("#static").css({ "top": -5, "right": 10 });
-                    $("#export").css({ "top": 30, "right": 10 });
+                    $("#static").css({"top": -5, "right": 10});
+                    $("#export").css({"top": 30, "right": 10});
                     myChart.resize();
                     initDataGrid();
                     return;
@@ -134,8 +168,8 @@
                 if (t == null) Ktw.App.MenuInit.currentParent.SetSize(1200, 350);
                 document.getElementById("statictable").style.height = (Ktw.App.MenuInit.currentParent.Height - 125) + "px";
                 document.getElementById("chartModule").style.height = 0 + "px";
-                $("#static").css({ "top": -5, "right": 90 });
-                $("#export").css({ "top": -5, "right": 10 });
+                $("#static").css({"top": -5, "right": 90});
+                $("#export").css({"top": -5, "right": 10});
                 $("#topport").css("min-width", 1000);
                 $("#chartModule").css("min-width", 1000);
                 $(".stc-nav").css("min-width", 1000);
@@ -149,47 +183,46 @@
                 windowresize();
             }
         }
+
+        //读取json文件
+        function getParamJson() {
+            $.ajax({
+                url: Ktw.App.ServerUrl + '/config/hubeiProject/param.json',
+                dataType: 'json',
+                type: 'GET',
+                cache: false,
+                timeout: 2000,
+                async: false,//同步
+                error: function () {
+                },
+                success: function (data) {
+                    params = data;
+                }
+            });
+        }
         function initCharts() {
+            var tag = 0;
+            var historyoption = [];
+            var currentparam;
             myChart = echarts.init(document.getElementById('chart'));
             myChart.clear();
-            var data = [];
-            var xarray = [];
-            var yAxis = [
-                       {
-                           name: '单位/公顷',
-                           type: 'value',
-                       },
-            ];
-            var toolbox = {
-                show: true,
-                left: 20,
-                feature: {
-                    saveAsImage: { type: 'png' }
+            var series = [];
+            //给series赋值
+            for (var i = 0; i < echartsData.datas.length; i++) {
+                var rows = {
+                    name: echartsData.datas[i].name,
+                    type: "line",
+                    // stack: 'A',
+                    data: echartsData.datas[i].data,
                 }
-            };
-
-            var legendarray = [], series = [];
-            var field = $("#field").prop("$this").GetText();
-            switch (field) {
-                case "项目个数": for (var i = 0; i < result.length; i++) data.push(result[i].count);
-                    yAxis[0].name = '单位/个';
-                    break;
-                case "总用地面积": for (var i = 0; i < result.length; i++) data.push(result[i].pz_xz_mj); break;
-                case "新增建设用地面积": for (var i = 0; i < result.length; i++) data.push(result[i].xz_jsyd_mj); break;
-                case "农用地转用面积": for (var i = 0; i < result.length; i++) data.push(result[i].pz_nyd_mj); break;
-                case "占用耕地面积": for (var i = 0; i < result.length; i++) data.push(result[i].pz_gd_mj); break;
-                case "征收土地面积": for (var i = 0; i < result.length; i++) data.push(result[i].sq_zs_jt); break;
-                default: for (var i = 0; i < result.length; i++) data.push(result[i].count); break;
+                series.push(rows);
             }
-            series = [{
-                name: field,
-                type: "bar",
-                barMaxWidth: '100',
-                data: data
-            }];
-            for (var i = 0; i < result.length; i++) {
-                xarray.push(result[i].xzqmc);
-            };
+            var yAxis = [
+                {
+                    name: '公顷',
+                    type: 'value',
+                },
+            ];
             chartOption = {
                 tooltip: {
                     trigger: 'axis',
@@ -197,33 +230,61 @@
                         type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
                     }
                 },
-
                 legend: {
                     x: 'center',
                     top: 30,
-                    data: legendarray
+                    data: echartsData.lengdArray
                 },
                 grid: {
                     left: '3%',
                     right: '4%',
-                    bottom: '3%',
+                    bottom: '5%',
                     top: 70,
                     containLabel: true
                 },
                 xAxis: [
-                   {
-                       type: 'category',
-                       data: xarray,
-                       axisLabel: {
-                           interval: 0,//横轴信息全部显示
-                       }
-                   }
+                    {
+                        type: 'category',
+                        data: echartsData.xarray,
+                        axisLabel: {
+                            interval: 0,//横轴信息全部显示
+                            rotate: 45
+                        }
+                    }
                 ],
+                toolbox: {
+                    show: true,
+                    left: 20,
+                    feature: {
+                        myTool1: {
+                            show: true,
+                            title: '返回上一步',
+                            icon: 'image://http://echarts.baidu.com/images/favicon.png',
+                            onclick: function () {
+                                if (tag == 0) {
+                                    Ktw.Alert("已经到第一层!");
+                                    return;
+                                }
+                                myChart.clear();
+                                tag--;
+                                myChart.setOption(historyoption[tag]);
+                                chartOption = $.extend(true, {}, historyoption[tag]);
+                                myChart.trigger("click", currentparam);
+                            }
+                        },
+                        saveAsImage: {type: 'png'}
+                    }
+                },
                 yAxis: yAxis,
-                toolbox: toolbox,
-                series: series
+                series: series,
             };
             myChart.setOption(chartOption);
+            //钻取
+            myChart.off('dblclick');
+            //柱状图双击事件
+            myChart.on('dblclick', function (param) {
+                console.log(param)
+            });
             window.onresize = function () {
                 Ktw.App.MenuInit.currentParent.Layout();
                 windowresize("a");
@@ -249,29 +310,30 @@
                 }
             }
         }
-
-        //最多保留4位小数
-        function fixed4(num) {
-            if (parseInt(num) != num && num.toString().split(".")[1].length > 4)
-                num = parseFloat(num.toFixed(4));
-            return num;
-        }
         function Statistics(type) {
+            //初始化进来type没有值
+            echartsData.postConfig = params.BWXZCHART;
+            if (type == "bwxz") {
+                echartsData.postConfig = params.BWXZCHART;
+            }
+            if (type == "hbcc") {
+                echartsData.postConfig = params.HBCCCHART;
+            }
             var county = "";
-            result = [];
+            var areadata = Ktw.cookie.AreaTree.Children;
+            $.each(areadata, function (i, value) {
+                county += value.areaname + ",";
+            });
             y = [];
-            county = $("#area").prop("$this").GetText();
-            county = county.split("，");
-            county = county.join(",");
-            var startyear = $("#startyear").prop("$this").GetText();
-            var endyear = $("#endyear").prop("$this").GetText();
-            if (startyear > endyear) { Ktw.Alert("请选择正确统计时间!"); return; }
-            var map = {starttime: startyear,endtime: endyear,countyarea: county };
+            var countyarea = $("#area").prop("$this").GetText();
+            var deadline = countyarea.split("，");
+            county = deadline.toString();
+            //如果当前选中城市为全省域，统计各市；选中为市，统计该市下面的区
             $.ajax({
                 type: "POST",
-                data: JSON.stringify(map),
+                data: JSON.stringify(echartsData.postConfig),
                 contentType: "application/json",
-                url: Ktw.App.ServerUrl + "jsydsp/getInfoByflmj",
+                url: Ktw.App.ServerUrl + "Nong/statisticBWXZCharts",
                 beforeSend: function () {
                     ctr.Show();
                 },
@@ -279,50 +341,40 @@
                     ctr.Close();
                 },
                 success: function (data) {
-                    result = [];
-                    for (var i = 0; i < data.data.length; i++) {
-                        result[i] = {};
-                        var opts = $('#dataModule').datagrid('getColumnFields');
-                        for (var j = 0; j < opts.length; j++) {
-                            result[i]["xzqmc"] = data.data[i]["xzqmc"]
-                            if (opts[j] != "xzqmc" && opts[j] != "time") {
-                                if (data.data[i][opts[j]]!=null)
-                                result[i][opts[j]] = fixed4(data.data[i][opts[j]]);
-                            }
-                        }
-                        //result.push(data.data[i]);
-                        if (i == 0) result[i]["time"] = startyear + "至" + endyear;
-                        //计算增长率
-                        if(i!=0){
-                            if (result[i - 1]["pz_xz_mj"])
-                                result[i]["pz_xz_mjzzl"] = fixed4((result[i]["pz_xz_mj"] - result[i - 1]["pz_xz_mj"]) / result[i - 1]["pz_xz_mj"] * 100) + "%";
-                            if (result[i - 1]["xz_jsyd_mj"])
-                                result[i]["xz_jsyd_mjzzl"] = fixed4((result[i]["xz_jsyd_mj"] - result[i - 1]["xz_jsyd_mj"]) / result[i - 1]["xz_jsyd_mj"] * 100) + "%";
-                            if (result[i - 1]["pz_nyd_mj"])
-                                result[i]["pz_nyd_mjzzl"] = fixed4((result[i]["pz_nyd_mj"] - result[i - 1]["pz_nyd_mj"]) / result[i - 1]["pz_nyd_mj"] * 100) + "%";
-                            if (result[i - 1]["pz_gd_mj"])
-                                result[i]["pz_gd_mjzzl"] = fixed4((result[i]["pz_gd_mj"] - result[i - 1]["pz_gd_mj"]) / result[i - 1]["pz_gd_mj"] * 100) + "%";
-                            if (result[i - 1]["sq_zs_jt"])
-                                result[i]["sq_zs_jtzzl"] = fixed4((result[i]["sq_zs_jt"] - result[i - 1]["sq_zs_jt"]) / result[i - 1]["sq_zs_jt"] * 100) + "%";
-                            }
+                    var k = "";
+                    if (data.code == -1) {
+                        Ktw.Alert(data.msg);
+                        return;
                     }
-                    $('#dataModule').datagrid({
-                        data: result
-                    });
-                    $('#dataModule').datagrid({
-                        onLoadSuccess: function () {
-                            var merges = [{
-                                index: 0,
-                                rowspan: result.length
-                            }];
-                            for (var i = 0; i < merges.length; i++)
-                                $('#dataModule').datagrid('mergeCells', {
-                                    index: merges[i].index,
-                                    field: 'time',
-                                    rowspan: merges[i].rowspan
-                                });
+                    echartsData.xarray = [];
+                    //给echarts图例赋值
+                    if (data.legends.length > 0) {
+                        echartsData.lengdArray = data.legends;
+                    }
+                    echartsData.datas = [];//清除echartseries数据
+                    for (var i = 0; i < data.legends.length; i++) {
+                        /**置空**/
+                        echartsData.xarray = [];
+                        echartsData.seriedata = [];
+                        echartsData.rowDatas = {};
+                        echartsData.rowDatas.name = data.legends[i];//赋值地类型
+                        for (var j = 0; j < data.rows.length; j++) {
+                            echartsData.xarray.push(data.rows[j].行政区);
+                            var has = false;//用来标记此类地是否有值
+                            for (var k = 0; k < Object.keys(data.rows[j]).length; k++) {
+                                if (data.legends[i] == Object.keys(data.rows[j])[k]) {
+                                    echartsData.seriedata.push(data.rows[j][Object.keys(data.rows[j])[k]]);
+                                    has = true;
+                                    break;
+                                }
+                            }
+                            if (!has) {
+                                echartsData.seriedata.push(0);
+                            }
                         }
-                    });
+                        echartsData.rowDatas.data = echartsData.seriedata;
+                        echartsData.datas.push(echartsData.rowDatas);
+                    }
                     initCharts();
                 },
                 error: function (e) {
@@ -331,15 +383,15 @@
             });
         }
         function exportData(e) {
-            if (result.length <= 1) {
+            if (datamodules.data.length<1) {
                 Ktw.Alert("当前无数据,不支持导出");
                 return;
             }
             $.ajax({
                 type: "POST",
-                data: JSON.stringify(result),
+                data: JSON.stringify(datamodules),
                 contentType: "application/json",
-                url: Ktw.App.ServerUrl + "jsydsp/flmjexport",
+                url: Ktw.App.ServerUrl + "Nong/export",
                 success: function (e) {
                     if (e.success) {
                         var path = e.data;
@@ -347,7 +399,6 @@
                             var downlaod = Ktw.App.Root + path;
                             window.open(downlaod);
                         }
-
                     }
                 },
                 error: function (e) {
@@ -357,158 +408,209 @@
             });
         }
         function initDataGrid() {
-            var width = (winWidth * 0.98 - 40) / 13;
+            if (stype == "bwxz") {
+                bioageData.postConfig = params.BWXZCHART;
+            }
+            if (stype == "hbcc") {
+                bioageData.postConfig = params.HBCCCHART;
+            }
+            var width = (winWidth * 0.98 - 45) / 12;
+            bioageData.rows = [];
+            bioageData.columns = [];
+            $.ajax({
+                url: Ktw.App.ServerUrl + "Nong/statisticBWXZCharts",
+                data: JSON.stringify(bioageData.postConfig),
+                contentType: "application/json",
+                type: 'post',
+                cache: false,
+                timeout: 2000,
+                async: false,//同步
+                error: function () {
+                },
+                success: function (data) {
+                    //为dataModules添加cols，动态生成excel
+                    datamodules.cols=[];
+                    datamodules.cols.push("行政区");
+                    for(var i=0;i<data.legends.length;i++){
+                        datamodules.cols.push(data.legends[i]);
+                    }
+                    datamodules.cols.push("总面积");
+                    bioageData.rows = data.rows;
+                    datamodules.data = bioageData.rows;
+                    bioageData.columns = [];
+                    //添加行政区
+                    var rowData = {
+                        field: '行政区', title: '行政区', width: width, align: 'center',
+                    };
+                    bioageData.columns.push(rowData);
+                    //添加统计的几类土地
+                    for (var j = 0; j < data.legends.length; j++) {
+                            rowData = {
+                                field: data.legends[j], title: data.legends[j], width: width, align: 'center',
+                            };
+                        bioageData.columns.push(rowData);
+                    }
+                    //添加总面积
+                    rowData = {
+                        field: '总面积', title: '总面积(公顷)', width: width, align: 'center',
+                    };
+                    bioageData.columns.push(rowData);
+                }
+            });
             $('#dataModule').datagrid({
-                //pagination: true,
-                total: 2000,
-                pageSize: 10,
+                data: bioageData.rows,
+                pagination: false,
+                pageNumber: 1,
+                pageSize: 2,
                 pageList: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
                 rownumbers: true,
+                loadMsg: "数据正在加载中，请稍后......",
                 fit: true,        //自动大小
-                fitColumns: false, //自适应列宽
+                fitColumns: true, //自适应列宽
                 singleSelect: true,  //是否单选
-                columns: [[
-                    { field: 'time', title: '时间段', width: width, align: 'center', rowspan: 2, },
-                    { field: 'xzqmc', title: '地区', width: width, align: 'center', rowspan: 2 },
-                    { field: 'count', title: '项目个数(个)', align: 'center', width: width, rowspan: 2 },
-                    { title: '总用地面积', align: 'center', colspan: 2, rowspan: 1 },
-                     { title: '新增建设用地面积', align: 'center', colspan: 2, rowspan: 1 },
-                     { title: '农用地转用面积', align: 'center', colspan: 2, rowspan: 1 },
-                     {  title: '占用耕地面积',colspan: 2, align: 'center', rowspan: 1 },
-                    {  title: '征收土地面积', colspan: 2, align: 'center', rowspan: 1 },
-                   ], [
-                    { field: 'pz_xz_mj', title: '面积(公顷)', width: width, align: 'center', rowspan: 1 },
-                     { field: 'pz_xz_mjzzl', title: '增长率', width: width, align: 'center', rowspan: 1 },
-                        { field: 'xz_jsyd_mj', title: '面积(公顷)', width: width, align: 'center', rowspan: 1 },
-                     { field: 'xz_jsyd_mjzzl', title: '增长率', width: width, align: 'center', rowspan: 1 },
-                        { field: 'pz_nyd_mj', title: '面积(公顷)', width: width, align: 'center', rowspan: 1 },
-                     { field: 'pz_nyd_mjzzl', title: '增长率', width: width, align: 'center', rowspan: 1 },
-                        { field: 'pz_gd_mj', title: '面积(公顷)', width: width, align: 'center', rowspan: 1 },
-                     { field: 'pz_gd_mjzzl', title: '增长率', width: width, align: 'center', rowspan: 1 },
-                        { field: 'sq_zs_jt', title: '面积(公顷)', width: width, align: 'center', rowspan: 1 },
-                     { field: 'sq_zs_jtzzl', title: '增长率', width: width, align: 'center', rowspan: 1 },
-                ],
-
-                ]
+                idField: 'Project_id',
+                columns: [bioageData.columns],
             });
         }
+
+        //初始化县区
         function initTarget() {
             var areaComBox = $("#area").prop('$this');
+            var areaSHENGComBox = $("#areaSHENG").prop('$this');
+            //县市区应该入库
             var areadata = Ktw.cookie.AreaTree.Children;
             datas = [];
-            $.each(areadata, function (i, value) {
-                datas.push(value.areaname);
-            });
+            dataSHENG = [];
+            for (var i = 0; i < areadata.length; i++) {
+                if (areadata[i].arealevel == 1) {
+                    dataSHENG.push(areadata[i].areaname);
+                }
+                else if (areadata[i].arealevel == 2) {
+                    if (datas.length == 0) {
+                        datas.push("全省域");
+                    }
+                    datas.push(areadata[i].areaname);
+                }
+            }
             areaComBox.SetData(datas);
-            $("#area").prop("$this").SetSelectedItem(datas);
-            var fieldComBox = $("#field").prop('$this')
-            fieldComBox.SetData(["项目个数","总用地面积", "新增建设用地面积", "农用地转用面积", "占用耕地面积", "征收土地面积"]);
+            areaSHENGComBox.SetData(dataSHENG);
+            $("#area").prop("$this").SetSelectedItem(datas[0]);
+            $("#areaSHENG").prop("$this").SetSelectedItem(dataSHENG[0]);
         }
     </script>
     <style>
         .Content {
             width: 100%;
             height: 100%;
-
         }
-            .Content .ToolDiv {
-                width: 100%;
-                height: 40px;
-                border-bottom: 1px solid #E4E9EF;
-            }
-                .Content .ToolDiv .Title {
-                    width: 85px;
-                    text-align: right;
-                    line-height: 20px;
-                    height: 20px;
-                    display: inline-block;
-                    float: left;
-                }
-                    .Content .ToolDiv .Title .Icon {
-                        width: 16px;
-                        height: 16px;
-                        display: inline-block;
-                        margin-top: 11px;
-                    }
-                    .Content .ToolDiv .Title .Text {
-                        display: inline-block;
-                        float: right;
-                        width: 49px;
-                    }
-            .Content .HiddenBtn {
-                filter: alpha(Opacity=80);
-                -moz-opacity: 0.8;
-                opacity: 0.8;
-            }
 
-                .Content .HiddenBtn .ArrowBtn {
-                    cursor: pointer;
-                }
-                 .stc-nav {
-            /*background-color: pink;*/
-            height: 30px;
-            padding-top: 4px;
-            padding-left: 5px;
-            padding-right: 5px;
-            /*min-width:500px*/
+        .Content .ToolDiv {
+            width: 100%;
+            height: 40px;
+            border-bottom: 1px solid #E4E9EF;
         }
+
+        .Content .ToolDiv .Title {
+            width: 85px;
+            text-align: center;
+            line-height: 20px;
+            height: 20px;
+            display: inline-block;
+            float: left;
+        }
+
+        .Content .ToolDiv .Title .Icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            margin-top: 11px;
+        }
+
+        .Content .ToolDiv .Title .Text {
+            display: inline-block;
+            float: right;
+            width: 49px;
+        }
+
+        .Content .HiddenBtn {
+            filter: alpha(Opacity=80);
+            -moz-opacity: 0.8;
+            opacity: 0.8;
+        }
+
+        .Content .HiddenBtn .ArrowBtn {
+            cursor: pointer;
+        }
+
         .panel-body-noborder {
             border-bottom-width: 1px;
             border-bottom-color: #dddddd;
             border-top-width: 1px;
             border-top-color: #dddddd;
         }
-         div#statictable .panel-body-noheader {
-             border: 0;
-         }
-            .Content .ToolDiv .Title .Icon  {
-         margin-top: 2px;
-         }
+
+        .stc-nav {
+            height: 30px;
+            padding-top: 4px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        div#statictable .panel-body-noheader {
+            border: 0;
+        }
+
+        .Content .ToolDiv .Title .Icon {
+            margin-top: 2px;
+        }
+
+        #area {
+            display: inline-block !important;
+        }
+
+        #areaSHENG {
+            display: inline-block !important;
+        }
     </style>
 </head>
 <body>
-    <div class="Content">
-         <div class="stc-nav">
-             <span class="btng left btng-left active" id="byarea" style="margin-left:0.5%">按行政区</span>
-             <span class="btng left" id="byyear">按年份</span>
-             <span class="btng left btng-right" id="byquarter">按季度</span>
-            <span class="btng right btng-right active" id="map" style="margin-right:1%">图</span>
-            <span class="btng right btng-left" id="tab">表</span>
+<div class="Content">
+    <div class="stc-nav">
+        <span class="btng left btng-left active" id="byarea" style="margin-left:0.5%">不稳新增</span>
+        <span class="btng left" id="hbcc">后备擦除</span>
+        <span class="btng left btng-right" id="lsfb">零散分布</span>
+        <span class="btng right btng-right active" id="map" style="margin-right:1%">图</span>
+        <span class="btng right btng-left" id="tab">表</span>
+    </div>
+    <div id="topport" style="width: 100%; height: 49%;">
+        <div id="searchModule" class="ToolDiv"
+             style="position:relative; width:98%;margin-left:1%; margin-top:5px; border-bottom:0px;border:1px solid #CACACA; border-radius:10px;">
+            <div id="newline2" style="display: inline-block;">
+                <div id="areaSHENG" class="ktw-combobox"
+                     style="z-index: 2; width: 180px; height: 20px;margin-left:5px;margin-top:10px;"
+                     opt='{"TipInfo":"请选择","MultiSelect":false,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">省</span></div>"}'></div>
+                <div id="area" class="ktw-combobox"
+                     style="z-index: 2; width: 180px; height: 20px;margin-left:5px;"
+                     opt='{"TipInfo":"请选择","MultiSelect":false,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">市</span></div>"}'></div>
+            </div>
+            <div class="Button" id="export" operatetype="Export"
+                 style="float:right;padding-top:4px; padding-right:10px;position:absolute">
+                <span class="button">导出</span>
+            </div>
+            <div class="Button" id="static" operatetype="Statistics"
+                 style="float:right;padding-top:4px;padding-right:10px;position:absolute;">
+                <span class="button">统计</span>
+            </div>&nbsp;&nbsp;
         </div>
-        <div id="topport" style="width: 100%;height: 49%;">
-            <div id="searchModule" class="ToolDiv" style="position:relative; width:98%;margin-left:1%; margin-top:5px; border-bottom:0px;border:1px solid #CACACA; border-radius:10px;">
-                <div style="display: inline-block;">
-                    <div id="startyear" class="ktw-combobox" style="z-index: 4;position:relative; width: 174px; height: 20px;margin-top: 10px;margin-left:5px" opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\"><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">起始年份</span></div>"}'></div>
-                </div>
-                <div style="display: inline-block;">
-                    <div id="endyear" class="ktw-combobox" style="z-index: 4;position:relative; width: 174px; height: 20px;margin-top: 10px;" opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\"><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">终止年份</span></div>"}'></div>
-                </div>
-                <div id="newline2" style="display: inline-block;">
-                    <div id="area" class="ktw-combobox" style="z-index: 3; position:relative;width: 174px; height: 20px;margin-top: 10px;" opt='{"TipInfo":"请选择","MultiSelect":true,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\"><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">县市区</span></div>"}'></div>
-                </div>
-                <div class="Button" id="export" operatetype="Export" style="float: right; padding-top: 4px; padding-right: 10px; position: absolute">
-                    <span class="button">导出</span>
-                </div>
-                <div class="Button" id="static" operatetype="Statistics" style="float: right; padding-top: 4px; padding-right: 10px; position: absolute;">
-                    <span class="button">统计</span>
-                </div>
-                &nbsp;&nbsp;
-                <!--<div style="float: right; margin-right: 10px; margin-top: 15px">单位:宗、公顷、万元</div>-->
-            </div>
-           <div id="statictable" style="width: 98%; height: calc(100% - 50px); margin: 0 auto; margin-top: 5px; border: 1px solid #CACACA; border-radius: 10px;">
-                <div id="dataModule" style="width: 100%;"></div>
-            </div>
-        </div>
-        <div id="chartModule" style="width: 98%; height:calc(49% - 40px); min-height:80px; bottom:0px; margin:0 auto;margin-top:5px;margin-bottom:5px;margin-left:1%; border:1px solid #CACACA; border-radius:10px;">
-            <div class="ToolDiv">
-                <div style="display: inline-block;margin-left:6px">
-                    <div id="field" class="ktw-combobox" style="z-index: 2; width: 174px; height: 20px;margin-top:10px" opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\"><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">统计字段</span></div>"}'></div>
-                </div>
-            </div>
-            <div id="chart" style="width: 99%; height: calc(100% - 40px); float: left;"></div>
-          <!--  <div id="Piechart" style="width: 28%; height: 85%; float: right; border: 1px solid black; margin-right: 5px"></div>-->
+        <div id="statictable"
+             style="width:98%;height:calc(100% - 50px); margin:0 auto;margin-top:5px;border:1px solid #CACACA; border-radius:10px;">
+            <div id="dataModule" style="width: 100%;"></div>
         </div>
     </div>
+    <div id="chartModule"
+         style="width: 98%; height:calc(49% - 40px); min-height:80px; bottom:0px; margin:0 auto;margin-top:5px;margin-bottom:5px;margin-left:1%; border:1px solid #CACACA; border-radius:10px;">
+        <div id="chart" style="width: 99%; height: 100%;float:left;margin-left:5px"></div>
+    </div>
+</div>
 </body>
 </html>
-

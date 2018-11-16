@@ -95,8 +95,9 @@
         //获取所有流向数据
         function getdata() {
             $.ajax({
-                url: owsurl + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + field1 + "," + field2 + "&destcrs=" + destcrs,
+                url: owsurl + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + field1 + "," + field2 + "&destcrs=EPSG:32649",
                 type: 'GET',
+                dataType: "json",
                 error: function (data) {
                     errordata();
                     getdata2();
@@ -113,8 +114,9 @@
         //获取流向统计汇总数据
         function getdata2() {
             $.ajax({
-                url: owsurl + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + field1 + "," + field2 + "&destcrs=" + destcrs + "&stats=true",
+                url: owsurl + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + field1 + "," + field2 + "&destcrs=EPSG:32649&stats=true",
                 type: 'GET',
+                dataType: "json",
                 error: function (data) {
                     errordata2();
                     AddTableRow();
@@ -268,9 +270,10 @@
                                     $("#container" + lsnum,window.top.document.body).append('<div id="containerList' + lsnum + '" style="position:absolute;width:100%;height:100%;top:0;background:#fff;"></div>')
                                     waitbox.Show();
                                     $.ajax({
-                                        url:owsurl + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + field1 + "," + field2 + "&destcrs=" + destcrs + "&getOne=" + lsName,
+                                        url: owsurl + "?service=wps&version=2017.06.21&request=statDltbChanges&path=" + templayername + "&fieldMap=" + field1 + "," + field2 + "&destcrs=EPSG:32649&getOne=" + lsName,
                                       //  url: "http://192.168.227.104:8081/hgis/ows?service=wps&version=2017.06.21&request=statDltbChanges&path=tmp:tmp_7181b126-358f-4b15-af6f-2c94cb47d94d&fieldMap=over_一级分类,一级分类&destcrs=EPSG:4546&getOne=" + lsName,
                                         type: 'GET',
+                                        dataType: "json",
                                         success: function (redata) {                                           
 
                                             waitbox.Close();

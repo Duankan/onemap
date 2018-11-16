@@ -23,7 +23,6 @@
     <script>
         var Ktw = window.top.window.ktw;
         var xarray = [];
-        var dataGrid;
         var winWidth;
         var result = [];
         var datamodules = [];
@@ -31,6 +30,7 @@
         var datas;
         var myChart;
         var ctr;
+        var params;//传递的参数
         $(window).ready(function () {
             ctr = new ktw.UCWaitBox({
                 Parent: $(".Content")
@@ -40,12 +40,7 @@
             Ktw.ClearFinal();
             winWidth = $(window).width() >= 1000 ? $(window).width() : 1000;
             var stype = "area";
-            var myDate = new Date();
-            var starttime = myDate.getFullYear() + "-01-01",
-                endtime = myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate();
-            //初始化时间
-            $('#starttime').datebox('setValue', starttime);
-            $('#endtime').datebox('setValue', endtime);
+            getParamJson();
             initTarget();
             initDataGrid();
             Statistics();
@@ -57,95 +52,13 @@
                 if (type == "Statistics") Statistics(stype);
                 if (type == "Export") exportData(evt);
             });
-            //var wayComBox = $("#way").prop('$this')
-            //wayComBox.SetData(["按行政区", "按年份", "按季度"]);
-            var syearComBox = $("#startyear").prop('$this');
-            var eyearComBox = $("#endyear").prop('$this');
             var countyarea = $("#area").prop("$this");
-            var quarterComBox = $("#quarter").prop("$this");
-            syearComBox.SetVisible(false);
-            eyearComBox.SetVisible(false);
-            quarterComBox.SetVisible(false);
-            var date = [], date1 = [];
-            for (var i = 2008; i <= myDate.getFullYear(); i++) {
-                date.push(i);
-            }
-            for (var i = 1; i <= 12; i++) {
-                date1.push(i + "月");
-            }
-            var byarea = [datas, starttime, endtime];
-            var byyear = [datas[0], date[0], date[date.length - 1]];
-            var byquarter = [datas[0], date[date.length - 1], date[date.length - 1], ["第一季度", "第二季度", "第三季度", "第四季度"]];
+            // var byarea = [datas];
             /**绑定按钮点击事件**/
             $("#byarea").bind("click", function (e) {
                 $("#byarea").addClass("active");
-                $("#time").show();
-                syearComBox.SetVisible(false);
-                eyearComBox.SetVisible(false);
-                quarterComBox.SetVisible(false);
-                countyarea.listBox.MultiSelect = true;
-                if ($("#byyear").hasClass("active")) {
-                    byyear = [$("#area").prop("$this").GetText(), $("#startyear").prop("$this").GetText(), $("#endyear").prop("$this").GetText()];
-                    $("#byyear").removeClass("active");
-                }
-                if ($("#byquarter").hasClass("active")) {
-                    byquarter = [$("#area").prop("$this").GetText(), $("#startyear").prop("$this").GetText(), $("#endyear").prop("$this").GetText(), $("#quarter").prop("$this").GetText().split("，")];
-                    $("#byquarter").removeClass("active");
-                }
-                $("#area").prop("$this").SetSelectedItem(byarea[0]);
-                $('#starttime').datebox('setValue', byarea[1]);
-                $('#endtime').datebox('setValue', byarea[2]);
+                // $("#area").prop("$this").SetSelectedItem(byarea[0]);
                 stype = "area";
-                Statistics(stype);
-            });
-            $("#byyear").bind("click", function (e) {
-                $("#byyear").addClass("active");
-                syearComBox.SetVisible(true);
-                syearComBox.SetData(date);
-                eyearComBox.SetVisible(true);
-                eyearComBox.SetData(date);
-                quarterComBox.SetVisible(false);
-                $("#time").hide();
-                countyarea.listBox.MultiSelect = false;
-                if ($("#byarea").hasClass("active")) {
-                    byarea = [$("#area").prop("$this").GetText().split("，"), $("#starttime").data().combo.previousText, $("#endtime").data().combo.previousText];
-                    $("#byarea").removeClass("active");
-                }
-                if ($("#byquarter").hasClass("active")) {
-                    byquarter = [$("#area").prop("$this").GetText(), $("#startyear").prop("$this").GetText(), $("#endyear").prop("$this").GetText(), $("#quarter").prop("$this").GetText().split("，")];
-                    $("#byquarter").removeClass("active");
-                }
-                $("#area").prop("$this").SetSelectedItem(byyear[0]);
-                $("#startyear").prop("$this").SetValue(byyear[1]);
-                $("#endyear").prop("$this").SetValue(byyear[2]);
-                stype = "year";
-                Statistics(stype);
-            });
-            $("#byquarter").bind("click", function (e) {
-                $("#byquarter").addClass("active");
-                $("#byarea").removeClass("active");
-                $("#byyear").removeClass("active");
-                syearComBox.SetVisible(true);
-                syearComBox.SetData(date);
-                eyearComBox.SetVisible(true);
-                eyearComBox.SetData(date);
-                quarterComBox.SetVisible(true);
-                quarterComBox.SetData(["第一季度", "第二季度", "第三季度", "第四季度"])
-                $("#time").hide();
-                countyarea.listBox.MultiSelect = false;
-                if ($("#byarea").hasClass("active")) {
-                    byarea = [$("#area").prop("$this").GetText().split("，"), $("#starttime").data().combo.previousText, $("#endtime").data().combo.previousText];
-                    $("#byarea").removeClass("active");
-                }
-                if ($("#byyear").hasClass("active")) {
-                    byyear = [$("#area").prop("$this").GetText(), $("#startyear").prop("$this").GetText(), $("#endyear").prop("$this").GetText()];
-                    $("#byyear").removeClass("active");
-                }
-                $("#area").prop("$this").SetSelectedItem(byquarter[0]);
-                $("#startyear").prop("$this").SetValue(byquarter[1]);
-                $("#endyear").prop("$this").SetValue(byquarter[2]);
-                $("#quarter").prop("$this").SetSelectedItem(byquarter[3]);
-                stype = "quarter";
                 Statistics(stype);
             });
             $("#tab").bind("click", function (e) {
@@ -171,8 +84,8 @@
                 windowresize();
             });
         })
-
         function windowresize(t) {
+            debugger
             if ($("#searchModule").find("br").length > 0) {
                 $("#newline").remove();
             }
@@ -233,7 +146,22 @@
                 windowresize();
             }
         }
-
+        //读取json文件
+        function getParamJson() {
+            $.ajax({
+                url: Ktw.App.ServerUrl + '/config/hubeiProject/param.json',
+                dataType: 'json',
+                type: 'GET',
+                cache: false,
+                timeout: 2000,
+                async: false,//同步
+                error: function () {
+                },
+                success: function (data) {
+                    params = data;
+                }
+            });
+        }
         function initCharts() {
             var tag = 0;
             var historyoption = [];
@@ -243,7 +171,6 @@
             myChart.clear();
             var data1 = [], data2 = [], data4 = [];
             for (var i = 0; i < result.length; i++) {
-                // data1.push(result[i].XZ_JSYD_MJ);
                 data2.push(result[i]);
             }
             var series = [
@@ -316,66 +243,8 @@
             myChart.setOption(chartOption);
             //钻取
             myChart.off('dblclick');
+            //柱状图双击事件
             myChart.on('dblclick', function (param) {
-                currentparam = param;
-                data1 = [];
-                data2 = [];
-                var data3 = [];
-                var data4 = [];
-                if (param.seriesName == "新增建设用地") {
-                    historyoption[0] = $.extend(true, {}, chartOption);
-                    name1 = "农用地转用";
-                    name2 = "未利用地面积";
-                    legendarray = [name1, name2, "增长率"];
-                    for (var i = 0; i < result.length; i++) {
-                        data1.push(result[i].PZ_NYD_MJ);
-                        data2.push(result[i].PZ_WLYD_MJ);
-                    }
-                } else if (param.seriesName == "农用地转用") {
-                    historyoption[1] = $.extend(true, {}, chartOption);
-                    name1 = "耕地";
-                    name2 = "林地";
-                    name3 = "园地";
-                    name4 = "其他农用地";
-                    legendarray = [name1, name2, name3, name4, "增长率",];
-                    for (var i = 0; i < result.length; i++) {
-                        data1.push(result[i].PZ_GD_MJ);
-                        data2.push(result[i].PZ_LD_MJ);
-                        data3.push(result[i].PZ_YD_MJ);
-                        data4.push(result[i].PZ_QTNYD_MJ);
-                    }
-                    if (chartOption.series.length <= 3) {
-                        chartOption.series.splice(2, 0, {});
-                        chartOption.series.splice(3, 0, {});
-                    }
-                    chartOption.series[2].data = data3;
-                    chartOption.series[3].data = data4;
-                    chartOption.series[2].name = name3;
-                    chartOption.series[3].name = name4;
-                    chartOption.series[2].type = "bar";
-                    chartOption.series[3].type = "bar";
-                } else if (param.seriesName == "耕地") {
-                    historyoption[2] = $.extend(true, {}, chartOption);
-                    if (chartOption.series.length > 3) chartOption.series.splice(2, 2);
-                    name1 = "基本农田";
-                    name2 = "其他耕地";
-                    legendarray = [name1, name2, "增长率"];
-                    for (var i = 0; i < result.length; i++) {
-                        data1.push(result[i].PZ_JBNT_MJ);
-                        data2.push(result[i].PZ_GD_MJ - result[i].PZ_JBNT_MJ);
-                    }
-                } else {
-                    return;
-                }
-                chartOption.legend.data = legendarray;
-                chartOption.series[0].name = name1;
-                chartOption.series[1].name = name2;
-                chartOption.series[0].data = data1;
-                chartOption.series[1].data = data2;
-                myChart.clear();
-                myChart.setOption(chartOption);
-                myChart.trigger("click", param);
-                tag++;
             });
             window.onresize = function () {
                 Ktw.App.MenuInit.currentParent.Layout();
@@ -401,118 +270,27 @@
                     myChart.resize();
                 }
             }
-
         }
-
-        //验证统计必填条件
-        function validation() {
-            var startyear = $("#startyear").prop("$this").GetText();
-            if ($("#startyear").prop("$this").Visible == true && startyear == "") {
-                Ktw.Alert("请选择起始年份!");
-                return false;
-            }
-            var endyear = $("#endyear").prop("$this").GetText();
-            if ($("#endyear").prop("$this").Visible == true && endyear == "") {
-                Ktw.Alert("请选择终止年份!");
-                return false;
-            }
-            var quarter = $("#quarter").prop("$this").GetText();
-            if ($("#quarter").prop("$this").Visible == true && quarter == "") {
-                Ktw.Alert("请选择季度!");
-                return false;
-            }
-            return true;
-        }
-
         function Statistics(type) {
             var flag = "area";
-            var myDate = new Date();
-            var starttime = myDate.getFullYear() + "-01-01",
-                endtime = myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate();
             var county = "";
             var areadata = Ktw.cookie.AreaTree.Children;
+            debugger
             $.each(areadata, function (i, value) {
                 county += value.areaname + ",";
             });
             result = [];
-            var y = [{starttime: starttime, endtime: endtime}];
-            if (type == "year") {
-                y = [];
-                flag = "byyear"
-                county = $("#area").prop("$this").GetText();
-                var startyear = $("#startyear").prop("$this").GetText();
-                var endyear = $("#endyear").prop("$this").GetText();
-                if (startyear > endyear) {
-                    Ktw.Alert("请选择正确统计时间!");
-                    return;
-                }
-                if (validation() == false) return;
-                y.push({starttime: startyear, endtime: endyear});
-            }
-            else if (type == "area") {
+            if (type == "area") {
                 y = [];
                 var countyarea = $("#area").prop("$this").GetText();
                 var deadline = countyarea.split("，");
                 county = deadline.toString();
-                starttime = $("#starttime").data().combo.previousText;
-                endtime = $("#endtime").data().combo.previousText;
-                if (starttime > endtime) {
-                    Ktw.Alert("请选择正确统计时间!");
-                    return;
-                }
-                y.push({starttime: starttime, endtime: endtime});
             }
-            else if (type == "quarter") {
-                y = [];
-                var year = [];
-                flag = "byquarter"
-                county = $("#area").prop("$this").GetText();
-                var startyear = $("#startyear").prop("$this").GetText();
-                var endyear = $("#endyear").prop("$this").GetText();
-                if (startyear > endyear) {
-                    Ktw.Alert("请选择正确统计时间!");
-                    return;
-                }
-                var quarter = $("#quarter").prop("$this").GetText();
-                if (validation() == false) return;
-                var quarterline = quarter.split("，");
-                for (var i = 0; i < quarterline.length; i++) {
-                    switch (quarterline[i]) {
-                        case "第一季度":
-                            quarterline[i] = {start: "-01-01", end: "-03-31"}
-                            break;
-                        case "第二季度":
-                            quarterline[i] = {start: "-04-01", end: "-06-30"}
-                            break;
-                        case "第三季度":
-                            quarterline[i] = {start: "-07-01", end: "-09-30"}
-                            break;
-                        case "第四季度":
-                            quarterline[i] = {start: "-10-01", end: "-12-31"}
-                            break;
-                        default:
-                            return;
-                    }
-                }
-                for (var i = startyear; i <= endyear; i++) {
-                    for (var j = 0; j < quarterline.length; j++) {
-                        y.push({starttime: i + quarterline[j].start, endtime: i + quarterline[j].end});
-                    }
-                }
-            }
-            // var map = { dt: y, countyarea: county, flag: flag };
-            var map = {
-                "url": "http://192.168.1.63:8080/hgis/ows",
-                "typename": "ktw:dileituban",
-                "groupFields": "行政区",
-                "statisticsFields": [{"operate": "sum", "field": "TBMJ"}],
-                "clip": "0"
-            };
             $.ajax({
                 type: "POST",
-                data: JSON.stringify(map),
+                data: JSON.stringify(params.XZQMJ),
                 contentType: "application/json",
-                url: Ktw.App.ServerUrl + "jsydsp/getinfobyys",
+                url: Ktw.App.ServerUrl + "Nong/getLandUseStatus",
                 beforeSend: function () {
                     ctr.Show();
                 },
@@ -529,72 +307,9 @@
                     //应该是去拿datagrid的所有列数，给datagrid赋值start!!!!
                     debugger
                     var opts = $('#dataModule').datagrid('getColumnFields');
-                    // //t数组用来装合计数据
-                    // var t = [];
-                    // //初始化datagrid需要的列数的数组长度
-                    // for (var i = 0; i < opts.length; i++) {
-                    //     t[i] = 0;
-                    // }
-                    // for (var i = 0; i < data.data.length; i++) {
-                    //     var time = data.data[i].START_TIME + "至" + data.data[i].END_TIME;
-                    //     if (data.data[i].START_TIME == "") time = data.data[i].END_TIME + "之前";
-                    //     if (data.data[i].END_TIME == "") {
-                    //         time = data.data[i].START_TIME + "至" + myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate();
-                    //     }
-                    //     if (type == "year") {
-                    //         time = data.data[i].START_TIME + "年"
-                    //     }
-                    //     else if (type == "quarter") {
-                    //         var year = data.data[i].END_TIME.slice(0, 4);
-                    //         var month = data.data[i].END_TIME.slice(5, 7);
-                    //         switch (month) {
-                    //             case "03":
-                    //                 month = "第一季度";
-                    //                 break;
-                    //             case "06":
-                    //                 month = "第二季度";
-                    //                 break;
-                    //             case "09":
-                    //                 month = "第三季度";
-                    //                 break;
-                    //             case "12":
-                    //                 month = "第四季度";
-                    //                 break;
-                    //         }
-                    //         time = year + month;
-                    //     }
-                    //     var a = { time: time, XZQMC: data.data[i].XZQMC };
-                    //     for (var j = 2; j < opts.length; j++) {
-                    //         var temp = data.data[i][opts[j]];
-                    //         if (parseInt(temp) != temp && temp.toString().split(".")[1].length > 4) temp = parseFloat(temp.toFixed(4));
-                    //         a[opts[j]] = temp;
-                    //         t[j] = t[j] + a[opts[j]];
-                    //     }
-                    //     result.push(a);
-                    // }
-                    // var a = { time: "", XZQMC: "合计" };
-                    // for (var j = 2; j < opts.length; j++) {
-                    //     a[opts[j]] = t[j];
-                    // }
-                    // datamodules = [];
-                    // for (var i = 0; i < result.length; i++) datamodules.push(result[i]);
-                    // datamodules.push(a);
-                    // $('#dataModule').datagrid({
-                    //     data: datamodules
-                    // });
-                    // result.unshift(a);
-                    // xarray = [];
-                    // if (type == "year" || type == "quarter") {
-                    //     for (var i = 1; i < result.length; i++) xarray.push(result[i].time);
-                    //     xarray.unshift("合计");
-                    // }
-                    // else {
-                    //     for (var i = 0; i < result.length; i++) xarray.push(result[i].XZQMC);
-                    // }
-                    //给datagrid赋值end!!!!
-                    //赋值echarts-->result:[120, 200, 150, 80, 70, 110, 130],xarray:['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
                     result = [];
                     xarray = [];
+                    debugger
                     for (var i = 0; i < data.data.length; i++) {
                         result.push(data.data[i].sum);
                         xarray.push(data.data[i].name);
@@ -606,7 +321,6 @@
                 }
             });
         }
-
         function exportData(e) {
             if (result.length <= 1) {
                 Ktw.Alert("当前无数据,不支持导出");
@@ -624,7 +338,6 @@
                             var downlaod = Ktw.App.Root + path;
                             window.open(downlaod);
                         }
-
                     }
                 },
                 error: function (e) {
@@ -633,49 +346,59 @@
                 }
             });
         }
-
         function initDataGrid() {
             var width = (winWidth * 0.98 - 45) / 12;
+            var rows = [];
+            $.ajax({
+                url: Ktw.App.ServerUrl + "Nong/staticsBiaoge",
+                data: JSON.stringify(params.BIAOGE),
+                contentType: "application/json",
+                type: 'post',
+                cache: false,
+                timeout: 2000,
+                async: false,//同步
+                error: function () {
+                },
+                success: function (data) {
+                    rows = data.rows;
+                    datamodules = rows;
+                }
+            });
             $('#dataModule').datagrid({
+                data: rows,
                 pagination: false,
-                // total: 2000,
-                pageNumber:1,
+                pageNumber: 1,
                 pageSize: 2,
                 pageList: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
                 rownumbers: true,
                 loadMsg: "数据正在加载中，请稍后......",
                 fit: true,        //自动大小
-                fitColumns: false, //自适应列宽
+                fitColumns: true, //自适应列宽
                 singleSelect: true,  //是否单选
                 idField: 'Project_id',
-                url:Ktw.App.ServerUrl + "jsydsp/staticsBiaoge",
-                onLoadSuccess: function (data) {
-                    datamodules=data.rows;
-                },
                 columns: [
                     [
                         {field: 'time', title: '统计时间', width: width, align: 'center', rowspan: 5,},
-                        {field: 'xzqname', title: '县市区', width: width, align: 'center', rowspan: 5},
-                        {title: '审批合计(公顷)', colspan: 10}],
+                        {field: 'xzqname', title: '县市区', width: width, align: 'center', rowspan: 5,},
+                        {title: '行政区合计(公顷)', colspan: 10}],
                     [
                         {field: 'pz_xm_mj', title: '总面积', width: width, align: 'center', rowspan: 4},
-                        {title: '行政区用地', width: width, align: 'center', colspan: 8, rowspan: 1},
-                        // {field: 'cl_jsyd_mj', title: '原有集体<br/>建设用地', width: width, align: 'center', rowspan: 4},
+                        {title: '八大类用地', width: width, align: 'center', colspan: 9, rowspan: 1},
                     ],
                     [
                         {field: 'gendi', title: '耕地', width: width, align: 'center', rowspan: 3},
-                        {title: '行政区用地', width: width, align: 'center', colspan: 6, rowspan: 1},
+                        {title: '六大类用地', align: 'center', colspan: 7, rowspan: 1},
                         {field: 'qita', title: '其他土地', width: width, align: 'center', rowspan: 3},
                     ],
                     [
                         {field: 'yuan', title: '园地', width: width, align: 'center', rowspan: 2},
-                        {title: '耕地demo', width: width, align: 'center', colspan: 2, rowspan: 1},
+                        {title: '林,草', width: width, align: 'center', colspan: 3, rowspan: 1},
                         {field: 'jiaot', title: '交通设施', width: width, align: 'center', rowspan: 2},
                         {field: 'shuili', title: '水利用地', width: width, align: 'center', rowspan: 2},
                         {field: 'chenzhen', title: '城镇工矿', width: width, align: 'center', rowspan: 2},
                     ],
                     [
-                        {field: 'lindi', title: '林地', width: width, align: 'center', rowspan: 1},
+                        {field: 'lindi', title: '林地', width: 0.95 * width, align: 'center', rowspan: 1, colspan: 2},
                         {field: 'cao', title: '草地', width: width, align: 'center', rowspan: 1}
                     ]
                 ]
@@ -687,24 +410,20 @@
             var areaSHIComBox = $("#areaSHI").prop('$this');
             //县市区应该入库
             var areadata = Ktw.cookie.AreaTree.Children;
-            datas = [];dataSHI=[];
-            for(var i=0;i<areadata.length;i++){
-                if(areadata[i].arealevel==2){
+            datas = [];
+            dataSHI = [];
+            for (var i = 0; i < areadata.length; i++) {
+                if (areadata[i].arealevel == 2) {
                     dataSHI.push(areadata[i].areaname);
                 }
-                else if(areadata[i].arealevel==3) {
+                else if (areadata[i].arealevel == 3) {
                     datas.push(areadata[i].areaname);
                 }
             }
-            // var datas = ["江夏区","武昌区","江汉区","洪山区","江岸区","黄陂区"];
-            // $.each(areadata, function (i, value) {
-            //     datas.push(value.areaname);
-            // });
             areaComBox.SetData(datas);
             areaSHIComBox.SetData(dataSHI);
             $("#area").prop("$this").SetSelectedItem(datas[1]);
             $("#areaSHI").prop("$this").SetSelectedItem(dataSHI[0]);
-
         }
     </script>
     <style>
@@ -772,6 +491,14 @@
         .Content .ToolDiv .Title .Icon {
             margin-top: 2px;
         }
+
+        #area {
+            display: inline-block !important;
+        }
+
+        #areaSHI {
+            display: inline-block !important;
+        }
     </style>
 </head>
 <body>
@@ -786,33 +513,13 @@
     <div id="topport" style="width: 100%; height: 49%;">
         <div id="searchModule" class="ToolDiv"
              style="position:relative; width:98%;margin-left:1%; margin-top:5px; border-bottom:0px;border:1px solid #CACACA; border-radius:10px;">
-            <div id="time" style="display: inline-block;vertical-align: top;margin-top:10px;margin-left:15px">统计时间：
-                <input id="starttime" name="JSZZRQ" class="easyui-datebox" data-options="width:120,editable:false"/>
-                &nbsp; 至：<input id="endtime" name="JSZZRQ" class="easyui-datebox"
-                                data-options="width:120,editable:false"/>
-            </div>
-            <div style="display: inline-block;">
-                <div id="startyear" class="ktw-combobox"
-                     style="z-index: 3;position:relative; width: 180px; height: 20px;margin-left:10px;margin-top:10px"
-                     opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">起始年份</span></div>"}'></div>
-            </div>
-            <div style="display: inline-block;">
-                <div id="endyear" class="ktw-combobox"
-                     style="z-index: 3;position:relative; width: 180px; height: 20px;margin-left:5px;margin-top:10px"
-                     opt='{"TipInfo":"请选择","HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">终止年份</span></div>"}'></div>
-            </div>
-            <div id="newline1" style="display: inline-block;">
-                <div id="quarter" class="ktw-combobox"
-                     style="z-index: 2; width: 180px; height: 20px;margin-left:10px;margin-top:10px"
-                     opt='{"TipInfo":"请选择","MultiSelect":true,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">季度</span></div>"}'></div>
-            </div>
             <div id="newline2" style="display: inline-block;">
                 <div id="areaSHI" class="ktw-combobox"
-                     style="z-index: 2; width: 180px; height: 20px;margin-left:5px;margin-top:10px"
-                     opt='{"TipInfo":"请选择","MultiSelect":true,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">市</span></div>"}'></div>
+                     style="z-index: 2; width: 180px; height: 20px;margin-left:5px;margin-top:10px;"
+                     opt='{"TipInfo":"请选择","MultiSelect":false,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">市</span></div>"}'></div>
                 <div id="area" class="ktw-combobox"
-                     style="z-index: 2; width: 180px; height: 20px;margin-left:5px;margin-top:10px;position: absolute;top: 40%;left: 213px;"
-                     opt='{"TipInfo":"请选择","MultiSelect":true,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">县区</span></div>"}'></div>
+                     style="z-index: 2; width: 180px; height: 20px;margin-left:5px;"
+                     opt='{"TipInfo":"请选择","MultiSelect":false,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">县区</span></div>"}'></div>
             </div>
             <div class="Button" id="export" operatetype="Export"
                  style="float:right;padding-top:4px; padding-right:10px;position:absolute">

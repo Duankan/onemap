@@ -49,7 +49,7 @@
         </Widgets>
         <Widgets>
           <ID>TongJiFenXi6</ID>
-          <Title>综合分析(分类面积)</Title>
+          <Title>综合分析(分类统计)</Title>
           <Icon>image/menu_zhuanti.png</Icon>
           <IsVisible>true</IsVisible>
           <Order>1</Order>
@@ -322,27 +322,51 @@
           <!--<IconCls>icon-statistic</IconCls>  -->
           <!--<Remark/> -->
         <!--</Widgets>  -->
-        <!--<Widgets> -->
-          <!--<ID>TongJiFenXiChu2</ID>  -->
-          <!--<Title>统计分析(时空分布)</Title>  -->
-          <!--<Icon>image/menu_zhuanti.png</Icon>  -->
-          <!--<IsVisible>true</IsVisible>  -->
-          <!--<Order>1</Order>  -->
-          <!--<IsLoad>false</IsLoad>  -->
-          <!--<Size> -->
-            <!--<Height>600</Height>  -->
-            <!--<Width>1200</Width> -->
-          <!--</Size>  -->
-          <!--<Position> -->
-            <!--<X>200</X>  -->
-            <!--<Y>97</Y> -->
-          <!--</Position>  -->
-          <!--<DockStyle>float</DockStyle>  -->
-          <!--<DockParent>main</DockParent>  -->
-          <!--<Url>html/onemap/storagetwo.html</Url>  -->
-          <!--<IconCls>icon-statistic</IconCls>  -->
-          <!--<Remark/> -->
-        <!--</Widgets>  -->
+        <Widgets>
+          <ID>TongJiFenXi5</ID>
+          <Title>时空统计</Title>
+          <Icon>image/menu_zhuanti.png</Icon>
+          <IsVisible>true</IsVisible>
+          <Order>1</Order>
+          <Modal>false</Modal>
+          <IsLoad>false</IsLoad>
+          <IsMaximize>true</IsMaximize>
+          <Size>
+            <Height>450</Height>
+            <Width>550</Width>
+          </Size>
+          <Position>
+            <X>200</X>
+            <Y>97</Y>
+          </Position>
+          <DockStyle>float</DockStyle>
+          <DockParent>main</DockParent>
+          <Url>html/onemap/TYGN/TimeSlider.html</Url>
+          <IconCls>icon-statistic</IconCls>
+          <Remark/>
+          <Parameters/>
+        </Widgets>
+        <Widgets>
+          <ID>TongJiFenXiChu2</ID>
+          <Title>统计分析(时空分布)</Title>
+          <Icon>image/menu_zhuanti.png</Icon>
+          <IsVisible>true</IsVisible>
+          <Order>1</Order>
+          <IsLoad>false</IsLoad>
+          <Size>
+            <Height>600</Height>
+            <Width>1200</Width>
+          </Size>
+          <Position>
+            <X>200</X>
+            <Y>97</Y>
+          </Position>
+          <DockStyle>float</DockStyle>
+          <DockParent>main</DockParent>
+          <Url>html/onemap/storagetwo.html</Url>
+          <IconCls>icon-statistic</IconCls>
+          <Remark/>
+        </Widgets>
         <!--<Widgets>
           <ID>fuzhushenpi</ID>
           <Title>辅助审批</Title>
@@ -651,182 +675,46 @@
     </Bounds>-->  
     <!--地图中心点-->  
     <!--<Center>111.47432327270508,27.236309051513672</Center>-->
-    <Center>112.61947684291534,27.74047684291534</Center>
+    <Center>114.269,30.71</Center>
     <!--<Center>114.36344084291534,-81.22525132282237</Center>-->  
     <!--坐标参考系-->  
     <EPSG>EPSG:4326</EPSG>  
-    <!--图层配置信息 -->  
+    <!--图层配置信息 -->
     <LayerInfo>
-	  <BaseLayers>
-        <ID>xzq_5</ID>
-        <Name>行政区_村</Name>
-        <Url><![CDATA[http://192.168.1.86:8089/geoserver/ktw/wms]]></Url>
-        <Type>WMS</Type>
-        <TypeEx>Vector</TypeEx>
-        <Args/>
-        <TypeName>ktw:XZQ_BASE</TypeName>
-        <MaxZoom>22</MaxZoom>
-        <MinZoom>1</MinZoom>
-        <Visible>true</Visible>
-        <Order>0</Order>
-      </BaseLayers>
+
       <BaseLayers>
-        <ID>xzq_0</ID>
-        <Name>行政区_全国</Name>
-        <Url><![CDATA[http://192.168.1.86:8089/geoserver/ktw/wms]]></Url>
+        <ID>ktw:XZQ_chulihou</ID>
+        <Name>WMS_影像</Name>
+        <Url><![CDATA[http://192.168.1.93:8080/hgis/ows]]></Url>
         <Type>WMS</Type>
-        <TypeEx>Vector</TypeEx>
-        <Args/>
-        <TypeName>ktw:XZQ_BASE</TypeName>
-        <MaxZoom>20</MaxZoom>
-        <MinZoom>1</MinZoom>
-        <Visible>true</Visible>
-        <Order>5</Order>
-      </BaseLayers>
-      <BaseLayers>
-        <ID>xzq_4</ID>
-        <Name>行政区_乡</Name>
-        <Url><![CDATA[http://192.168.1.86:8089/geoserver/ktw/wms]]></Url>
-        <Type>WMS</Type>
-        <TypeEx>Vector</TypeEx>
-        <Args/>
-        <TypeName>ktw:XZQ_BASE</TypeName>
-        <MaxZoom>20</MaxZoom>
-        <MinZoom>1</MinZoom>
-        <Visible>true</Visible>
-        <Order>1</Order>
-      </BaseLayers>
-      <BaseLayers>
-        <ID>xzq_3</ID>
-        <Name>行政区_县</Name>
-        <Url><![CDATA[http://192.168.1.86:8089/geoserver/ktw/wms]]></Url>
-        <Type>WMS</Type>
-        <TypeEx>Vector</TypeEx>
-        <Args/>
-        <TypeName>ktw:XZQ_BASE</TypeName>
-        <MaxZoom>20</MaxZoom>
-        <MinZoom>1</MinZoom>
-        <Visible>true</Visible>
-        <Order>2</Order>
-      </BaseLayers>
-      <BaseLayers>
-        <ID>xzq_2</ID>
-        <Name>行政区_市</Name>
-        <Url><![CDATA[http://192.168.1.86:8089/geoserver/ktw/wms]]></Url>
-        <Type>WMS</Type>
-        <TypeEx>Vector</TypeEx>
-        <Args/>
-        <TypeName>ktw:XZQ_BASE</TypeName>
-        <MaxZoom>20</MaxZoom>
-        <MinZoom>1</MinZoom>
-        <Visible>true</Visible>
-        <Order>3</Order>
-      </BaseLayers>
-      <BaseLayers>
-        <ID>xzq_1</ID>
-        <Name>行政区_省</Name>
-        <Url><![CDATA[http://192.168.1.86:8089/geoserver/ktw/wms]]></Url>
-        <Type>WMS</Type>
-        <TypeEx>Vector</TypeEx>
-        <Args/>
-        <TypeName>ktw:XZQ_BASE</TypeName>
-        <MaxZoom>20</MaxZoom>
-        <MinZoom>1</MinZoom>
-        <Visible>true</Visible>
-        <Order>4</Order>
-      </BaseLayers>
-      <!--<BaseLayers>
-        <ID>baidu_vector</ID>
-        <Name>百度矢量底图</Name>
-        <Url><![CDATA[http://online{s}.map.bdimg.com/tile/?qt=tile&x={x}&y={y}&z={z}&styles=pl&udt=20150518]]></Url>
-        <Type>Tile</Type>
-        <TypeEx>Image</TypeEx>
-        <Args>{subdomains:["0", "1", "2"],tms:true}</Args>
-        <MaxZoom>20</MaxZoom>
-        <MinZoom>1</MinZoom>
-        <Visible>true</Visible>
-        <Order>1</Order>
-      </BaseLayers>-->  
-      <!--<BaseLayers>
-        <ID>tree_pidi</ID>
-        <Text>批地</Text>
-        <Visible>true</Visible>
-        <Url>OneMapWMS</Url>
-        <EPSG>EPSG:4610</EPSG>
-        <CQL_FILTER></CQL_FILTER>
-        <Layers>onemap:t_inf_onemap_jsydspxxb</Layers>
-        <Style/>
-        <Type>WMS</Type>
-        <TypeEx>Image</TypeEx>
-        <ServerType>hgis</ServerType>
-        <WMS>OneMapWMS</WMS>
-        <ZIndex>9999</ZIndex>
-        <Opacity>1</Opacity>
-      </BaseLayers>-->  
-      <!--<BaseLayers>
-        <ID>wmts_yx</ID>
-        <Name>WMTS_影像</Name>
-        <Url><![CDATA[http://192.168.1.211:8080/hgis/ktw/wmts]]></Url>
-        <Type>WMTS</Type>
         <TypeEx>Image,Vector</TypeEx>
         <Args/>
-        <Layers>ktw:testdom</Layers>
+        <Layers>ktw:DLTB2017</Layers>
+        <TypeName>ktw:DLTB2017</TypeName>
         <Style/>
         <EPSG>EPSG:4490</EPSG>
         <MaxZoom>20</MaxZoom>
         <MinZoom>1</MinZoom>
-        <Visible>false</Visible>
+        <Visible>true</Visible>
         <Order>0</Order>
-      </BaseLayers>-->  
-      <BaseLayers> 
-        <ID>tdt_image</ID>  
-        <Name>天地图_影像</Name>  
-        <Url><![CDATA[http://t{s}.tianditu.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={z}&TileRow={y}&TileCol={x}&style=default&format=tiles]]></Url>  
-        <Type>Tile</Type>  
-        <TypeEx>Image</TypeEx>  
-        <Args>{subdomains:["0", "1", "2", "3", "4", "5", "6", "7"],offsetX:0.0000,offsetY:-1.0590}</Args>  
-        <MaxZoom>20</MaxZoom>  
-        <MinZoom>1</MinZoom>  
-        <Visible>false</Visible>  
-        <Order>1</Order> 
-      </BaseLayers> 
-      <!--<BaseLayers> 
-        <ID>tdt_vector</ID>  
-        <Name>天地图_矢量</Name>  
-        <Url><![CDATA[http://t{s}.tianditu.com/vec_w/wmts?service=wmts&request=gettile&version=1.0.0&layer=vec&format=tiles&tilematrixset=w&TileMatrix={z}&TileRow={y}&TileCol={x}]]></Url>  
-        <Type>Tile</Type>  
-        <TypeEx>Vector</TypeEx>  
-        <Args>{subdomains:["0", "1", "2", "3", "4", "5", "6", "7"]}</Args>  
-        <MaxZoom>20</MaxZoom>  
-        <MinZoom>1</MinZoom>  
-        <Visible>true</Visible>  
-        <Order>2</Order> 
+      </BaseLayers>
+      <!--<BaseLayers>
+        <ID>ktw:BWTC</ID>
+        <Name>WMS_影像</Name>
+        <Url><![CDATA[http://192.168.1.63:8086/hgis/ows]]></Url>
+        <Type>WMS</Type>
+        <TypeEx>Image,Vector</TypeEx>
+        <Args/>
+        <Layers>ktw:BWTC</Layers>
+        <TypeName>ktw:BWTC</TypeName>
+        <Style/>
+        <EPSG>EPSG:4490</EPSG>
+        <MaxZoom>20</MaxZoom>
+        <MinZoom>1</MinZoom>
+        <Visible>true</Visible>
+        <Order>0</Order>
       </BaseLayers>-->
-      <BaseLayers> 
-        <ID>tdt_image_vector_bound</ID>  
-        <Name>天地图_影像_矢量_边界</Name>  
-        <Url><![CDATA[http://t{s}.tianditu.cn/ibo_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=ibo&tileMatrixSet=w&TileMatrix={z}&TileRow={y}&TileCol={x}&style=default&format=tiles]]></Url>  
-        <Type>Tile</Type>  
-        <TypeEx>Image</TypeEx>  
-        <Args>{subdomains:["0", "1", "2", "3", "4", "5", "6", "7"],offsetX:0.0000,offsetY:-1.0590}</Args>  
-        <MaxZoom>20</MaxZoom>  
-        <MinZoom>1</MinZoom>  
-        <Visible>false</Visible>  
-        <Order>3</Order> 
-      </BaseLayers>  
-      <BaseLayers> 
-        <ID>tdt_image_vector_name</ID>  
-        <Name>天地图_影像_矢量_地名标注</Name>  
-        <Url><![CDATA[http://t{s}.tianditu.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={z}&TileRow={y}&TileCol={x}&style=default&format=tiles]]></Url>  
-        <Type>Tile</Type>  
-        <TypeEx>Image</TypeEx>  
-        <Args>{subdomains:["0", "1", "2", "3", "4", "5", "6", "7"],offsetX:0.0000,offsetY:-1.0590}</Args>  
-        <MaxZoom>20</MaxZoom>  
-        <MinZoom>1</MinZoom>  
-        <Visible>false</Visible>  
-        <Order>4</Order> 
-      </BaseLayers>-->
-    </LayerInfo>  
+    </LayerInfo>
     <!--工具栏上工具配置信息 -->  
     <ToolInfo> 
       <ID>maptool</ID>  
@@ -1312,62 +1200,70 @@
             <Checked>false</Checked>
             <Children>
               <MapLayer>
-                <ID>tree_tdlyxz09</ID>
+                <ID>ktw:BWTC</ID>
                 <Text>不稳定新增</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
-                <Filter/>
-                <TypeName>2009GDLTB</TypeName>
+                <EPSG>EPSG:4490</EPSG>
+                <!--<Filter/>-->
+                <TypeName>ktw:BWTC</TypeName>
                 <FLHZ>tdlyxz</FLHZ>
-                <Sld/>
+                <!--<Sld/>-->
                 <IconCls>icon-tree-polygon</IconCls>
-                <Styles/>
+                <!--<Styles/>-->
                 <Checked>false</Checked>
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>权属单位名</SearchFields>
-                <DisplayFields>权属单位名,批准文号</DisplayFields>
+                <SearchFields>DLMC</SearchFields>
+                <DisplayFields>DLMC,QSDWMC</DisplayFields>
                 <DetailFields>
                   <Field>
-                    <ByName>地类名称</ByName>
-                    <Name>地类名称</Name>
-                  </Field>
-                  <Field>
-                    <ByName>权属性质</ByName>
-                    <Name>权属性质</Name>
+                    <ByName>地理名称</ByName>
+                    <Name>DLMC</Name>
                   </Field>
                   <Field>
                     <ByName>权属单位名</ByName>
-                    <Name>权属单位名</Name>
+                    <Name>QSDWMC</Name>
                   </Field>
                   <Field>
-                    <ByName>座落单位名</ByName>
-                    <Name>座落单位名</Name>
+                    <ByName>所属行政区</ByName>
+                    <Name>F_XZQHMC</Name>
                   </Field>
                   <Field>
-                    <ByName>耕地类型</ByName>
-                    <Name>耕地类型</Name>
+                    <ByName>要素代码</ByName>
+                    <Name>YSDM</Name>
                   </Field>
                   <Field>
-                    <ByName>批准文号</ByName>
-                    <Name>批准文号</Name>
+                    <ByName>所属行政区</ByName>
+                    <Name>F_XZQHMC</Name>
+                  </Field>
+                  <Field>
+                    <ByName>权属单位代码</ByName>
+                    <Name>QSDWDM</Name>
+                  </Field>
+                  <Field>
+                    <ByName>坐落单位代码</ByName>
+                    <Name>ZLDWDM</Name>
+                  </Field>
+                  <Field>
+                    <ByName>图斑编号</ByName>
+                    <Name>TBBH</Name>
                   </Field>
                   <Field>
                     <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
+                    <Name>TBDLMJ</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_tdlyxz10</ID>
-                <Text>更低后备资源擦除</Text>
+                <ID>ktw:HBTC_CC</ID>
+                <Text>耕地后备资源擦除</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:onemap_TDLYXZ_2010</TypeName>
+                <TypeName>ktw:HBTC_CC</TypeName>
                 <FLHZ>tdlyxz</FLHZ>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
@@ -1376,24 +1272,24 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>权属单位名</SearchFields>
-                <DisplayFields>权属单位名,批准文号</DisplayFields>
+                <SearchFields>DLMC</SearchFields>
+                <DisplayFields>DLMC,QSDWMC</DisplayFields>
                 <DetailFields>
                   <Field>
                     <ByName>地类名称</ByName>
-                    <Name>地类名称</Name>
+                    <Name>DLMC</Name>
                   </Field>
                   <Field>
                     <ByName>权属性质</ByName>
-                    <Name>权属性质</Name>
+                    <Name>QSXZ</Name>
                   </Field>
                   <Field>
                     <ByName>权属单位名</ByName>
-                    <Name>权属单位名</Name>
+                    <Name>QSDWMC</Name>
                   </Field>
                   <Field>
                     <ByName>座落单位名</ByName>
-                    <Name>座落单位名</Name>
+                    <Name>ZLDWMC</Name>
                   </Field>
                   <Field>
                     <ByName>耕地类型</ByName>
@@ -1401,22 +1297,22 @@
                   </Field>
                   <Field>
                     <ByName>批准文号</ByName>
-                    <Name>批准文号</Name>
+                    <Name>ZLDWDM</Name>
                   </Field>
                   <Field>
                     <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
+                    <Name>TBDLMJ</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_tdlyxz11</ID>
-                <Text>集中连片擦除</Text>
+                <ID>tree_tdlyxz11jbntbaohutuban</ID>
+                <Text>集中连片擦除</Text><!--no data-->
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>	onemap:onemap_TDLYXZ_2011</TypeName>
+                <TypeName>	onemap:jbntbaohutuban11</TypeName>
                 <FLHZ>tdlyxz</FLHZ>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
@@ -1459,13 +1355,13 @@
                 </DetailFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_tdlyxz12</ID>
+                <ID>ktw:HBTC_42</ID>
                 <Text>零散分布后备资源</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:onemap_TDLYXZ_2012</TypeName>
+                <TypeName>ktw:HBTC_42</TypeName>
                 <FLHZ>tdlyxz</FLHZ>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
@@ -1474,24 +1370,24 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>权属单位名</SearchFields>
-                <DisplayFields>权属单位名,批准文号</DisplayFields>
+                <SearchFields>DLMC</SearchFields>
+                <DisplayFields>DLMC,QSDWMC</DisplayFields>
                 <DetailFields>
                   <Field>
                     <ByName>地类名称</ByName>
-                    <Name>地类名称</Name>
+                    <Name>DLMC</Name>
                   </Field>
                   <Field>
                     <ByName>权属性质</ByName>
-                    <Name>权属性质</Name>
+                    <Name>QSXZ</Name>
                   </Field>
                   <Field>
                     <ByName>权属单位名</ByName>
-                    <Name>权属单位名</Name>
+                    <Name>QSDWMC</Name>
                   </Field>
                   <Field>
                     <ByName>座落单位名</ByName>
-                    <Name>座落单位名</Name>
+                    <Name>QSDWMC</Name>
                   </Field>
                   <Field>
                     <ByName>耕地类型</ByName>
@@ -1499,11 +1395,11 @@
                   </Field>
                   <Field>
                     <ByName>批准文号</ByName>
-                    <Name>批准文号</Name>
+                    <Name>ZLDWDM</Name>
                   </Field>
                   <Field>
                     <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
+                    <Name>TBDLMJ</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
@@ -1526,13 +1422,13 @@
                 <Checked>false</Checked>
                 <Children>
                   <MapLayer>
-                    <ID>tree_jsydgsq</ID>
+                    <ID>JSYDGZQ</ID>
                     <Text>建设用地管制区</Text>
                     <Visible>true</Visible>
                     <Url>OneMapOWS</Url>
                     <EPSG>EPSG:4610</EPSG>
                     <Filter/>
-                    <TypeName>onemap:TDLYZTGH_12_CZJSKZQ</TypeName>
+                    <TypeName>ktw:JSYDGZQ</TypeName>
                     <FLHZ>gzq</FLHZ>
                     <Sld/>
                     <IconCls>icon-tree-polygon</IconCls>
@@ -1541,35 +1437,35 @@
                     <GeometryName>the_geom</GeometryName>
                     <Type>WMS</Type>
                     <ServerType>hgis</ServerType>
-                    <SearchFields>标识码</SearchFields>
-                    <DisplayFields>控制区编号,标识码</DisplayFields>
+                    <SearchFields>BSM</SearchFields>
+                    <DisplayFields>XZQDM,BSM</DisplayFields>
                     <DetailFields>
                       <Field>
                         <ByName>标识码</ByName>
-                        <Name>标识码</Name>
+                        <Name>BSM</Name>
                       </Field>
                       <Field>
                         <ByName>控制区编号</ByName>
-                        <Name>控制区编号</Name>
+                        <Name>XZQDM</Name>
                       </Field>
                       <Field>
                         <ByName>要素代码</ByName>
-                        <Name>要素代码</Name>
+                        <Name>OBJECTID</Name>
                       </Field>
                       <Field>
                         <ByName>控制区面积(m²)</ByName>
-                        <Name>控制区面积</Name>
+                        <Name>GZQMJ</Name>
                       </Field>
                     </DetailFields>
                   </MapLayer>
                   <MapLayer>
-                    <ID>tree_tdghdl</ID>
+                    <ID>ktw:TDGHDL</ID>
                     <Text>土地规划地类</Text>
                     <Visible>true</Visible>
                     <Url>OneMapOWS</Url>
-                    <EPSG>EPSG:4610</EPSG>
+                    <EPSG>EPSG:4490</EPSG>
                     <Filter/>
-                    <TypeName>onemap:TDLYZTGH_12_TDGHDL</TypeName>
+                    <TypeName>ktw:TDGHDL</TypeName>
                     <FLHZ>gzq</FLHZ>
                     <Sld/>
                     <IconCls>icon-tree-polygon</IconCls>
@@ -1578,24 +1474,24 @@
                     <GeometryName>the_geom</GeometryName>
                     <Type>WMS</Type>
                     <ServerType>hgis</ServerType>
-                    <SearchFields>规划地类名</SearchFields>
-                    <DisplayFields>规划地类名,规划地类编</DisplayFields>
+                    <SearchFields>GHDLMC</SearchFields>
+                    <DisplayFields>GHDLMC,YSDM</DisplayFields>
                     <DetailFields>
                       <Field>
                         <ByName>规划地类名称</ByName>
-                        <Name>规划地类名</Name>
+                        <Name>GHDLMC</Name>
                       </Field>
                       <Field>
                         <ByName>规划期限</ByName>
                         <Name>规划期限</Name>
                       </Field>
                       <Field>
-                        <ByName>mpArea</ByName>
-                        <Name>mpArea</Name>
+                        <ByName>面积</ByName>
+                        <Name>GHDLMJ</Name>
                       </Field>
                       <Field>
                         <ByName>标识码</ByName>
-                        <Name>标识码</Name>
+                        <Name>BSM</Name>
                       </Field>
                       <Field>
                         <ByName>规划地类编号</ByName>
@@ -1604,43 +1500,6 @@
                       <Field>
                         <ByName>说明</ByName>
                         <Name>说明</Name>
-                      </Field>
-                    </DetailFields>
-                  </MapLayer>
-                  <MapLayer>
-                    <ID>tree_tdytq</ID>
-                    <Text>土地用途区</Text>
-                    <Visible>true</Visible>
-                    <Url>OneMapOWS</Url>
-                    <EPSG>EPSG:4610</EPSG>
-                    <Filter/>
-                    <TypeName>onemap:TDLYZTGH_12_JQLXDW</TypeName>
-                    <FLHZ>gzq</FLHZ>
-                    <Sld/>
-                    <IconCls>icon-tree-polygon</IconCls>
-                    <Styles/>
-                    <Checked>false</Checked>
-                    <GeometryName>the_geom</GeometryName>
-                    <Type>WMS</Type>
-                    <ServerType>hgis</ServerType>
-                    <SearchFields>权属单位名</SearchFields>
-                    <DisplayFields>权属单位名,座落单位名</DisplayFields>
-                    <DetailFields>
-                      <Field>
-                        <ByName>标识码</ByName>
-                        <Name>标识码</Name>
-                      </Field>
-                      <Field>
-                        <ByName>权属单位名</ByName>
-                        <Name>权属单位名</Name>
-                      </Field>
-                      <Field>
-                        <ByName>地类名称</ByName>
-                        <Name>地类名称</Name>
-                      </Field>
-                      <Field>
-                        <ByName>座落单位名</ByName>
-                        <Name>座落单位名</Name>
                       </Field>
                     </DetailFields>
                   </MapLayer>
@@ -1655,13 +1514,13 @@
                 <Checked>false</Checked>
                 <Children>
                   <MapLayer>
-                    <ID>tree_zxcqghkzfw</ID>
+                    <ID>ZXCQGHKZFW</ID>
                     <Text>中心城区规划控制范围</Text>
                     <Visible>true</Visible>
                     <Url>OneMapOWS</Url>
-                    <EPSG>EPSG:4610</EPSG>
+                    <EPSG>EPSG:4490</EPSG>
                     <Filter/>
-                    <TypeName>onemap:TDLYZTGH_12_CZJSKZQ</TypeName>
+                    <TypeName>ktw:ZXCQGHKZFW</TypeName>
                     <FLHZ>gzq</FLHZ>
                     <Sld/>
                     <IconCls>icon-tree-polygon</IconCls>
@@ -1670,35 +1529,35 @@
                     <GeometryName>the_geom</GeometryName>
                     <Type>WMS</Type>
                     <ServerType>hgis</ServerType>
-                    <SearchFields>标识码</SearchFields>
-                    <DisplayFields>控制区编号,标识码</DisplayFields>
+                    <SearchFields>BSM</SearchFields>
+                    <DisplayFields>XZQMC,BSM</DisplayFields>
                     <DetailFields>
                       <Field>
                         <ByName>标识码</ByName>
-                        <Name>标识码</Name>
+                        <Name>BSM</Name>
                       </Field>
                       <Field>
-                        <ByName>控制区编号</ByName>
-                        <Name>控制区编号</Name>
+                        <ByName>行政区名称</ByName>
+                        <Name>XZQMC</Name>
                       </Field>
                       <Field>
                         <ByName>要素代码</ByName>
-                        <Name>要素代码</Name>
+                        <Name>YSDM</Name>
                       </Field>
                       <Field>
                         <ByName>控制区面积(m²)</ByName>
-                        <Name>控制区面积</Name>
+                        <Name>KZMJ</Name>
                       </Field>
                     </DetailFields>
                   </MapLayer>
                   <MapLayer>
-                    <ID>tree_ghkzbj</ID>
+                    <ID>	ZXCQGHKZBJ</ID>
                     <Text>中心城区规划扩展边界</Text>
                     <Visible>true</Visible>
                     <Url>OneMapOWS</Url>
-                    <EPSG>EPSG:4610</EPSG>
+                    <EPSG>EPSG:4490</EPSG>
                     <Filter/>
-                    <TypeName>onemap:TDLYZTGH_12_TDGHDL</TypeName>
+                    <TypeName>ktw:	ZXCQGHKZBJ</TypeName>
                     <FLHZ>gzq</FLHZ>
                     <Sld/>
                     <IconCls>icon-tree-polygon</IconCls>
@@ -1707,75 +1566,27 @@
                     <GeometryName>the_geom</GeometryName>
                     <Type>WMS</Type>
                     <ServerType>hgis</ServerType>
-                    <SearchFields>规划地类名</SearchFields>
-                    <DisplayFields>规划地类名,规划地类编</DisplayFields>
-                    <DetailFields>
-                      <Field>
-                        <ByName>规划地类名称</ByName>
-                        <Name>规划地类名</Name>
-                      </Field>
-                      <Field>
-                        <ByName>规划期限</ByName>
-                        <Name>规划期限</Name>
-                      </Field>
-                      <Field>
-                        <ByName>mpArea</ByName>
-                        <Name>mpArea</Name>
-                      </Field>
-                      <Field>
-                        <ByName>标识码</ByName>
-                        <Name>标识码</Name>
-                      </Field>
-                      <Field>
-                        <ByName>规划地类编号</ByName>
-                        <Name>规划地类编</Name>
-                      </Field>
-                      <Field>
-                        <ByName>说明</ByName>
-                        <Name>说明</Name>
-                      </Field>
-                    </DetailFields>
-                  </MapLayer>
-                  <MapLayer>
-                    <ID>tree_zbfw</ID>
-                    <Text>城市周边范围</Text>
-                    <Visible>true</Visible>
-                    <Url>OneMapOWS</Url>
-                    <EPSG>EPSG:4610</EPSG>
-                    <Filter/>
-                    <TypeName>onemap:TDLYZTGH_12_JQLXDW</TypeName>
-                    <FLHZ>gzq</FLHZ>
-                    <Sld/>
-                    <IconCls>icon-tree-polygon</IconCls>
-                    <Styles/>
-                    <Checked>false</Checked>
-                    <GeometryName>the_geom</GeometryName>
-                    <Type>WMS</Type>
-                    <ServerType>hgis</ServerType>
-                    <SearchFields>权属单位名</SearchFields>
-                    <DisplayFields>权属单位名,座落单位名</DisplayFields>
+                    <SearchFields>BSM</SearchFields>
+                    <DisplayFields>XZQMC,BSM</DisplayFields>
                     <DetailFields>
                       <Field>
                         <ByName>标识码</ByName>
-                        <Name>标识码</Name>
+                        <Name>BSM</Name>
                       </Field>
                       <Field>
-                        <ByName>权属单位名</ByName>
-                        <Name>权属单位名</Name>
+                        <ByName>行政区名称</ByName>
+                        <Name>XZQMC</Name>
                       </Field>
                       <Field>
-                        <ByName>地类名称</ByName>
-                        <Name>地类名称</Name>
+                        <ByName>要素代码</ByName>
+                        <Name>YSDM</Name>
                       </Field>
                       <Field>
-                        <ByName>座落单位名</ByName>
-                        <Name>座落单位名</Name>
+                        <ByName>控制区面积(m²)</ByName>
+                        <Name>KZMJ</Name>
                       </Field>
                     </DetailFields>
                   </MapLayer>
-
-
-
                 </Children>
               </MapLayer>
             </Children>
@@ -1789,13 +1600,13 @@
             <Checked>false</Checked>
             <Children>
               <MapLayer>
-                <ID>tree_yjjbntg</ID>
-                <Text>永久基本农田</Text>
+                <ID>CSZBFW</ID>
+                <Text>城市周边范围</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:FDDJD</TypeName>
+                <TypeName>ktw:CSZBFW</TypeName>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
                 <Styles/>
@@ -1803,17 +1614,17 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>地类名称,权属单位名</SearchFields>
-                <DisplayFields>地类名称,权属单位名</DisplayFields>
+                <SearchFields>BSM,ZDDW</SearchFields>
+                <DisplayFields>BSM,ZDDW</DisplayFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_bhpk</ID>
+                <ID>JBNTBHPK</ID>
                 <Text>基本农田保护片块</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:FDDJM</TypeName>
+                <TypeName>ktw:JBNTBHPK</TypeName>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
                 <Styles/>
@@ -1821,35 +1632,35 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>DLMC,QSDWMC</SearchFields>
-                <DisplayFields>DLMC,QSDWMC</DisplayFields>
+                <SearchFields>BSM,BHPKBH</SearchFields>
+                <DisplayFields>BSM,BHPKBH</DisplayFields>
                 <DetailFields>
                   <Field>
-                    <ByName>单位名称</ByName>
-                    <Name>DLMC</Name>
+                    <ByName>标识码</ByName>
+                    <Name>BSM</Name>
                   </Field>
                   <Field>
-                    <ByName>权属单位名称</ByName>
-                    <Name>QSDWMC</Name>
+                    <ByName>保护片块编号</ByName>
+                    <Name>BHPKBH</Name>
                   </Field>
                   <Field>
-                    <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
+                    <ByName>保护片块面积(m²)</ByName>
+                    <Name>BHPKMJ</Name>
                   </Field>
                   <Field>
-                    <ByName>地块周长(m)</ByName>
-                    <Name>mpLength</Name>
+                    <ByName>基本农田面积(m²)</ByName>
+                    <Name>JBNTMJ</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_jbntbhqa</ID>
+                <ID>JBNTBHQ</ID>
                 <Text>基本农田保护区</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:FDDJM</TypeName>
+                <TypeName>ktw:JBNTBHQ</TypeName>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
                 <Styles/>
@@ -1857,35 +1668,39 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>DLMC,QSDWMC</SearchFields>
-                <DisplayFields>DLMC,QSDWMC</DisplayFields>
+                <SearchFields>BSM,BHQBH</SearchFields>
+                <DisplayFields>BSM,BHQBH</DisplayFields>
                 <DetailFields>
                   <Field>
-                    <ByName>单位名称</ByName>
-                    <Name>DLMC</Name>
+                    <ByName>标识码</ByName>
+                    <Name>BSM</Name>
                   </Field>
                   <Field>
-                    <ByName>权属单位名称</ByName>
-                    <Name>QSDWMC</Name>
+                    <ByName>保护区编号</ByName>
+                    <Name>BHQBH</Name>
                   </Field>
                   <Field>
-                    <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
+                    <ByName>保护区面积(m²)</ByName>
+                    <Name>BHQMJ</Name>
                   </Field>
                   <Field>
-                    <ByName>地块周长(m)</ByName>
-                    <Name>mpLength</Name>
+                    <ByName>保护区开始时间</ByName>
+                    <Name>BHKSSJ</Name>
+                  </Field>
+                  <Field>
+                    <ByName>保护区结束时间</ByName>
+                    <Name>BHJSSJ</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_bhtba</ID>
+                <ID>JBNTBHTB</ID>
                 <Text>基本农田保护图斑</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:FDDJM</TypeName>
+                <TypeName>ktw:JBNTBHTB</TypeName>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
                 <Styles/>
@@ -1897,7 +1712,7 @@
                 <DisplayFields>DLMC,QSDWMC</DisplayFields>
                 <DetailFields>
                   <Field>
-                    <ByName>单位名称</ByName>
+                    <ByName>地理名称</ByName>
                     <Name>DLMC</Name>
                   </Field>
                   <Field>
@@ -1906,22 +1721,22 @@
                   </Field>
                   <Field>
                     <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
+                    <Name>TBMJ</Name>
                   </Field>
                   <Field>
-                    <ByName>地块周长(m)</ByName>
-                    <Name>mpLength</Name>
+                    <ByName>基本农田面积(m²)</ByName>
+                    <Name>JBNTMJ</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_bzp</ID>
+                <ID>JBNTBZP</ID>
                 <Text>基本农田标志牌</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:FDDJM</TypeName>
+                <TypeName>ktw:JBNTBZP</TypeName>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
                 <Styles/>
@@ -1929,35 +1744,35 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>DLMC,QSDWMC</SearchFields>
-                <DisplayFields>DLMC,QSDWMC</DisplayFields>
+                <SearchFields>BSM,BZPBH</SearchFields>
+                <DisplayFields>BSM,BZPBH</DisplayFields>
                 <DetailFields>
                   <Field>
-                    <ByName>单位名称</ByName>
-                    <Name>DLMC</Name>
+                    <ByName>标识码</ByName>
+                    <Name>BSM</Name>
                   </Field>
                   <Field>
-                    <ByName>权属单位名称</ByName>
-                    <Name>QSDWMC</Name>
+                    <ByName>标志牌编号</ByName>
+                    <Name>BZPBH</Name>
                   </Field>
                   <Field>
-                    <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
+                    <ByName>行政区名称</ByName>
+                    <Name>XZQMC</Name>
                   </Field>
                   <Field>
-                    <ByName>地块周长(m)</ByName>
-                    <Name>mpLength</Name>
+                    <ByName>责任单位</ByName>
+                    <Name>ZRDW</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_bzpzji</ID>
+                <ID>JBNTBZPZJ</ID>
                 <Text>基本农田标志牌注记</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:FDDJM</TypeName>
+                <TypeName>ktw:JBNTBZPZJ</TypeName>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
                 <Styles/>
@@ -1965,35 +1780,17 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>DLMC,QSDWMC</SearchFields>
-                <DisplayFields>DLMC,QSDWMC</DisplayFields>
-                <DetailFields>
-                  <Field>
-                    <ByName>单位名称</ByName>
-                    <Name>DLMC</Name>
-                  </Field>
-                  <Field>
-                    <ByName>权属单位名称</ByName>
-                    <Name>QSDWMC</Name>
-                  </Field>
-                  <Field>
-                    <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
-                  </Field>
-                  <Field>
-                    <ByName>地块周长(m)</ByName>
-                    <Name>mpLength</Name>
-                  </Field>
-                </DetailFields>
+                <SearchFields>BSM,ZJNR</SearchFields>
+                <DisplayFields>BSM,ZJNR</DisplayFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_hrhcc</ID>
+                <ID>JBNTHRHC</ID>
                 <Text>基本农田划入划出</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:FDDJM</TypeName>
+                <TypeName>ktw:JBNTHRHC</TypeName>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
                 <Styles/>
@@ -2001,35 +1798,35 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>DLMC,QSDWMC</SearchFields>
-                <DisplayFields>DLMC,QSDWMC</DisplayFields>
+                <SearchFields>BSM,HRHCTBBH</SearchFields>
+                <DisplayFields>BSM,HRHCTBBH</DisplayFields>
                 <DetailFields>
                   <Field>
-                    <ByName>单位名称</ByName>
-                    <Name>DLMC</Name>
+                    <ByName>标识码</ByName>
+                    <Name>BSM</Name>
                   </Field>
                   <Field>
-                    <ByName>权属单位名称</ByName>
-                    <Name>QSDWMC</Name>
+                    <ByName>划入划出图斑编号</ByName>
+                    <Name>HRHCTBBH</Name>
                   </Field>
                   <Field>
-                    <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
+                    <ByName>图斑面积(m²)</ByName>
+                    <Name>TBMJ</Name>
                   </Field>
                   <Field>
-                    <ByName>地块周长(m)</ByName>
-                    <Name>mpLength</Name>
+                    <ByName>所属行政区</ByName>
+                    <Name>XZQMC</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_hczjn</ID>
+                <ID>JBNTHRHCBJ</ID>
                 <Text>基本农田划入划出注记</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:FDDJM</TypeName>
+                <TypeName>ktw:JBNTHRHCBJ</TypeName>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
                 <Styles/>
@@ -2037,35 +1834,35 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>DLMC,QSDWMC</SearchFields>
-                <DisplayFields>DLMC,QSDWMC</DisplayFields>
+                <SearchFields>BSM,HRHCTBBH</SearchFields>
+                <DisplayFields>BSM,HRHCTBBH</DisplayFields>
                 <DetailFields>
                   <Field>
-                    <ByName>单位名称</ByName>
-                    <Name>DLMC</Name>
+                    <ByName>标识码</ByName>
+                    <Name>BSM</Name>
                   </Field>
                   <Field>
-                    <ByName>权属单位名称</ByName>
-                    <Name>QSDWMC</Name>
+                    <ByName>划入划出图斑编号</ByName>
+                    <Name>HRHCTBBH</Name>
                   </Field>
                   <Field>
-                    <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
+                    <ByName>图斑面积(m²)</ByName>
+                    <Name>TBMJ</Name>
                   </Field>
                   <Field>
-                    <ByName>地块周长(m)</ByName>
-                    <Name>mpLength</Name>
+                    <ByName>所属行政区</ByName>
+                    <Name>XZQMC</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
               <MapLayer>
-                <ID>tree_jbzhik</ID>
+                <ID>JBNTZJ</ID>
                 <Text>基本农田注记</Text>
                 <Visible>true</Visible>
                 <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
+                <EPSG>EPSG:4490</EPSG>
                 <Filter/>
-                <TypeName>onemap:FDDJM</TypeName>
+                <TypeName>ktw:JBNTZJ</TypeName>
                 <Sld/>
                 <IconCls>icon-tree-polygon</IconCls>
                 <Styles/>
@@ -2073,38 +1870,12 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>DLMC,QSDWMC</SearchFields>
-                <DisplayFields>DLMC,QSDWMC</DisplayFields>
-                <DetailFields>
-                  <Field>
-                    <ByName>单位名称</ByName>
-                    <Name>DLMC</Name>
-                  </Field>
-                  <Field>
-                    <ByName>权属单位名称</ByName>
-                    <Name>QSDWMC</Name>
-                  </Field>
-                  <Field>
-                    <ByName>土地面积(m²)</ByName>
-                    <Name>Shape_Area</Name>
-                  </Field>
-                  <Field>
-                    <ByName>地块周长(m)</ByName>
-                    <Name>mpLength</Name>
-                  </Field>
-                </DetailFields>
+                <SearchFields>BSM,ZJNR</SearchFields>
+                <DisplayFields>BSM,ZJNR</DisplayFields>
               </MapLayer>
             </Children>
           </MapLayer>
         </Children>
-      </MapLayer>
-      <MapLayer>
-        <ID>1000209</ID>
-        <Text>社会经济</Text>
-        <Icon>image/maptool/layers.png</Icon>
-        <Visible>true</Visible>
-        <Open>true</Open>
-        <Checked>false</Checked>
       </MapLayer>
       <MapLayer>
         <ID>1000212</ID>
@@ -2125,14 +1896,9 @@
               <MapLayer>
                 <ID>tree_yjjbntg</ID>
                 <Text>2013</Text>
+                <Icon>image/maptool/layers.png</Icon>
                 <Visible>true</Visible>
-                <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
-                <Filter/>
-                <TypeName>onemap:FDDJD</TypeName>
-                <Sld/>
-                <IconCls>icon-tree-polygon</IconCls>
-                <Styles/>
+                <Open>false</Open>
                 <Checked>false</Checked>
                 <Children>
                   <MapLayer>
@@ -2244,13 +2010,13 @@
                     </DetailFields>
                   </MapLayer>
                   <MapLayer>
-                    <ID>tree_tb</ID>
+                    <ID>DLTB2013</ID>
                     <Text>地类图斑</Text>
                     <Visible>true</Visible>
                     <Url>OneMapOWS</Url>
-                    <EPSG>EPSG:4610</EPSG>
+                    <EPSG>EPSG:4490</EPSG>
                     <Filter/>
-                    <TypeName>onemap:FDDJM</TypeName>
+                    <TypeName>ktw:DLTB2013</TypeName>
                     <Sld/>
                     <IconCls>icon-tree-polygon</IconCls>
                     <Styles/>
@@ -2262,7 +2028,7 @@
                     <DisplayFields>DLMC,QSDWMC</DisplayFields>
                     <DetailFields>
                       <Field>
-                        <ByName>单位名称</ByName>
+                        <ByName>地类名称</ByName>
                         <Name>DLMC</Name>
                       </Field>
                       <Field>
@@ -2270,12 +2036,8 @@
                         <Name>QSDWMC</Name>
                       </Field>
                       <Field>
-                        <ByName>土地面积(m²)</ByName>
-                        <Name>Shape_Area</Name>
-                      </Field>
-                      <Field>
-                        <ByName>地块周长(m)</ByName>
-                        <Name>mpLength</Name>
+                        <ByName>图斑面积(m²)</ByName>
+                        <Name>TBMJ</Name>
                       </Field>
                     </DetailFields>
                   </MapLayer>
@@ -2507,14 +2269,9 @@
               <MapLayer>
                 <ID>tree_yjjbntg4</ID>
                 <Text>2014</Text>
+                <Icon>image/maptool/layers.png</Icon>
                 <Visible>true</Visible>
-                <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
-                <Filter/>
-                <TypeName>onemap:FDDJD</TypeName>
-                <Sld/>
-                <IconCls>icon-tree-polygon</IconCls>
-                <Styles/>
+                <Open>false</Open>
                 <Checked>false</Checked>
                 <Children>
                   <MapLayer>
@@ -2889,14 +2646,9 @@
               <MapLayer>
                 <ID>tree_yjjbntg5</ID>
                 <Text>2015</Text>
+                <Icon>image/maptool/layers.png</Icon>
                 <Visible>true</Visible>
-                <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
-                <Filter/>
-                <TypeName>onemap:FDDJD</TypeName>
-                <Sld/>
-                <IconCls>icon-tree-polygon</IconCls>
-                <Styles/>
+                <Open>false</Open>
                 <Checked>false</Checked>
                 <Children>
                   <MapLayer>
@@ -3008,13 +2760,13 @@
                     </DetailFields>
                   </MapLayer>
                   <MapLayer>
-                    <ID>tree_tb</ID>
+                    <ID>DLTB2015</ID>
                     <Text>地类图斑</Text>
                     <Visible>true</Visible>
                     <Url>OneMapOWS</Url>
-                    <EPSG>EPSG:4610</EPSG>
+                    <EPSG>EPSG:4490</EPSG>
                     <Filter/>
-                    <TypeName>onemap:FDDJM</TypeName>
+                    <TypeName>ktw:DLTB2015</TypeName>
                     <Sld/>
                     <IconCls>icon-tree-polygon</IconCls>
                     <Styles/>
@@ -3271,14 +3023,9 @@
               <MapLayer>
                 <ID>tree_yjjbntg6</ID>
                 <Text>2016</Text>
+                <Icon>image/maptool/layers.png</Icon>
                 <Visible>true</Visible>
-                <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
-                <Filter/>
-                <TypeName>onemap:FDDJD</TypeName>
-                <Sld/>
-                <IconCls>icon-tree-polygon</IconCls>
-                <Styles/>
+                <Open>false</Open>
                 <Checked>false</Checked>
                 <Children>
                   <MapLayer>
@@ -3390,13 +3137,13 @@
                     </DetailFields>
                   </MapLayer>
                   <MapLayer>
-                    <ID>tree_tb</ID>
+                    <ID>DLTB2016</ID>
                     <Text>地类图斑</Text>
                     <Visible>true</Visible>
                     <Url>OneMapOWS</Url>
-                    <EPSG>EPSG:4610</EPSG>
+                    <EPSG>EPSG:4490</EPSG>
                     <Filter/>
-                    <TypeName>onemap:FDDJM</TypeName>
+                    <TypeName>ktw:DLTB2016</TypeName>
                     <Sld/>
                     <IconCls>icon-tree-polygon</IconCls>
                     <Styles/>
@@ -3408,7 +3155,7 @@
                     <DisplayFields>DLMC,QSDWMC</DisplayFields>
                     <DetailFields>
                       <Field>
-                        <ByName>单位名称</ByName>
+                        <ByName>地类名称</ByName>
                         <Name>DLMC</Name>
                       </Field>
                       <Field>
@@ -3416,12 +3163,8 @@
                         <Name>QSDWMC</Name>
                       </Field>
                       <Field>
-                        <ByName>土地面积(m²)</ByName>
-                        <Name>Shape_Area</Name>
-                      </Field>
-                      <Field>
-                        <ByName>地块周长(m)</ByName>
-                        <Name>mpLength</Name>
+                        <ByName>图斑面积(m²)</ByName>
+                        <Name>TBMJ</Name>
                       </Field>
                     </DetailFields>
                   </MapLayer>
@@ -3653,14 +3396,9 @@
               <MapLayer>
                 <ID>tree_yjjbntg7</ID>
                 <Text>2017</Text>
+                <Icon>image/maptool/layers.png</Icon>
                 <Visible>true</Visible>
-                <Url>OneMapOWS</Url>
-                <EPSG>EPSG:4610</EPSG>
-                <Filter/>
-                <TypeName>onemap:FDDJD</TypeName>
-                <Sld/>
-                <IconCls>icon-tree-polygon</IconCls>
-                <Styles/>
+                <Open>false</Open>
                 <Checked>false</Checked>
                 <Children>
                   <MapLayer>
@@ -3772,13 +3510,13 @@
                     </DetailFields>
                   </MapLayer>
                   <MapLayer>
-                    <ID>tree_tb</ID>
+                    <ID>DLTB2017</ID>
                     <Text>地类图斑</Text>
                     <Visible>true</Visible>
                     <Url>OneMapOWS</Url>
-                    <EPSG>EPSG:4610</EPSG>
+                    <EPSG>EPSG:4490</EPSG>
                     <Filter/>
-                    <TypeName>onemap:FDDJM</TypeName>
+                    <TypeName>ktw:DLTB2017</TypeName>
                     <Sld/>
                     <IconCls>icon-tree-polygon</IconCls>
                     <Styles/>
@@ -3790,7 +3528,7 @@
                     <DisplayFields>DLMC,QSDWMC</DisplayFields>
                     <DetailFields>
                       <Field>
-                        <ByName>单位名称</ByName>
+                        <ByName>地类名称</ByName>
                         <Name>DLMC</Name>
                       </Field>
                       <Field>
@@ -3798,12 +3536,8 @@
                         <Name>QSDWMC</Name>
                       </Field>
                       <Field>
-                        <ByName>土地面积(m²)</ByName>
-                        <Name>Shape_Area</Name>
-                      </Field>
-                      <Field>
-                        <ByName>地块周长(m)</ByName>
-                        <Name>mpLength</Name>
+                        <ByName>图斑面积(m²)</ByName>
+                        <Name>TBMJ</Name>
                       </Field>
                     </DetailFields>
                   </MapLayer>
@@ -4086,8 +3820,8 @@
           </MapLayer>-->
         </Children>
       </MapLayer>
-    </ArrayOfMapLayer> 
-  </SystemMap>  
+    </ArrayOfMapLayer>
+  </SystemMap>
   <!--地址 -->  
   <SystemUri> 
     <RelativeUris> 
@@ -4106,7 +3840,7 @@
     </BasicUris>  
     <BasicUris> 
       <ID>GisUrl</ID>  
-      <Uri>http://192.168.1.90:8086/</Uri>
+      <Uri>http://192.168.1.93:8080/</Uri>
     </BasicUris> 
   </SystemUri>  
   <!--业务系统扩展 -->  
@@ -5929,62 +5663,62 @@
         </BtnAnalysis> 
       </W> 
     </Analysis>  
-    <!--土地利用变化监测下拉图层配置项-->  
-    <Tdlybh> 
-      <!--叠加结果图层渲染样式DLTB_WP_YJDL-->  
-      <Styles>DLTB_WP_YJDL</Styles>  
-      <analysislayer> 
-        <destcrs>EPSG:2383</destcrs>  
-        <name>2012年地类图斑</name>  
-        <nf>2012年</nf>  
-        <styles>DLTB_WP_YJDL</styles>  
-        <layerepsg>EPSG:4610</layerepsg>  
-        <layerurl>192.168.1.70:8081</layerurl>  
-        <layername>onemap:onemap_TDLYXZ_2012</layername>  
-        <analysisfield>一级分类</analysisfield> 
-      </analysislayer>  
-      <!-- <analysislayer>
-      <destcrs>EPSG:4546</destcrs>
-      <name>2012年地类图斑</name>
-      <nf>2012年</nf>
-      <styles>DLTB_WP_YJDL</styles>
-      <layerepsg>EPSG:4490</layerepsg>      
-      <layerurl>172.168.230.133:8080</layerurl>
-      <layername>ktw:DLTB_2012</layername>
-      <analysisfield>一级分类</analysisfield>
-    </analysislayer>
-    <analysislayer>
-      <destcrs>EPSG:4546</destcrs>
-      <name>2013年地类图斑</name>
-      <nf>2013年</nf>
-      <styles>DLTB_WP_YJDL</styles>
-      <layerepsg>EPSG:4490</layerepsg>      
-      <layerurl>172.168.230.131:8080</layerurl>
-      <layername>ktw:zhangshashidileituba</layername>
-      <analysisfield>一级分类</analysisfield>
-    </analysislayer>-->  
-      <analysislayer> 
-        <destcrs>EPSG:2383</destcrs>  
-        <name>2013年地类图斑</name>  
-        <nf>2013年</nf>  
-        <styles>DLTB_WP_YJDL</styles>  
-        <layerepsg>EPSG:4610</layerepsg>  
-        <layerurl>192.168.1.70:8081</layerurl>  
-        <layername>onemap:onemap_TDLYXZ_2013</layername>  
-        <analysisfield>一级分类</analysisfield> 
-      </analysislayer>  
-      <!-- <analysislayer>
-      <destcrs>EPSG:4546</destcrs>
-      <name>2016年地类图斑</name>     
-      <nf>2016年</nf>
-      <styles>DLTB_WP_YJDL</styles>
-      <layerepsg>EPSG:4490</layerepsg>
-      <layerurl>172.168.230.132:8080</layerurl>
-      <layername>ktw:DLTB_2016</layername>
-      <analysisfield>一级分类</analysisfield>
-    </analysislayer>--> 
-    </Tdlybh>  
-    <!--辅助审批图层配置-->  
+    <!--土地利用变化监测下拉图层配置项-->
+    <Tdlybh>
+      <!--叠加结果图层渲染样式DLTB_WP_YJDL-->
+      <Styles>DLTB_WP_YJDL</Styles>
+      <analysislayer>
+        <destcrs>EPSG:4490</destcrs>
+        <name>2013年地类图斑</name>
+        <nf>2013年</nf>
+        <styles>dltb01</styles>
+        <layerepsg>EPSG:4490</layerepsg>
+        <layerurl>192.168.1.90:8086</layerurl>
+        <layername>ktw:DLTB2013</layername>
+        <analysisfield>DLMCYJ</analysisfield>
+      </analysislayer>
+      <analysislayer>
+        <destcrs>EPSG:4490</destcrs>
+        <name>2014年地类图斑</name>
+        <nf>2014年</nf>
+        <styles>dltb01</styles>
+        <layerepsg>EPSG:4490</layerepsg>
+        <layerurl>192.168.1.90:8086</layerurl>
+        <layername>ktw:DLTB2014</layername>
+        <analysisfield>DLMCYJ</analysisfield>
+      </analysislayer>
+      <analysislayer>
+        <destcrs>EPSG:4490</destcrs>
+        <name>2015年地类图斑</name>
+        <nf>2015年</nf>
+        <styles>dltb01</styles>
+        <layerepsg>EPSG:4490</layerepsg>
+        <layerurl>192.168.1.90:8086</layerurl>
+        <layername>ktw:DLTB2015</layername>
+        <analysisfield>DLMCYJ</analysisfield>
+      </analysislayer>
+      <analysislayer>
+        <destcrs>EPSG:4490</destcrs>
+        <name>2016年地类图斑</name>
+        <nf>2016年</nf>
+        <styles>dltb01</styles>
+        <layerepsg>EPSG:4610</layerepsg>
+        <layerurl>192.168.1.90:8086</layerurl>
+        <layername>ktw:DLTB2016</layername>
+        <analysisfield>DLMCYJ</analysisfield>
+      </analysislayer>
+      <analysislayer>
+        <destcrs>EPSG:4490</destcrs>
+        <name>2017年地类图斑</name>
+        <nf>2017年</nf>
+        <styles>dltb01</styles>
+        <layerepsg>EPSG:4490</layerepsg>
+        <layerurl>192.168.1.90:8086</layerurl>
+        <layername>ktw:DLTB2017</layername>
+        <analysisfield>一级分类</analysisfield>
+      </analysislayer>
+    </Tdlybh>
+    <!--辅助审批图层配置-->
     <Approve> 
       <Layer> 
         <ID>JBNT</ID>  

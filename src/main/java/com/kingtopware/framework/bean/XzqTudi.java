@@ -1,12 +1,14 @@
 package com.kingtopware.framework.bean;
 
-public class XzqTudi {
-    private Float sum;
+import java.io.Serializable;
+
+public class XzqTudi implements Serializable{
+    private Double sum;
     private String name;
-    public Float getSum() {
+    public Double getSum() {
         return sum;
     }
-    public void setSum(Float sum) {
+    public void setSum(Double sum) {
         this.sum = sum;
     }
 

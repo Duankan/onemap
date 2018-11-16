@@ -4,17 +4,17 @@ public class Datagrid implements Serializable{
     private static final long serialVersionUID = 1L;
     private String startdate;
     private String order;
-    private String gendi;
-    private String yuan;
-    private String lindi;
-    private String cao;
-    private String jiaot;
-    private String shuili;
-    private String qita;
-    private String chenzhen;
+    private Double gendi;
+    private Double yuan;
+    private Double lindi;
+    private Double cao;
+    private Double jiaot;
+    private Double shuili;
+    private Double qita;
+    private Double chenzhen;
     private String xzqname;
     private String areacode;
-    private String sum;
+    private Double sum;
 
     public String getStartdate() {
         return startdate;
@@ -32,11 +32,11 @@ public class Datagrid implements Serializable{
         this.order = order;
     }
 
-    public String getSum() {
+    public Double getSum() {
         return sum;
     }
 
-    public void setSum(String sum) {
+    public void setSum(Double sum) {
         sum = sum;
     }
 
@@ -60,67 +60,67 @@ public class Datagrid implements Serializable{
         return serialVersionUID;
     }
 
-    public String getGendi() {
+    public Double getGendi() {
         return gendi;
     }
 
-    public void setGendi(String gendi) {
+    public void setGendi(Double gendi) {
         this.gendi = gendi;
     }
 
-    public String getYuan() {
+    public Double getYuan() {
         return yuan;
     }
 
-    public void setYuan(String yuan) {
+    public void setYuan(Double yuan) {
         this.yuan = yuan;
     }
 
-    public String getLindi() {
+    public Double getLindi() {
         return lindi;
     }
 
-    public void setLindi(String lindi) {
+    public void setLindi(Double lindi) {
         this.lindi = lindi;
     }
 
-    public String getCao() {
+    public Double getCao() {
         return cao;
     }
 
-    public void setCao(String cao) {
+    public void setCao(Double cao) {
         this.cao = cao;
     }
 
-    public String getJiaot() {
+    public Double getJiaot() {
         return jiaot;
     }
 
-    public void setJiaot(String jiaot) {
+    public void setJiaot(Double jiaot) {
         this.jiaot = jiaot;
     }
 
-    public String getShuili() {
+    public Double getShuili() {
         return shuili;
     }
 
-    public void setShuili(String shuili) {
+    public void setShuili(Double shuili) {
         this.shuili = shuili;
     }
 
-    public String getQita() {
+    public Double getQita() {
         return qita;
     }
 
-    public void setQita(String qita) {
+    public void setQita(Double qita) {
         this.qita = qita;
     }
 
-    public String getChenzhen() {
+    public Double getChenzhen() {
         return chenzhen;
     }
 
-    public void setChenzhen(String chenzhen) {
+    public void setChenzhen(Double chenzhen) {
         this.chenzhen = chenzhen;
     }
 }
