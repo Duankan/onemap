@@ -6,7 +6,8 @@
         //保存侧面板是否可见
         var rightVisible, bottomVisible, leftVisible, topVisible;
         //保存图层树、图层选择树位置、高级查询位置、影像切换图标位置、工具箱位置、比例尺位置、坐标提示位置
-        var pos_tree = {}, pos_tree_select = {}, pos_globalQuery = {}, pos_tools = {}, pos_tools2 = {}, pos_switch = {}, pos_scale = {}, pos_latlng = {};
+        var pos_tree = {}, pos_tree_select = {}, pos_globalQuery = {}, pos_tools = {}, pos_tools2 = {}, pos_switch = {},
+            pos_scale = {}, pos_latlng = {};
         var options = {
             weight: 2,
             color: '#F9B140', //多边形颜色
@@ -16,6 +17,7 @@
         };
         //测量控件
         var measure;
+
         function startMearsure(type) {
             if (measure) {
                 measure.removeTo();
@@ -46,7 +48,10 @@
             ktw.App.LeftPanel.SetVisible(!isunfull ? false : leftVisible);
             ktw.App.RightPanel.SetVisible(!isunfull ? false : rightVisible);
             ktw.App.BottomPanel.SetVisible(!isunfull ? false : bottomVisible);
-            $(".commontab").css(!isunfull ? { top: "5px", left: "60px" } : { top: pos_globalQuery.top, left: pos_globalQuery.left });
+            $(".commontab").css(!isunfull ? { top: "5px", left: "60px" } : {
+                top: pos_globalQuery.top,
+                left: pos_globalQuery.left
+            });
             $("#total-layertree").css(!isunfull ? { top: "5px", left: "5px" } : { top: pos_tree.top, left: pos_tree.left });
             $(".MapSwitch").css(!isunfull ? { top: "5px" } : { top: pos_switch.top });
             $("#selectLayer").css(!isunfull ? { top: "55px" } : { top: pos_tree_select.top });
@@ -96,17 +101,17 @@
         //放置多屏对比、双拼对比、卷帘
         var toolsDiv2 = $('<div id="toolsbox2" style="position: absolute;top:165px;width:40px;height:36px;right:10px;z-index:3"></div>');
         var SplitTwoScreen = $(
-        		'<div  class="mappanelsymbol toolsymbol"  style=top:0px;right:0px;background-color:#196a86;opacity:0.8;" tag="maptool-SplitTwoScreen" title="双屏对比"><div class="Icon icon-maptool-SplitTwoScreen"></div></div>')
-        		.appendTo(toolsDiv2);
+            '<div  class="mappanelsymbol toolsymbol"  style=top:0px;right:0px;background-color:#196a86;opacity:0.8;" tag="maptool-SplitTwoScreen" title="双屏对比"><div class="Icon icon-maptool-SplitTwoScreen"></div></div>')
+            .appendTo(toolsDiv2);
         var toolsPanel2 = $(
-             '<div id="toolsPanel2" class="mappanelsymbol" style="top:0px;height:35px;width:72px;display:none;right:40px;border-right:0px;"></div>')
-             .appendTo(toolsDiv2);
+            '<div id="toolsPanel2" class="mappanelsymbol" style="top:0px;height:35px;width:72px;display:none;right:40px;border-right:0px;"></div>')
+            .appendTo(toolsDiv2);
         var SplitFourScreen = $(
-          '<div class="toolsymbol" style="solid #999;top:0px;opacity: 0.8;right:0px;" tag="maptool-SplitFourScreen" title="多屏对比"><div class="Icon icon-maptool-SplitFourScreen"></div></div>')
-          .appendTo(toolsPanel2);
+            '<div class="toolsymbol" style="solid #999;top:0px;opacity: 0.8;right:0px;" tag="maptool-SplitFourScreen" title="多屏对比"><div class="Icon icon-maptool-SplitFourScreen"></div></div>')
+            .appendTo(toolsPanel2);
         var RollingScreen = $(
-        		'<div class="toolsymbol" style="border-left:1px solid #999;top:0px; opacity: 0.8;" tag="maptool-RollingScreen" title="卷帘对比"><div class="Icon icon-maptool-RollingScreen"></div></div>')
-        		.appendTo(toolsPanel2);
+            '<div class="toolsymbol" style="border-left:1px solid #999;top:0px; opacity: 0.8;" tag="maptool-RollingScreen" title="卷帘对比"><div class="Icon icon-maptool-RollingScreen"></div></div>')
+            .appendTo(toolsPanel2);
         ktw.App.MapPanel.Target.append(toolsDiv);
         ktw.App.MapPanel.Target.append(toolsDiv2);
         var toolsymbol = $('<div class="mappanelsymbol" style=top:0px;right:0px;background-color:#196a86;opacity:0.8;"><div class="Icon icon-maptool-tool"></div></div>').appendTo(toolsDiv);
@@ -140,28 +145,28 @@
             toolsymbol.next().toggle();
         });
         var toolsPanel = $(
-				'<div id="toolsPanel" class="mappanelsymbol" style="top:42px;height:252px;display:none;right:0px;border-top:0px;"></div>')
-				.appendTo(toolsDiv);
+            '<div id="toolsPanel" class="mappanelsymbol" style="top:42px;height:252px;display:none;right:0px;border-top:0px;"></div>')
+            .appendTo(toolsDiv);
         var screenfull = $(
-				'<div class="toolsymbol" style="border-bottom:1px solid #999;top:0px;" tag="maptool-fullscreen" title="全屏"><div class="Icon icon-maptool-fullscreen"></div></div>')
-				.appendTo(toolsPanel);
+            '<div class="toolsymbol" style="border-bottom:1px solid #999;top:0px;" tag="maptool-fullscreen" title="全屏"><div class="Icon icon-maptool-fullscreen"></div></div>')
+            .appendTo(toolsPanel);
         var fullmap = $(
-				'<div class="toolsymbol" style="border-bottom:1px solid #999;top:36px;" tag="maptool-fullmap" title="全图"><div class="Icon icon-maptool-fullmap"></div></div>')
-				.appendTo(toolsPanel);
+            '<div class="toolsymbol" style="border-bottom:1px solid #999;top:36px;" tag="maptool-fullmap" title="全图"><div class="Icon icon-maptool-fullmap"></div></div>')
+            .appendTo(toolsPanel);
         var measuredistance = $(
-				'<div class="toolsymbol" style="top:72px;border-bottom: 1px solid #999;" tag="maptool-measuredistance" title="测距"><div class="Icon icon-maptool-measuredistance"></div></div>')
-				.appendTo(toolsPanel);
+            '<div class="toolsymbol" style="top:72px;border-bottom: 1px solid #999;" tag="maptool-measuredistance" title="测距"><div class="Icon icon-maptool-measuredistance"></div></div>')
+            .appendTo(toolsPanel);
         var measurearea = $(
-				'<div class="toolsymbol" style="top:108px;border-bottom: 1px solid #999;" tag="maptool-measurearea" title="测面积"><div class="Icon icon-maptool-measurearea"></div></div>')
-				.appendTo(toolsPanel);
+            '<div class="toolsymbol" style="top:108px;border-bottom: 1px solid #999;" tag="maptool-measurearea" title="测面积"><div class="Icon icon-maptool-measurearea"></div></div>')
+            .appendTo(toolsPanel);
         var zoomin = $(
-				'<div class="toolsymbol" style="top:144px;border-bottom: 1px solid #999;" tag="maptool-zoomin" title="放大"><div class="Icon icon-maptool-zoomin"></div></div>')
-				.appendTo(toolsPanel);
+            '<div class="toolsymbol" style="top:144px;border-bottom: 1px solid #999;" tag="maptool-zoomin" title="放大"><div class="Icon icon-maptool-zoomin"></div></div>')
+            .appendTo(toolsPanel);
         var zoomout = $(
-				'<div class="toolsymbol" style="top:180px;border-bottom: 1px solid #999;" tag="maptool-zoomout" title="缩小"><div class="Icon icon-maptool-zoomout"></div></div>')
-				.appendTo(toolsPanel);
+            '<div class="toolsymbol" style="top:180px;border-bottom: 1px solid #999;" tag="maptool-zoomout" title="缩小"><div class="Icon icon-maptool-zoomout"></div></div>')
+            .appendTo(toolsPanel);
         var clearmap = $(
-				'<div class="toolsymbol" style="top:216px;" tag="maptool-clearmap"><div class="Icon icon-maptool-clearmap" title="清除屏幕"></div></div>').appendTo(toolsPanel);
+            '<div class="toolsymbol" style="top:216px;" tag="maptool-clearmap"><div class="Icon icon-maptool-clearmap" title="清除屏幕"></div></div>').appendTo(toolsPanel);
         $(".toolsymbol").mouseenter(function () {
             var tag = $(this).attr("tag");
             $(".Icon", $(this)).removeClass("icon-" + tag);
@@ -173,7 +178,7 @@
         }).click(function () {
             var tag = $(this).attr("tag");
             if (tag == "maptool-fullscreen"
-                    || tag == "maptool-unfullscreen") {
+                || tag == "maptool-unfullscreen") {
                 // 全屏
                 if (tag == "maptool-fullscreen") {
                     fullscreen();
@@ -307,11 +312,16 @@
     }
     //初始化通用查询和通用分析tab
     ktw.InitCommonTab = function () {
+        //var strhtml = "" +
+        //    '<div class="commontab">' +
+        //    '<div class="commontab-query active">查询</div>' +
+        //    '<div class="commontab-analysis">分析</div>' +
+        //    '</div>';
         var strhtml = "" +
-             '<div class="commontab">' +
-                '<div class="commontab-query active">查询</div>' +
-                '<div class="commontab-analysis">分析</div>' +
-             '</div>';
+            '<div class="commontab">' +
+            '<div class="commontab-query active">查询</div>' +
+            '<div class="commontab-analysis">分析</div>' +
+            '</div>';
         var tabs = $(strhtml);
         tabs.find(".commontab-query").click(function () {
             if (ktw.App.GlobalQuery.Target.css("display") == "none") {
@@ -359,7 +369,7 @@
         if (!ktw.IsArray(MapLayer))
             MapLayer = [MapLayer];
         var curarr = Enumerable.From(MapLayer).Where(
-                "s=>s.Visible!='false'").ToArray();
+            "s=>s.Visible!='false'").ToArray();
         for (var i = 0; i < curarr.length; i++) {
             if (curarr[i].Children && curarr[i].Children.MapLayer) {
                 if (curarr[i].Checked == true || curarr[i].Checked == "true") {
@@ -370,10 +380,10 @@
             }
         }
     }
+
     ktw.LayerTree = function (_ArrayOfMapLayer) {
         var $this = this;
         $this.layerdata = layerdata;
-        debugger;
         ArrayOfMapLayer = _ArrayOfMapLayer;
         funExt($this);
         preDealChecked(ArrayOfMapLayer.MapLayer);
@@ -388,6 +398,7 @@
         //勾选/去勾选的添加删除图层操作
         $this.LayoutSelectedList();
     }
+
     function funExt(control) {
         $.extend(control, {
             LayoutSelectedList: function () {
@@ -638,8 +649,10 @@
                         if (layerdata_deleted[i].Type == ktw.MapUtils.GetLayer("searchLayer").get("tag")) {
                             ktw.App.GlobalQuery.Clear();
                             ktw.App.GlobalGlandAnalysis.Clear();
-                        };
-                    } catch (ex) { }
+                        }
+                        ;
+                    } catch (ex) {
+                    }
                     ktw.MapUtils.RemoveLayer("tipicLayer" + layerdata_deleted[i].ID, ktw.App.Map);
 
                 }
@@ -702,88 +715,84 @@
                     var tmp = ktw.GetSystemUrlByRelID(currdata.Url);
                     currdata.Url = tmp == "" ? currdata.Url : tmp;
                     switch (currdata.Type) {
-                        case ktw.LayerType.Mapping:
-                            {
-                                var param = {
-                                    Map: ktw.App.Map,
-                                    ID: "tipicLayer" + currdata.ID
-                                };
-                                ktw.MapLoad.AddArcGISLayer($.extend({}, currdata, param));
-                                break;
+                        case ktw.LayerType.Mapping: {
+                            var param = {
+                                Map: ktw.App.Map,
+                                ID: "tipicLayer" + currdata.ID
+                            };
+                            ktw.MapLoad.AddArcGISLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                        case ktw.LayerType.Tile: {
+                            var param = { Map: ktw.App.Map, ID: "tipicLayer" + currdata.ID };
+                            //处理图例
+                            if (!ktw.IsNull(currdata.Legend)) {
+                                ktw.App.Map.__legend.AddData(currdata.Legend);
                             }
-                        case ktw.LayerType.Tile:
-                            {
-                                var param = { Map: ktw.App.Map, ID: "tipicLayer" + currdata.ID };
-                                //处理图例
-                                if (!ktw.IsNull(currdata.Legend)) {
-                                    ktw.App.Map.__legend.AddData(currdata.Legend);
-                                }
-                                ktw.MapLoad.AddTileLayer($.extend({}, currdata, param));
-                                break;
+                            ktw.MapLoad.AddTileLayer($.extend({}, currdata, param));
+                            break;
+                        }
+                        case ktw.LayerType.WMS: {
+                            var param = {
+                                ID: "tipicLayer" + currdata.ID,
+                                Url: currdata.Url,
+                                Layers: currdata.TypeName,
+                                ServerType: currdata.ServerType ? currdata.ServerType : "hgis",
+                                Map: ktw.App.Map,
+                                ZIndex: parseInt(currdata.Order),
+                                Styles: currdata.Styles,
+                                MaxZoom: currdata.MaxZoom,
+                                MinZoom: currdata.MinZoom
                             }
-                        case ktw.LayerType.WMS:
-                            {
-                                var param = {
-                                    ID: "tipicLayer" + currdata.ID,
-                                    Url: currdata.Url,
-                                    Layers: currdata.TypeName,
-                                    ServerType: currdata.ServerType ? currdata.ServerType : "hgis",
-                                    Map: ktw.App.Map,
-                                    ZIndex: parseInt(currdata.Order),
-                                    Styles: currdata.Styles,
-                                    MaxZoom: currdata.MaxZoom,
-                                    MinZoom: currdata.MinZoom
-                                }
-                                if (!ktw.IsNull(currdata.Sld)) {
-                                    var sldbody = ktw.MapUtils.LoadSLD(currdata.Sld);
-                                    sldbody = sldbody.replace("%LayerName%", currdata.TypeName);
-                                    param.Sldbody = sldbody;
-                                    //使用sldbody时不能指定layers参数
-                                    param.Layers = undefined;
-                                }
-                                if (!ktw.IsNull(currdata.Legend)) {
-                                    ktw.App.Map.__legend.AddData(currdata.Legend);
-                                }
-                                //处理Filter参数
-                                if (!ktw.IsNull(currdata.Filter)) {
-                                    param.CQLFilter = currdata.Filter;
-                                }
-                                if (!ktw.IsNull(currdata.Bounds) &&
-                                    !ktw.IsNull(currdata.Bounds.XMin) &&
-                                    !ktw.IsNull(currdata.Bounds.XMax) &&
-                                    !ktw.IsNull(currdata.Bounds.YMin) &&
-                                    !ktw.IsNull(currdata.Bounds.YMax)) {
-                                    var ext = currdata.Bounds;
-                                    var southWest = L.latLng(parseFloat(ext.YMin), parseFloat(ext.XMin)),
-                                            northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax));
-                                    param.bounds = L.latLngBounds(southWest, northEast);
-                                }
-                                ktw.MapLoad.AddWMSLayer(param);
-                                break;
+                            if (!ktw.IsNull(currdata.Sld)) {
+                                var sldbody = ktw.MapUtils.LoadSLD(currdata.Sld);
+                                sldbody = sldbody.replace("%LayerName%", currdata.TypeName);
+                                param.Sldbody = sldbody;
+                                //使用sldbody时不能指定layers参数
+                                param.Layers = undefined;
                             }
-                        case ktw.LayerType.WMTS:
-                            {
-                                var param = {
-                                    Map: ktw.App.Map,
-                                    ID: "tipicLayer" + currdata.ID,
-                                    Layers: currdata.TypeName
-                                };
-                                if (!ktw.IsNull(currdata.Legend)) {
-                                    ktw.App.Map.__legend.AddData(currdata.Legend);
-                                }
-                                if (!ktw.IsNull(currdata.Bounds) &&
-                                    !ktw.IsNull(currdata.Bounds.XMin) &&
-                                    !ktw.IsNull(currdata.Bounds.XMax) &&
-                                    !ktw.IsNull(currdata.Bounds.YMin) &&
-                                    !ktw.IsNull(currdata.Bounds.YMax)) {
-                                    var ext = currdata.Bounds;
-                                    var southWest = L.latLng(parseFloat(ext.YMin), parseFloat(ext.XMin)),
-                                            northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax));
-                                    param.bounds = L.latLngBounds(southWest, northEast);
-                                }
-                                ktw.MapLoad.AddWMTSLayer($.extend({}, currdata, param));
-                                break;
+                            if (!ktw.IsNull(currdata.Legend)) {
+                                ktw.App.Map.__legend.AddData(currdata.Legend);
                             }
+                            //处理Filter参数
+                            if (!ktw.IsNull(currdata.Filter)) {
+                                param.CQLFilter = currdata.Filter;
+                            }
+                            if (!ktw.IsNull(currdata.Bounds) &&
+                                !ktw.IsNull(currdata.Bounds.XMin) &&
+                                !ktw.IsNull(currdata.Bounds.XMax) &&
+                                !ktw.IsNull(currdata.Bounds.YMin) &&
+                                !ktw.IsNull(currdata.Bounds.YMax)) {
+                                var ext = currdata.Bounds;
+                                var southWest = L.latLng(parseFloat(ext.YMin), parseFloat(ext.XMin)),
+                                    northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax));
+                                param.bounds = L.latLngBounds(southWest, northEast);
+                            }
+                            ktw.MapLoad.AddWMSLayer(param);
+                            break;
+                        }
+                        case ktw.LayerType.WMTS: {
+                            var param = {
+                                Map: ktw.App.Map,
+                                ID: "tipicLayer" + currdata.ID,
+                                Layers: currdata.TypeName
+                            };
+                            if (!ktw.IsNull(currdata.Legend)) {
+                                ktw.App.Map.__legend.AddData(currdata.Legend);
+                            }
+                            if (!ktw.IsNull(currdata.Bounds) &&
+                                !ktw.IsNull(currdata.Bounds.XMin) &&
+                                !ktw.IsNull(currdata.Bounds.XMax) &&
+                                !ktw.IsNull(currdata.Bounds.YMin) &&
+                                !ktw.IsNull(currdata.Bounds.YMax)) {
+                                var ext = currdata.Bounds;
+                                var southWest = L.latLng(parseFloat(ext.YMin), parseFloat(ext.XMin)),
+                                    northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax));
+                                param.bounds = L.latLngBounds(southWest, northEast);
+                            }
+                            ktw.MapLoad.AddWMTSLayer($.extend({}, currdata, param));
+                            break;
+                        }
                     }
                 } else {
                     // 已经存在了该图层
@@ -807,8 +816,8 @@
                 if (!ktw.IsArray(MapLayer))
                     MapLayer = [MapLayer];
                 var curarr = Enumerable.From(MapLayer).Where(
-                        "s=>s.Visible!='false'").OrderBy(
-                        "x=>x.Order").ToArray();
+                    "s=>s.Visible!='false'").OrderBy(
+                    "x=>x.Order").ToArray();
                 for (var i = 0; i < curarr.length; i++) {
                     var layer = {};
                     layer.Tag = curarr[i];
@@ -816,7 +825,7 @@
                         "Value": curarr[i].ID,
                         "Text": curarr[i].Text,
                         "State": curarr[i].Open === "true" ? "open"
-                                : "close",
+                            : "close",
                         "Checked": (curarr[i].Checked === true || curarr[i].Checked == "true"),
                         "iconCls": curarr[i].IconCls,
                         "icon": curarr[i].Icon
@@ -824,12 +833,12 @@
                     data.push(layer);
                     min = 500;
                     if (curarr[i].Url && curarr[i].Url != ""
-                            && (curarr[i].Checked === true || curarr[i].Checked == "true")) {
+                        && (curarr[i].Checked === true || curarr[i].Checked == "true")) {
                         curarr[i].Order = min--;
                         layerdata.push(curarr[i]);
                     }
                     if (curarr[i].Children
-                            && curarr[i].Children.MapLayer) {
+                        && curarr[i].Children.MapLayer) {
                         layer.Child = [];
                         this.GetData(layer.Child, curarr[i].Children.MapLayer, layerdata);
                     }
@@ -847,9 +856,10 @@
                     StateField: "State",
                     TagField: "Tag"
                 });
-
+                //图层树绑定点击事件
                 tree_control.Target.bind("onChecking", function (evt, arg) {
                 }).bind("onChecked", function (evt, arg) {
+
                     // 首先获取所有选中的图层列表
                     var nodes = tree_control.GetChecked(true);
                     // 只获取哪些具有url属性的节点
@@ -911,7 +921,10 @@
                     checkflag = true;
                     evt.preventDefault();
                 }).bind("onClick", function () {
-                    if (checkflag) { checkflag = false; return; }
+                    if (checkflag) {
+                        checkflag = false;
+                        return;
+                    }
                     if ($(arguments[1]).find("span.arrow.expanded").length > 0) {
                         tree_control.Collapse(arguments[1]);
                     } else {
@@ -922,7 +935,8 @@
                     try {
                         $this.contextLayer = null;
                         $this.contextLayer = $(data.target).prop("$this").Tag;
-                    } catch (ex) { }
+                    } catch (ex) {
+                    }
                     if ($this.contextLayer && (!ktw.IsNull($this.contextLayer.Url) || !ktw.IsNull($this.contextLayer.OWS)))
                         $('#mtree').menu('show', { left: data.event.pageX, top: data.event.pageY });
                 });
@@ -995,7 +1009,7 @@
                 }
                 if (size || size.Height) {
                     size.height = parseFloat(size.Height)
-                            + "px";
+                        + "px";
                 }
                 var popbox = new ktw.PopBox({
                     ID: "selectLayer",
@@ -1022,17 +1036,17 @@
                     ktw.App.GlobalQuery.Clear();
                 }
                 ktw.App.BottomPanel.Add(ktw.App.Root
-                        + "html/onemap/layerdata.html", {
-                            layerinfo: layerinfo
-                        });
+                    + "html/onemap/layerdata.html", {
+                        layerinfo: layerinfo
+                    });
             },
             InitTreeMenu: function () {
                 var $this = this;
                 var dom = '<div id="mtree" class="easyui-menu" style="width: 120px; border: 0px">' +
-        '<div id="miProp" data-options="iconCls:\'icon-print\'">查看属性表</div>' +
-        '<div id="miNavLayer" data-options="iconCls:\'icon-search\'">缩放至图层</div>' +
-        '<div id="layer_exout" data-options="iconCls:\'icon-search\'">导出属性表</div>' +
-    '</div>';
+                    '<div id="miProp" data-options="iconCls:\'icon-print\'">查看属性表</div>' +
+                    '<div id="miNavLayer" data-options="iconCls:\'icon-search\'">缩放至图层</div>' +
+                    '<div id="layer_exout" data-options="iconCls:\'icon-search\'">导出属性表</div>' +
+                    '</div>';
                 var menu = $(dom);
                 menu.menu({
                     onShow: function () {
@@ -1058,13 +1072,13 @@
                     var ext;
                     try {
                         var layer = ktw.MapUtils.GetLayer("tipicLayer" +
-                        ktw.App.LayerTree.contextLayer.ID);
+                            ktw.App.LayerTree.contextLayer.ID);
                         var ext = ktw.App.LayerTree.contextLayer.Extent;
                         if (!ext) ext = ktw.App.LayerTree.contextLayer.Bounds;
                         if (ext && ext.XMin) {
                             var southWest = L.latLng(parseFloat(ext.YMin), parseFloat(ext.XMin)),
-                                            northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax)),
-                                            bounds = L.latLngBounds(southWest, northEast);
+                                northEast = L.latLng(parseFloat(ext.YMax), parseFloat(ext.XMax)),
+                                bounds = L.latLngBounds(southWest, northEast);
 
                             ktw.App.Map.fitBounds(bounds, { animate: true, duration: 1 });
                         } else {
@@ -1101,7 +1115,8 @@
                                 }
                             });
                         }
-                    } catch (ex) { }
+                    } catch (ex) {
+                    }
                 });
                 //导出属性表
                 menu.find("#layer_exout").click(function () {
@@ -1144,7 +1159,7 @@
                 Height: 271
             });
             ucMapTip.SetPosition(center, ktw.TrianglePosition.Left,
-					ktw.TrianglePosition.Left);
+                ktw.TrianglePosition.Left);
             $(ucMapTip).one("onClosed", function () {
                 ucMapTip = null;
                 //ktw.App.LifeCtr.HideFlash();//关闭窗口的时候，隐藏生命周期框
@@ -1172,7 +1187,7 @@
         var title, DetailInfo;
         //title = "详细信息";
         title = ktw.IsNull(param.Title) ? "详细信息" : param.Title,
-        ucMapTip.SetTitle(title);
+            ucMapTip.SetTitle(title);
         if (param.Content) {
             //如果传递进来内容
             detailPanel.append(param.Content);
@@ -1195,8 +1210,10 @@
             $this.drawfeature = undefined;//当前绘制的元素
             $this.drawfeature_epsg = undefined;//当前绘制的元素的epsg
             $this.bufferRadius = 0;// 缓冲半径
-            $this.dataGrid = undefined;;
-            $this.polyganKey = undefined;;
+            $this.dataGrid = undefined;
+            ;
+            $this.polyganKey = undefined;
+            ;
             $this.curPageStyle = undefined;
             $this.totalFeatures = undefined;
             $this.PageIndex = ktw.IsNumber(opt.PageIndex) ? opt.PageIndex : 1;
@@ -1207,7 +1224,7 @@
                 if (!ktw.IsArray(MapLayer))
                     MapLayer = [MapLayer];
                 var curarr = Enumerable.From(MapLayer).Where(
-                        "s=>s.Visible!='false'").OrderBy("x=>x.Order").ToArray();
+                    "s=>s.Visible!='false'").OrderBy("x=>x.Order").ToArray();
                 for (var i = 0; i < curarr.length; i++) {
                     $this.LayerInfoConfiger.push(curarr[i]);
                     if (curarr[i].Children && curarr[i].Children.MapLayer) {
@@ -1238,26 +1255,55 @@
                 url: ktw.GetSystemUrlByRelID($this.curLayerinfo.Url),
                 where: "",
                 successFunc: function (res) {
-                    clearTimeout($this._timeout);
-                    $this.HeaderPanel.show();
-                    $this.DataPanel.show();
-                    $this.ShowPanel();//结果框展示
-                    if ($this.totalFeatures == undefined) {
-                        $this.totalFeatures = res.totalFeatures;
+                    if ($this.isIdentify)//识别 不显示结果框 直接弹气泡
+                    {
+                        if (res.totalFeatures == 0) return;                     
+                        ktw.App.HighLight.hightLightFit(res.features[0]);                      
+                        var data = res.features[0];
+                        var content = $("<div></div>");
+                        var fields = $this.curLayerinfo.DetailFields.Field;
+                        //高亮后气泡面板显示的数据
+                        for (var i = 0; i < fields.length; i++) {
+                            var rowdiv = $(
+                                '<div class="row"><div class="Title">'
+                                + fields[i].ByName
+                                + '</div><div class="Content" title="'
+                                + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
+                                : data.properties[fields[i].Name])
+                                + '">'
+                                + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
+                                : data.properties[fields[i].Name])
+                                + '</div></div>').appendTo(content);
+                        }
+                        //弹出气泡框
+                        ktw.ShowMapTip(res.features[0], {
+                            ID: "taxInfo",
+                            Title: "详细信息",
+                            Content: content
+                        });
                     }
-                    var pageInfo = {
-                        pageIndex: $this.PageIndex,
-                        pageSize: $this.PageSize,
-                        totalCount: $this.totalFeatures,
-                        msg: "共{total}条数据"
-                    };
-                    $this.dataGrid.Load(res.features, pageInfo);
-                    $this.waitbox.Close();
+                    else {
+                        clearTimeout($this._timeout);
+                        $this.HeaderPanel.show();
+                        $this.DataPanel.show();
+                        $this.ShowPanel();//结果框展示
+                        if ($this.totalFeatures == undefined) {
+                            $this.totalFeatures = res.totalFeatures;
+                        }
+                        var pageInfo = {
+                            pageIndex: $this.PageIndex,
+                            pageSize: $this.PageSize,
+                            totalCount: $this.totalFeatures,
+                            msg: "共{total}条数据"
+                        };
+                        $this.dataGrid.Load(res.features, pageInfo);
+                        $this.waitbox.Close();
+                    }
                 },
                 failFunc: function (res) {
                     $this.waitbox.Close();
                     $this.dataGrid.Load([], { totalCount: 0, pageIndex: 1, pageSize: 5 });
-                    ktw.Error(res);
+                   // ktw.Error(res);
                     console.error(res);
                 }
             }
@@ -1266,7 +1312,7 @@
             var dom = [];
             dom.push('<div class="globalQuery">');
             dom.push('  <div id="divSearch" class="searchBox">');
-            dom.push('   <div id="txtKey" class="ktw-textbox" style="width: 300px; height: 30px; line-height: 30px; float: left;" opt=\'{"TipInfo":"请输入关键字","TextAlign":"center"}\'></div>');
+            dom.push('   <div id="txtKey" class="ktw-textbox" style="width: 130px; height: 30px; line-height: 30px; float: left;" opt=\'{"TipInfo":"请输入关键字","TextAlign":"center"}\'></div>');
             dom.push('   <div  class="searchButton">搜索</div>');
             dom.push('  </div>');
             dom.push('  <div class="resultPanel">');
@@ -1277,14 +1323,12 @@
             dom.push('     </div>');
             dom.push('    <div class="poiPanel"></div>');
             dom.push('  </div>');
-            dom.push('  <div class="spatialBox">');
+            dom.push('  <div class="spatialBox" >');
             dom.push('   <div class="Button" title="矩形" shapetype="Rectangle" style="margin-left:5px;">');
             dom.push('     <div class="icon-draw-rect" style="height: 16px; width: 16px; margin-top: 3px; margin-left: 3px;"></div>');
             dom.push('   </div>');
-            dom.push('   <div title="清除绘制图形" class="Button" shapetype="Clear">');
-            dom.push('     <div class="icon-maptool-clearmap2" style="height: 16px; width: 16px; margin-top: 3px; margin-left: 3px;"></div>');
-            dom.push('   </div>');
-            dom.push('<div class="popsearch">');
+        
+            //dom.push('<div class="popsearch">');
             dom.push('   <div class="Button" title="多边形" shapetype="Polygon">');
             dom.push('     <div class="icon-draw-polygon" style="height: 16px; width: 16px; margin-top: 3px; margin-left: 3px;"></div>');
             dom.push('   </div>');
@@ -1294,21 +1338,27 @@
             dom.push('   <div class="Button" title="点" shapetype="Point">');
             dom.push('     <div class="icon-draw-point" style="height: 16px; width: 16px; margin-top: 3px; margin-left: 3px;"></div>');
             dom.push('   </div>');
+            dom.push('   <div class="Button" title="识别" shapetype="PointI">');
+            dom.push('     <div class="icon-draw-point-i" style="height: 16px; width: 16px; margin-top: 3px; margin-left: 3px;"></div>');
+            dom.push('   </div>');
             dom.push('   <div class="Button" title="导入坐标文件" shapetype="File">');
             dom.push('     <div class="icon-draw-import" style="height: 16px; width: 16px; margin-top: 3px; margin-left: 3px;"></div>');
             dom.push('   </div>');
             dom.push('<input type="file" accept="text/plain" id="ImportFile" name="coorfile" style="display:none" />')
+            dom.push('   <div title="清除绘制图形" class="Button" shapetype="Clear">');
+            dom.push('     <div class="icon-maptool-clearmap2" style="height: 16px; width: 16px; margin-top: 3px; margin-left: 3px;"></div>');
+            dom.push('   </div>');
             dom.push('  </div>');
             dom.push('</div>');
-            dom.push(' </div>');
+            //dom.push(' </div>');
             $this.Target = $(dom.join(''));
-            $this.Target.find(".spatialBox").hover(function () {
-                $(this).height(55);
-                $this.Target.find(".popsearch").show();
-            }, function () {
-                $(this).height(28);
-                $this.Target.find(".popsearch").hide();
-            })
+            //$this.Target.find(".spatialBox").hover(function () {
+            //    $(this).height(55);
+            //    $this.Target.find(".popsearch").show();
+            //}, function () {
+            //    $(this).height(28);
+            //    $this.Target.find(".popsearch").hide();
+            //})
             //ktw.App.MapPanel.Target.append($this.Target);
             $(".commontab").append($this.Target);
             ktw.InitControl();// 初始化框架控件
@@ -1318,13 +1368,14 @@
                     $this.Target.find(".searchButton").click();
                 }
             });
-            $this.DrawButtons = $this.Target.find(".Button");
-            $this.SearchButton = $this.Target.find(".searchButton");
-            $this.ResultPanel = $this.Target.find(".resultPanel");
-            $this.DataPanel = $this.Target.find(".poiPanel");
+            $this.DrawButtons = $this.Target.find(".Button");//查询框的右边四个小工具
+            $this.SearchButton = $this.Target.find(".searchButton");//查询对应的搜索按钮
+            $this.ResultPanel = $this.Target.find(".resultPanel");//查询的结果面板
+            $this.DataPanel = $this.Target.find(".poiPanel");//结果面板的一条条数据面板
             $this.waitbox = new ktw.UCWaitBox($this.DataPanel);
-            $this.ResultHeaders = $this.Target.find("#headerTop");
-            $this.HeaderPanel = $this.Target.find(".headerPanel");
+            $this.ResultHeaders = $this.Target.find("#headerTop");//结果面板上放的显示图层名字的面板
+            $this.HeaderPanel = $this.Target.find(".headerPanel");//上面的父元素
+            //输入框悬浮事件
             $this.Target.find("#txtKey").hover(function () {
                 if ($this._timeout) clearTimeout($this._timeout);
                 if ($this.ResultPanel.css("display") == "none") {
@@ -1341,6 +1392,7 @@
                     }, 100);
                 }
             });
+            //有显示图层名称名字的div悬浮事件
             $this.HeaderPanel.hover(function () {
                 if ($this._timeout) clearTimeout($this._timeout);
             }, function () {
@@ -1352,20 +1404,31 @@
                     }, 100);
                 }
             });
+            //画框点等的点击事件
             $this.DrawButtons.click(function () {
+                $this.isIdentify = false;
                 spatialFilter = "";
                 $this.drawfeature = null;
                 $this.draw.clear();
-                var type = $(this).attr("shapetype");
+                var type = $(this).attr("shapetype");//绘制图形类型
+                $this.shapeType = type;
                 switch (type) {
-                    case "Rectangle":
-                    case "Polygon":
-                    case "Circle":
-                    case "Point": {
-                        $this.totalFeatures = undefined;
-                        $this.Draw(type, $this);
-                        break;
-                    }
+                    case "Rectangle"://矩形
+                    case "Polygon"://多边形
+                    case "Circle"://圆
+                    case "Point": //点
+                        {
+                            $this.totalFeatures = undefined;
+                            $this.Draw(type, $this);
+                            break;
+                        }
+                    case "PointI": //添加识别提取功能
+                        {
+                            $this.isIdentify = true;
+                            $this.totalFeatures = undefined;
+                            $this.Draw(type, $this);
+                            break;
+                        }                        
                     case "Clear": {
                         $this.Clear();
                         break;
@@ -1375,96 +1438,109 @@
                         //ktw.Alert_Short("功能未提供!");
                         //return;
                         $this.Clear();
+                        $this.Target.find("#ImportFile").unbind("change");
                         $this.Target.find("#ImportFile").bind("change", (function () {
-                            if ($.trim($(this).val()) == "")
-                                return;
-                            var baseUri = ktw.App.ServerUrl;
-                            var url = baseUri + "layer/fetchcoor";
-                            $.ajaxFileUpload({
-                                url: url, // 用于文件上传的服务器端请求地址
-                                type: 'post',
-                                data: {}, // 此参数非常严谨，写错一个引号都不行
-                                secureuri: false, // 一般设置为false
-                                fileElementId: 'ImportFile',
-                                dataType: 'json', // 返回值类型
-                                // 一般设置为json
-                                success: function (data, status) // 服务器成功响应处理函数
-                                {
-                                    $("#ImportFile").val("");
-                                    $this.refreshCurrlayer();
-                                    if (status && data.success) {
-                                        if (ktw.App.RightPanel) {
-                                            ktw.App.RightPanel.SetVisible(false);
+                            var fileObj = document.getElementById("ImportFile").files[0]; // js 获取文件对象
+                            if (fileObj.type == "text/plain")//记事本 xy坐标串
+                            {
+                                var reader = new FileReader();
+                                reader.onload = function () {
+                                    if (reader.result) {
+                                        //显示文件内容
+                                        var result = reader.result;
+                                        var arrxystr = result.split(/[\n]/)
+                                        var arrxy = [];
+                                        for (var i = 0; i < arrxystr.length; i++) {
+                                            var point = [];
+                                            var arrxystrpoint = arrxystr[i].replace(/(^\s*)|(\s*$)/g, "").split(/[\s]/);
+                                            var lon = parseFloat(arrxystrpoint[0]);
+                                            var lat = parseFloat(arrxystrpoint[1]);
+                                            point[0] = lat;
+                                            point[1] = lon;
+                                            arrxy.push(point)
                                         }
-                                        if (ktw.App.BottomPanel) {
-                                            ktw.App.BottomPanel.SetVisible(false);
-                                        }
-
-                                        ktw.App.GlobalQuery.Clear();
-                                        var arr = data.data.split('#');
-                                        var wkt = '';
-                                        for (var i = 0; i < arr.length; i++) {
-                                            var tmp = arr[i].split(',');
-                                            if (tmp.length < 2) {
-                                                ktw.Alert("坐标格式不规范,请检查!");
-                                                /**
-                                                 * 113.06647008888432,27.878057293379666
-                                                 * 113.06647008888432,27.818319134199978
-                                                 * 113.15710729591557,27.818319134199978
-                                                 * 113.15710729591557,27.878057293379666
-                                                 * 113.06647008888432,27.878057293379666
-                                                 * 113.06647008888432,27.878057293379666
-                                                 */
-                                                return;
-                                            }
-                                            wkt += "," + tmp[0] + " ";
-                                            wkt += tmp[1];
-                                        }
-                                        wkt = 'POLYGON((' + wkt.substring(1) + "))";
-                                        var read = new ktop.Wkt.Wkt();
-                                        read.read(wkt);
-                                        $this.drawfeature = read.toObject(true);
-                                        //将图形加入绘制图层,统一管理
-                                        ktw.App.Draw.Container.addLayer($this.drawfeature);
-                                        var optionp = {
-                                            weight: 1,
-                                            color: '#ff0000',
-                                            fill: true,
-                                            fillColor: '#ffffff',
-                                            fillOpacity: 0.3,
-                                            zIndex: 500
-                                        }
-                                        $this.drawfeature.setStyle(optionp);
-                                        ktw.App.Map.fitBounds($this.drawfeature.getBounds(), {
+                                        var polygon = L.polygon(arrxy, { color: '#ff0000', fillColor: '#ffffff', fillOpacity: 0.3, weight: 1 })
+                                        $this.drawfeature = polygon;
+                                        ktw.App.Draw.Container.addLayer(polygon);
+                                        console.log(polygon.getBounds());
+                                        ktw.App.Map.fitBounds(polygon.getBounds(), {
                                             animate: true,
                                             duration: 1
                                         });
                                         $this.Search();
-                                    } else {
-                                        ktw.Alert(data.message);
                                     }
-                                },
-                                error: function (data,
-                                        status, e)// 服务器响应失败处理函数
-                                {
-                                    $("#ImportFile")
-                                            .val("");
-                                    ktw.Alert(e);
-                                }
-                            });
-                            return false;
+                                };
+                                reader.readAsText(fileObj);
+
+                            }
+                            else if (fileObj.type == "application/zip")//shp文件 
+                            {
+                                var formFile = new FormData();
+                                formFile.append("count", 200); //加入文件对象
+                                formFile.append("shapefile", fileObj); //加入文件对象
+                                var baseUri = ktw.GetSystemUrlByRelID("ExtSysService");
+                                $.ajax({
+                                    url: baseUri + "/service/gisserver/getwktsbyshpzip",
+                                    type: "post",
+                                    data: formFile,
+                                    type: "Post",
+                                    dataType: "json",
+                                    cache: false,//上传文件无需缓存
+                                    processData: false,//用于对data参数进行序列化处理 这里必须false
+                                    contentType: false, //必须
+                                    success: function (result) {
+                                        console.log("over..");
+                                        //处理返回的数据 
+                                        $this.refreshCurrlayer();
+                                        for (var i = 0; i < result.data.length; i++) {
+                                            var read = new ktop.Wkt.Wkt();
+                                            //var wktstr = result.data[i].substring(result.data[i].indexOf('('), result.data[i].length);
+                                            //var wkttype = result.data[i].substring(0, result.data[i].indexOf('('));
+                                            //var wktxy =wkttype+ ktw.ConvertWKT(wktstr);
+                                            read.read(result.data[i]);
+                                            $this.drawfeature = read.toObject(false);
+                                            //将图形加入绘制图层,统一管理
+                                            ktw.App.Draw.Container.addLayer($this.drawfeature);
+                                            var optionp = {
+                                                weight: 1,
+                                                color: '#ff0000',
+                                                fill: true,
+                                                fillColor: '#ffffff',
+                                                fillOpacity: 0.3,
+                                                zIndex: 500
+                                            }
+                                            $this.drawfeature.setStyle(optionp);
+                                            ktw.App.Map.fitBounds($this.drawfeature.getBounds(), {
+                                                animate: true,
+                                                duration: 1
+                                            });
+                                            
+                                         
+                                        }
+                                        $this.Search();
+                                    },
+                                    error: function (e) {
+                                        alert("错误！！");
+                                    }
+                                });
+                            }
+                            else {
+                                alert("不支持的文件类型");
+                            }
+
                         }));
+
                         $this.Target.find("#ImportFile").click();
                     }
                 }
             });
             // 文本框输入变化事件
             $this.Target.find("#txtKey").prop("$this").bind("onChange",
-                    function (s, e) {
-                        //搜索条件发生变化时不再清除
-                        /*$this.ShowPanel(false);
-                        $this.Clear();*/
-                    });
+                function (s, e) {
+                    //搜索条件发生变化时不再清除
+                    /*$this.ShowPanel(false);
+                    $this.Clear();*/
+                });
             // 查询按钮点击事件
             $this.SearchButton.click(function () {
                 $this.Search();
@@ -1479,7 +1555,6 @@
             //ktw.App.ClearPreWidget();
             $this.Target.find(".classItem-select").eq(0).click();// 默认查询第一个
         }
-
         $this.refreshCurrlayer = function () {
             // 设置当前要进行查询的图层
             var item = $this.Target.find("#headerTop>span.classItem-select").not(".classItem-disabled");
@@ -1500,32 +1575,32 @@
         $this.initDataGrid = function (target) {
             // 初始化dataGrid
             var taxView = $.extend({}, $.fn.datagrid.defaults.view,
-                            {
-                                renderRow: function (target, fields, frozen,
-                                              rowIndex, rowData) {
-                                    var col = [];
-                                    // 必须保证有显示的字段列表,即使是没有的字段名
-                                    if (ktw.IsNull($this.curLayerinfo.DisplayFields)) {
-                                        $this.curLayerinfo.DisplayFields = "#emptyname#,#emptyaddress#";
-                                    }
-                                    rowData.properties = rowData.properties || {};
-                                    var data = rowData.properties;
-                                    var key = $this.curLayerinfo.DisplayFields.split(",");
-                                    var name = ktw.IsNull(data[key[0]]) ? "暂无信息"
-                                            : data[key[0]];
-                                    var address = ktw.IsNull(data[key[1]]) ? "暂无信息"
-                                            : data[key[1]];
-                                    col.push('<td>');
-                                    col.push(' <div style="width: 387px; height: 60px; margin: 5px; position: relative;">');
-                                    col.push(' <span style="width: 24px; height: 36px; position: absolute; left: 3px; top: 6px; background-image: url(image/poi_red.png)">');
-                                    col.push('   <b style="font-size: 15px; color: white; position: absolute; left: 8px; top: 3px;">' + (rowIndex + 1) + '</b></span>');
-                                    col.push(' <span style="position: absolute; left: 35px; top: 10px; max-height:30px;overflow:hidden;color: blue;" title="' + name + '">' + name + '</span>');
-                                    col.push(' <span style="position: absolute; left: 35px; top: 35px;">' + address + '</span>');
-                                    col.push('</div>');
-                                    col.push('</td>');
-                                    return col.join('');
-                                }
-                            });
+                {
+                    //我理解为load后的调用该方法
+                    renderRow: function (target, fields, frozen, rowIndex, rowData) {
+                        var col = [];
+                        // 必须保证有显示的字段列表,即使是没有的字段名
+                        if (ktw.IsNull($this.curLayerinfo.DisplayFields)) {
+                            $this.curLayerinfo.DisplayFields = "#emptyname#,#emptyaddress#";
+                        }
+                        rowData.properties = rowData.properties || {};
+                        var data = rowData.properties;
+                        var key = $this.curLayerinfo.DisplayFields.split(",");
+                        var name = ktw.IsNull(data[key[0]]) ? "暂无信息"
+                            : data[key[0]];
+                        var address = ktw.IsNull(data[key[1]]) ? "暂无信息"
+                            : data[key[1]];
+                        col.push('<td>');
+                        col.push(' <div style="width: 387px; height: 60px; margin: 5px; position: relative;">');
+                        col.push(' <span style="width: 24px; height: 36px; position: absolute; left: 3px; top: 6px; background-image: url(image/poi_red.png)">');
+                        col.push('   <b style="font-size: 15px; color: white; position: absolute; left: 8px; top: 3px;">' + (rowIndex + 1) + '</b></span>');
+                        col.push(' <span style="position: absolute; left: 35px; top: 10px; max-height:30px;overflow:hidden;color: blue;" title="' + name + '">' + name + '</span>');
+                        col.push(' <span style="position: absolute; left: 35px; top: 35px;">' + address + '</span>');
+                        col.push('</div>');
+                        col.push('</td>');
+                        return col.join('');
+                    }
+                });
             $this.dataGrid = new ktw.UCDataGrid({
                 ID: "resultGrid",
                 View: taxView,
@@ -1541,7 +1616,7 @@
                 pagequery: false,
                 buttons: $("<div/>")
             });
-
+            //poi面板挂接datagrid
             target.DataPanel.append($this.dataGrid.Target);
             $this.dataGrid.Layout([]);
 
@@ -1553,11 +1628,13 @@
             });
             // 行选中事件
             $this.dataGrid.Target.bind("onSelectRow", { target: target }, function (s, e) {
+
                 if (ktw.App.LifeCtr) {
                     ktw.App.LifeCtr.Hide();
                 }
                 $this.SelectRowData = e.Row;
                 var type = $this.ResultHeaders.find(".classItem-select").attr("tag");
+                //征补等生命周期，湖北项目不需要
                 if (['p', 'z', 'c', 'g', 'y', 'b', 'w'].contains(type)) {
                     //hgis生成id的机制不同于geoserver
                     var guid = e.Row.properties[ktw.App.GlobalQuery.curLayerinfo.Key];
@@ -1584,18 +1661,20 @@
                 var data = e.Row;
                 var content = $("<div></div>");
                 var fields = $this.curLayerinfo.DetailFields.Field;
+                //高亮后气泡面板显示的数据
                 for (var i = 0; i < fields.length; i++) {
                     var rowdiv = $(
-                            '<div class="row"><div class="Title">'
-                                    + fields[i].ByName
-                                    + '</div><div class="Content" title="'
-                                    + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
-                                            : data.properties[fields[i].Name])
-                                    + '">'
-                                    + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
-                                            : data.properties[fields[i].Name])
-                                    + '</div></div>').appendTo(content);
+                        '<div class="row"><div class="Title">'
+                        + fields[i].ByName
+                        + '</div><div class="Content" title="'
+                        + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
+                        : data.properties[fields[i].Name])
+                        + '">'
+                        + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
+                        : data.properties[fields[i].Name])
+                        + '</div></div>').appendTo(content);
                 }
+                //弹出气泡框
                 ktw.ShowMapTip(e.Row, {
                     ID: "taxInfo",
                     Title: "详细信息",
@@ -1614,7 +1693,7 @@
                 's=>s.LifeCycle=="' + type + '"').FirstOrDefault();
             if (ktw.IsNull($this.curLayerinfo) || ktw.IsNull($this.curLayerinfo.TypeName)) {
                 $this.curLayerinfo = Enumerable.From(target.LayerInfoConfiger).Where(
-                's=>s.ID=="' + type.substring(3) + '"').FirstOrDefault();
+                    's=>s.ID=="' + type.substring(3) + '"').FirstOrDefault();
             }
             if (ktw.IsNull($this.curLayerinfo) || ktw.IsNull($this.curLayerinfo.TypeName)) return;
             // 构造过滤条件
@@ -1623,9 +1702,16 @@
             if ($this.curLayerinfo.Filter) {
                 $this.curFilte = $this.curLayerinfo.Filter;
             }
+            //app.xml里配置了查询的字段，拼接过滤条件
             if ($this.curLayerinfo.SearchFields && $this.curLayerinfo.SearchFields.length > 0 && $this.curText) {
                 var arryKey = $this.curLayerinfo.SearchFields.split(",");
                 for (var i = 0; i < arryKey.length; i++) {
+                    //处理根据中文字段查询
+                    if (escape(arryKey[i]).indexOf("%u") < 0) {
+                    }
+                    else {
+                        arryKey[i] = "\"" + arryKey[i] + "\"";//中文查询外面需要加上双引号
+                    }
                     $this.curFilter += " OR " + arryKey[i] + " LIKE '%" + $this.curText + "%'";
                 }
                 if ($this.curFilter.length > 0) {
@@ -1634,7 +1720,7 @@
                     $this.curFilter = undefined;
                 }
             }
-
+            //出wms并wfs查询，最后wfs的结果回调上面的queryOption的方法
             $this.addWMS($this.curFilter, $this.drawfeature, target, $this.bufferRadius);
         }
         // 根据条件渲染和查询,attr:字符串查询语句,feature:要素,target:global实例
@@ -1650,22 +1736,22 @@
                 var wkt_wfs = ktw.GetWKTByFeature(tmp, true);
                 if ($this.shapeType === ktw.DrawType.Circle) {
                     spatial_wms = ktw.MapUtils.GetCql_DWITHIN(wkt_wms,
-                            $this.bufferRadius + radius);
+                        $this.bufferRadius + radius);
                     spatial_wfs = ktw.MapUtils.GetCql_DWITHIN(wkt_wfs,
-                            $this.bufferRadius + radius);
+                        $this.bufferRadius + radius);
                 } else if ($this.shapeType === ktw.DrawType.Point) {
                     spatial_wms = ktw.MapUtils.GetCql_INTERSECTS(wkt_wms);
                     spatial_wfs = ktw.MapUtils.GetCql_INTERSECTS(wkt_wfs);
                 } else {
                     spatial_wms = ktw.MapUtils
-                            .GetCql_DWITHIN(wkt_wms);
+                        .GetCql_DWITHIN(wkt_wms);
                     spatial_wfs = ktw.MapUtils
-                            .GetCql_DWITHIN(wkt_wfs);
+                        .GetCql_DWITHIN(wkt_wfs);
                 }
                 spatial_wms = spatial_wms.replace("the_geom",
-                        $this.curLayerinfo.GeometryName);
+                    $this.curLayerinfo.GeometryName);
                 spatial_wfs = spatial_wfs.replace("the_geom",
-                        $this.curLayerinfo.GeometryName);
+                    $this.curLayerinfo.GeometryName);
 
             }
             finalFilter = "";
@@ -1748,33 +1834,35 @@
             return this;
         },
         // 解绑事件
-        $this.unbind = function (eventName) {
-            this.Target.unbind(eventName);
-            return this;
-        }
-        // 绑定事件
+            $this.unbind = function (eventName) {
+                this.Target.unbind(eventName);
+                return this;
+            }
+        // classItem绑定事件，输入框下方的图层<span>标签
         $this.bindSourceChangeEvent = function () {
-            $this.Target.find(".classItem").unbind(
-                    "mouseenter mouseleave click").mouseenter(function () {
-                        if ($(this).hasClass("classItem-select"))
-                            return;
-                        $(this).addClass("classItem-hover");
-                    }).mouseleave(function () {
-                        $(this).removeClass("classItem-hover");
-                    }).click(function () {
-                        if ($(this).hasClass("classItem-disabled"))
-                            return;
-                        $(this).siblings().removeClass("classItem-select");
-                        $(this).addClass("classItem-select");
-                        $this.refreshCurrlayer();
-                        //当切换查询图层时不进行实际查询
-                        if ($this.DataPanel.css("display") == "none" && $this.ResultPanel.css("display") == "block") return;
-                        $this.hasSearched = true;
-                        $this.curText = $.trim($this.Target.find("#txtKey").prop(
-                                "$this").GetValue());
-                        var type = $(this).attr("tag");
-                        $this.searchByType(type, $this);
-                    });
+            $this.Target.find(".classItem")
+                .unbind("mouseenter mouseleave click").mouseenter(function () {
+                    if ($(this).hasClass("classItem-select"))
+                        return;
+                    $(this).addClass("classItem-hover");
+                }).mouseleave(function () {
+                    $(this).removeClass("classItem-hover");
+                }).click(function () {//点击事件
+                    if ($(this).hasClass("classItem-disabled"))
+                        return;
+                    $(this).siblings().removeClass("classItem-select");
+                    $(this).addClass("classItem-select");
+                    $this.refreshCurrlayer();
+                    //当切换查询图层时不进行实际查询
+                    if ($this.DataPanel.css("display") == "none" && $this.ResultPanel.css("display") == "block") return;
+                    $this.hasSearched = true;
+                    //获取输入框文字
+                    $this.curText = $.trim($this.Target.find("#txtKey").prop(
+                        "$this").GetValue());
+                    var type = $(this).attr("tag");//获取根据哪个图层查询
+                    //查询
+                    $this.searchByType(type, $this);
+                });
         }
         $this.init(opt);
         $this.initDataGrid($this);
@@ -1808,7 +1896,7 @@
                 if (!ktw.IsArray(MapLayer))
                     MapLayer = [MapLayer];
                 var curarr = Enumerable.From(MapLayer).Where(
-                        "s=>s.Visible!='false'").OrderBy("x=>x.Order").ToArray();
+                    "s=>s.Visible!='false'").OrderBy("x=>x.Order").ToArray();
                 for (var i = 0; i < curarr.length; i++) {
                     $this.LayerInfoConfiger.push(curarr[i]);
                     if (curarr[i].Children && curarr[i].Children.MapLayer) {
@@ -1875,6 +1963,7 @@
                     $this.Target.find(".searchButton").click();
                 }
             });
+            //画框按钮
             $this.DrawButtons = $this.Target.find(".Button");
             $this.SearchButton = $this.Target.find(".searchButton");
             $this.ResultPanel = $this.Target.find(".resultPanel");
@@ -1882,13 +1971,14 @@
             $this.waitbox = new ktw.UCWaitBox($this.DataPanel);
             $this.ResultHeaders = $this.Target.find("#headerTop");
             $this.HeaderPanel = $this.Target.find(".headerPanel");
-
+            //画框点击事件，根据不同的画框类型画框
             $this.DrawButtons.click(function () {
                 spatialFilter = "";
                 $this.drawfeature = null;
-                $this.draw.clear();//清除绘制
+                $this.draw.clear();//清除绘制（每次画框清除之前的框）
                 ktw.App.Map.HighLightContainer.clear();//清除高亮
                 var type = $(this).attr("shapetype");
+                $this.shapeType = type;
                 switch (type) {
                     case "Rectangle":
                     case "Polygon":
@@ -1907,85 +1997,98 @@
                         //ktw.Alert_Short("功能未提供!");
                         //return;
                         $this.Clear();
+                        $this.Target.find("#ImportFile2").unbind("change");
                         $this.Target.find("#ImportFile2").bind("change", (function () {
-                            if ($.trim($(this).val()) == "")
-                                return;
-                            var baseUri = ktw.App.ServerUrl;
-                            var url = baseUri + "layer/fetchcoor";
-                            $.ajaxFileUpload({
-                                url: url, // 用于文件上传的服务器端请求地址
-                                type: 'post',
-                                data: {}, // 此参数非常严谨，写错一个引号都不行
-                                secureuri: false, // 一般设置为false
-                                fileElementId: 'ImportFile2',
-                                dataType: 'json', // 返回值类型
-                                // 一般设置为json
-                                success: function (data, status) // 服务器成功响应处理函数
-                                {
-                                    $("#ImportFile2").val("");
-                                    $this.refreshCurrlayer();
-                                    if (status && data.success) {
-                                        if (ktw.App.RightPanel) {
-                                            ktw.App.RightPanel.SetVisible(false);
+                            var fileObj = document.getElementById("ImportFile2").files[0]; // js 获取文件对象
+                            if (fileObj.type == "text/plain")//记事本 xy坐标串
+                            {
+                                var reader = new FileReader();
+                                reader.onload = function () {
+                                    if (reader.result) {
+                                        //显示文件内容
+                                        var result = reader.result;
+                                        var arrxystr = result.split(/[\n]/)
+                                        var arrxy = [];
+                                        for (var i = 0; i < arrxystr.length; i++) {
+                                            var point = [];
+                                            var arrxystrpoint = arrxystr[i].replace(/(^\s*)|(\s*$)/g, "").split(/[\s]/);
+                                            var lon = parseFloat(arrxystrpoint[0]);
+                                            var lat = parseFloat(arrxystrpoint[1]);
+                                            point[0] = lat;
+                                            point[1] = lon;
+                                            arrxy.push(point)
                                         }
-                                        if (ktw.App.BottomPanel) {
-                                            ktw.App.BottomPanel.SetVisible(false);
-                                        }
-
-                                        ktw.App.GlobalQuery.Clear();
-                                        var arr = data.data.split('#');
-                                        var wkt = '';
-                                        for (var i = 0; i < arr.length; i++) {
-                                            var tmp = arr[i].split(',');
-                                            if (tmp.length < 2) {
-                                                ktw.Alert("坐标格式不规范,请检查!");
-                                                /**
-                                                 * 113.06647008888432,27.878057293379666
-                                                 * 113.06647008888432,27.818319134199978
-                                                 * 113.15710729591557,27.818319134199978
-                                                 * 113.15710729591557,27.878057293379666
-                                                 * 113.06647008888432,27.878057293379666
-                                                 * 113.06647008888432,27.878057293379666
-                                                 */
-                                                return;
-                                            }
-                                            wkt += "," + tmp[0] + " ";
-                                            wkt += tmp[1];
-                                        }
-                                        wkt = 'POLYGON((' + wkt.substring(1) + "))";
-                                        var read = new ktop.Wkt.Wkt();
-                                        read.read(wkt);
-                                        $this.drawfeature = read.toObject(true);
-                                        //将图形加入绘制图层,统一管理
-                                        ktw.App.Draw.Container.addLayer($this.drawfeature);
-                                        var optionp = {
-                                            weight: 1,
-                                            color: '#ff0000',
-                                            fill: true,
-                                            fillColor: '#ffffff',
-                                            fillOpacity: 0.3,
-                                            zIndex: 500
-                                        }
-                                        $this.drawfeature.setStyle(optionp);
-                                        ktw.App.Map.fitBounds($this.drawfeature.getBounds(), {
+                                        var polygon = L.polygon(arrxy, { color: '#ff0000', fillColor: '#ffffff', fillOpacity: 0.3, weight: 1 })
+                                        $this.drawfeature = polygon;
+                                        ktw.App.Draw.Container.addLayer(polygon);
+                                        console.log(polygon.getBounds());
+                                        ktw.App.Map.fitBounds(polygon.getBounds(), {
                                             animate: true,
                                             duration: 1
                                         });
                                         $this.Search();
-                                    } else {
-                                        ktw.Alert(data.message);
                                     }
-                                },
-                                error: function (data,
-                                        status, e)// 服务器响应失败处理函数
-                                {
-                                    $("#ImportFile2")
-                                            .val("");
-                                    ktw.Alert(e);
-                                }
-                            });
-                            return false;
+                                };
+                                reader.readAsText(fileObj);
+
+                            }
+                            else if (fileObj.type == "application/zip")//shp文件 
+                            {
+                                var formFile = new FormData();
+                                formFile.append("count", 200); //加入文件对象
+                                formFile.append("shapefile", fileObj); //加入文件对象
+                                var baseUri = ktw.GetSystemUrlByRelID("ExtSysService");
+                                $.ajax({
+                                    url: baseUri + "/service/gisserver/getwktsbyshpzip",
+                                    type: "post",
+                                    data: formFile,
+                                    type: "Post",
+                                    dataType: "json",
+                                    cache: false,//上传文件无需缓存
+                                    processData: false,//用于对data参数进行序列化处理 这里必须false
+                                    contentType: false, //必须
+                                    success: function (result) {
+                                        console.log("over..");
+                                        //处理返回的数据 
+                                        $this.refreshCurrlayer();
+                                        for (var i = 0; i < result.data.length; i++) {
+                                            var read = new ktop.Wkt.Wkt();
+                                            //var wktstr = result.data[i].substring(result.data[i].indexOf('('), result.data[i].length);
+                                            //var wkttype = result.data[i].substring(0, result.data[i].indexOf('('));
+                                            //var wktxy =wkttype+ ktw.ConvertWKT(wktstr);
+                                            read.read(result.data[i]);
+                                            $this.drawfeature = read.toObject(false);
+                                            //将图形加入绘制图层,统一管理
+                                            ktw.App.Draw.Container.addLayer($this.drawfeature);
+                                            var optionp = {
+                                                weight: 1,
+                                                color: '#ff0000',
+                                                fill: true,
+                                                fillColor: '#ffffff',
+                                                fillOpacity: 0.3,
+                                                zIndex: 500
+                                            }
+                                            $this.drawfeature.setStyle(optionp);
+                                            ktw.App.Map.fitBounds($this.drawfeature.getBounds(), {
+                                                animate: true,
+                                                duration: 1
+                                            });
+                                            $this.drawfeature = read.toObject(true);
+                                            $this.Search();
+                                        }
+                                      
+                                    },
+                                    error: function (e) {
+                                        alert("错误！！");
+                                    }
+                                });
+                            }
+                            else {
+                                alert("不支持的文件类型");
+                            }
+
                         }));
+
                         $this.Target.find("#ImportFile2").click();
                     }
                 }
@@ -2022,10 +2125,10 @@
 
             // 文本框输入变化事件
             $this.Target.find("#txtKey").prop("$this").bind("onChange",
-                    function (s, e) {
-                        //$this.ShowPanel(false);
-                        //$this.Clear();
-                    });
+                function (s, e) {
+                    //$this.ShowPanel(false);
+                    //$this.Clear();
+                });
             // 查询按钮点击事件
             $this.SearchButton.click(function () {
                 $this.Search();
@@ -2043,39 +2146,40 @@
 
             // 初始化dataGrid
             var taxView = $.extend({}, $.fn.datagrid.defaults.view,
-                            {
-                                renderRow: function (target, fields, frozen,
-                                              rowIndex, rowData) {
-                                    var col = [];
-                                    // 必须保证有显示的字段列表,即使是没有的字段名
-                                    if (ktw.IsNull($this.curLayerinfo.DisplayFields)) {
-                                        $this.curLayerinfo.DisplayFields = "#emptyname#,#emptyaddress#";
-                                    }
-                                    if (ktw.IsNull(rowData) || ktw.IsNull($this.curLayerinfo.DetailFields.Field[0].Name))
-                                        return col.join('');
-                                    var data = rowData;
-                                    //var key = $this.curLayerinfo.DisplayFields.split(",");
-                                    var name = ktw.IsNull(data[$this.curLayerinfo.DetailFields.Field[0].Name]) ? "暂无信息"
-                                            : data[$this.curLayerinfo.DetailFields.Field[0].Name];
-                                    var allarea = ktw.IsNull(data["allarea"]) ? "暂无信息"
-                                            : data["allarea"];
-                                    var glandarea = ktw.IsNull(data["glandarea"]) ? "暂无信息"
-                                            : data["glandarea"];
-                                    var yzb = ktw.IsNull(data["YZB"]) ? "暂无信息"
-                                           : data["YZB"];
-                                    col.push('<td>');
-                                    col.push(' <div style="width: 387px; height: 60px; margin: 5px; position: relative;">');
-                                    col.push(' <span style="width: 24px; height: 36px; position: absolute; left: 3px; top: 6px; background-image: url(image/poi_red.png)">');
-                                    col.push('   <b style="font-size: 15px; color: white; position: absolute; left: 8px; top: 3px;">' + (rowIndex + 1) + '</b></span>');
-                                    col.push(' <span style="position: absolute; left: 35px; top: -5px; max-height:30px;overflow:hidden;color: blue;" title="' + name + '">' + name + '</span>');
-                                    //col.push(' <span style="position: absolute; left: 35px; top: 20px;">' + "总面积" + allarea + '</span>');
-                                    col.push(' <span style="position: absolute; left: 35px; top: 17px;">' + "压占面积：" + glandarea + '平方米</span>');
-                                    col.push(' <span style="position: absolute; left: 35px; top: 39px;">' + "压占比：" + yzb + '</span>');
-                                    col.push('</div>');
-                                    col.push('</td>');
-                                    return col.join('');
-                                }
-                            });
+                {
+                    renderRow: function (target, fields, frozen,
+                                         rowIndex, rowData) {
+                        var col = [];
+                        // 必须保证有显示的字段列表,即使是没有的字段名
+                        if (ktw.IsNull($this.curLayerinfo.DisplayFields)) {
+                            $this.curLayerinfo.DisplayFields = "#emptyname#,#emptyaddress#";
+                        }
+                        if (ktw.IsNull(rowData) || ktw.IsNull($this.curLayerinfo.DetailFields.Field[0].Name))
+                            return col.join('');
+                        var data = rowData;
+                        //var key = $this.curLayerinfo.DisplayFields.split(",");
+                        var name = ktw.IsNull(data[$this.curLayerinfo.DetailFields.Field[0].Name]) ? "暂无信息"
+                            : data[$this.curLayerinfo.DetailFields.Field[0].Name];
+                        var allarea = ktw.IsNull(data["allarea"]) ? "暂无信息"
+                            : data["allarea"];
+                        var glandarea = ktw.IsNull(data["glandarea"]) ? "暂无信息"
+                            : data["glandarea"];
+                        var yzb = ktw.IsNull(data["YZB"]) ? "暂无信息"
+                            : data["YZB"];
+                        console.log(yzb + "@" + glandarea);
+                        col.push('<td>');
+                        col.push(' <div style="width: 387px; height: 60px; margin: 5px; position: relative;">');
+                        col.push(' <span style="width: 24px; height: 36px; position: absolute; left: 3px; top: 6px; background-image: url(image/poi_red.png)">');
+                        col.push('   <b style="font-size: 15px; color: white; position: absolute; left: 8px; top: 3px;">' + (rowIndex + 1) + '</b></span>');
+                        col.push(' <span style="position: absolute; left: 35px; top: -5px; max-height:30px;overflow:hidden;color: blue;" title="' + name + '">' + name + '</span>');
+                        //col.push(' <span style="position: absolute; left: 35px; top: 20px;">' + "总面积" + allarea + '</span>');
+                        col.push(' <span style="position: absolute; left: 35px; top: 17px;">' + "压占面积：" + glandarea + '平方米</span>');
+                        col.push(' <span style="position: absolute; left: 35px; top: 39px;">' + "压占比：" + yzb + '</span>');
+                        col.push('</div>');
+                        col.push('</td>');
+                        return col.join('');
+                    }
+                });
             $this.dataGrid = new ktw.UCDataGrid({
                 ID: "resultGrid",
                 View: taxView,
@@ -2141,15 +2245,15 @@
                 var fields = $this.curLayerinfo.DetailFields.Field;
                 for (var i = 0; i < fields.length; i++) {
                     var rowdiv = $(
-                            '<div class="row"><div class="Title">'
-                                    + fields[i].ByName
-                                    + '</div><div class="Content" title="'
-                                    + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
-                                            : data.properties[fields[i].Name])
-                                    + '">'
-                                    + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
-                                            : data.properties[fields[i].Name])
-                                    + '</div></div>').appendTo(content);
+                        '<div class="row"><div class="Title">'
+                        + fields[i].ByName
+                        + '</div><div class="Content" title="'
+                        + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
+                        : data.properties[fields[i].Name])
+                        + '">'
+                        + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
+                        : data.properties[fields[i].Name])
+                        + '</div></div>').appendTo(content);
                 }
                 ktw.ShowMapTip($this.layerdata[e.index], {
                     ID: "taxInfo",
@@ -2173,42 +2277,40 @@
             if (!ktw.IsNull($this.curText)) {
                 $this.bufferRadius = parseFloat($this.curText)
             }
-			else
-			{
-		        $this.bufferRadius=0.0;
-			}
+            else {
+                $this.bufferRadius = 0.0;
+            }
             if (!ktw.IsNull(feature)) {
                 var radius;
-				if (feature.hasOwnProperty("_mRadius"))
-				{
-					radius = feature.getRadius();
+                if (feature.hasOwnProperty("_mRadius")) {
+                    radius = feature.getRadius();
                     $this.bufferRadius = $this.bufferRadius + radius;
-				}
+                }
                 // if ($this.shapeType === ktw.DrawType.Circle) {
-                    // radius = feature.getRadius();
-                    // $this.bufferRadius = $this.bufferRadius + radius;
+                // radius = feature.getRadius();
+                // $this.bufferRadius = $this.bufferRadius + radius;
                 // }
                 var tmp = ktw.Project.Transform(ktw.EPSG, $this.curLayerinfo.EPSG, feature.toGeoJSON());
                 var wkt_wms = ktw.GetWKTByFeature(tmp, false);
                 var wkt_wfs = ktw.GetWKTByFeature(tmp, true);
                 if ($this.shapeType === ktw.DrawType.Circle) {
                     spatial_wms = ktw.MapUtils.GetCql_DWITHIN(wkt_wms,
-                            $this.bufferRadius + radius);
+                        $this.bufferRadius + radius);
                     spatial_wfs = ktw.MapUtils.GetCql_DWITHIN(wkt_wfs,
-                            $this.bufferRadius + radius);
+                        $this.bufferRadius + radius);
                 } else if ($this.shapeType === ktw.DrawType.Point) {
                     spatial_wms = ktw.MapUtils.GetCql_INTERSECTS(wkt_wms);
                     spatial_wfs = ktw.MapUtils.GetCql_INTERSECTS(wkt_wfs);
                 } else {
                     spatial_wms = ktw.MapUtils
-                            .GetCql_DWITHIN(wkt_wms);
+                        .GetCql_DWITHIN(wkt_wms);
                     spatial_wfs = ktw.MapUtils
-                            .GetCql_DWITHIN(wkt_wfs);
+                        .GetCql_DWITHIN(wkt_wfs);
                 }
                 spatial_wms = spatial_wms.replace("the_geom",
-                        $this.curLayerinfo.GeometryName);
+                    $this.curLayerinfo.GeometryName);
                 spatial_wfs = spatial_wfs.replace("the_geom",
-                        $this.curLayerinfo.GeometryName);
+                    $this.curLayerinfo.GeometryName);
             }
             finalFilter = "";
             if (!ktw.IsNull(attr))
@@ -2275,7 +2377,8 @@
                     Url: ktw.GetSystemUrlByRelID($this.curLayerinfo.Url),
                     TypeName: $this.curLayerinfo.TypeName,
                     Geometry: $this.geom,
-                    filterName: $this.curLayerinfo.GeometryName,
+                    //  filterName: $this.curLayerinfo.GeometryName,
+                    filterName: undefined,
                     SourceProject: $this.curLayerinfo.EPSG,
                     TargetProject: ktw.ProEPSG,
                     startIndex: ($this.PageIndex - 1) * $this.PageSize,
@@ -2340,50 +2443,50 @@
             return this;
         },
         // 解绑事件
-        $this.unbind = function (eventName) {
-            this.Target.unbind(eventName);
-            return this;
-        }
+            $this.unbind = function (eventName) {
+                this.Target.unbind(eventName);
+                return this;
+            }
         // 绑定事件
         $this.bindSourceChangeEvent = function () {
             $this.Target.find(".classItem").unbind(
-                    "mouseenter mouseleave click").mouseenter(function () {
-                        if ($(this).hasClass("classItem-select")) {
-                            var itemstr = $(this).attr("flhz");
-                            if (!ktw.IsNull(itemstr)) {
-                                if ($this.HeaderPanel.css("display") == "block" && $this.DataPanel.css("display") != "none") {
-                                    var strs = itemstr.split(",");
-                                    var str = "<div style='width:100px'>";
-                                    if (strs.contains("tdlyxz")) {
-                                        str += "<div class='item' id='_tdlyxz' onclick='__tdlyxzfl(this)'>分类汇总</div>";
-                                    }
-                                    if (strs.contains("gzq")) {
-                                        str += "<div class='item' id='_ydqgz' onclick='__ydqgz(this)'>用地区管制</div>";
-                                    }
-                                    str += "</div>";
-                                    tooltip.pop(this, str, { offsetY: -20, cssClass: "pop-flhz" });
+                "mouseenter mouseleave click").mouseenter(function () {
+                    if ($(this).hasClass("classItem-select")) {
+                        var itemstr = $(this).attr("flhz");
+                        if (!ktw.IsNull(itemstr)) {
+                            if ($this.HeaderPanel.css("display") == "block" && $this.DataPanel.css("display") != "none") {
+                                var strs = itemstr.split(",");
+                                var str = "<div style='width:100px'>";
+                                if (strs.contains("tdlyxz")) {
+                                    str += "<div class='item' id='_tdlyxz' onclick='__tdlyxzfl(this)'>分类汇总</div>";
                                 }
+                                if (strs.contains("gzq")) {
+                                    str += "<div class='item' id='_ydqgz' onclick='__ydqgz(this)'>用地区管制</div>";
+                                }
+                                str += "</div>";
+                                tooltip.pop(this, str, { offsetY: -20, cssClass: "pop-flhz" });
                             }
-                            return;
                         }
-                        $(this).addClass("classItem-hover");
-                    }).mouseleave(function () {
-                        $(this).removeClass("classItem-hover");
-                    }).click(function () {
-                        if ($(this).hasClass("classItem-disabled"))
-                            return;
-                        $this.curText = $.trim($this.Target.find("#txtKey").prop(
-                                "$this").GetValue());
-                        $(this).siblings().removeClass("classItem-select");
-                        $(this).addClass("classItem-select");
-                        $this.refreshCurrlayer();
-                        if ($this.HeaderPanel.css("display") == "block" && $this.DataPanel.css("display") == "none") {
-                            //悬浮提示切换,不进行实际查询
-                            return;
-                        }
-                        var type = $(this).attr("tag");
-                        $this.analysisByType(type, $this);
-                    });
+                        return;
+                    }
+                    $(this).addClass("classItem-hover");
+                }).mouseleave(function () {
+                    $(this).removeClass("classItem-hover");
+                }).click(function () {
+                    if ($(this).hasClass("classItem-disabled"))
+                        return;
+                    $this.curText = $.trim($this.Target.find("#txtKey").prop(
+                        "$this").GetValue());
+                    $(this).siblings().removeClass("classItem-select");
+                    $(this).addClass("classItem-select");
+                    $this.refreshCurrlayer();
+                    if ($this.HeaderPanel.css("display") == "block" && $this.DataPanel.css("display") == "none") {
+                        //悬浮提示切换,不进行实际查询
+                        return;
+                    }
+                    var type = $(this).attr("tag");
+                    $this.analysisByType(type, $this);
+                });
         }
         //土地利用现状分类汇总
         window.__tdlyxzfl = window.__tdlyxzfl || function () {
@@ -2413,16 +2516,16 @@
                             datagriddata.push(obj.Features[i].properties);
                         }
                         var result = Enumerable.From(datagriddata).GroupBy("{地类名称:" + "$.地类名称,权属性质:" + "$.权属性质" + "}", null,
-                                                                  function (key, g) {
-                                                                      var result = {
-                                                                          dlmc: key.地类名称,
-                                                                          qsxz: key.权属性质,
-                                                                          glandtotal: parseFloat(g.Sum("$.glandarea")).toFixed(4),
-                                                                          alltotal: parseFloat(g.Sum("$.allarea")).toFixed(4),
-                                                                          count: g.Count()
-                                                                      }
-                                                                      return result;
-                                                                  }, "$.地类名称 + '-'+ $.权属性质").ToArray();
+                            function (key, g) {
+                                var result = {
+                                    dlmc: key.地类名称,
+                                    qsxz: key.权属性质,
+                                    glandtotal: parseFloat(g.Sum("$.glandarea")).toFixed(4),
+                                    alltotal: parseFloat(g.Sum("$.allarea")).toFixed(4),
+                                    count: g.Count()
+                                }
+                                return result;
+                            }, "$.地类名称 + '-'+ $.权属性质").ToArray();
                         var StatisticsData = result;
                         var ctr = new window.top.ktw.Window({
                             ID: "ktw_flhz_2",
@@ -2446,7 +2549,8 @@
                         ctr.Open();
                     } else {
                         ktw.Alert("无计算数据!");
-                    };
+                    }
+                    ;
                     ktw.App.GlobalGlandAnalysis.waitbox.Close();
                 } else {
                     ktw.App.GlobalGlandAnalysis.waitbox.Close();
@@ -2487,7 +2591,8 @@
                 total = parseFloat(res) / 10000;
                 total = isNaN(total) ? 1000 : total;
                 total = total.toFixed(2);
-            }, function () { });
+            }, function () {
+            });
             var kinds = btnAnakysis.Kinds.Kind;
             for (var tt_k = 0; tt_k < kinds.length; tt_k++) {
                 result[kinds[tt_k].ByName] = {};
@@ -2545,17 +2650,17 @@
                         for (var tt_kind in result) {
                             if (tt_o == 0) {
                                 var tbl_row = $("<tr>" +
-                            "<td rowspan='4' class='form-text'>" + total + "</td>" +
-                            "<td class='form-text'>" + tt_kind + "</td>" +
-                            "<td class='form-text'>" + (result[tt_kind].coverarea).toFixed(2) + "</td>" +
-                            "<td class='form-text'>" + (result[tt_kind].coverallarea).toFixed(2) + "</td>" +
-                            "<td class='form-text'>" + result[tt_kind].percent + "</td></tr>").appendTo(tbl);
+                                    "<td rowspan='4' class='form-text'>" + total + "</td>" +
+                                    "<td class='form-text'>" + tt_kind + "</td>" +
+                                    "<td class='form-text'>" + (result[tt_kind].coverarea).toFixed(2) + "</td>" +
+                                    "<td class='form-text'>" + (result[tt_kind].coverallarea).toFixed(2) + "</td>" +
+                                    "<td class='form-text'>" + result[tt_kind].percent + "</td></tr>").appendTo(tbl);
                             } else {
                                 var tbl_row = $("<tr>" +
-                           "<td class='form-text'>" + tt_kind + "</td>" +
-                           "<td class='form-text'>" + (result[tt_kind].coverarea).toFixed(2) + "</td>" +
-                            "<td class='form-text'>" + (result[tt_kind].coverallarea).toFixed(2) + "</td>" +
-                           "<td class='form-text'>" + result[tt_kind].percent + "</td></tr>").appendTo(tbl);
+                                    "<td class='form-text'>" + tt_kind + "</td>" +
+                                    "<td class='form-text'>" + (result[tt_kind].coverarea).toFixed(2) + "</td>" +
+                                    "<td class='form-text'>" + (result[tt_kind].coverallarea).toFixed(2) + "</td>" +
+                                    "<td class='form-text'>" + result[tt_kind].percent + "</td></tr>").appendTo(tbl);
                             }
                             tt_o++;
                         }
@@ -2581,7 +2686,8 @@
                         ctr.Open();
                     } else {
                         ktw.Alert("无计算数据!");
-                    };
+                    }
+                    ;
                     ktw.App.GlobalGlandAnalysis.waitbox.Close();
                 } else {
                     ktw.App.GlobalGlandAnalysis.waitbox.Close();
@@ -2613,11 +2719,11 @@
         $($this.GlandArea.obj).bind("onGlandAreaSuccess", function (e, obj) {
             $this.waitbox.Close();
             if (obj.Success == false) {
-				//通用功能发生错误原因暂未解决，暂时注释掉
+                //通用功能发生错误原因暂未解决，暂时注释掉
                 //ktw.Alert("分析失败,请检查网络请求!");
-				//错误返回同时，清除datagrid数据
-				$this.dataGrid.Load([], { totalCount: 0, pageIndex: 1, pageSize: 5 });
-				
+                //错误返回同时，清除datagrid数据
+                $this.dataGrid.Load([], { totalCount: 0, pageIndex: 1, pageSize: 5 });
+
                 return;
             }
             $this.DataPanel.show();
@@ -2636,13 +2742,23 @@
             }
             var columns = [];
             gridfields = [
-               { "Name": $this.curLayerinfo.DetailFields.Field[0].Name, "ByName": $this.curLayerinfo.DetailFields.Field[0].ByName },
-               { "Name": "allarea", "ByName": "总面积" },
-               { "Name": "glandarea", "ByName": "压盖面积" },
-               { "Name": "YZB", "ByName": "压占比" },
+                {
+                    "Name": $this.curLayerinfo.DetailFields.Field[0].Name,
+                    "ByName": $this.curLayerinfo.DetailFields.Field[0].ByName
+                },
+                { "Name": "allarea", "ByName": "总面积" },
+                { "Name": "glandarea", "ByName": "压盖面积" },
+                { "Name": "YZB", "ByName": "压占比" },
             ];
             for (var i = 0; i < gridfields.length; i++) {
-                columns.push({ field: gridfields[i].Name, title: gridfields[i].ByName, height: 50, width: 79, align: 'center', sortable: false });
+                columns.push({
+                    field: gridfields[i].Name,
+                    title: gridfields[i].ByName,
+                    height: 50,
+                    width: 79,
+                    align: 'center',
+                    sortable: false
+                });
             }
             $this.dataGrid.Layout(columns);
             //$this.PageIndex = 1;
@@ -2688,7 +2804,7 @@
             strsld = strsld.replace("%FeatureTypeStyle%", strrule);
         else
             strsld = strsld.replace("%FeatureTypeStyle%", "<FeatureTypeStyle>"
-                    + strrule + "</FeatureTypeStyle>");
+                + strrule + "</FeatureTypeStyle>");
         return strsld;
     };
     ktw.LegendToRule = function (legends) {
@@ -2702,21 +2818,21 @@
             strRules += "<PolygonSymbolizer>";
             if (!ktw.IsNull(o.Fill)) {
                 strRules += "<Fill><CssParameter name=\"fill\">" + o.Fill.Color
-                        + "</CssParameter>";
+                    + "</CssParameter>";
                 strRules += "<CssParameter name=\"fill-opacity\">"
-                        + (ktw.IsNull(o.Fill.Opacity) ? 1 : o.Fill.Opacity)
-                        + "</CssParameter>";
+                    + (ktw.IsNull(o.Fill.Opacity) ? 1 : o.Fill.Opacity)
+                    + "</CssParameter>";
                 strRules += "</Fill>";
             }
             if (!ktw.IsNull(o.Border)) {
                 strRules += "<Stroke><CssParameter name=\"stroke\">"
-                        + o.Border.Color + "</CssParameter>";
+                    + o.Border.Color + "</CssParameter>";
                 strRules += "<CssParameter name=\"stroke-opacity\">"
-                        + (ktw.IsNull(o.Border.Opacity) ? 1 : o.Border.Opacity)
-                        + "</CssParameter>";
+                    + (ktw.IsNull(o.Border.Opacity) ? 1 : o.Border.Opacity)
+                    + "</CssParameter>";
                 strRules += "<CssParameter name=\"stroke-width\">"
-                        + (ktw.IsNull(o.Border.Width) ? 1 : o.Border.Width)
-                        + "</CssParameter>";
+                    + (ktw.IsNull(o.Border.Width) ? 1 : o.Border.Width)
+                    + "</CssParameter>";
                 strRules += "</Stroke>";
             }
             strRules += "</PolygonSymbolizer></Rule>";
@@ -2727,12 +2843,12 @@
         var strfilter = "";
         var prefix = isPR ? "ogc:" : "";
         var condition = '<' + prefix
-                + 'Filter xmlns:ogc="http://www.opengis.net/ogc">';
+            + 'Filter xmlns:ogc="http://www.opengis.net/ogc">';
         if (!ktw.IsNull(spatialParam) && !ktw.IsNull(spatialParam.bbox)) {
             if (!ktw.IsNull(strWhere))
                 condition += '<ogc:And>';
             condition += ktw.BBOX(spatialParam.bbox, spatialParam.geometryName,
-                    version);
+                version);
         }
         if (!ktw.IsNull(spatialParam) && !ktw.IsNull(spatialParam.geometry)) {
             if (!ktw.IsNull(strWhere))
@@ -2741,9 +2857,9 @@
         }
         if (!ktw.IsNull(strWhere)) {
             strWhere = strWhere.replace(
-                    /1=1\s*AND|1=1\s*and|1=1\s*OR|1=1\s*or|1=1\s*/, "");
+                /1=1\s*AND|1=1\s*and|1=1\s*OR|1=1\s*or|1=1\s*/, "");
             var arrCondition = strWhere
-                    .split(/\) AND \(|\) AND|AND \(|\)AND\(|\)AND|AND\(/);
+                .split(/\) AND \(|\) AND|AND \(|\)AND\(|\)AND|AND\(/);
             var orCondition = [];
             if (!ktw.IsNull(strWhere)) {
                 if (arrCondition.length == 1)
@@ -2762,11 +2878,12 @@
         strfilter += condition;
         if (((!ktw.IsNull(spatialParam) && !ktw.IsNull(spatialParam.bbox)) || (!ktw
                 .IsNull(spatialParam) && !ktw.IsNull(spatialParam.geometry)))
-                && !ktw.IsNull(strWhere))
+            && !ktw.IsNull(strWhere))
             strfilter += '</ogc:And>';
         strfilter += '</' + prefix + 'Filter>';
         return strfilter;
     };
+
     function FilterORQuote(con) {
         var arrCon = con.split(/\) OR \(|\) OR|OR \(|\)OR\(|\)OR|OR\(/);
         var orstr = "";
@@ -2780,6 +2897,7 @@
             orstr += FilterAND(con);
         return orstr;
     }
+
     function FilterAND(con) {
         var arrCon = con.split(/ AND /);
         var condition = "", andstr = "";
@@ -2796,6 +2914,7 @@
         condition = andstr;
         return condition;
     }
+
     function FilterOR(con) {
         var arrCon = con.split(/ OR /);
         var orstr = "";
@@ -2809,6 +2928,7 @@
             orstr += propertyFilter(con);
         return orstr;
     }
+
     function propertyFilter(arr) {
         var strFilter = "";
         if (!arr)
@@ -2816,63 +2936,64 @@
         arr = arr.replace(/\(/g, "");
         arr = arr.replace(/\)/g, "");
         var arr1 = arr.trim().split(
-                /=|>|<|>=|<=|<>| in | IN | IS | is | LIKE | like /);
+            /=|>|<|>=|<=|<>| in | IN | IS | is | LIKE | like /);
         arr1[0] = arr1[0].trim();
         arr1[arr1.length - 1] = arr1[arr1.length - 1].replace(/\'/g, "").trim();
         if (arr1[0] === "1")
             return "";
         if (arr.toUpperCase().indexOf(ktw.ComparisonOps.PropertyIsNotEqualTo) >= 0)
             strFilter = '<ogc:PropertyIsNotEqualTo><ogc:PropertyName>'
-                    + arr1[0] + '</ogc:PropertyName><ogc:Literal>'
-                    + arr1[arr1.length - 1]
-                    + '</ogc:Literal></ogc:PropertyIsNotEqualTo>';
+                + arr1[0] + '</ogc:PropertyName><ogc:Literal>'
+                + arr1[arr1.length - 1]
+                + '</ogc:Literal></ogc:PropertyIsNotEqualTo>';
         else if (arr.toUpperCase().indexOf(
                 ktw.ComparisonOps.PropertyIsLessThanOrEqualTo) >= 0)
             strFilter = '<ogc:PropertyIsLessThanOrEqualTo><ogc:PropertyName>'
-                    + arr1[0] + '</ogc:PropertyName><ogc:Literal>'
-                    + arr1[arr1.length - 1]
-                    + '</ogc:Literal></ogc:PropertyIsLessThanOrEqualTo>';
+                + arr1[0] + '</ogc:PropertyName><ogc:Literal>'
+                + arr1[arr1.length - 1]
+                + '</ogc:Literal></ogc:PropertyIsLessThanOrEqualTo>';
         else if (arr.toUpperCase().indexOf(
                 ktw.ComparisonOps.PropertyIsGreaterThanOrEqualTo) >= 0)
             strFilter = '<ogc:PropertyIsGreaterThanOrEqualTo><ogc:PropertyName>'
-                    + arr1[0]
-                    + '</ogc:PropertyName><ogc:Literal>'
-                    + arr1[arr1.length - 1]
-                    + '</ogc:Literal></ogc:PropertyIsGreaterThanOrEqualTo>';
+                + arr1[0]
+                + '</ogc:PropertyName><ogc:Literal>'
+                + arr1[arr1.length - 1]
+                + '</ogc:Literal></ogc:PropertyIsGreaterThanOrEqualTo>';
         else if (arr.toUpperCase()
                 .indexOf(ktw.ComparisonOps.PropertyIsLessThan) >= 0)
             strFilter = '<ogc:PropertyIsLessThan><ogc:PropertyName>' + arr1[0]
-                    + '</ogc:PropertyName><ogc:Literal>'
-                    + arr1[arr1.length - 1]
-                    + '</ogc:Literal></ogc:PropertyIsLessThan>';
+                + '</ogc:PropertyName><ogc:Literal>'
+                + arr1[arr1.length - 1]
+                + '</ogc:Literal></ogc:PropertyIsLessThan>';
         else if (arr.toUpperCase().indexOf(
                 ktw.ComparisonOps.PropertyIsGreaterThan) >= 0)
             strFilter = '<ogc:PropertyIsGreaterThan><ogc:PropertyName>'
-                    + arr1[0] + '</ogc:PropertyName><ogc:Literal>'
-                    + arr1[arr1.length - 1]
-                    + '</ogc:Literal></ogc:PropertyIsGreaterThan>';
+                + arr1[0] + '</ogc:PropertyName><ogc:Literal>'
+                + arr1[arr1.length - 1]
+                + '</ogc:Literal></ogc:PropertyIsGreaterThan>';
         else if (arr.toUpperCase().indexOf(ktw.ComparisonOps.PropertyIsEqualTo) >= 0) {
             if (arr1[arr1.length] === "")
                 strFilter = '<ogc:PropertyIsNull><ogc:PropertyName>' + arr1[0]
-                        + '</ogc:PropertyName></ogc:PropertyIsNull>';
+                    + '</ogc:PropertyName></ogc:PropertyIsNull>';
             else
                 strFilter = '<ogc:PropertyIsEqualTo><ogc:PropertyName>'
-                        + arr1[0] + '</ogc:PropertyName><ogc:Literal>'
-                        + arr1[arr1.length - 1]
-                        + '</ogc:Literal></ogc:PropertyIsEqualTo>';
+                    + arr1[0] + '</ogc:PropertyName><ogc:Literal>'
+                    + arr1[arr1.length - 1]
+                    + '</ogc:Literal></ogc:PropertyIsEqualTo>';
         } else if (arr.toUpperCase().indexOf(ktw.ComparisonOps.PropertyIsLike) >= 0)
             strFilter = '<ogc:PropertyIsLike wildCard="*" singleChar="_" escapeChar="!"><ogc:PropertyName>'
-                    + arr1[0]
-                    + '</ogc:PropertyName><ogc:Literal>'
-                    + arr1[arr1.length - 1].replace(/\%/g, "*")
-                    + '</ogc:Literal></ogc:PropertyIsLike>';
+                + arr1[0]
+                + '</ogc:PropertyName><ogc:Literal>'
+                + arr1[arr1.length - 1].replace(/\%/g, "*")
+                + '</ogc:Literal></ogc:PropertyIsLike>';
         else if (arr.toUpperCase().indexOf(ktw.ComparisonOps.PropertyIsNull) >= 0)
             strFilter = '<ogc:PropertyIsNull><ogc:PropertyName>' + arr1[0]
-                    + '</ogc:PropertyName></ogc:PropertyIsNull>';
+                + '</ogc:PropertyName></ogc:PropertyIsNull>';
         else if (arr.toUpperCase().indexOf(ktw.ComparisonOps.PropertyWithIN) >= 0)
             strFilter = PropertyWithINFilter(arr1);
         return strFilter.trim();
     }
+
     function PropertyWithINFilter(condition) {
         var values = condition[condition.length - 1].trim();
         values = values.replace(/\(/g, "");
@@ -2882,10 +3003,10 @@
         $.each(values, function (i, o) {
             if (o)
                 orstr += '<ogc:PropertyIsEqualTo><ogc:PropertyName>'
-                        + condition[0].trim()
-                        + '</ogc:PropertyName><ogc:Literal>'
-                        + o.replace(/\'/g, "").trim()
-                        + '</ogc:Literal></ogc:PropertyIsEqualTo>';
+                    + condition[0].trim()
+                    + '</ogc:PropertyName><ogc:Literal>'
+                    + o.replace(/\'/g, "").trim()
+                    + '</ogc:Literal></ogc:PropertyIsEqualTo>';
         });
         orstr += '</ogc:Or>';
         return orstr;
@@ -2900,28 +3021,28 @@
             version = "1.0.0";
         if (version === "1.0.0")
             strbbox = '<ogc:BBOX><ogc:PropertyName>'
-                    + field
-                    + '</ogc:PropertyName>'
-                    + '<gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">'
-                    + '<gml:coordinates decimal="." cs="," ts=" ">' + bbox[0]
-                    + ',' + bbox[1] + ' ' + bbox[2] + ',' + bbox[3]
-                    + '</gml:coordinates>' + '</gml:Box></ogc:BBOX>'
+                + field
+                + '</ogc:PropertyName>'
+                + '<gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">'
+                + '<gml:coordinates decimal="." cs="," ts=" ">' + bbox[0]
+                + ',' + bbox[1] + ' ' + bbox[2] + ',' + bbox[3]
+                + '</gml:coordinates>' + '</gml:Box></ogc:BBOX>'
         else if (version === "1.1.0")
             strbbox = '<ogc:BBOX><ogc:PropertyName>'
-                    + field
-                    + '</ogc:PropertyName>'
-                    + '<gml:Envelope srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">'
-                    + '<gml:lowerCorner>' + bbox[0] + ' ' + bbox[1]
-                    + '</gml:lowerCorner>' + '<gml:upperCorner>' + bbox[2]
-                    + ' ' + bbox[3] + '</gml:upperCorner>'
-                    + '</gml:Envelope></ogc:BBOX>';
+                + field
+                + '</ogc:PropertyName>'
+                + '<gml:Envelope srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">'
+                + '<gml:lowerCorner>' + bbox[0] + ' ' + bbox[1]
+                + '</gml:lowerCorner>' + '<gml:upperCorner>' + bbox[2]
+                + ' ' + bbox[3] + '</gml:upperCorner>'
+                + '</gml:Envelope></ogc:BBOX>';
         return strbbox;
     };
 
     // 图形
     ktw.Geometry = function (param, version) {
         var strgeometry = '<ogc:PropertyName>' + param.geometryName
-                + '</ogc:PropertyName>';
+            + '</ogc:PropertyName>';
         var type = param.geometry.getType().toLowerCase();
         if (type === "point" || type === "circle") {// 点
             var point;
@@ -2934,10 +3055,10 @@
             strgeometry += '<gml:Point srsName="http://www.opengis.net/gml/srs/epsg.xml#4326" xmlns:gml="http://www.opengis.net/gml">';
             if (version === "1.1.0")
                 strgeometry += '<gml:pos>' + point.replace(/,/g, " ")
-                        + '</gml:pos>';
+                    + '</gml:pos>';
             else if (version === "1.0.0")
                 strgeometry += '<gml:coordinates decimal="." cs="," ts=" ">'
-                        + point.toString() + '</gml:coordinates>';
+                    + point.toString() + '</gml:coordinates>';
             strgeometry += '</gml:Point>';
         } else if (type === "polygon") {
             strgeometry += '<gml:Polygon srsName="http://www.opengis.net/gml/srs/epsg.xml#4326" xmlns:gml="http://www.opengis.net/gml">';
@@ -2945,16 +3066,16 @@
             $.each(linearRings, function (i, o) {
                 if (version === "1.1.0") {
                     var linearRing = '<gml:LinearRing><gml:posList>'
-                            + o.getCoordinates().toString().replace(/,/g, " ")
-                            + '</gml:posList></gml:LinearRing>';
+                        + o.getCoordinates().toString().replace(/,/g, " ")
+                        + '</gml:posList></gml:LinearRing>';
                     if (i === 0)
                         strgeometry += '<gml:exterior>' + linearRing + '</gml:exterior>';
                     else
                         strgeometry += linearRing;
                 } else if (version === "1.0.0") {
                     var linearRing = '<gml:LinearRing><gml:coordinates decimal="." cs="," ts=" ">'
-                            + o.getCoordinates().toString().replace(/,/g, " ")
-                            + '</gml:coordinates></gml:LinearRing>';
+                        + o.getCoordinates().toString().replace(/,/g, " ")
+                        + '</gml:coordinates></gml:LinearRing>';
                     if (i === 0)
                         strgeometry += '<gml:outerBoundaryIs>' + linearRing + '</gml:outerBoundaryIs>';
                     else
@@ -2966,22 +3087,22 @@
             strgeometry += '<gml:LineString srsName="http://www.opengis.net/gml/srs/epsg.xml#4326" xmlns:gml="http://www.opengis.net/gml">'
             if (version === "1.1.0")
                 strgeometry += '<gml:posList>'
-                        + param.geometry.getCoordinates().toString().replace(
-                                /,/g, " ") + '</gml:posList>';
+                    + param.geometry.getCoordinates().toString().replace(
+                        /,/g, " ") + '</gml:posList>';
             else if (version === "1.0.0")
                 strgeometry += '<gml:coordinates decimal="." cs="," ts=" ">'
-                        + param.geometry.getCoordinates().toString()
-                        + '</gml:coordinates>';
+                    + param.geometry.getCoordinates().toString()
+                    + '</gml:coordinates>';
             strgeometry += '</gml:LineString>';
             param.distance = 0.0006;
             param.relation = ktw.Relations.DWITHIN;
         }
         var isbuffer = param.relation.toLowerCase() != ktw.Relations.DWITHIN.toLowerCase()
-                || ktw.IsNull(param.distance) || param.distance <= 0;
+            || ktw.IsNull(param.distance) || param.distance <= 0;
         strgeometry = '<ogc:' + param.relation + '>' + strgeometry + (isbuffer ? "" : '<ogc:Distance units="'
-                        + (ktw.IsNull(param.unit) ? "degrees" : param.unit)
-                        + '">' + param.distance + '</ogc:Distance>') + '</ogc:'
-                + param.relation + '>';
+            + (ktw.IsNull(param.unit) ? "degrees" : param.unit)
+            + '">' + param.distance + '</ogc:Distance>') + '</ogc:'
+            + param.relation + '>';
         return strgeometry;
     };
 })(jQuery);
@@ -2991,7 +3112,8 @@
     ktw.LifeCycle = function (opt) {
         var $this = this;
         $this.YWXX = true;
-        var funcnull = function () { };
+        var funcnull = function () {
+        };
         opt = opt || {};
         $this.map = opt.map || ktw.App.Map;
         if (opt.conf) {
@@ -3048,6 +3170,7 @@
                     return strhtml;
                 }
             };
+
             //根据引用的id值从图层树的配置中查找图层的配置
             function searchLayerTree(layers, refid) {
                 if (layers && !layers.length) layers = [layers];
@@ -3056,11 +3179,14 @@
                         return layers[i];
                     } else if (layers[i].Children && layers[i].Children.MapLayer) {
                         var tmp = searchLayerTree(layers[i].Children.MapLayer, refid);
-                        if (tmp) { return tmp; }
+                        if (tmp) {
+                            return tmp;
+                        }
                     }
                 }
                 return null;
             }
+
             $(["p", "z", "c", "g", "y", "b", "w"]).each(function (i, item) {
                 if ($this.conf[item.toUpperCase()] && $this.conf[item.toUpperCase()].Layer && $this.conf[item.toUpperCase()].Layer.Ref) {
                     //土地生命周期中图层的配置继承字图层树的配置
@@ -3082,7 +3208,7 @@
             + '<div class="life-ring life-topmiddle" life="b"><div><span class="label">补</span><span class="count"><span></span></span></span></div></div>'
             + '<div class="life-ring life-topleft" life="w"><div><span class="label">查</span><span class="count"><span></span></span></span></div></div>'
             + '<div class="life-ring life-inner" life="p"><div><span class="label">批</span><span class="count"><span></span></span></div></div>'
-        + '</div>';
+            + '</div>';
         +'</div>';
         $this.Target = $(html);
         //注册导航环鼠标移入事件
@@ -3099,7 +3225,9 @@
             }
         });
         //显示或关闭导航换
-        $this.Show = function () { $this.Target.show() };
+        $this.Show = function () {
+            $this.Target.show()
+        };
         $this.Hide = function () {
             $this.Target.hide();//清除生命周期
             ktw.ClearMapTip();//清除冒泡弹出框
@@ -3125,7 +3253,7 @@
         };
 
         /** 数据格式
-            var data = {
+         var data = {
                 p: [],//批地项目列表
                 z: [],//征地项目列表
                 c: [],//储地项目列表
@@ -3134,7 +3262,7 @@
                 b: [],//补地项目列表
                 w: [],//查地项目列表
             };
-        */
+         */
         $this._data = { p: [], z: [], c: [], g: [], y: [], b: [], w: [] };
         $this.type = null;//生命周期的当前周期类型:p、z、c、g、y、b、w
         /* 加载数据和提示框输出函数
@@ -3150,7 +3278,15 @@
                 $this._formatters = formatters;
             }
             else if (!ktw.IsNull(formatters)) {
-                $this._formatters = { p: funcnull, z: funcnull, c: funcnull, g: funcnull, y: funcnull, b: funcnull, w: funcnull };
+                $this._formatters = {
+                    p: funcnull,
+                    z: funcnull,
+                    c: funcnull,
+                    g: funcnull,
+                    y: funcnull,
+                    b: funcnull,
+                    w: funcnull
+                };
                 $.extend($this._formatters, formatters);
             }
 
@@ -3166,27 +3302,39 @@
                         if (null == details) {
                             continue;
                         }
-						
-						//当type和data的类型保持一致时，才能进行下一步    HKH:2018.7.5
-						var tempvalue = details.primaryKey;
-						var tempChar=tempvalue[0].toLowerCase();
-						var keyValue;
-						switch(type)
-						{
-							case "p": keyValue="j";break;
-							case "z":keyValue="z";break;
-							case "c":keyValue="c";break;
-							case "g":keyValue="g";break;
-							case "y":keyValue="d";break;
-							case "b":keyValue="b";break;
-							case "w":keyValue="w";break;
-							
-						}
-						if(tempChar!=keyValue)
-						{
-				            continue;
-						}
-						
+
+                        //当type和data的类型保持一致时，才能进行下一步    HKH:2018.7.5
+                        var tempvalue = details.primaryKey;
+                        var tempChar = tempvalue[0].toLowerCase();
+                        var keyValue;
+                        switch (type) {
+                            case "p":
+                                keyValue = "j";
+                                break;
+                            case "z":
+                                keyValue = "z";
+                                break;
+                            case "c":
+                                keyValue = "c";
+                                break;
+                            case "g":
+                                keyValue = "g";
+                                break;
+                            case "y":
+                                keyValue = "d";
+                                break;
+                            case "b":
+                                keyValue = "b";
+                                break;
+                            case "w":
+                                keyValue = "w";
+                                break;
+
+                        }
+                        if (tempChar != keyValue) {
+                            continue;
+                        }
+
                         window.lifecycle_handlers[$this._data[i][j][$this.conf[i.toUpperCase()].Layer.Key.toLowerCase()]] = (function (data, conf) {
                             return function () {
                                 $this.loadlifecycleconf = conf;
@@ -3224,15 +3372,15 @@
                                 var fields = conf.Layer.DetailFields.Field;
                                 for (var i = 0; i < fields.length; i++) {
                                     var rowdiv = $(
-                                            '<div><div class="Title">'
-                                                    + fields[i].ByName
-                                                    + '</div><div class="TabContent" title="'
-                                                    + (ktw.IsNull(data[fields[i].Name.toLowerCase()]) ? "-"
-                                                            : data[fields[i].Name.toLowerCase()])
-                                                    + '">'
-                                                    + (ktw.IsNull(data[fields[i].Name.toLowerCase()]) ? "-"
-                                                            : data[fields[i].Name.toLowerCase()])
-                                                    + '</div></div>').appendTo(detailTabPanel);
+                                        '<div><div class="Title">'
+                                        + fields[i].ByName
+                                        + '</div><div class="TabContent" title="'
+                                        + (ktw.IsNull(data[fields[i].Name.toLowerCase()]) ? "-"
+                                        : data[fields[i].Name.toLowerCase()])
+                                        + '">'
+                                        + (ktw.IsNull(data[fields[i].Name.toLowerCase()]) ? "-"
+                                        : data[fields[i].Name.toLowerCase()])
+                                        + '</div></div>').appendTo(detailTabPanel);
 
 
                                 }
@@ -3241,7 +3389,12 @@
 
                                 var PanelFjxq = $("<div style=\"height: 30px;position:absolute;/*margin-right: 1px;*/right:17px;line-height:30px;font-size:14px;bottom:0;left:0;text-align:right;padding-right:2px;border-top:1px solid #eee;background-color:#F8F8FF;\"></div>");
                                 var type = "";
-                                for (var k in $this.conf) { if ($this.conf[k] == conf) { type = k.toLowerCase(); break; } }
+                                for (var k in $this.conf) {
+                                    if ($this.conf[k] == conf) {
+                                        type = k.toLowerCase();
+                                        break;
+                                    }
+                                }
                                 /*if (ktw.App.Config.Extend.Archive) {
                                     //如果配置了档案就显示档案的超链接
                                     var url_t = ktw.App.Config.Extend.Archive.Url;
@@ -3306,14 +3459,23 @@
                                             $this.CurrertAnalysis.DetailFields.Field = [$this.CurrertAnalysis.DetailFields.Field];
                                         }
                                         for (var i = 0; i < $this.CurrertAnalysis.DetailFields.Field.length; i++) {
-                                            var a = { "Name": $this.CurrertAnalysis.DetailFields.Field[i].Name, "ByName": $this.CurrertAnalysis.DetailFields.Field[i].ByName };
+                                            var a = {
+                                                "Name": $this.CurrertAnalysis.DetailFields.Field[i].Name,
+                                                "ByName": $this.CurrertAnalysis.DetailFields.Field[i].ByName
+                                            };
                                             gridfields.push(a);
                                         }
                                         gridfields.push({ "Name": "allarea", "ByName": "总面积" });
                                         gridfields.push({ "Name": "glandarea", "ByName": "压占面积" });
                                         gridfields.push({ "Name": "YZB", "ByName": "压占比" });
                                         for (var i = 0; i < gridfields.length; i++) {
-                                            columns.push({ field: gridfields[i].Name, title: gridfields[i].ByName, width: 70, align: 'center', sortable: false });
+                                            columns.push({
+                                                field: gridfields[i].Name,
+                                                title: gridfields[i].ByName,
+                                                width: 70,
+                                                align: 'center',
+                                                sortable: false
+                                            });
                                         }
                                         //
                                         var exdata = [];
@@ -3337,17 +3499,17 @@
                                                 }
                                                 if ($this.CurrertAnalysis.BtnName == "土地利用现状" && byname == "根据土地用途汇总统计") {
                                                     var result = Enumerable.From($this.datagriddata).GroupBy("{" + this.attributes.tag.nodeValue + ":" + "$." + this.attributes.tag.nodeValue + ",权属性质:" + "$.权属性质" + "}", null,
-                                                          function (key, g) {
-                                                              var result = {
-                                                                  //currency: key,
-                                                                  dlmc: key.地类名称,
-                                                                  qsxz: key.权属性质,
-                                                                  glandtotal: parseFloat(g.Sum("$.glandarea")).toFixed(4),
-                                                                  alltotal: parseFloat(g.Sum("$.allarea")).toFixed(4),
-                                                                  count: g.Count()
-                                                              }
-                                                              return result;
-                                                          }, "$.地类名称 + '-'+ $.权属性质").ToArray();
+                                                        function (key, g) {
+                                                            var result = {
+                                                                //currency: key,
+                                                                dlmc: key.地类名称,
+                                                                qsxz: key.权属性质,
+                                                                glandtotal: parseFloat(g.Sum("$.glandarea")).toFixed(4),
+                                                                alltotal: parseFloat(g.Sum("$.allarea")).toFixed(4),
+                                                                count: g.Count()
+                                                            }
+                                                            return result;
+                                                        }, "$.地类名称 + '-'+ $.权属性质").ToArray();
                                                     $this.StatisticsData = result;
                                                     var ctr = new window.top.ktw.Window({
                                                         ID: "ktw_flhz",
@@ -3365,7 +3527,11 @@
                                                         Draggable: true,
                                                         Resizable: true,
                                                         Url: "html/onemap/table_flhz.html",
-                                                        Parameters: { result: $this.StatisticsData, conf: $this.loadlifecycleconf, data: $this.loadlifecycledata }
+                                                        Parameters: {
+                                                            result: $this.StatisticsData,
+                                                            conf: $this.loadlifecycleconf,
+                                                            data: $this.loadlifecycledata
+                                                        }
                                                     });
                                                     ctr.Layout();
                                                     ctr.Open();
@@ -3421,17 +3587,17 @@
                                                     for (var tt_kind in result) {
                                                         if (tt_o == 0) {
                                                             var tbl_row = $("<tr>" +
-                                                        "<td rowspan='4' class='form-text'>" + total + "</td>" +
-                                                        "<td class='form-text'>" + tt_kind + "</td>" +
-                                                        "<td class='form-text'>" + (result[tt_kind].coverarea).toFixed(2) + "</td>" +
-                                                        "<td class='form-text'>" + (result[tt_kind].coverallarea).toFixed(2) + "</td>" +
-                                                        "<td class='form-text'>" + result[tt_kind].percent + "</td></tr>").appendTo(tbl);
+                                                                "<td rowspan='4' class='form-text'>" + total + "</td>" +
+                                                                "<td class='form-text'>" + tt_kind + "</td>" +
+                                                                "<td class='form-text'>" + (result[tt_kind].coverarea).toFixed(2) + "</td>" +
+                                                                "<td class='form-text'>" + (result[tt_kind].coverallarea).toFixed(2) + "</td>" +
+                                                                "<td class='form-text'>" + result[tt_kind].percent + "</td></tr>").appendTo(tbl);
                                                         } else {
                                                             var tbl_row = $("<tr>" +
-                                                       "<td class='form-text'>" + tt_kind + "</td>" +
-                                                       "<td class='form-text'>" + (result[tt_kind].coverarea).toFixed(2) + "</td>" +
-                                                        "<td class='form-text'>" + (result[tt_kind].coverallarea).toFixed(2) + "</td>" +
-                                                       "<td class='form-text'>" + result[tt_kind].percent + "</td></tr>").appendTo(tbl);
+                                                                "<td class='form-text'>" + tt_kind + "</td>" +
+                                                                "<td class='form-text'>" + (result[tt_kind].coverarea).toFixed(2) + "</td>" +
+                                                                "<td class='form-text'>" + (result[tt_kind].coverallarea).toFixed(2) + "</td>" +
+                                                                "<td class='form-text'>" + result[tt_kind].percent + "</td></tr>").appendTo(tbl);
                                                         }
                                                         tt_o++;
                                                     }
@@ -3458,15 +3624,15 @@
                                                 }
                                                 else {
                                                     var result = Enumerable.From($this.datagriddata).GroupBy("$." + this.attributes.tag.nodeValue, null,
-                                                              function (key, g) {
-                                                                  var result = {
-                                                                      currency: key,
-                                                                      glandtotal: parseFloat(g.Sum("$.glandarea")).toFixed(4),
-                                                                      alltotal: parseFloat(g.Sum("$.allarea")).toFixed(4),
-                                                                      count: g.Count()
-                                                                  }
-                                                                  return result;
-                                                              }).ToArray();
+                                                        function (key, g) {
+                                                            var result = {
+                                                                currency: key,
+                                                                glandtotal: parseFloat(g.Sum("$.glandarea")).toFixed(4),
+                                                                alltotal: parseFloat(g.Sum("$.allarea")).toFixed(4),
+                                                                count: g.Count()
+                                                            }
+                                                            return result;
+                                                        }).ToArray();
                                                     $this.StatisticsData = result;
                                                     var dataGrid;
                                                     var content = $("<div style=\"height:100%;width:100%;\"></div>");
@@ -3514,12 +3680,21 @@
                                                     $this.StatisticsWin.Open();
                                                     var columns = [];
                                                     var gridfields = [];
-                                                    gridfields.push({ "Name": "currency", "ByName": this.attributes.name.nodeValue });
+                                                    gridfields.push({
+                                                        "Name": "currency",
+                                                        "ByName": this.attributes.name.nodeValue
+                                                    });
                                                     gridfields.push({ "Name": "glandtotal", "ByName": "压占面积(㎡)" });
                                                     gridfields.push({ "Name": "alltotal", "ByName": "总面积(㎡)" });
                                                     gridfields.push({ "Name": "count", "ByName": "地块数" });
                                                     for (var i = 0; i < gridfields.length; i++) {
-                                                        columns.push({ field: gridfields[i].Name, title: gridfields[i].ByName, width: 50, align: 'center', sortable: false });
+                                                        columns.push({
+                                                            field: gridfields[i].Name,
+                                                            title: gridfields[i].ByName,
+                                                            width: 50,
+                                                            align: 'center',
+                                                            sortable: false
+                                                        });
                                                     }
                                                     dataGrid.Layout(columns);
                                                     var pageInfo = {
@@ -3583,15 +3758,15 @@
                                                 var fields = $this.curLayerinfo.DetailFields.Field;
                                                 for (var i = 0; i < fields.length; i++) {
                                                     var rowdiv = $(
-                                                            '<div class="row"><div class="Title">'
-                                                                    + fields[i].ByName
-                                                                    + '</div><div class="Content" style="width:180px;" title="'
-                                                                    + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
-                                                                            : data.properties[fields[i].Name])
-                                                                    + '">'
-                                                                    + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
-                                                                            : data.properties[fields[i].Name])
-                                                                    + '</div></div>').appendTo(content);
+                                                        '<div class="row"><div class="Title">'
+                                                        + fields[i].ByName
+                                                        + '</div><div class="Content" style="width:180px;" title="'
+                                                        + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
+                                                        : data.properties[fields[i].Name])
+                                                        + '">'
+                                                        + (ktw.IsNull(data.properties[fields[i].Name]) ? "-"
+                                                        : data.properties[fields[i].Name])
+                                                        + '</div></div>').appendTo(content);
                                                 }
                                                 //增加一行空白列,防止悬浮"附件及详情"遮盖最后一行数据
                                                 $('<div class="row"><div class="Title"> </div><div class="Content" title=" "></div></div>').appendTo(content);
@@ -3807,7 +3982,11 @@
                         });
                     });
                 });
-                if (opt2.itemSource.length > 0) { opt2.visible = true; } else { opt2.visible = false; }
+                if (opt2.itemSource.length > 0) {
+                    opt2.visible = true;
+                } else {
+                    opt2.visible = false;
+                }
                 if (!opt.map.__legend) {
                     opt.map.__legend = $this;
                     opt.map.__legend._legend = new ktw.MapLegend(opt2).addTo(opt.map);
@@ -3861,7 +4040,13 @@
         ctr.Alert(msg, null, callback);
     }
     ktw.Alert_Short = function (msg) {
-        var ctr = new ktw.Messager($.extend({}, opt, { Modal: false, Type: "warn", ButtonVisible: false, AutoVisible: true, Timeout: 1400 }));
+        var ctr = new ktw.Messager($.extend({}, opt, {
+            Modal: false,
+            Type: "warn",
+            ButtonVisible: false,
+            AutoVisible: true,
+            Timeout: 1400
+        }));
         ctr.Alert(msg);
     }
     ktw.Info = function (msg, isModal, callback) {
@@ -3870,7 +4055,13 @@
         ctr.Alert(msg, null, callback);
     }
     ktw.Info_Short = function (msg) {
-        var ctr = new ktw.Messager($.extend({}, opt, { Modal: false, Type: "info", ButtonVisible: false, AutoVisible: true, Timeout: 1400 }));
+        var ctr = new ktw.Messager($.extend({}, opt, {
+            Modal: false,
+            Type: "info",
+            ButtonVisible: false,
+            AutoVisible: true,
+            Timeout: 1400
+        }));
         ctr.Alert(msg);
     }
     ktw.Error = function (msg, isModal, callback) {
@@ -3879,7 +4070,13 @@
         ctr.Alert(msg, null, callback);
     }
     ktw.Error_Short = function (msg) {
-        var ctr = new ktw.Messager($.extend({}, opt, { Modal: false, Type: "error", ButtonVisible: false, AutoVisible: true, Timeout: 1400 }));
+        var ctr = new ktw.Messager($.extend({}, opt, {
+            Modal: false,
+            Type: "error",
+            ButtonVisible: false,
+            AutoVisible: true,
+            Timeout: 1400
+        }));
         ctr.Alert(msg);
     }
     ktw.Confirm = function (msg, okBack, cancelBack) {
@@ -4043,7 +4240,8 @@
             //土地利用动态变化检测
             var btn = $('<div class="statistic-common icon-statistic-tdjc"><span>土地监测</span></div>');
             popbox.Add(btn);
-            btn.hover(function () { }).click(function () {
+            btn.hover(function () {
+            }).click(function () {
                 // 土地监测				
                 var ctr = new ktw.Window({
                     ID: "ktw-LandMonitoring;",
@@ -4073,7 +4271,8 @@
             //供地专题
             var btn2 = $('<div class="statistic-common icon-statistic-gdzt"><span>供地专题</span></div>');
             popbox.Add(btn2);
-            btn2.hover(function () { }).click(function () {
+            btn2.hover(function () {
+            }).click(function () {
                 // 土地监测
                 var ctr = new ktw.Window({
                     ID: "ktw-LandMonitoring;",
@@ -4099,7 +4298,8 @@
             //土地资源
             var btn3 = $('<div class="statistic-common icon-statistic-tdzy"><span>土地资源</span></div>');
             popbox.Add(btn3);
-            btn3.hover(function () { }).click(function () {
+            btn3.hover(function () {
+            }).click(function () {
                 // 土地资源
                 var ctr = new ktw.Window({
                     ID: "ktw-LandMonitoring;",
@@ -4125,7 +4325,8 @@
             //旅游
             var btn3 = $('<div class="statistic-common icon-statistic-ly"><span>旅游</span></div>');
             popbox.Add(btn3);
-            btn3.hover(function () { }).click(function () {
+            btn3.hover(function () {
+            }).click(function () {
                 // 旅游
                 var ctr = new ktw.Window({
                     ID: "ktw-LandMonitoring;",
@@ -4151,7 +4352,8 @@
             //耕地保护
             var btn3 = $('<div class="statistic-common icon-statistic-gdbh"><span>耕地保护</span></div>');
             popbox.Add(btn3);
-            btn3.hover(function () { }).click(function () {
+            btn3.hover(function () {
+            }).click(function () {
                 // 耕地保护
                 var ctr = new ktw.Window({
                     ID: "ktw-LandMonitoring;",
@@ -4177,7 +4379,8 @@
             //建设用地宏观分析
             var btn3 = $('<div class="statistic-common icon-statistic-jsyd"><span>建设用地</span></div>');
             popbox.Add(btn3);
-            btn3.hover(function () { }).click(function () {
+            btn3.hover(function () {
+            }).click(function () {
                 // 建设用地宏观分析
                 var ctr = new ktw.Window({
                     ID: "ktw-LandMonitoring;",
@@ -4259,7 +4462,13 @@
                     Draggable: true,
                     Resizable: true,
                     Url: "html/onemap/table_flhz.html",
-                    Parameters: { result: null, conf: null, data: null, areacode: ktw.cookie.AreaTree.areacode, areaname: ktw.cookie.AreaTree.areaname }
+                    Parameters: {
+                        result: null,
+                        conf: null,
+                        data: null,
+                        areacode: ktw.cookie.AreaTree.areacode,
+                        areaname: ktw.cookie.AreaTree.areaname
+                    }
                 });
                 ctr.Layout();
                 if (ktw.App.CommonWin) {

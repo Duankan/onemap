@@ -2,22 +2,24 @@
 <html>
 <!--luxiaolin-->
 <head>
-    <title>用地地块总列表</title>
-    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css" />
-    <link rel="stylesheet" type="text/css" href="../../css/app.css" />
-    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
-    <link rel="stylesheet" type="text/css" href="../../theme/icon.css" />
-    <link rel="stylesheet" type="text/css" href="../../css/icon.css" />
+    <title>管制用地总列表</title>
+    <link rel="stylesheet" type="text/css" href="../../theme/default/easyui.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/app.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="../../theme/icon.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css"/>
     <script type="text/javascript" src="../../js/jquery.min.js"></script>
     <script type="text/javascript" src="../../js/jquery.easyui.min.js"></script>
     <script type="text/javascript" src="../../js/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript" src="../../js/linq.min.js"></script>
     <script type="text/javascript" src="../../js/guid.js"></script>
+
     <script src="../../js/ktw.ui.js"></script>
+    <script src="../../js/ktw.onemap.js"></script>
     <style type="text/css">
     </style>
     <script type="text/javascript">
-        var Ktw = window.top.window.ktw;
+        var Ktw = window.top.window.ktw;//父对象
         var currlayer;//当前图层对象
         var YongDiLayer;//业务图层配置信息对象357
         var searchText;//普通搜索框的文本
@@ -27,19 +29,12 @@
         var gridfields;//表格的列
         var totalFeatures = null;//返回总记录数
         var filter = "1=1";
-
         var queryOption = undefined;
-
         var featuresall = [];//保存返回的所有图层数据
-
         var LayerInfoConfiger = [];
-
-
         var isFirstG = false;
         var isFirstB = false;
-
         var isMapClick = false;
-
 
         function WidgetCommunication(s) {//部件通讯
             var parent = s.parent;
@@ -100,7 +95,7 @@
                         if ((null != res) && (res.features.length > 0)) {
                             if (res.features.length > 0) {
                                 for (var i = 0; i < res.features.length; i++) {
-                                    Ktw.App.HighLight.hightLight(res.features[i]);
+                                    // Ktw.App.HighLight.hightLight(res.features[i]);
                                 }
                             }
                             getLifeCycle(res.features[0]);
@@ -125,15 +120,17 @@
                             featuresall = res.features;
                             if (res.features.length > 0) {
                                 for (var i = 0; i < res.features.length; i++) {
-                                    res.features[i].properties.fzrq = Ktw.UtcToDate(res.features[i].properties.fzrq);
-                                    res.features[i].properties.sprq = Ktw.UtcToDate(res.features[i].properties.sprq);
+                                    if (res.features[i].properties.GZQLXDM) {
+                                        if (res.features[i].properties.GZQLXDM == "010") res.features[i].properties.gzlb = "允许建设区";
+                                        if (res.features[i].properties.GZQLXDM == "020") res.features[i].properties.gzlb = "有条件建设区";
+                                        if (res.features[i].properties.GZQLXDM == "030") res.features[i].properties.gzlb = "限制建设区";
+                                        if (res.features[i].properties.GZQLXDM == "040") res.features[i].properties.gzlb = "禁止建设区";
+                                    }
                                     layerdata.push(res.features[i].properties);
-                                    Ktw.App.HighLight.hightLightSearch(res.features[i]);
+                                    // Ktw.App.HighLight.hightLightSearch(res.features[i]);
                                 }
                             }
-
                             dataGrid.Load(layerdata, pageInfo);
-
                         }
                         else {
                             Ktw.Alert_Short("无查询数据！");
@@ -141,21 +138,16 @@
                             dataGrid.Load(layerdata, pageInfo);
                         }
                     }
-
                 },
                 failFunc: function (res) {
                     if (!isMapClick)
                         Ktw.Alert_Short("查询失败！");
                 }
             }
-
-
             //地图绑定点击事件
             Ktw.App.Map.on("click ", mapOnClick);
             Ktw.App.HighLight.ContainerSearch.on('click', mapOnClick);
             Ktw.App.HighLight.Container.on('click', mapOnClick);
-
-
             Ktw.App.LifeCtr.Hide();
             isFirstG = true;
             filter = "1=1";
@@ -167,8 +159,6 @@
             //初始化查询表格
             initDataGrid();
             queryData(pageIndex, pageSize, filter);
-
-
         }
 
         //高级搜索
@@ -194,7 +184,7 @@
                 });
                 queryWin.Target.find("#tdpzrq").html(
                     '<input id="pzrq1" name="ZZRQ" class="easyui-datebox" data-options="width:166,height:24" />&nbsp;至&nbsp;'
-                + '<input id="pzrq2" name="ZZRQ" class="easyui-datebox" data-options="width:166,height:24" />');
+                    + '<input id="pzrq2" name="ZZRQ" class="easyui-datebox" data-options="width:166,height:24" />');
                 queryWin.Target.find("#btnresetSearch").click(function () {
                     top.$("#queryWin").find("#jsxmmc,#pdwh").each(function (i, item) {
                         var textValue = item.$this.GetValue();
@@ -256,17 +246,23 @@
                 currlayer.setVisible(true);
             }
         }
+
         function initDataGrid() {
             //获取对应的column;
             if (Ktw.IsNull(dataGrid)) {
                 var columns = [];
                 gridfields = YongDiLayer.PanelFields.Field;
                 for (var i = 0; i < gridfields.length; i++) {
-                    columns.push({ field: gridfields[i].Name, title: gridfields[i].ByName, width: 80, align: 'center', sortable: false });
-
+                    columns.push({
+                        field: gridfields[i].Name,
+                        title: gridfields[i].ByName,
+                        width: 80,
+                        align: 'center',
+                        sortable: false
+                    });
                 }
                 Ktw.App.BottomPanel.SetVisible(true);
-                Ktw.App.BottomPanel.SetTitle("用地地块总列表");
+                Ktw.App.BottomPanel.SetTitle("管制用地总列表");
                 Ktw.App.BottomPanel.unbind("onResize");
                 Ktw.App.BottomPanel.bind("onResize", function (evt) {
                     if (!Ktw.IsNull(dataGrid)) dataGrid.Resize(Ktw.App.BottomPanel.Width, Ktw.App.BottomPanel.Height - 25);
@@ -287,17 +283,36 @@
                 $("#content").append(dataGrid.Target);
                 var onceflag = false;
                 dataGrid.Layout(columns);
-
-
                 dataGrid.Target.bind("onSelectPage", function (s, e) {
                     pageIndex = e.index;
                     pageSize = e.size;
-
                     queryData(pageIndex, pageSize, filter);
                     onceflag = false;
                 });
+                var fields = YongDiLayer.DetailFields.Field;//弹出面板显示字段
                 dataGrid.Target.bind("onClickRow", function (s, e) {
-                    getLifeCycle(featuresall[e.index]);
+                    //拼接弹出面板内容
+                    var content=$("<div></div>");
+                    for(var i=0;i<fields.length;i++){
+                        var rowdiv = $(
+                            '<div class="row"><div class="Title">'
+                            + fields[i].ByName
+                            + '</div><div class="Content" title="'
+                            + (ktw.IsNull(featuresall[e.index].properties[fields[i].Name]) ? "-"
+                            : featuresall[e.index].properties[fields[i].Name])
+                            + '">'
+                            + (ktw.IsNull(featuresall[e.index].properties[fields[i].Name]) ? "-"
+                            : featuresall[e.index].properties[fields[i].Name])
+                            + '</div></div>').appendTo(content);
+                    }
+                    Ktw.App.HighLight.hightLightFit(featuresall[e.index]);
+                    //弹出气泡框
+                    Ktw.ShowMapTip(featuresall[e.index], {
+                        ID: "taxInfo",
+                        Title: "详细信息",
+                        Content: content
+                    });
+                    // getLifeCycle(featuresall[e.index]);
                 });
                 dataGrid.Target.bind("onSearchClick", function (s, e) {
                     searchText = e.value.trim();
@@ -307,9 +322,7 @@
                 //添加工具
                 Ktw.App.BottomPanel.ClearTool();
                 var searchBox = $('<div style="float:left;margin-right:5px; width:200px;  background-color:#f1f1f1;line-height:22px;margin-top:3px;"></div>');
-
                 var searchTr = $('<span class="textbox searchbox" style="width: 198px; height: 20px;"></span><span id="lblMsg" style="height: 30px;color:red;"></span>');
-
                 var inputstr = $('<input id="searchsql" type="text"  autocomplete="off" placeholder="输入案卷名称，宗地号等..." style="margin-left: 0px; margin-right: 18px; padding-top: 1px; padding-bottom: 1px; width: 172px;">');
                 var searchSpan = $('<span id="searchspan" class="textbox-addon textbox-addon-right" style="right: 0px;"><a href="javascript:void(0)" class="textbox-icon searchbox-button" icon-index="0" tabindex="-1" style="width: 18px; height: 20px;"></a></span>');
                 searchSpan.click(function () {
@@ -325,7 +338,6 @@
                 });
                 inputstr.appendTo(searchTr);
                 searchSpan.appendTo(searchTr);
-
                 searchTr.keydown(function (e) {
                     if (e.keyCode == 13) {
                         var val = Ktw.App.BottomPanel.Target.find("#searchsql").val();
@@ -346,17 +358,9 @@
                         queryData(pageIndex, pageSize, filter);
                     }
                 });
-
                 inputspan = $('<span id="lblMsg" style="height: 30px;color:red;"></span>');
-
-
-
                 searchTr.appendTo(searchBox);
-
                 searchBox.appendTo(Ktw.App.BottomPanel.Header);
-
-
-
                 tools = [
                     {
                         IconCls: 'icon-delete',
@@ -367,28 +371,26 @@
                         Content: searchBox,
                         Pos: "left"
                     },
-                      {
-                          IconCls: 'icon-import',
-                          TipTitle: '导出地块总列表',
-                          ID: 'btnExport',
-                          Pos: "left"
-                      },
-                  {
-                      IconCls: 'icon-query',
-                      TipTitle: '高级查询',
-                      ID: 'btnQuery',
-                      Pos: "left"
-                  }
+                    {
+                        IconCls: 'icon-import',
+                        TipTitle: '导出地块总列表',
+                        ID: 'btnExport',
+                        Pos: "left"
+                    },
+                    {
+                        IconCls: 'icon-query',
+                        TipTitle: '高级查询',
+                        ID: 'btnQuery',
+                        Pos: "left"
+                    }
                 ];
                 Ktw.App.BottomPanel.AddTool(tools);
             }
-
-
         }
 
         /**
-        **刷新表底部
-        **/
+         **刷新表底部
+         **/
         function refresh() {
             pageIndex = 1;
             var pageInfo = {
@@ -406,17 +408,13 @@
         function mapOnClick(evt) {
             Ktw.App.HighLight.clearHighLight();
             var coordinate = evt.latlng;
-
             isMapClick = true;
             var tmp = Ktw.Project.Transform(Ktw.EPSG, YongDiLayer.EPSG, coordinate);
             var lat = tmp.lat;
             var lng = tmp.lng;
-
             var filterclick = " INTERSECTS(" + YongDiLayer.GeometryName + ",POINT(" + lng + " " + lat + "))";//Geometry
-
             queryData(1, 5, filterclick);
         }
-
 
         //生命周期数据获取
         function getLifeCycle(param) {
@@ -458,8 +456,8 @@
         }
 
         /**
-        **查询数据方法
-        **/
+         **查询数据方法
+         **/
         function queryData(index, size, filter) {
             size = size || 5;
             var wmsparam = {
@@ -487,7 +485,7 @@
                 typename: YongDiLayer.TypeName, //查询图层名称
                 startIndex: startIndex,//总记录数索引
                 count: size,//页面大小
-                sortBy: "sprq desc",
+                sortBy: "GZQLXDM desc",
                 where: filter //过滤条件});
             });
             Ktw.WFSQ(queryOption);
@@ -496,8 +494,8 @@
 
 
         /**
-        **获取高级搜索条件
-        **/
+         **获取高级搜索条件
+         **/
         function getAdvanceFilter() {
             var filter = "";
             var starttime = "";
@@ -540,8 +538,8 @@
 
 
         /**
-        **获取基本查询条件
-        **/
+         **获取基本查询条件
+         **/
         function getCondition() {
             var val = Ktw.App.BottomPanel.Target.find("#searchsql").val();
             val = $.trim(val);
@@ -563,35 +561,39 @@
     </script>
 </head>
 <body>
-    <div id="content" style="width: 100%; height: 100%;"></div>
-    <div id="queryWin" style="width: 500px; height: 140px;">
-        <table style="width: 500px;">
-            <tr style="height: 30px;">
-                <td style="width: 20%; text-align: center; vertical-align: central;">按案卷名称</td>
-                <td style="width: 80%; padding-left: 15px">
-                    <div id="jsxmmc" name="NSRMC" class="ktw-textbox" opt='{"Width":367,"Required":"false"}' maxlength="32" byname="建设项目名称"></div>
-                </td>
-            </tr>
-            <tr style="height: 30px;">
-                <td style="text-align: center; vertical-align: central;">按宗地号</td>
-                <td style="padding-left: 15px">
-                    <div id="pdwh" name="PZWH" class="ktw-textbox" opt='{"Width":367,"Required":"false"}' maxlength="32" byname="批准文号"></div>
-                </td>
-            </tr>
-            <tr style="height: 30px;">
-                <td style="text-align: center; vertical-align: central;">按审批日期</td>
-                <td id="tdpzrq" style="padding-left: 15px"></td>
-            </tr>
-        </table>
-        <div style="height: 41px; border-top: 1px solid #B6C7DB;">
-            <span id="btnresetSearch" class='button' style="margin-top: 6px; width: 35px; position: relative; margin-left: 10px; margin-right: 13px; float: right;">重置</span>
+<div id="content" style="width: 100%; height: 100%;"></div>
+<div id="queryWin" style="width: 500px; height: 140px;">
+    <table style="width: 500px;">
+        <tr style="height: 30px;">
+            <td style="width: 20%; text-align: center; vertical-align: central;">按案卷名称</td>
+            <td style="width: 80%; padding-left: 15px">
+                <div id="jsxmmc" name="NSRMC" class="ktw-textbox" opt='{"Width":367,"Required":"false"}' maxlength="32"
+                     byname="建设项目名称"></div>
+            </td>
+        </tr>
+        <tr style="height: 30px;">
+            <td style="text-align: center; vertical-align: central;">按宗地号</td>
+            <td style="padding-left: 15px">
+                <div id="pdwh" name="PZWH" class="ktw-textbox" opt='{"Width":367,"Required":"false"}' maxlength="32"
+                     byname="批准文号"></div>
+            </td>
+        </tr>
+        <tr style="height: 30px;">
+            <td style="text-align: center; vertical-align: central;">按审批日期</td>
+            <td id="tdpzrq" style="padding-left: 15px"></td>
+        </tr>
+    </table>
+    <div style="height: 41px; border-top: 1px solid #B6C7DB;">
+        <span id="btnresetSearch" class='button'
+              style="margin-top: 6px; width: 35px; position: relative; margin-left: 10px; margin-right: 13px; float: right;">重置</span>
 
-            <span id="btnadvanceSearch" class='button' style="margin-top: 6px; width: 35px; position: relative; float: right;">查询</span>
-        </div>
-
-
+        <span id="btnadvanceSearch" class='button'
+              style="margin-top: 6px; width: 35px; position: relative; float: right;">查询</span>
     </div>
 
-    <iframe id="formcon" style="width: 0; height: 0;" />
+
+</div>
+
+<iframe id="formcon" style="width: 0; height: 0;"/>
 </body>
 </html>

@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.ContextLoader;
 
+import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -49,19 +51,22 @@ public class NongController {
         HttpUtils httpUtils = new HttpUtils();
         JSONObject jasonObject = JSONObject.parseObject(map);
         String url = jasonObject.getString("url") + "?" + "request=aggregate&service=wps";
-        jasonObject.remove("url");
-        //设置请求头和请求参数
-        List<Map<String, Object>> li = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject.toJSONString());
+        String groupField=jasonObject.getString("groupFields"); //分组字段
+        String tjField=((JSONObject)((JSONArray)jasonObject.get("statisticsFields")).get(0)).getString("field");//统计字段
+        List<Map<String, Object>> li = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject.toJSONString());//设置请求头和请求参数
         String re = httpUtils.doPost(url, li.get(1), li.get(0));
         if (!StringUtil.isBlank(re)) {
             JSONArray objects = JSON.parseArray(re);
             for (int i = 0; i < objects.size(); i++) {
+                String SUM_TBMJ=objects.getJSONObject(i).getString("SUM_"+tjField)==
+                        null?"0":objects.getJSONObject(i).getString("SUM_"+tjField);//防止空指针
+                double twoFixed=Double.valueOf(SUM_TBMJ);
                 XzqTudi xzqTudi = new XzqTudi();
-                xzqTudi.setName(objects.getJSONObject(i).getString("行政区"));
-                xzqTudi.setSum(Double.valueOf(objects.getJSONObject(i).getString("SUM_TBMJ"))*0.0001);
+                xzqTudi.setName(objects.getJSONObject(i).getString(groupField));
+                xzqTudi.setSum(twoFixed);
                 l.add(xzqTudi);
             }
-            redisUtil.set(key, l);
+            redisUtil.set(key, l,600L);
         }
         rs.setData(l);
         return rs;
@@ -86,13 +91,14 @@ public class NongController {
         JSONObject jasonObject = JSONObject.parseObject(map);
         String url = jasonObject.getString("url") + "?" + "request=aggregate&service=wps";
         String cqlField = jasonObject.getString("cqlField");
+        String groupField=jasonObject.getString("groupFields");//分组字段
+        String tjField=((JSONObject)((JSONArray)jasonObject.get("statisticsFields")).get(0)).getString("field");//统计字段
         JSONArray cqlConditionArray = (JSONArray) jasonObject.get("cqlCondition");
         List<String> listRES = new ArrayList<String>();//放不同地类的所有请求数据
         for (int i = 0; i < cqlConditionArray.size(); i++) {
             String cqlFilter = cqlField + " like " + "'" + cqlConditionArray.get(i) + "%'";
             jasonObject.put("filter", cqlFilter);
-            //设置请求头和请求参数
-            List<Map<String, Object>> l = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject.toJSONString());
+            List<Map<String, Object>> l = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject.toJSONString());//设置请求头和请求参数
             String re = httpUtils.doPost(url, l.get(1), l.get(0));
             if (!StringUtils.isEmpty(re)) {
                 listRES.add(re);
@@ -105,8 +111,8 @@ public class NongController {
                 Datagrid datagrid = new Datagrid();
                 listDTOs.add(datagrid);
             }
-            listDTOs = nongBiz.fillBiaoGeData(listRES, listDTOs);
-            redisUtil.set(key, listDTOs);
+            listDTOs = nongBiz.fillBiaoGeData(listRES, listDTOs,groupField,tjField);
+            redisUtil.set(key, listDTOs,600l);
         }
         resultmap.put("rows", listDTOs);
         return resultmap;
@@ -127,15 +133,35 @@ public class NongController {
         JSONObject jasonObject = JSONObject.parseObject(map);
         JSONObject jasonObject2 = JSONObject.parseObject(map);
         String url = jasonObject.getString("url") + "?" + "request=aggregate&service=wps";
+        //可能有的字段太多，不需要全部显示
+        String cqlField = jasonObject.getString("cqlField");
+        JSONArray cqlConditionArray = (JSONArray) jasonObject.get("cqlCondition");
+        if(!StringUtils.isEmpty(cqlField)&&cqlConditionArray.size()>0){
+            StringBuilder sb=new StringBuilder();
+            for(int i=0;i<cqlConditionArray.size();i++){
+                String sql=null;
+                if(i==cqlConditionArray.size()-1){
+                    sql=cqlField+" like "+ "'"+cqlConditionArray.get(i)+"%'";
+                }
+                else {
+                    sql=cqlField+" like "+ "'"+cqlConditionArray.get(i)+"%' or ";
+                }
+                sb.append(sql);
+            }
+            jasonObject.put("filter",sb.toString());
+            jasonObject2.put("filter",sb.toString());
+        }
         String groupField1 = StringUtils.substringBefore(jasonObject.getString("groupFields"), ",");//dlmc
         String groupField2 = StringUtils.substringAfter(jasonObject.getString("groupFields"), ",");//xzqmc
+        //统计返回结果字段
+        String tjField=((JSONObject)((JSONArray)jasonObject.get("statisticsFields")).get(0)).getString("field");
         jasonObject2.put("groupFields",groupField1);
         //设置请求头和请求参数
         List<Map<String, Object>> l = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject.toJSONString());
         List<Map<String, Object>> l2 = HttpUtils.addHeadAndParam("application/x-www-form-urlencoded", jasonObject2.toJSONString());
         String re = httpUtils.doPost(url, l.get(1), l.get(0));
         String re2=httpUtils.doPost(url,l2.get(1),l2.get(0));
-        resultMap=nongBiz.statisticBWXZ(re,re2,groupField1,groupField2);
+        resultMap=nongBiz.statisticBWXZ(re,re2,groupField1,groupField2,tjField);
         if(resultMap!=null){
             resultMap.put("code",1);
             resultMap.put("msg","成功");
@@ -144,7 +170,7 @@ public class NongController {
             resultMap.put("code",-1);
             resultMap.put("msg","失败");
         }
-        redisUtil.set(key, resultMap);
+        redisUtil.set(key, resultMap,600l);
         return resultMap;
     }
 

@@ -4,123 +4,96 @@ public class Datagrid implements Serializable{
     private static final long serialVersionUID = 1L;
     private String startdate;
     private String order;
-    private Double gendi;
-    private Double yuan;
-    private Double lindi;
-    private Double cao;
-    private Double jiaot;
-    private Double shuili;
-    private Double qita;
-    private Double chenzhen;
+    private double gendi;
+    private double yuan;
+    private double lindi;
+    private double cao;
+    private double jiaot;
+    private double shuili;
+    private double qita;
+    private double chenzhen;
     private String xzqname;
     private String areacode;
-    private Double sum;
-
+    private double sum;
     public String getStartdate() {
         return startdate;
     }
-
     public void setStartdate(String startdate) {
         this.startdate = startdate;
     }
-
     public String getOrder() {
         return order;
     }
-
     public void setOrder(String order) {
         this.order = order;
     }
-
-    public Double getSum() {
-        return sum;
+    public double getSum() {
+        return this.gendi+this.lindi+this.yuan+this.cao+this.jiaot+this.shuili+this.chenzhen+this.qita;
     }
-
-    public void setSum(Double sum) {
+    public void setSum(double sum) {
         sum = sum;
     }
-
     public String getXzqname() {
         return xzqname;
     }
-
     public void setXzqname(String xzqname) {
         this.xzqname = xzqname;
     }
-
     public String getAreacode() {
         return areacode;
     }
-
     public void setAreacode(String areacode) {
         this.areacode = areacode;
     }
-
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
-
-    public Double getGendi() {
+    public double getGendi() {
         return gendi;
     }
-
-    public void setGendi(Double gendi) {
+    public void setGendi(double gendi) {
         this.gendi = gendi;
     }
-
-    public Double getYuan() {
+    public double getYuan() {
         return yuan;
     }
-
-    public void setYuan(Double yuan) {
+    public void setYuan(double yuan) {
         this.yuan = yuan;
     }
-
-    public Double getLindi() {
+    public double getLindi() {
         return lindi;
     }
-
-    public void setLindi(Double lindi) {
+    public void setLindi(double lindi) {
         this.lindi = lindi;
     }
-
-    public Double getCao() {
+    public double getCao() {
         return cao;
     }
-
-    public void setCao(Double cao) {
+    public void setCao(double cao) {
         this.cao = cao;
     }
-
-    public Double getJiaot() {
+    public double getJiaot() {
         return jiaot;
     }
-
-    public void setJiaot(Double jiaot) {
+    public void setJiaot(double jiaot) {
         this.jiaot = jiaot;
     }
-
-    public Double getShuili() {
+    public double getShuili() {
         return shuili;
     }
-
-    public void setShuili(Double shuili) {
+    public void setShuili(double shuili) {
         this.shuili = shuili;
     }
-
-    public Double getQita() {
+    public double getQita() {
         return qita;
     }
-
-    public void setQita(Double qita) {
+    public void setQita(double qita) {
         this.qita = qita;
     }
-
-    public Double getChenzhen() {
+    public double getChenzhen() {
         return chenzhen;
     }
-
-    public void setChenzhen(Double chenzhen) {
+    public void setChenzhen(double chenzhen) {
         this.chenzhen = chenzhen;
     }
 }

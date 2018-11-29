@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -31,8 +31,8 @@
         var myChart;
         var ctr;
         var params;//传递的参数
-        var stype = "bwxz";//初始化查不稳新增
-        var areadata;//市和区的数据
+        var areadata;//市县区的数据
+        var stype = "jbnt";//初始化查不稳新增
         var unit={
             "biaogeUint":"公顷",
             "chartUnit":"公顷"
@@ -40,7 +40,7 @@
         /**echart数据**/
         var echartsData = {
             lengdArray: [],//图例数据
-            datas: [],//所有的series数据 结构：[{name:'',data:[12,....]},....]
+            datas: [],//所有的series数据 结构：[{name:'',data:[12,....]},....,{name:'',data:[]}]
             rowDatas: {},//行数据  结构：{name:'',data:[12.....]}
             seriedata: [],//行数据里面的data  结构：上面里面的data
             xarray: [],//x周
@@ -78,7 +78,7 @@
                 $("#hbcc").removeClass("active");
                 $("#lsfb").removeClass("active");
                 // $("#area").prop("$this").SetSelectedItem(byarea[0]);
-                stype = "bwxz";
+                stype = "jbnt";
                 Statistics(stype);
             });
             //后背擦除点击事件
@@ -124,23 +124,12 @@
             });
             //监听勾选框change
             $(".SHIselect").change(function () {
-                var XIANselect = $(".XIANselect");
+                var XIANselect=$(".XIANselect");
                 XIANselect.empty();
-                var areacode = this.value;
-                var xianData = Enumerable.From(areadata).Where('p=>p.areacode.startsWith(' + areacode.substr(0, 4) + ')&&p.arealevel==3').ToArray();
-                for (var i = 0; i < xianData.length; i++) {
-                    $("<option value='" + xianData[i].areacode + "'>" + xianData[i].areaname + "</option>").appendTo(XIANselect);
-                }
-            });
-            //checkbox改变事件
-            $("#checkBox").change(function () {
-                if (this.checked) {
-                    $("#areaSHI").hide("slow");
-                    $("#areaXIAN").hide("slow");
-                }
-                else {
-                    $("#areaSHI").show("slow");
-                    $("#areaXIAN").show("slow");
+                var areacode=this.value;
+                var xianData=Enumerable.From(areadata).Where('p=>p.areacode.startsWith('+areacode.substr(0,4)+')&&p.arealevel==3').ToArray();
+                for(var i=0;i<xianData.length;i++){
+                    $("<option value='"+xianData[i].areacode+"'>"+xianData[i].areaname+"</option>").appendTo(XIANselect);
                 }
             });
             //表格单位转换
@@ -183,6 +172,7 @@
                 }
             })
         })
+
         function windowresize(t) {
             if ($("#searchModule").find("br").length > 0) {
                 $("#newline").remove();
@@ -372,13 +362,7 @@
         }
         function Statistics(type) {
             //初始化进来type没有值
-            echartsData.postConfig = params.BWXZCHART;
-            if (type == "bwxz") {
-                echartsData.postConfig = params.BWXZCHART;
-            }
-            if (type == "hbcc") {
-                echartsData.postConfig = params.HBCCCHART;
-            }
+            echartsData.postConfig = params.JBNT;
             var county = "";
             var areadata = Ktw.cookie.AreaTree.Children;
             $.each(areadata, function (i, value) {
@@ -421,14 +405,15 @@
                             var has = false;//用来标记此类地是否有值
                             //遍历每条数据的key如：水田，旱地...
                             for (var k = 0; k < Object.keys(data.rows[j]).length; k++) {
+                                //如果数据中有该土地类型-->赋值
                                 if (data.legends[i] == Object.keys(data.rows[j])[k]) {
-                                    var num = data.rows[j][Object.keys(data.rows[j])[k]];//土地面积
-                                    if (data.rows[j][Object.keys(data.rows[j])[k]] == null) {
+                                    var num = data.rows[j][Object.keys(data.rows[j])[k]];
+                                    if (num == null) {
                                         num = "0.00";
                                     }
-                                     unit.chartUnit=="公顷"?
-                                        echartsData.seriedata.push((parseFloat(num) * 0.0001).toFixed(2)):echartsData.seriedata.push((parseFloat(num) * 0.0015).toFixed(2));
-                                    has = true;
+                                    unit.chartUnit=="公顷"?
+                                        echartsData.seriedata.push((parseFloat(num) * 0.0001).toFixed(2)): echartsData.seriedata.push((parseFloat(num) * 0.0015).toFixed(2));
+                                    has=true;
                                     break;
                                 }
                             }
@@ -473,12 +458,7 @@
             });
         }
         function initDataGrid() {
-            if (stype == "bwxz") {
-                bioageData.postConfig = params.BWXZCHART;
-            }
-            if (stype == "hbcc") {
-                bioageData.postConfig = params.HBCCCHART;
-            }
+            bioageData.postConfig = params.JBNT;
             var width = (winWidth * 0.98 - 45) / 12;
             bioageData.rows = [];
             bioageData.columns = [];
@@ -496,6 +476,7 @@
                     //为dataModules添加cols，动态生成excel
                     datamodules.cols = [];
                     datamodules.cols.push("行政区");
+                    //为导出准备列
                     for (var i = 0; i < data.legends.length; i++) {
                         datamodules.cols.push(data.legends[i]);
                     }
@@ -510,10 +491,13 @@
                     row["总面积"]=Sum;
 
                     datamodules.cols.push("总面积");
+                    /**为表格数据属性赋值**/
                     bioageData.rows = data.rows;
                     bioageData.rows.splice(0,0,row);
-                    datamodules.data = bioageData.rows;
+                    bioageData.total = data.total;
+                    bioageData.pages = (bioageData.total % bioageData.pages) == 0 ? bioageData.total / bioageData.pages : (bioageData.total / bioageData.pages) + 1;
                     bioageData.columns = [];
+                    datamodules.data = bioageData.rows;
                     //添加行政区
                     var rowData = {
                         field: '行政区', title: '行政区', width: width, align: 'center',
@@ -535,10 +519,7 @@
                     }
                     //添加总面积
                     rowData = {
-                        field: '总面积',
-                        title: '总面积('+unit.biaogeUint+')',
-                        width: width,
-                        align: 'center',
+                        field: '总面积', title: '总面积('+unit.biaogeUint+')', width: width, align: 'center',
                         formatter: function (value, row, index) {
                             if (value == null) {
                                 value = "0.00";
@@ -561,6 +542,7 @@
                 columns: [bioageData.columns],
             });
             $('#dataModule').datagrid("loadData", {rows: bioageData.rows.slice(0, 10), total: bioageData.rows.length});
+            //分页组件存在，并监听分页事件
             var pg = $('#dataModule').datagrid(("getPager"));
             if (pg) {
                 $(pg).pagination({
@@ -580,24 +562,25 @@
                     }
                 });
             }
+            //删除pageList
             $(".pagination-page-list").remove();
         }
-        //初始化市县区
+        //初始化县区
         function initTarget() {
-            var XIANselect = $(".XIANselect");
-            var SHIselect = $(".SHIselect");
+            var XIANselect=$(".XIANselect");
+            var SHIselect=$(".SHIselect");
             areadata = Ktw.cookie.AreaTree.Children;
-            var ShiareaCode = [];
-            for (var i = 0; i < areadata.length; i++) {
-                var option = $("<option value='" + areadata[i].areacode + "'>" + areadata[i].areaname + "</option>");
-                if (areadata[i].arealevel == 2) {
+            var ShiareaCode=[];
+            for (var i=0;i<areadata.length;i++){
+                var option=$("<option value='"+areadata[i].areacode+"'>"+areadata[i].areaname+"</option>");
+                if(areadata[i].arealevel==2){
                     ShiareaCode.push(areadata[i].areacode);//记录市的code
                     SHIselect.append(option);
                 }
             }
-            var xianData = Enumerable.From(areadata).Where('p=>p.areacode.startsWith(' + ShiareaCode[0].substr(0, 4) + ')&&p.arealevel==3').ToArray();
-            for (var j = 0; j < xianData.length; j++) {
-                $("<option value='" + xianData[j].areacode + "'>" + xianData[j].areaname + "</option>").appendTo(XIANselect);
+            var xianData=Enumerable.From(areadata).Where('p=>p.areacode.startsWith('+ShiareaCode[0].substr(0,4)+')&&p.arealevel==3').ToArray();
+            for(var j=0;j<xianData.length;j++){
+                $("<option value='"+xianData[j].areacode+"'>"+xianData[j].areaname+"</option>").appendTo(XIANselect);
             }
         }
     </script>
@@ -625,6 +608,7 @@
             display: inline-block;
             margin-top: 11px;
         }
+
         .Content .ToolDiv .Title .Text {
             display: inline-block;
             float: right;
@@ -644,6 +628,7 @@
             border-top-width: 1px;
             border-top-color: #dddddd;
         }
+
         .stc-nav {
             height: 30px;
             padding-top: 4px;
@@ -659,8 +644,13 @@
         #areaXIAN {
             display: inline-block;
         }
+
         #areaSHI {
             display: inline-block;
+        }
+        .dimension{
+            display: inline-block;
+            margin-left: -6px;
         }
         .chartUnit{
             position: absolute;
@@ -677,18 +667,14 @@
             right: 35px;
             top: 89px;
         }
-        .dimension{
-            display: inline-block;
-            margin-left: -6px;
-        }
     </style>
 </head>
 <body>
 <div class="Content">
     <div class="stc-nav">
-        <span class="btng left btng-left active" id="byarea" style="margin-left:0.5%">不稳新增</span>
-        <span class="btng left" id="hbcc">后备擦除</span>
-        <span class="btng left btng-right" id="lsfb">零散分布</span>
+        <span class="btng left btng-left active" id="byarea" style="margin-left:0.5%">基本农田</span>
+        <!--<span class="btng left" id="hbcc">后备擦除</span>-->
+        <!--<span class="btng left btng-right" id="lsfb">零散分布</span>-->
         <span class="btng right btng-right active" id="map" style="margin-right:1%">图</span>
         <span class="btng right btng-left" id="tab">表</span>
     </div>
@@ -710,7 +696,7 @@
                 </div>
             </div>
             <div id="newline2" style="display: inline-block;">
-                <div id="areaSHI" style="z-index: 2; width: 180px; height: 20px;margin-left:-10px;margin-top:10px;">
+                <div id="areaSHI" style="width: 180px; height: 20px;margin-left:-10px;margin-top:10px;">
                     <div class="Title">
                         <div class="Icon icon-area"></div>
                         <span style="font-size: 15px;">市:</span>
@@ -718,10 +704,10 @@
                     <select class="SHIselect" style="border: rgb(0, 153, 204) solid 1px;width: 84px;margin-left: 3px">
                     </select>
                 </div>
-                <div id="areaXIAN" style="z-index: 2; width: 180px; height: 20px;margin-left:-10px;">
+                <div id="areaXIAN" style="width: 180px; height: 20px;margin-left:-10px;">
                     <div class="Title">
                         <div class="Icon icon-area"></div>
-                        <span style="font-size: 15px;">区县:</span>
+                        <span style="font-size: 15px;">县区:</span>
                     </div>
                     <select class="XIANselect" style="border: rgb(0, 153, 204) solid 1px;width: 84px">
                     </select>
@@ -744,10 +730,10 @@
     </div>
     <div id="chartModule"
          style="width: 98%; height:calc(49% - 40px); min-height:80px; bottom:0px; margin:0 auto;margin-top:5px;margin-bottom:5px;margin-left:1%; border:1px solid #CACACA; border-radius:10px;">
-            <select class="chartUnit">
-                <option value="gq">公顷</option>
-                <option value="mu">亩</option>
-            </select>
+        <select class="chartUnit">
+            <option value="gq">公顷</option>
+            <option value="mu">亩</option>
+        </select>
         <div id="chart" style="width: 99%; height: 100%;float:left;margin-left:5px"></div>
     </div>
 </div>

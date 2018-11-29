@@ -56,6 +56,32 @@
         "field": "TBDLMJ"
       }
     ],
-    "clip": "0"
+    "clip": "0",
+    "cqlCondition": [
+      "043",
+      "116",
+      "125",
+      "126"
+    ],
+    "cqlField": "DLBM"
+  },
+  "JBNT": {
+    "url": "http://192.168.1.93:8080/hgis/ows",
+    "typename": "ktw:JBNTBHTB",
+    "groupFields": "DLMC,行政区",
+    "statisticsFields": [
+      {
+        "operate": "sum",
+        "field": "TBMJ"
+      }
+    ],
+    "clip": "0",
+    "cqlCondition": [
+      "011",
+      "012",
+      "013",
+      "023"
+    ],
+    "cqlField": "DLBM"
   }
 }

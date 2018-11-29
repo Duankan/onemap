@@ -614,10 +614,23 @@
         opacity: 1;
     }
 
-    .commontab .commontab-query, .commontab .commontab-analysis {
+    .commontab .commontab-query {
         /*background-color: #eee;*/
-        background-color: #019CC8;
-        color: #fff;
+        background-color: #eee;
+        color: #444;
+        border-top-left-radius: 8px;
+        float: left;
+        cursor: pointer;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding-left: 18px;
+        padding-right: 18px;
+        /*color: #444;*/
+    }
+     .commontab .commontab-analysis {
+        /*background-color: #eee;*/
+        background-color: #eee;
+        color: #444;
         border-top-left-radius: 8px;
         float: left;
         cursor: pointer;
@@ -635,18 +648,23 @@
     margin-left: 2px;
 }
 
+    .commontab-analysis.active,  .commontab-analysis:hover, .commontab-analysis:hover {
+        background-color: #019CC8;
+       /* color: #fff;*/
+        /*background-color: #eee;*/
+        color: #444;
+    }
 
-
-    .commontab-query.active, .commontab-analysis.active, .commontab-query:hover, .commontab-analysis:hover {
-        /*background-color: #019CC8;
-        color: #fff;*/
-        background-color: #eee;
+    .commontab-query.active,  .commontab-query:hover, .commontab-analysis:hover {
+        background-color: #019CC8;
+       /* color: #fff;*/
+        /*background-color: #eee;*/
         color: #444;
     }
 
 /**通用查询模块**/
 .globalQuery {
-    width: 409px;
+    width: 367px;
     height: 30px;
     position: absolute;
     top: 30px;
@@ -679,9 +697,9 @@
     position: absolute;
     background-color: white;
     border: 1px solid #95B8E7;
-    width: 58px;
+    width: 178px;
     height: 28px;
-    left: 299px;
+    left: 129px;
 }
 
 .globalQuery .popsearch {
@@ -718,11 +736,11 @@
 .globalQuery .searchBox {
     position: absolute;
     left: 0;
-    width: 417px;
+    width: 367px;
 }
 
     .globalQuery .searchBox .searchButton {
-        width: 50px;
+        width: 58px;
         height: 28px;
         line-height: 28px;
         text-align: center;
@@ -732,7 +750,7 @@
         color: white;
         /*float: left;*/
         position: absolute;
-        left: 325px;
+        left: 275px;
         font-size: 13px;
         cursor: pointer;
         margin-left: 33px;

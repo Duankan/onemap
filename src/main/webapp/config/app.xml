@@ -70,6 +70,55 @@
           <Remark/>
           <Parameters/>
         </Widgets>
+        <Widgets>
+          <ID>TongJiFenXi3</ID>
+          <Title>基本农田统计</Title>
+          <Icon>image/menu_zhuanti.png</Icon>
+          <IsVisible>true</IsVisible>
+          <Order>1</Order>
+          <Modal>false</Modal>
+          <IsLoad>false</IsLoad>
+          <Size>
+            <Height>450</Height>
+            <Width>550</Width>
+          </Size>
+          <Position>
+            <X>200</X>
+            <Y>97</Y>
+          </Position>
+          <DockStyle>float</DockStyle>
+          <DockParent>main</DockParent>
+          <Url>html/onemap/jbnttj.html</Url>
+          <IconCls>icon-statistic</IconCls>
+          <Remark/>
+          <Parameters/>
+        </Widgets>
+        <Widgets>
+          <ID>hrhclb</ID>
+          <Title>划入划出总列表</Title>
+          <Icon>image/menu_zhuanti.png</Icon>
+          <IconCls/>
+          <IsVisible>true</IsVisible>
+          <Order>1</Order>
+          <IsLoad>false</IsLoad>
+          <Size>
+            <Height>365</Height>
+            <Width>367</Width>
+          </Size>
+          <Position>
+            <X>70</X>
+            <Y>110</Y>
+          </Position>
+          <DockStyle>bottom</DockStyle>
+          <Minimizable>true</Minimizable>
+          <Maximizable>true</Maximizable>
+          <Modal>false</Modal>
+          <Draggable>true</Draggable>
+          <Resizable>false</Resizable>
+          <!--<DockParent>bottom</DockParent>-->
+          <Url>html/onemap/hrhc.html</Url>
+          <Remark/>
+        </Widgets>
       </Menus>
       <Menus> 
         <ID>zhengdi</ID>  
@@ -414,7 +463,7 @@
         <Parameters/>
         <Widgets>
           <ID>yddkzlb</ID>
-          <Title>用地地块总列表</Title>
+          <Title>管制用地总列表</Title>
           <Icon>image/menu_zhuanti.png</Icon>
           <IconCls/>
           <IsVisible>true</IsVisible>
@@ -435,97 +484,123 @@
           <Draggable>true</Draggable>
           <Resizable>false</Resizable>
           <!--<DockParent>bottom</DockParent>-->
-          <Url>html/onemap/yddkzlb.html</Url>
+          <Url>html/onemap/gzyd.html</Url>
           <Remark/>
         </Widgets>
         <Widgets>
-          <ID>TongJiFenXiYong1</ID>
-          <Title>统计分析(规划用途)</Title>
+          <ID>xzlylb</ID>
+          <Title>土地利用现状列表</Title>
           <Icon>image/menu_zhuanti.png</Icon>
-          <IsVisible>true</IsVisible>
-          <Order>1</Order>
-          <Modal>false</Modal>
-          <IsLoad>false</IsLoad>
-          <Size>
-            <Height>450</Height>
-            <Width>550</Width>
-          </Size>
-          <Position>
-            <X>200</X>
-            <Y>97</Y>
-          </Position>
-          <DockStyle>float</DockStyle>
-          <DockParent>main</DockParent>
-          <Url>html/onemap/landstatic.html</Url>
-          <IconCls>icon-statistic</IconCls>
-          <Remark/>
-        </Widgets>
-        <Widgets>
-          <ID>TongJiFenXi7</ID>
-          <Title>统计分析(查封登记)</Title>
-          <Icon>image/menu_zhuanti.png</Icon>
-          <IsVisible>true</IsVisible>
-          <Order>2</Order>
-          <Modal>false</Modal>
-          <IsLoad>false</IsLoad>
-          <Size>
-            <Height>600</Height>
-            <Width>1200</Width>
-          </Size>
-          <Position>
-            <X>200</X>
-            <Y>97</Y>
-          </Position>
-          <DockStyle>float</DockStyle>
-          <DockParent>main</DockParent>
-          <Url>html/onemap/cfdjAnalysis.html</Url>
-          <IconCls>icon-statistic</IconCls>
-          <Remark/>
-          <Parameters/>
-        </Widgets>
-        <Widgets>
-          <ID>TongJiFenXi8</ID>
-          <Title>统计分析(抵押权属)</Title>
-          <Icon>image/menu_zhuanti.png</Icon>
-          <IsVisible>true</IsVisible>
-          <Order>3</Order>
-          <Modal>false</Modal>
-          <IsLoad>false</IsLoad>
-          <Size>
-            <Height>600</Height>
-            <Width>1200</Width>
-          </Size>
-          <Position>
-            <X>200</X>
-            <Y>97</Y>
-          </Position>
-          <DockStyle>float</DockStyle>
-          <DockParent>main</DockParent>
-          <Url>html/onemap/dyqsAnalysis.html</Url>
-          <IconCls>icon-statistic</IconCls>
-          <Remark/>
-          <Parameters/>
-        </Widgets>
-        <Widgets>
-          <ID>fuzhushenpi</ID>
-          <Title>辅助审批</Title>
-          <Icon>image/menu_zhuanti.png</Icon>
+          <IconCls/>
           <IsVisible>true</IsVisible>
           <Order>1</Order>
           <IsLoad>false</IsLoad>
           <Size>
-            <Height>720</Height>
-            <Width>1200</Width>
+            <Height>365</Height>
+            <Width>367</Width>
           </Size>
           <Position>
-            <X>225</X>
-            <Y>62</Y>
+            <X>70</X>
+            <Y>110</Y>
           </Position>
-          <DockStyle>float</DockStyle>
-          <DockParent>main</DockParent>
-          <Url>html/onemap/planuse.html</Url>
+          <DockStyle>bottom</DockStyle>
+          <Minimizable>true</Minimizable>
+          <Maximizable>true</Maximizable>
+          <Modal>false</Modal>
+          <Draggable>true</Draggable>
+          <Resizable>false</Resizable>
+          <!--<DockParent>bottom</DockParent>-->
+          <Url>html/onemap/useStatusList.html</Url>
           <Remark/>
         </Widgets>
+        <!--<Widgets>-->
+          <!--<ID>TongJiFenXiYong1</ID>-->
+          <!--<Title>统计分析(规划用途)</Title>-->
+          <!--<Icon>image/menu_zhuanti.png</Icon>-->
+          <!--<IsVisible>true</IsVisible>-->
+          <!--<Order>1</Order>-->
+          <!--<Modal>false</Modal>-->
+          <!--<IsLoad>false</IsLoad>-->
+          <!--<Size>-->
+            <!--<Height>450</Height>-->
+            <!--<Width>550</Width>-->
+          <!--</Size>-->
+          <!--<Position>-->
+            <!--<X>200</X>-->
+            <!--<Y>97</Y>-->
+          <!--</Position>-->
+          <!--<DockStyle>float</DockStyle>-->
+          <!--<DockParent>main</DockParent>-->
+          <!--<Url>html/onemap/landstatic.html</Url>-->
+          <!--<IconCls>icon-statistic</IconCls>-->
+          <!--<Remark/>-->
+        <!--</Widgets>-->
+        <!--<Widgets>-->
+          <!--<ID>TongJiFenXi7</ID>-->
+          <!--<Title>统计分析(查封登记)</Title>-->
+          <!--<Icon>image/menu_zhuanti.png</Icon>-->
+          <!--<IsVisible>true</IsVisible>-->
+          <!--<Order>2</Order>-->
+          <!--<Modal>false</Modal>-->
+          <!--<IsLoad>false</IsLoad>-->
+          <!--<Size>-->
+            <!--<Height>600</Height>-->
+            <!--<Width>1200</Width>-->
+          <!--</Size>-->
+          <!--<Position>-->
+            <!--<X>200</X>-->
+            <!--<Y>97</Y>-->
+          <!--</Position>-->
+          <!--<DockStyle>float</DockStyle>-->
+          <!--<DockParent>main</DockParent>-->
+          <!--<Url>html/onemap/cfdjAnalysis.html</Url>-->
+          <!--<IconCls>icon-statistic</IconCls>-->
+          <!--<Remark/>-->
+          <!--<Parameters/>-->
+        <!--</Widgets>-->
+        <!--<Widgets>-->
+          <!--<ID>TongJiFenXi8</ID>-->
+          <!--<Title>统计分析(抵押权属)</Title>-->
+          <!--<Icon>image/menu_zhuanti.png</Icon>-->
+          <!--<IsVisible>true</IsVisible>-->
+          <!--<Order>3</Order>-->
+          <!--<Modal>false</Modal>-->
+          <!--<IsLoad>false</IsLoad>-->
+          <!--<Size>-->
+            <!--<Height>600</Height>-->
+            <!--<Width>1200</Width>-->
+          <!--</Size>-->
+          <!--<Position>-->
+            <!--<X>200</X>-->
+            <!--<Y>97</Y>-->
+          <!--</Position>-->
+          <!--<DockStyle>float</DockStyle>-->
+          <!--<DockParent>main</DockParent>-->
+          <!--<Url>html/onemap/dyqsAnalysis.html</Url>-->
+          <!--<IconCls>icon-statistic</IconCls>-->
+          <!--<Remark/>-->
+          <!--<Parameters/>-->
+        <!--</Widgets>-->
+        <!--<Widgets>-->
+          <!--<ID>fuzhushenpi</ID>-->
+          <!--<Title>辅助审批</Title>-->
+          <!--<Icon>image/menu_zhuanti.png</Icon>-->
+          <!--<IsVisible>true</IsVisible>-->
+          <!--<Order>1</Order>-->
+          <!--<IsLoad>false</IsLoad>-->
+          <!--<Size>-->
+            <!--<Height>720</Height>-->
+            <!--<Width>1200</Width>-->
+          <!--</Size>-->
+          <!--<Position>-->
+            <!--<X>225</X>-->
+            <!--<Y>62</Y>-->
+          <!--</Position>-->
+          <!--<DockStyle>float</DockStyle>-->
+          <!--<DockParent>main</DockParent>-->
+          <!--<Url>html/onemap/planuse.html</Url>-->
+          <!--<Remark/>-->
+        <!--</Widgets>-->
       </Menus>
     </SubSystems>
   </SystemTheme>  
@@ -968,7 +1043,7 @@
     <!--地图切换控件配置信息 -->  
     <MapSwitchInfo> 
       <Margin> 
-        <Top>65</Top>  
+        <Top>65</Top>
         <Left>10</Left>  
         <Right>10</Right>  
         <Bottom>10</Bottom> 
@@ -1153,7 +1228,7 @@
           <Width>300</Width>
         </Size>
         <Position>
-          <Top>65</Top>
+          <Top>90</Top>
           <Right/>
           <Left>55</Left>
           <ContentTop>40</ContentTop>
@@ -1182,6 +1257,89 @@
         <Visible>true</Visible>
         <Open>true</Open>
         <Checked>false</Checked>
+        <Children>
+          <MapLayer>
+            <ID>ktw:JSYDPD</ID>
+            <Text>批地</Text>
+            <Visible>true</Visible>
+            <Url>OneMapOWS</Url>
+            <EPSG>EPSG:4490</EPSG>
+            <Filter/>
+            <TypeName>ktw:JSYDPD</TypeName>
+            <!--<Sld>config/p.sld</Sld>-->
+            <IconCls>icon-tree-polygon</IconCls>
+            <Styles/>
+            <Legend>
+              <Type>Part</Type>
+              <Title/>
+              <Item>
+                <SubType>polygon</SubType>
+                <Text>批地项目</Text>
+                <Fill>
+                  <Color>#018FAA</Color>
+                  <Opacity>1</Opacity>
+                </Fill>
+                <Border>
+                  <Width>1</Width>
+                  <Color>#018FAA</Color>
+                  <Opacity>1</Opacity>
+                </Border>
+              </Item>
+            </Legend>
+            <Checked>false</Checked>
+            <GeometryName>geometry</GeometryName>
+            <LifeCycle>p</LifeCycle>
+            <Type>WMS</Type>
+            <Key>gid</Key>
+            <NoQuery/>
+            <DefaultQuery>true</DefaultQuery>
+            <ServerType>geoserver</ServerType>
+            <SearchFields>PZWH</SearchFields>
+            <DisplayFields>PZWH</DisplayFields>
+            <!--<DetailFields>
+                  <Field>
+                    <ByName>项目名称</ByName>
+                    <Name>xm_mc</Name>
+                  </Field>
+                  <Field>
+                    <ByName>案卷名称</ByName>
+                    <Name>aj_mc</Name>
+                  </Field>
+                  <Field>
+                    <ByName>行政区名称</ByName>
+                    <Name>xzqmc</Name>
+                  </Field>
+                  <Field>
+                    <ByName>批准文号</ByName>
+                    <Name>pz_wh</Name>
+                  </Field>
+                  <Field>
+                    <ByName>预审文号</ByName>
+                    <Name>ys_wh</Name>
+                  </Field>
+                  <Field>
+                    <ByName>规划用途</ByName>
+                    <Name>gh_yt</Name>
+                  </Field>
+                  <Field>
+                    <ByName>用地类型</ByName>
+                    <Name>yd_lx</Name>
+                  </Field>
+                  <Field>
+                    <ByName>已供面积(m²)</ByName>
+                    <Name>yg_mj</Name>
+                  </Field>
+                  <Field>
+                    <ByName>申请单位</ByName>
+                    <Name>sq_dw</Name>
+                  </Field>
+                  <Field>
+                    <ByName>单位联系人</ByName>
+                    <Name>sq_dw_lxr</Name>
+                  </Field>
+                </DetailFields>-->
+          </MapLayer>
+        </Children>
       </MapLayer>
       <MapLayer>
         <ID>1000202</ID>
@@ -1428,7 +1586,7 @@
                     <Url>OneMapOWS</Url>
                     <EPSG>EPSG:4610</EPSG>
                     <Filter/>
-                    <TypeName>ktw:JSYDGZQ</TypeName>
+                    <TypeName>ktw:JSYDGZQ1</TypeName>
                     <FLHZ>gzq</FLHZ>
                     <Sld/>
                     <IconCls>icon-tree-polygon</IconCls>
@@ -1445,12 +1603,12 @@
                         <Name>BSM</Name>
                       </Field>
                       <Field>
-                        <ByName>控制区编号</ByName>
-                        <Name>XZQDM</Name>
+                        <ByName>行政区</ByName>
+                        <Name>qmc</Name>
                       </Field>
                       <Field>
-                        <ByName>要素代码</ByName>
-                        <Name>OBJECTID</Name>
+                        <ByName>管制类别</ByName>
+                        <Name>GZQLXDM</Name>
                       </Field>
                       <Field>
                         <ByName>控制区面积(m²)</ByName>
@@ -1798,24 +1956,28 @@
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
-                <SearchFields>BSM,HRHCTBBH</SearchFields>
-                <DisplayFields>BSM,HRHCTBBH</DisplayFields>
+                <SearchFields>行政区,XZQMC</SearchFields>
+                <DisplayFields>行政区,XZQMC</DisplayFields>
                 <DetailFields>
                   <Field>
-                    <ByName>标识码</ByName>
-                    <Name>BSM</Name>
+                    <ByName>行政区</ByName>
+                    <Name>行政区</Name>
                   </Field>
                   <Field>
-                    <ByName>划入划出图斑编号</ByName>
-                    <Name>HRHCTBBH</Name>
-                  </Field>
-                  <Field>
-                    <ByName>图斑面积(m²)</ByName>
-                    <Name>TBMJ</Name>
-                  </Field>
-                  <Field>
-                    <ByName>所属行政区</ByName>
+                    <ByName>村庄</ByName>
                     <Name>XZQMC</Name>
+                  </Field>
+                  <Field>
+                    <ByName>划入划出(代码)</ByName>
+                    <Name>HRHCLXDM</Name>
+                  </Field>
+                  <Field>
+                    <ByName>原因(代码)</ByName>
+                    <Name>HCYY</Name>
+                  </Field>
+                  <Field>
+                    <ByName>面积</ByName>
+                    <Name>TBMJ</Name>
                   </Field>
                 </DetailFields>
               </MapLayer>
@@ -3757,19 +3919,13 @@
                       </Field>
                     </DetailFields>
                   </MapLayer>
-
                 </Children>
-
                 <GeometryName>the_geom</GeometryName>
                 <Type>WMS</Type>
                 <ServerType>hgis</ServerType>
                 <SearchFields>地类名称,权属单位名</SearchFields>
                 <DisplayFields>地类名称,权属单位名</DisplayFields>
               </MapLayer>
-
-
-
-
             </Children>
           </MapLayer>
           <!--<MapLayer>
@@ -3822,30 +3978,49 @@
       </MapLayer>
     </ArrayOfMapLayer>
   </SystemMap>
-  <!--地址 -->  
-  <SystemUri> 
-    <RelativeUris> 
-      <ID>SysService</ID>  
-      <Uri>onemap/</Uri>  
-      <BasicID>ServiceUrl</BasicID> 
-    </RelativeUris>  
-    <RelativeUris> 
-      <ID>OneMapOWS</ID>  
+  <!--地址 -->
+  <!--地址 -->
+  <SystemUri>
+    <RelativeUris>
+      <ID>ExtSysService</ID>
+      <Uri></Uri>
+      <BasicID>ExtServiceUrl</BasicID>
+    </RelativeUris>
+    <RelativeUris>
+      <ID>SysService</ID>
+      <Uri>onemap/</Uri>
+      <BasicID>ServiceUrl</BasicID>
+    </RelativeUris>
+    <RelativeUris>
+      <ID>OneMapOWS</ID>
       <Uri>hgis/ows</Uri>
-      <BasicID>GisUrl</BasicID> 
-    </RelativeUris>  
-    <BasicUris> 
-      <ID>ServiceUrl</ID>  
-      <Uri>http://192.168.1.86:7081/</Uri>
-    </BasicUris>  
-    <BasicUris> 
-      <ID>GisUrl</ID>  
+      <BasicID>GisUrl</BasicID>
+    </RelativeUris>
+    <RelativeUris>
+      <ID>MasterService</ID>
+      <Uri>master/ows</Uri>
+      <BasicID>MasterUrl</BasicID>
+    </RelativeUris>
+    <BasicUris>
+      <ID>ExtServiceUrl</ID>
       <Uri>http://192.168.1.93:8080/</Uri>
-    </BasicUris> 
-  </SystemUri>  
+    </BasicUris>
+    <BasicUris>
+      <ID>ServiceUrl</ID>
+      <Uri>http://192.168.1.86:7081/</Uri>
+    </BasicUris>
+    <BasicUris>
+      <ID>GisUrl</ID>
+      <Uri>http://192.168.1.90:8086/</Uri>
+    </BasicUris>
+    <BasicUris>
+      <ID>MasterUrl</ID>
+      <Uri>http://192.168.1.90:8085/</Uri>
+    </BasicUris>
+  </SystemUri>
   <!--业务系统扩展 -->  
   <Extend> 
-    <!--土地生命周期配置-->  
+    <!--土地生命周期配置:-->
     <LifeCycle> 
       <P> 
         <Layer> 
@@ -3931,18 +4106,19 @@
             <MinWidth>1</MinWidth> 
           </Col> 
         </Tips> 
-      </P>  
+      </P>
+      <!--湖北项目：为划入划出列表-->
       <Z> 
         <Layer> 
           <!--引用图层树中的配置-->  
-          <Ref>tree_zhengdi</Ref>  
-          <PanelFields> 
-            <Field> 
-              <ByName>建设用地项目名称</ByName>  
-              <Name>jsydxmmc</Name> 
-            </Field>  
-            <Field> 
-              <ByName>行政区名称</ByName>  
+          <Ref>JBNTHRHC</Ref>
+          <PanelFields>
+            <Field>
+              <ByName>行政区</ByName>
+              <Name>xzq</Name>
+            </Field>
+            <Field>
+              <ByName>村庄</ByName>
               <Name>xzq_mc</Name> 
             </Field>  
             <Field> 
@@ -3950,38 +4126,26 @@
               <Name>pz_wh</Name> 
             </Field>  
             <Field> 
-              <ByName>土地用途</ByName>  
-              <Name>tdyt</Name> 
+              <ByName>批准日期</ByName>
+              <Name>pz_rq</Name>
             </Field>  
             <Field> 
-              <ByName>土地位置</ByName>  
-              <Name>tdwz</Name> 
+              <ByName>划入划出</ByName>
+              <Name>hrhc</Name>
             </Field>  
             <Field> 
-              <ByName>申请用地单位</ByName>  
-              <Name>sqyddw</Name> 
+              <ByName>原因</ByName>
+              <Name>yy</Name>
             </Field>  
             <Field> 
-              <ByName>申请用地总面积(㎡)</ByName>  
-              <Name>sqydzmj</Name> 
+              <ByName>面积(公顷)</ByName>
+              <Name>hrhcmj</Name>
             </Field>  
             <Field> 
-              <ByName>被征用土地总面积(㎡)</ByName>  
-              <Name>zytd_zmj</Name> 
+              <ByName>净变化面积(公顷)</ByName>
+              <Name>jbh_mj</Name>
             </Field>  
-            <Field> 
-              <ByName>补偿标准</ByName>  
-              <Name>bcbz</Name> 
-            </Field>  
-            <Field> 
-              <ByName>批准时间</ByName>  
-              <Name>pzsj</Name> 
-            </Field>  
-            <Field> 
-              <ByName>公告时间</ByName>  
-              <Name>ggsj</Name> 
-            </Field> 
-          </PanelFields> 
+          </PanelFields>
         </Layer>  
         <Tips> 
           <Col> 
@@ -4010,7 +4174,8 @@
             <Width>50</Width> 
           </Col> 
         </Tips> 
-      </Z>  
+      </Z>
+      <!--土地利用现状列表-->
       <C> 
         <Layer> 
           <!--引用图层树中的配置-->  
@@ -4160,65 +4325,34 @@
             <Width>50</Width> 
           </Col> 
         </Tips> 
-      </G>  
+      </G>
+      <!--管制用地列表-->
       <Y> 
         <Layer> 
           <!--引用图层树中的配置-->  
-          <Ref>tree_yongdi</Ref>  
+          <Ref>JSYDGZQ</Ref>
           <PanelFields> 
             <Field> 
-              <ByName>案卷名称</ByName>  
-              <Name>aj_mc</Name> 
+              <ByName>行政区</ByName>
+              <Name>qmc</Name>
             </Field>  
             <Field> 
-              <ByName>审批日期</ByName>  
-              <Name>sprq</Name> 
+              <ByName>行政区编号</ByName>
+              <Name>XZQDM</Name>
             </Field>  
             <Field> 
-              <ByName>地籍号</ByName>  
-              <Name>djh</Name> 
+              <ByName>管制类别</ByName>
+              <Name>gzlb</Name>
             </Field>  
             <Field> 
-              <ByName>土地座落</ByName>  
-              <Name>tdzl</Name> 
+              <ByName>允许代码</ByName>
+              <Name>YSDM</Name>
             </Field>  
             <Field> 
-              <ByName>宗地号</ByName>  
-              <Name>zdh</Name> 
+              <ByName>面积</ByName>
+              <Name>GZQMJ</Name>
             </Field>  
-            <Field> 
-              <ByName>发证日期</ByName>  
-              <Name>fzrq</Name> 
-            </Field>  
-            <Field> 
-              <ByName>发证机关</ByName>  
-              <Name>fzjg</Name> 
-            </Field>  
-            <Field> 
-              <ByName>证书类别</ByName>  
-              <Name>zslb</Name> 
-            </Field>  
-            <Field> 
-              <ByName>登记类别</ByName>  
-              <Name>djlb</Name> 
-            </Field>  
-            <Field> 
-              <ByName>图幅号</ByName>  
-              <Name>tfh</Name> 
-            </Field>  
-            <Field> 
-              <ByName>土地用途</ByName>  
-              <Name>tdyt</Name> 
-            </Field>  
-            <Field> 
-              <ByName>建筑面积(m²)</ByName>  
-              <Name>jzmj</Name> 
-            </Field>  
-            <Field> 
-              <ByName>建筑权属</ByName>  
-              <Name>jzqs</Name> 
-            </Field> 
-          </PanelFields> 
+          </PanelFields>
         </Layer>  
         <Tips> 
           <Col> 
@@ -5666,7 +5800,7 @@
     <!--土地利用变化监测下拉图层配置项-->
     <Tdlybh>
       <!--叠加结果图层渲染样式DLTB_WP_YJDL-->
-      <Styles>DLTB_WP_YJDL</Styles>
+      <Styles>dltb01</Styles>
       <analysislayer>
         <destcrs>EPSG:4490</destcrs>
         <name>2013年地类图斑</name>
@@ -5837,361 +5971,289 @@
         </Parameter> 
       </Parameters> 
     </Archive>  -->
-    <!--批地时间轴-->  
-    <TimeLine> 
-      <P> 
-        <Layer> 
-          <Ref>tree_pidi</Ref>  
+    <!--批地时间轴-->
+    <TimeLine>
+      <P>
+        <Layer>
+          <Ref>ktw:JSYDPD</Ref>
           <Sld></Sld>
-        </Layer>  
-        <Styles> 
-		  <Style1899>polygon1899</Style1899> 
-		  <Style2000>polygon2000</Style2000> 	
-          <Style2001>polygon2001</Style2001> 
-		  <Style2002>polygon2002</Style2002> 	
-		  <Style2003>polygon2003</Style2003> 
-		  <Style2004>polygon2004</Style2004> 	
-		  <Style2005>polygon2005</Style2005> 
-		  <Style2006>polygon2006</Style2006> 	
-          <Style2007>polygon2007</Style2007> 			  
-          <Style2008>polygon2008</Style2008>  
-          <Style2009>polygon2009</Style2009>  
-          <Style2010>polygon2010</Style2010>  
-          <Style2011>polygon2011</Style2011>  
-          <Style2012>polygon2012</Style2012>  
-          <Style2013>polygon2013</Style2013>  
-          <Style2014>polygon2014</Style2014>  
-          <Style2015>polygon2015</Style2015>  
-          <Style2016>polygon2016</Style2016>  
-          <Style2016>polygon2017</Style2016> 
-        </Styles>  
-        <Legends> 
-		 <Legend1899> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目1899</Text>  
-              <Fill> 
-                <Color>#97FFFF</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#9400D3</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend1899>  
-		   <Legend2000> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2000</Text>  
-              <Fill> 
-                <Color>#A020F0</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#00CDCD</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2000>  
-		   <Legend2001> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2001</Text>  
-              <Fill> 
-                <Color>#9F79EE</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#B03060</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2001>  
-		  <Legend2002> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2002</Text>  
-              <Fill> 
-                <Color>#EEC900</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#F08080</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2002>  
-		    <Legend2003> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2003</Text>  
-              <Fill> 
-                <Color>#71C671</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#8B7500</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2003>  
-		    <Legend2004> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2004</Text>  
-              <Fill> 
-                <Color>#00EE00</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#7D26CD</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2004>  
-		  <Legend2005> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2005</Text>  
-              <Fill> 
-                <Color>#FF7F00</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#EED2EE</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2005>  
-		   <Legend2006> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2006</Text>  
-              <Fill> 
-                <Color>#CD00CD</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#CAFF70</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2006>  
-		   <Legend2007> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2007</Text>  
-              <Fill> 
-                <Color>#BBFFFF</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#B03060</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2007>  
-          <Legend2008> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2008</Text>  
-              <Fill> 
-                <Color>#0000FF</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#FF0000</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2008>  
-          <Legend2009> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2009</Text>  
-              <Fill> 
-                <Color>#5CACEE</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#8470FF</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2009>  
-          <Legend2010> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2010</Text>  
-              <Fill> 
-                <Color>#EEB422</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#FF0000</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2010>  
-          <Legend2011> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2011</Text>  
-              <Fill> 
-                <Color>#CAFF70</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#CD950C</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2011>  
-          <Legend2012> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2012</Text>  
-              <Fill> 
-                <Color>#A4D3EE</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#9F79EE</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2012>  
-          <Legend2013> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2013</Text>  
-              <Fill> 
-                <Color>#43CD80</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#4169E1</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2013>  
-          <Legend2014> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2014</Text>  
-              <Fill> 
-                <Color>#EE8262</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#FF3E96</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2014>  
-          <Legend2015> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2015</Text>  
-              <Fill> 
-                <Color>#BC8F8F</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#B452CD</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2015>  
-          <Legend2016> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2016</Text>  
-              <Fill> 
-                <Color>#B03060</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#9ACD32</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2016>  
-          <Legend2017> 
-            <Type>Part</Type>  
-            <Title/>  
-            <Item> 
-              <SubType>polygon</SubType>  
-              <Text>批地项目2017</Text>  
-              <Fill> 
-                <Color>#018FAA</Color>  
-                <Opacity>1</Opacity> 
-              </Fill>  
-              <Border> 
-                <Width>1</Width>  
-                <Color>#018FAA</Color>  
-                <Opacity>1</Opacity> 
-              </Border> 
-            </Item> 
-          </Legend2017> 
-        </Legends> 
-      </P> 
-    </TimeLine> 
+        </Layer>
+        <Styles>
+          <Style2003>polygon2003</Style2003>
+          <Style2004>polygon2004</Style2004>
+          <Style2005>polygon2005</Style2005>
+          <Style2006>polygon2006</Style2006>
+          <Style2007>polygon2007</Style2007>
+          <Style2008>polygon2008</Style2008>
+          <Style2009>polygon2009</Style2009>
+          <Style2010>polygon2010</Style2010>
+          <Style2011>polygon2011</Style2011>
+          <Style2012>polygon2012</Style2012>
+          <Style2013>polygon2013</Style2013>
+          <Style2014>polygon2014</Style2014>
+          <Style2015>polygon2015</Style2015>
+          <Style2016>polygon2016</Style2016>
+          <Style2016>polygon2017</Style2016>
+        </Styles>
+        <Legends>
+          <Legend2003>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2003</Text>
+              <Fill>
+                <Color>#71C671</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#8B7500</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2003>
+          <Legend2004>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2004</Text>
+              <Fill>
+                <Color>#00EE00</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#7D26CD</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2004>
+          <Legend2005>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2005</Text>
+              <Fill>
+                <Color>#FF7F00</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#EED2EE</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2005>
+          <Legend2006>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2006</Text>
+              <Fill>
+                <Color>#CD00CD</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#CAFF70</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2006>
+          <Legend2007>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2007</Text>
+              <Fill>
+                <Color>#BBFFFF</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#B03060</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2007>
+          <Legend2008>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2008</Text>
+              <Fill>
+                <Color>#0000FF</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#FF0000</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2008>
+          <Legend2009>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2009</Text>
+              <Fill>
+                <Color>#5CACEE</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#8470FF</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2009>
+          <Legend2010>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2010</Text>
+              <Fill>
+                <Color>#EEB422</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#FF0000</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2010>
+          <Legend2011>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2011</Text>
+              <Fill>
+                <Color>#CAFF70</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#CD950C</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2011>
+          <Legend2012>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2012</Text>
+              <Fill>
+                <Color>#A4D3EE</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#9F79EE</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2012>
+          <Legend2013>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2013</Text>
+              <Fill>
+                <Color>#43CD80</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#4169E1</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2013>
+          <Legend2014>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2014</Text>
+              <Fill>
+                <Color>#EE8262</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#FF3E96</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2014>
+          <Legend2015>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2015</Text>
+              <Fill>
+                <Color>#BC8F8F</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#B452CD</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2015>
+          <Legend2016>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2016</Text>
+              <Fill>
+                <Color>#B03060</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#9ACD32</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2016>
+          <Legend2017>
+            <Type>Part</Type>
+            <Title/>
+            <Item>
+              <SubType>polygon</SubType>
+              <Text>批地项目2017</Text>
+              <Fill>
+                <Color>#018FAA</Color>
+                <Opacity>1</Opacity>
+              </Fill>
+              <Border>
+                <Width>1</Width>
+                <Color>#018FAA</Color>
+                <Opacity>1</Opacity>
+              </Border>
+            </Item>
+          </Legend2017>
+        </Legends>
+      </P>
+    </TimeLine>
 	<!--智能选址配置-->
     <ZNXZ>
       <Url>http://localhost:14689/index2.html</Url>

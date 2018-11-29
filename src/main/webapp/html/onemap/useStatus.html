@@ -27,10 +27,14 @@
         var result = [];
         var datamodules = [];
         var way;
-        var datas;
         var myChart;
         var ctr;
         var params;//传递的参数
+        var areadata;//市勾选框数据
+        var unit = {
+            "biaogeUint": "公顷",
+            "chartUnit": "公顷"
+        };
         $(window).ready(function () {
             ctr = new ktw.UCWaitBox({
                 Parent: $(".Content")
@@ -52,8 +56,6 @@
                 if (type == "Statistics") Statistics(stype);
                 if (type == "Export") exportData(evt);
             });
-            var countyarea = $("#area").prop("$this");
-            // var byarea = [datas];
             /**绑定按钮点击事件**/
             $("#byarea").bind("click", function (e) {
                 $("#byarea").addClass("active");
@@ -83,9 +85,58 @@
                 }
                 windowresize();
             });
+            //表格单位转换
+            $(".datagridUnit").change(function () {
+                if (this.value == "mu") {
+                    unit.biaogeUint = "亩";
+                }
+                else {
+                    unit.biaogeUint = "公顷";
+                }
+                initDataGrid();
+            });
+            //echarts单位转换
+            $(".chartUnit").change(function () {
+                if (this.value == "mu") {
+                    unit.chartUnit = "亩";
+                }
+                else {
+                    unit.chartUnit = "公顷";
+                }
+                Statistics(stype);
+            });
+            //监听勾选框change
+            $(".SHIselect").change(function () {
+                var XIANselect = $(".XIANselect");
+                XIANselect.empty();
+                var areacode = this.value;
+                var xianData = Enumerable.From(areadata).Where('p=>p.areacode.startsWith(' + areacode.substr(0, 4) + ')&&p.arealevel==3').ToArray();
+                for (var i = 0; i < xianData.length; i++) {
+                    $("<option value='" + xianData[i].areacode + "'>" + xianData[i].areaname + "</option>").appendTo(XIANselect);
+                }
+            });
+            //统计维度改变事件
+            $("#dimension").change(function () {
+                if (this.value == "sheng") {
+                    $("#areaSHI").hide("slow");
+                    $("#areaXIAN").hide("slow");
+                    $("#dimension").css({"margin-top": 10});
+                    $("#t1").css({"margin-top": 10});
+                }
+                else if (this.value == "shi") {
+                    $("#areaSHI").show("slow");
+                    $("#areaXIAN").hide("slow");
+                }
+                else {
+                    $("#areaSHI").show("slow");
+                    $("#areaXIAN").show("slow");
+                    $("#dimension").css({"margin-top": 0});
+                    $("#t1").css({"margin-top": 0});
+                }
+            })
         })
+
         function windowresize(t) {
-            debugger
             if ($("#searchModule").find("br").length > 0) {
                 $("#newline").remove();
             }
@@ -181,7 +232,7 @@
                 }];
             var yAxis = [
                 {
-                    name: '单位/公顷',
+                    name: unit.chartUnit,
                     type: 'value',
                 },
             ];
@@ -275,16 +326,12 @@
             var flag = "area";
             var county = "";
             var areadata = Ktw.cookie.AreaTree.Children;
-            debugger
             $.each(areadata, function (i, value) {
                 county += value.areaname + ",";
             });
             result = [];
             if (type == "area") {
                 y = [];
-                var countyarea = $("#area").prop("$this").GetText();
-                var deadline = countyarea.split("，");
-                county = deadline.toString();
             }
             $.ajax({
                 type: "POST",
@@ -305,13 +352,16 @@
                         return;
                     }
                     //应该是去拿datagrid的所有列数，给datagrid赋值start!!!!
-                    debugger
                     var opts = $('#dataModule').datagrid('getColumnFields');
                     result = [];
                     xarray = [];
-                    debugger
                     for (var i = 0; i < data.data.length; i++) {
-                        result.push(data.data[i].sum);
+                        if (unit.chartUnit == "公顷") {
+                            result.push((parseFloat(data.data[i].sum) * 0.0001).toFixed(2));
+                        }
+                        else {
+                            result.push((parseFloat(data.data[i].sum) * 0.0015).toFixed(2));
+                        }
                         xarray.push(data.data[i].name);
                     }
                     initCharts();
@@ -349,6 +399,119 @@
         function initDataGrid() {
             var width = (winWidth * 0.98 - 45) / 12;
             var rows = [];
+            $('#dataModule').datagrid({
+                pagination: true,
+                rownumbers: true,
+                loadMsg: "数据正在加载中，请稍后......",
+                fit: true,        //自动大小
+                fitColumns: true, //自适应列宽
+                singleSelect: true,  //是否单选
+                idField: 'Project_id',
+                columns: [
+                    [
+                        {field: 'time', title: '统计时间', width: width, align: 'center', rowspan: 5,},
+                        {field: 'xzqname', title: '县市区', width: width, align: 'center', rowspan: 5,},
+                        {title: '行政区合计(' + unit.biaogeUint + ')', colspan: 9}],
+                    [
+                        {
+                            field: 'sum',
+                            title: '总面积',
+                            width: width,
+                            align: 'center',
+                            rowspan: 4,
+                            formatter: function (value, row, index) {
+                                return unit.biaogeUint == "公顷"
+                                    ? (parseFloat(value) * 0.0001).toFixed(2) : (parseFloat(value) * 0.0015).toFixed(2);
+                            }
+                        },
+                        {title: '七大类用地', width: width, align: 'center', colspan: 8, rowspan: 1},
+                    ],
+                    [
+                        {
+                            field: 'gendi', title: '耕地', width: width, align: 'center', rowspan: 3,
+                            formatter: function (value, row, index) {
+                                return unit.biaogeUint == "公顷"
+                                    ? (parseFloat(value) * 0.0001).toFixed(2) : (parseFloat(value) * 0.0015).toFixed(2);
+                            }
+                        },
+                        {title: '六大类用地', align: 'center', colspan: 6, rowspan: 1},
+                        {
+                            field: 'qita', title: '其他土地', width: width, align: 'center', rowspan: 3,
+                            formatter: function (value, row, index) {
+                                return unit.biaogeUint == "公顷"
+                                    ? (parseFloat(value) * 0.0001).toFixed(2) : (parseFloat(value) * 0.0015).toFixed(2);
+                            }
+                        },
+                    ],
+                    [
+                        {
+                            field: 'yuan', title: '园地', width: width, align: 'center', rowspan: 2,
+                            formatter: function (value, row, index) {
+                                return unit.biaogeUint == "公顷"
+                                    ? (parseFloat(value) * 0.0001).toFixed(2) : (parseFloat(value) * 0.0015).toFixed(2);
+                            }
+                        },
+                        {
+                            title: '林,草', width: width, align: 'center', colspan: 2, rowspan: 1
+                        },
+                        {
+                            field: 'jiaot', title: '交通设施', width: width, align: 'center', rowspan: 2,
+                            formatter: function (value, row, index) {
+                                return unit.biaogeUint == "公顷"
+                                    ? (parseFloat(value) * 0.0001).toFixed(2) : (parseFloat(value) * 0.0015).toFixed(2);
+                            }
+                        },
+                        {
+                            field: 'shuili', title: '水利用地', width: width, align: 'center', rowspan: 2,
+                            formatter: function (value, row, index) {
+                                return unit.biaogeUint == "公顷"
+                                    ? (parseFloat(value) * 0.0001).toFixed(2) : (parseFloat(value) * 0.0015).toFixed(2);
+                            }
+                        },
+                        {
+                            field: 'chenzhen', title: '城镇工矿', width: width, align: 'center', rowspan: 2,
+                            formatter: function (value, row, index) {
+                                return unit.biaogeUint == "公顷"
+                                    ? (parseFloat(value) * 0.0001).toFixed(2) : (parseFloat(value) * 0.0015).toFixed(2);
+                            }
+                        },
+                    ],
+                    [
+                        {
+                            field: 'lindi', title: '林地', width: 0.95 * width, align: 'center', rowspan: 1,
+                            formatter: function (value, row, index) {
+                                return unit.biaogeUint == "公顷"
+                                    ? (parseFloat(value) * 0.0001).toFixed(2) : (parseFloat(value) * 0.0015).toFixed(2);
+                            }
+                        },
+                        {
+                            field: 'cao', title: '草地', width: width, align: 'center', rowspan: 1,
+                            formatter: function (value, row, index) {
+                                return unit.biaogeUint == "公顷"
+                                    ? (parseFloat(value) * 0.0001).toFixed(2) : (parseFloat(value) * 0.0015).toFixed(2);
+                            }
+                        }
+                    ]
+                ]
+            });
+            //分页组件存在，并监听分页事件
+            var pg = $('#dataModule').datagrid(("getPager"));
+            if (pg) {
+                $(pg).pagination({
+                    onRefresh: function (pageNumber, pageSize) {
+                    },
+                    //监听pageSize改变事件
+                    onChangePageSize: function () {
+                    },
+                    //监听翻页事件
+                    onSelectPage: function (pageNumber, pageSize) {
+                        var stat = (pageNumber - 1) * 10;
+                        var end = ((pageNumber - 1) * 10 + 10) >= rows.length ? rows.length : ((pageNumber - 1) * 10 + 10);
+                        $('#dataModule').datagrid("loadData", {rows: rows.slice(stat, end), total: rows.length});
+                    }
+                });
+            }
+            $(".pagination-page-list").remove();
             $.ajax({
                 url: Ktw.App.ServerUrl + "Nong/staticsBiaoge",
                 data: JSON.stringify(params.BIAOGE),
@@ -361,69 +524,37 @@
                 },
                 success: function (data) {
                     rows = data.rows;
+                    //省市州汇总
+                    var row = {"xzqname": "武汉市"};
+                    for (var i = 0; i < Object.keys(data.rows[0]).length; i++) {
+                        if (!isNaN(data.rows[0][Object.keys(data.rows[0])[i]])) {
+                            var pop = Enumerable.From(data.rows).Where('$.' + Object.keys(data.rows[0])[i] + '!=undefined').Select('p=>p.' + Object.keys(data.rows[0])[i]).Sum();
+                            row[Object.keys(data.rows[0])[i]] = pop;
+                        }
+                    }
+                    rows.splice(0, 0, row);
                     datamodules = rows;
+                    $('#dataModule').datagrid("loadData", {rows: rows.slice(0, 10), total: rows.length});
                 }
-            });
-            $('#dataModule').datagrid({
-                data: rows,
-                pagination: false,
-                pageNumber: 1,
-                pageSize: 2,
-                pageList: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-                rownumbers: true,
-                loadMsg: "数据正在加载中，请稍后......",
-                fit: true,        //自动大小
-                fitColumns: true, //自适应列宽
-                singleSelect: true,  //是否单选
-                idField: 'Project_id',
-                columns: [
-                    [
-                        {field: 'time', title: '统计时间', width: width, align: 'center', rowspan: 5,},
-                        {field: 'xzqname', title: '县市区', width: width, align: 'center', rowspan: 5,},
-                        {title: '行政区合计(公顷)', colspan: 10}],
-                    [
-                        {field: 'pz_xm_mj', title: '总面积', width: width, align: 'center', rowspan: 4},
-                        {title: '八大类用地', width: width, align: 'center', colspan: 9, rowspan: 1},
-                    ],
-                    [
-                        {field: 'gendi', title: '耕地', width: width, align: 'center', rowspan: 3},
-                        {title: '六大类用地', align: 'center', colspan: 7, rowspan: 1},
-                        {field: 'qita', title: '其他土地', width: width, align: 'center', rowspan: 3},
-                    ],
-                    [
-                        {field: 'yuan', title: '园地', width: width, align: 'center', rowspan: 2},
-                        {title: '林,草', width: width, align: 'center', colspan: 3, rowspan: 1},
-                        {field: 'jiaot', title: '交通设施', width: width, align: 'center', rowspan: 2},
-                        {field: 'shuili', title: '水利用地', width: width, align: 'center', rowspan: 2},
-                        {field: 'chenzhen', title: '城镇工矿', width: width, align: 'center', rowspan: 2},
-                    ],
-                    [
-                        {field: 'lindi', title: '林地', width: 0.95 * width, align: 'center', rowspan: 1, colspan: 2},
-                        {field: 'cao', title: '草地', width: width, align: 'center', rowspan: 1}
-                    ]
-                ]
             });
         }
         //初始化县区
         function initTarget() {
-            var areaComBox = $("#area").prop('$this');
-            var areaSHIComBox = $("#areaSHI").prop('$this');
-            //县市区应该入库
-            var areadata = Ktw.cookie.AreaTree.Children;
-            datas = [];
-            dataSHI = [];
+            var XIANselect = $(".XIANselect");
+            var SHIselect = $(".SHIselect");
+            areadata = Ktw.cookie.AreaTree.Children;
+            var ShiareaCode = [];
             for (var i = 0; i < areadata.length; i++) {
+                var option = $("<option value='" + areadata[i].areacode + "'>" + areadata[i].areaname + "</option>");
                 if (areadata[i].arealevel == 2) {
-                    dataSHI.push(areadata[i].areaname);
-                }
-                else if (areadata[i].arealevel == 3) {
-                    datas.push(areadata[i].areaname);
+                    ShiareaCode.push(areadata[i].areacode);//记录市的code
+                    SHIselect.append(option);
                 }
             }
-            areaComBox.SetData(datas);
-            areaSHIComBox.SetData(dataSHI);
-            $("#area").prop("$this").SetSelectedItem(datas[1]);
-            $("#areaSHI").prop("$this").SetSelectedItem(dataSHI[0]);
+            var xianData = Enumerable.From(areadata).Where('p=>p.areacode.startsWith(' + ShiareaCode[0].substr(0, 4) + ')&&p.arealevel==3').ToArray();
+            for (var j = 0; j < xianData.length; j++) {
+                $("<option value='" + xianData[j].areacode + "'>" + xianData[j].areaname + "</option>").appendTo(XIANselect);
+            }
         }
     </script>
     <style>
@@ -493,11 +624,37 @@
         }
 
         #area {
-            display: inline-block !important;
+            display: inline-block;
         }
 
         #areaSHI {
-            display: inline-block !important;
+            display: inline-block;
+        }
+
+        #areaXIAN {
+            display: inline-block;
+        }
+
+        .chartUnit {
+            position: absolute;
+            left: 95px;
+            background: skyblue;
+            z-index: 999;
+            margin-top: 6px;
+        }
+
+        .datagridUnit {
+            border: #0a7bb9 solid 1px;
+            background: skyblue;
+            position: absolute;
+            z-index: 999;
+            right: 35px;
+            top: 89px;
+        }
+
+        .dimension {
+            display: inline-block;
+            margin-left: -6px;
         }
     </style>
 </head>
@@ -513,13 +670,37 @@
     <div id="topport" style="width: 100%; height: 49%;">
         <div id="searchModule" class="ToolDiv"
              style="position:relative; width:98%;margin-left:1%; margin-top:5px; border-bottom:0px;border:1px solid #CACACA; border-radius:10px;">
+            <div id="newline1" style="display: inline-block;">
+                <!--统计维度-->
+                <div class="dimension">
+                    <div class="Title" id="t1">
+                        <div class="Icon icon-area"></div>
+                        <span style="font-size: 15px;">维度</span>
+                    </div>
+                    <select style="border: #0a7bb9 solid 1px" id="dimension">
+                        <option value="sheng">省（统计各市）</option>
+                        <option value="shi" selected="selected">市（统计各区）</option>
+                        <option value="qu">区（统计各村镇）</option>
+                    </select>
+                </div>
+            </div>
             <div id="newline2" style="display: inline-block;">
-                <div id="areaSHI" class="ktw-combobox"
-                     style="z-index: 2; width: 180px; height: 20px;margin-left:5px;margin-top:10px;"
-                     opt='{"TipInfo":"请选择","MultiSelect":false,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">市</span></div>"}'></div>
-                <div id="area" class="ktw-combobox"
-                     style="z-index: 2; width: 180px; height: 20px;margin-left:5px;"
-                     opt='{"TipInfo":"请选择","MultiSelect":false,"HeaderCSS":{"padding":"0px","width":"80px"},"PopupHeight":"85","IsOverShow":true,"Border":"1px","Padding":"0px","TextAlign":"center","BodyCSS": { "background-color": "transparent" },"Title":"<div class=\"Title\" ><div class=\"Icon icon-calendar\"></div><span class=\"Text\" style=\"margin-right:10px;\">县区</span></div>"}'></div>
+                <div id="areaSHI" style="z-index: 2; width: 180px; height: 20px;margin-left:-10px;margin-top:10px;">
+                    <div class="Title">
+                        <div class="Icon icon-area"></div>
+                        <span style="font-size: 15px;">市:</span>
+                    </div>
+                    <select class="SHIselect" style="border: rgb(0, 153, 204) solid 1px;width: 84px;margin-left: 3px">
+                    </select>
+                </div>
+                <div id="areaXIAN" style="width: 180px; height: 20px;margin-left:-10px;">
+                    <div class="Title">
+                        <div class="Icon icon-area"></div>
+                        <span style="font-size: 15px;">县区:</span>
+                    </div>
+                    <select class="XIANselect" style="border: rgb(0, 153, 204) solid 1px;width: 84px">
+                    </select>
+                </div>
             </div>
             <div class="Button" id="export" operatetype="Export"
                  style="float:right;padding-top:4px; padding-right:10px;position:absolute">
@@ -532,11 +713,19 @@
         </div>
         <div id="statictable"
              style="width:98%;height:calc(100% - 50px); margin:0 auto;margin-top:5px;border:1px solid #CACACA; border-radius:10px;">
+            <select class="datagridUnit">
+                <option value="gq">公顷</option>
+                <option value="mu">亩</option>
+            </select>
             <div id="dataModule" style="width: 100%;"></div>
         </div>
     </div>
     <div id="chartModule"
          style="width: 98%; height:calc(49% - 40px); min-height:80px; bottom:0px; margin:0 auto;margin-top:5px;margin-bottom:5px;margin-left:1%; border:1px solid #CACACA; border-radius:10px;">
+        <select class="chartUnit">
+            <option value="gq">公顷</option>
+            <option value="mu">亩</option>
+        </select>
         <div id="chart" style="width: 99%; height: 100%;float:left;margin-left:5px"></div>
     </div>
 </div>

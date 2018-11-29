@@ -1182,7 +1182,7 @@
                 startIndex: $this.GetGlandArgs.startIndex,
                 count: $this.GetGlandArgs.count,
                 change: (args.change == undefined) ? false : args.change,
-                sortBy: $this.GetGlandArgs.sortBy
+                sortBy: ($this.GetGlandArgs.sortBy == undefined) ? "gid" : $this.GetGlandArgs.sortBy,
             });
             var queryTack = new L.QueryTask(queryPram);
             queryTack.execute(QueryDataSuccess, fail);
@@ -1254,7 +1254,9 @@
             $this.GetGlandArgs.GlandGeomerys = [];//压盖的图形
             for (var i = 0; i < GlandGeo.length; i++) {
                 var geoPoly = L.GeoJSON.geometryToLayer(GlandGeo[i]);
-                $this.GetGlandArgs.GlandGeomerys.push(geoPoly.toGeoJSON().geometry)
+                if (geoPoly.toGeoJSON().geometry != undefined) {
+                    $this.GetGlandArgs.GlandGeomerys.push(geoPoly.toGeoJSON().geometry)
+                }
             }
             var measurePram = new L.QueryParameter.MeasureParameter({
                 url: $this.GetGlandArgs.Url,
@@ -1342,6 +1344,7 @@
                 feature = feature.toGeoJSON();
             }
             var layer = $this.Container.addData(feature);
+            //用来记录定时器，有新的高亮图层加入时，关闭上一个高亮定时器
             if ($this.Container.Interval) clearInterval($this.Container.Interval);
             $this.Container.Interval = setInterval(highlight, 500);
 
@@ -1364,7 +1367,7 @@
         $this.fit = function () {
             $this.map.fitBounds($this.Container.getBounds(), {
                 animate: true,
-                duration: 1
+                duration: 0.5
             });
         }
         //高亮显示重置
@@ -1407,6 +1410,7 @@
 (function ($) {
     ktw.DrawType = {
         Point: "Point",//点
+        PointI: "PointI",//点
         Polyline: "Polyline",//线
         Polygon: "Polygon",//多边形
         Circle: "Circle",//圆形
@@ -1462,7 +1466,7 @@
             $this.map.off('mousemove', $this.mouseMoveEvent);
         }
         $this.init();
-        $this.start = function (drawType) {
+        $this.start = function (drawType) {  
             $this.target.triggerHandler("onDrawStart", drawType);
             $this.Container.clearLayers();
             //$this.Container.bringToFront();
@@ -1480,6 +1484,12 @@
                         map.on('dblclick', $this.removeEvent);
                         break;
                     }
+                case ktw.DrawType.PointI:
+                    {
+                        map.on('click', $this.drawGraph);
+                        map.on('dblclick', $this.removeEvent);
+                        break;
+                    }
             }
         }
         $this.drawGraph = function (e) {
@@ -1489,6 +1499,14 @@
                 //对于点绘制,只执行一次
                 $this.map.off('click', $this.drawGraph);
                 $this.target.triggerHandler("onDrawCompleted", { $this: $this, event: e, obj: marker });
+            }
+            else if ($this.drawType === ktw.DrawType.PointI) {
+                $this.Container.clearLayers();//清除上一次符号
+                var marker = L.marker(mousePosition).addTo($this.Container);
+               //对于识别点绘制,要执行多次              
+             //   $this.map.off('click', $this.drawGraph);
+                $this.target.triggerHandler("onDrawCompleted", { $this: $this, event: e, obj: marker });
+              
             }
             else if ($this.drawType === ktw.DrawType.Polyline) {
                 $this.latlng.push(e.latlng);

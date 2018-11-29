@@ -129,9 +129,13 @@
         this.CommonTab = ktw.InitCommonTab();//初始化通用查询和通用分析切换面板
         this.GlobalQuery = new ktw.GlobalQuery();//初始化通用查询
         this.GlobalGlandAnalysis = new ktw.GlobalGlandAnalysis();//初始化通用分析
+
         this.LayerTree = new ktw.LayerTree(ktw.App.Config.SystemMap.ArrayOfMapLayer);//初始化图层树
         this.Statistic = new ktw.Statistic();//初始化应用统计
         ktw.InitLifeCtr({ map: ktw.App.Map, conf: ktw.App.Config.Extend.LifeCycle });
+
+
+
     };
 
     //窗口大小变化刷新布局
@@ -8072,6 +8076,7 @@
                               + " border-top: " + (triangleBottom / 2 + 2) + "px solid transparent;";
                 break;
         }
+
         DeleteRule(".ol-popup");
         ktw.InsertRule(ktw.App.TempStyle, ".ol-popup", olpopup);
         DeleteRule(".ol-popup::after");
