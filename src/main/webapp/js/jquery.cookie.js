@@ -1,4 +1,7 @@
-﻿(function (factory) {
+﻿/**
+ * 2018年11月30日，SVN代码管理器
+ */
+(function (factory) {
     if (typeof define === 'function' && define.amd) define(['jquery'], factory);
     else if (typeof exports === 'object') factory(require('jquery'));
     else factory(jQuery);
